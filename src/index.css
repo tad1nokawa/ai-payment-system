@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply antialiased text-slate-700;
+    font-feature-settings: 'palt';
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
