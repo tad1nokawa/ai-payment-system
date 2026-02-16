@@ -8,7 +8,12 @@ const Sidebar = ({ items, active, onSelect, title, color }) => (
       <p className="text-base font-bold" style={{ color }}>{active}</p>
     </div>
     <nav className="flex-1 py-2 overflow-y-auto">
-      {items.map(item => (
+      {items.map((item, idx) =>
+        item.separator ? (
+          <div key={`sep-${idx}`} className="px-4 pt-4 pb-1.5">
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">{item.label}</p>
+          </div>
+        ) : (
         <button
           key={item.id}
           onClick={() => onSelect(item.id)}
@@ -20,7 +25,8 @@ const Sidebar = ({ items, active, onSelect, title, color }) => (
           <span>{item.label}</span>
           {item.badge && <span className="ml-auto bg-rose-500 text-white text-[10px] rounded-full min-w-5 h-5 flex items-center justify-center font-semibold">{item.badge}</span>}
         </button>
-      ))}
+        )
+      )}
     </nav>
     <div className="px-5 py-3 border-t border-slate-700/50 text-xs text-slate-500 flex items-center gap-2 shrink-0">v1.0 / AI Payment</div>
   </div>
@@ -7197,55 +7203,58 @@ const PaymentPage = () => {
 };
 
 const masterMenuItems = [
-  // ── 概要 ──
+  { separator: true, label: "概況" },
   { id: "dashboard", icon: "📊", label: "ダッシュボード" },
   { id: "queue", icon: "⚡", label: "例外キュー", badge: 3 },
-  // ── 取引・顧客 ──
-  { id: "txn", icon: "💳", label: "注文管理" },
+  { separator: true, label: "取引" },
+  { id: "txn", icon: "💳", label: "取引モニタリング" },
   { id: "customers", icon: "👤", label: "顧客管理" },
-  // ── 加盟店・代理店 ──
+  { id: "recurring", icon: "🔄", label: "継続課金管理" },
+  { separator: true, label: "加盟店・代理店" },
   { id: "merchants", icon: "🏢", label: "加盟店管理" },
-  { id: "applications", icon: "📝", label: "申込・登録管理", badge: 2 },
+  { id: "applications", icon: "📝", label: "審査・申込管理", badge: 2 },
   { id: "agents", icon: "🤝", label: "代理店管理" },
-  // ── 決済・精算 ──
-  { id: "recurring", icon: "🔄", label: "リカーリング管理" },
-  { id: "settlement", icon: "💰", label: "精算・入金" },
-  // ── インフラ・セキュリティ ──
+  { separator: true, label: "経理" },
+  { id: "settlement", icon: "💰", label: "精算・入金管理" },
+  { id: "report", icon: "📈", label: "レポート" },
+  { separator: true, label: "決済インフラ" },
   { id: "processors", icon: "🔌", label: "接続先管理", badge: 2 },
   { id: "routing", icon: "🔀", label: "ルーティング" },
-  { id: "fraud", icon: "🛡️", label: "不正検知設定" },
+  { id: "fraud", icon: "🛡️", label: "不正検知" },
+  { separator: true, label: "AI・運用" },
   { id: "ai", icon: "🤖", label: "AI監視" },
-  // ── 分析・管理 ──
-  { id: "report", icon: "📈", label: "レポート" },
-  { id: "users", icon: "👥", label: "ユーザー管理" },
+  { id: "users", icon: "👥", label: "スタッフ管理" },
   { id: "settings", icon: "⚙️", label: "システム設定" },
 ];
 
 const merchantMenuItems = [
-  // ── 概要 ──
+  { separator: true, label: "概況" },
   { id: "m_dashboard", icon: "📊", label: "ダッシュボード" },
-  // ── 取引・顧客 ──
+  { separator: true, label: "取引" },
   { id: "m_transactions", icon: "💳", label: "取引一覧" },
   { id: "m_customers", icon: "👤", label: "顧客管理" },
-  // ── 決済商品 ──
-  { id: "m_links", icon: "🔗", label: "決済リンク管理" },
-  { id: "m_subscriptions", icon: "🔄", label: "継続・分割決済" },
-  // ── 売上・入金 ──
+  { separator: true, label: "決済プロダクト" },
+  { id: "m_links", icon: "🔗", label: "決済リンク" },
+  { id: "m_subscriptions", icon: "🔄", label: "継続・分割払い" },
+  { separator: true, label: "売上・入金" },
   { id: "m_report", icon: "📈", label: "売上レポート" },
-  { id: "m_payout", icon: "💰", label: "入金確認" },
-  // ── 設定 ──
-  { id: "m_api", icon: "🔧", label: "API設定" },
-  { id: "m_users", icon: "👥", label: "ユーザー管理" },
+  { id: "m_payout", icon: "💰", label: "入金管理" },
+  { separator: true, label: "設定" },
+  { id: "m_api", icon: "🔧", label: "API・Webhook" },
+  { id: "m_users", icon: "👥", label: "スタッフ管理" },
   { id: "m_account", icon: "⚙️", label: "アカウント設定" },
-  // ── サポート ──
-  { id: "m_chat", icon: "🤖", label: "AIサポート" },
+  { separator: true, label: "サポート" },
+  { id: "m_chat", icon: "🤖", label: "AIチャット" },
 ];
 
 const agentMenuItems = [
+  { separator: true, label: "概況" },
   { id: "d_dashboard", icon: "📊", label: "ダッシュボード" },
-  { id: "d_merchants", icon: "🏢", label: "加盟店一覧" },
-  { id: "d_reports", icon: "📋", label: "報告書" },
-  { id: "d_referral", icon: "📝", label: "申込紹介" },
+  { separator: true, label: "営業" },
+  { id: "d_merchants", icon: "🏢", label: "紹介先加盟店" },
+  { id: "d_referral", icon: "📝", label: "新規紹介" },
+  { separator: true, label: "管理" },
+  { id: "d_reports", icon: "📋", label: "実績レポート" },
   { id: "d_account", icon: "⚙️", label: "アカウント設定" },
 ];
 
