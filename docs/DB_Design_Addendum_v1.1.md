@@ -1,0 +1,620 @@
+# DB追加設計書 v1.2 — 追加テーブル定義
+
+**作成日: 2026-02-13**
+**対象: 追加要件8件 + 顧客管理(CRM)に対応するDB設計（新規13テーブル + 既存5テーブル変更 + ENUM 11型追加）**
+
+> 本ドキュメントはDB_Design_ERD_v1.0.md（35テーブル / 24 ENUM）への差分追記。
+> v1.0と合わせて「全48テーブル / 35 ENUM型」となる。
+
+---
+
+## 新規テーブル一覧
+
+| # | グループ | テーブル名 | 用途 | 関連要件 |
+|---|---------|----------|------|---------|
+| 0a | 顧客CRM | customers | 顧客プロファイル（名寄せ済み） | v1.2 顧客管理 |
+| 0b | 顧客CRM | customer_cards | 顧客のカード情報（トークン） | v1.2 顧客管理 |
+| 0c | 顧客CRM | customer_notes | 運営/加盟店メモ | v1.2 顧客管理 |
+| 1 | コア | sites | サイト情報（加盟店配下） | #7 マルチサイト |
+| 2 | 決済リンク | payment_links | URL決済の設定 | #1 URL決済 |
+| 3 | 継続決済 | subscription_plans | 継続/分割決済の商品設定 | #2 リカーリング |
+| 4 | 継続決済 | subscription_users | 継続/分割決済のユーザー | #2 リカーリング |
+| 5 | 共通 | announcements | 運営→加盟店のお知らせ | #4 お知らせ |
+| 6 | 共通 | error_codes | エラーコードマスター | #3 エラーコード |
+| 7 | 代理店 | agents | 代理店情報 | #6 代理店 |
+| 8 | 代理店 | agent_users | 代理店ユーザー | #6 代理店 |
+| 9 | 代理店 | agent_merchants | 代理店×加盟店紐付け | #6 代理店 |
+| 10 | 代理店 | agent_commissions | 代理店報酬 | #6 代理店 |
+
+---
+
+## テーブル定義
+
+### 0. customers（顧客プロファイル）🆕 v1.2
+
+決済を行ったエンドユーザーの名寄せ済みプロファイル。簡易CRM機能の中核テーブル。
+
+```sql
+CREATE TABLE customers (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    site_id         UUID NOT NULL REFERENCES sites(id),
+    merchant_id     UUID NOT NULL REFERENCES merchants(id),
+    customer_code   VARCHAR(20) UNIQUE NOT NULL,       -- CUS-XXXXXXXX（自動採番）
+    -- 名寄せキー
+    user_identifier VARCHAR(255),                      -- 加盟店側ユーザーID（最優先キー）
+    email           VARCHAR(255),                      -- メールアドレス
+    phone           VARCHAR(20),                       -- 電話番号
+    name            VARCHAR(255),                      -- カード名義 or 氏名
+    -- 統計（バッチ更新）
+    total_transactions INTEGER NOT NULL DEFAULT 0,     -- 総取引回数
+    total_amount    BIGINT NOT NULL DEFAULT 0,         -- LTV（累計決済額）
+    successful_transactions INTEGER NOT NULL DEFAULT 0,-- 成功取引回数
+    first_transaction_at TIMESTAMPTZ,                  -- 初回取引日
+    last_transaction_at  TIMESTAMPTZ,                  -- 最終取引日
+    average_amount  INTEGER NOT NULL DEFAULT 0,        -- 平均単価
+    -- CRM
+    risk_level      customer_risk_level NOT NULL DEFAULT 'low',
+    tags            JSONB DEFAULT '[]',                -- タグ（VIP / リピーター 等）
+    segment         customer_segment NOT NULL DEFAULT 'new', -- セグメント（自動判定）
+    -- ステータス
+    is_blocked      BOOLEAN NOT NULL DEFAULT false,    -- ブロック済みか
+    blocked_at      TIMESTAMPTZ,
+    blocked_reason  TEXT,
+    -- タイムスタンプ
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX idx_customers_site_user ON customers(site_id, user_identifier)
+    WHERE user_identifier IS NOT NULL;
+CREATE INDEX idx_customers_site_email ON customers(site_id, email)
+    WHERE email IS NOT NULL;
+CREATE INDEX idx_customers_merchant ON customers(merchant_id);
+CREATE INDEX idx_customers_segment ON customers(segment);
+CREATE INDEX idx_customers_last_txn ON customers(last_transaction_at DESC);
+```
+
+### 0-b. customer_cards（顧客カード情報）🆕 v1.2
+
+```sql
+CREATE TABLE customer_cards (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    customer_id     UUID NOT NULL REFERENCES customers(id),
+    card_token      VARCHAR(255) NOT NULL,             -- CDE側トークン
+    card_last4      VARCHAR(4) NOT NULL,               -- カード下4桁
+    card_bin6       VARCHAR(6),                        -- BIN6桁（発行元特定用）
+    card_brand      VARCHAR(20) NOT NULL,              -- VISA / MC / JCB / AMEX
+    card_exp_month  INTEGER,                           -- 有効期限（月）
+    card_exp_year   INTEGER,                           -- 有効期限（年）
+    first_used_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_used_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    is_active       BOOLEAN NOT NULL DEFAULT true,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_customer_cards_customer ON customer_cards(customer_id);
+CREATE INDEX idx_customer_cards_last4 ON customer_cards(card_last4);
+```
+
+### 0-c. customer_notes（顧客メモ）🆕 v1.2
+
+```sql
+CREATE TABLE customer_notes (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    customer_id     UUID NOT NULL REFERENCES customers(id),
+    note_text       TEXT NOT NULL,
+    created_by_type VARCHAR(20) NOT NULL,              -- 'admin' or 'merchant'
+    created_by_id   UUID NOT NULL,                     -- admin_users.id or merchant_users.id
+    created_by_name VARCHAR(100),                      -- 表示用の名前
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_customer_notes_customer ON customer_notes(customer_id);
+```
+
+### 1. sites（サイト情報）
+
+加盟店配下のサイト/サービスを管理。全ての取引・設定はサイト単位で紐づく。
+
+```sql
+CREATE TABLE sites (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    merchant_id     UUID NOT NULL REFERENCES merchants(id),
+    site_code       VARCHAR(20) UNIQUE NOT NULL,       -- サイトコード（自動採番）
+    site_name       VARCHAR(255) NOT NULL,             -- サイト名
+    site_url        VARCHAR(500) NOT NULL,             -- サイトURL
+    industry        industry_type NOT NULL,            -- 業種（既存ENUM）
+    business_model  business_model_type NOT NULL,      -- ビジネスモデル（既存ENUM）
+    description     TEXT,                              -- サービス説明
+    status          site_status NOT NULL DEFAULT 'pending', -- ステータス
+    payment_methods JSONB NOT NULL DEFAULT '[]',       -- 利用決済手段
+    fee_rate        JSONB,                             -- サイト別手数料率（ブランド別）
+    settlement_cycle VARCHAR(50),                      -- 入金サイクル
+    test_mode       BOOLEAN NOT NULL DEFAULT true,     -- テストモード
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at      TIMESTAMPTZ                        -- 論理削除
+);
+
+CREATE INDEX idx_sites_merchant ON sites(merchant_id);
+CREATE INDEX idx_sites_status ON sites(status);
+```
+
+### 2. payment_links（決済リンク設定）
+
+加盟店がURL決済（スイフトパス）を生成するための設定テーブル。
+
+```sql
+CREATE TABLE payment_links (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    site_id         UUID NOT NULL REFERENCES sites(id),
+    merchant_id     UUID NOT NULL REFERENCES merchants(id),
+    link_code       VARCHAR(64) UNIQUE NOT NULL,       -- URLに含まれるユニークコード
+    link_type       payment_link_type NOT NULL,        -- 一括/金額入力型/金額選択型
+    product_name    VARCHAR(255) NOT NULL,             -- 商品名
+    amount          INTEGER,                           -- 決済額（金額入力型はNULL）
+    amount_options  JSONB,                             -- 金額選択肢（金額選択型用）
+    currency        VARCHAR(3) NOT NULL DEFAULT 'JPY',
+    order_id_prefix VARCHAR(100),                      -- 注文IDプレフィックス
+    user_id_field   BOOLEAN NOT NULL DEFAULT false,    -- ユーザー識別ID入力の要否
+    custom_fields   JSONB DEFAULT '[]',                -- フリー項目設定
+    expires_at      TIMESTAMPTZ,                       -- 有効期限（NULLで無制限）
+    max_uses        INTEGER,                           -- 利用可能回数（NULLで無制限）
+    current_uses    INTEGER NOT NULL DEFAULT 0,        -- 現在の利用回数
+    status          link_status NOT NULL DEFAULT 'active',
+    created_by      UUID REFERENCES merchant_users(id),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_payment_links_site ON payment_links(site_id);
+CREATE INDEX idx_payment_links_merchant ON payment_links(merchant_id);
+CREATE INDEX idx_payment_links_code ON payment_links(link_code);
+CREATE INDEX idx_payment_links_status ON payment_links(status);
+```
+
+### 3. subscription_plans（継続/分割決済の商品設定）
+
+```sql
+CREATE TABLE subscription_plans (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    site_id             UUID NOT NULL REFERENCES sites(id),
+    merchant_id         UUID NOT NULL REFERENCES merchants(id),
+    plan_type           subscription_type NOT NULL,    -- 'recurring' or 'installment'
+    plan_name           VARCHAR(255) NOT NULL,         -- 商品名
+    -- 継続決済用
+    initial_amount      INTEGER,                       -- 初回決済金額
+    recurring_amount    INTEGER,                       -- 自動決済金額
+    billing_cycle_type  billing_cycle_type,            -- 指定間隔 / 月額
+    cycle_days          INTEGER,                       -- サイクル日数（指定間隔の場合）
+    billing_day         INTEGER,                       -- 毎月の決済日（月額の場合、1-28）
+    -- 分割決済用
+    total_amount        INTEGER,                       -- 商品総額
+    installment_count   INTEGER,                       -- 分割回数
+    -- 共通
+    currency            VARCHAR(3) NOT NULL DEFAULT 'JPY',
+    max_uses            INTEGER,                       -- 利用可能回数（NULLで無制限）
+    expires_at          TIMESTAMPTZ,                   -- 有効期限
+    status              plan_status NOT NULL DEFAULT 'active',
+    payment_link_id     UUID REFERENCES payment_links(id), -- URL決済と紐づく場合
+    created_by          UUID REFERENCES merchant_users(id),
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_sub_plans_site ON subscription_plans(site_id);
+CREATE INDEX idx_sub_plans_merchant ON subscription_plans(merchant_id);
+CREATE INDEX idx_sub_plans_status ON subscription_plans(status);
+```
+
+### 4. subscription_users（継続/分割決済のユーザー）
+
+```sql
+CREATE TABLE subscription_users (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    plan_id             UUID NOT NULL REFERENCES subscription_plans(id),
+    site_id             UUID NOT NULL REFERENCES sites(id),
+    merchant_id         UUID NOT NULL REFERENCES merchants(id),
+    -- ユーザー情報
+    email               VARCHAR(255),
+    user_identifier     VARCHAR(255),                  -- 加盟店側のユーザーID
+    card_token          VARCHAR(255),                  -- CDE側トークン（カード情報はCDE内）
+    card_last4          VARCHAR(4),                    -- カード下4桁（表示用）
+    card_brand          VARCHAR(20),                   -- カードブランド
+    -- 決済状態
+    status              subscription_user_status NOT NULL DEFAULT 'active',
+    first_payment_date  DATE NOT NULL,                 -- 初回決済日
+    next_payment_date   DATE,                          -- 次回決済日
+    last_payment_date   DATE,                          -- 最終決済日
+    -- 分割決済用
+    paid_count          INTEGER NOT NULL DEFAULT 0,    -- 支払済み回数
+    total_count         INTEGER,                       -- 分割総回数
+    -- リトライ管理
+    consecutive_failures INTEGER NOT NULL DEFAULT 0,   -- 連続失敗回数
+    last_retry_date     DATE,                          -- 最終リトライ日
+    -- カード変更URL
+    card_change_token   VARCHAR(255),                  -- カード変更URL用トークン
+    card_change_expires TIMESTAMPTZ,                   -- カード変更URLの有効期限
+    -- タイムスタンプ
+    stopped_at          TIMESTAMPTZ,                   -- 停止日時
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_sub_users_plan ON subscription_users(plan_id);
+CREATE INDEX idx_sub_users_site ON subscription_users(site_id);
+CREATE INDEX idx_sub_users_merchant ON subscription_users(merchant_id);
+CREATE INDEX idx_sub_users_status ON subscription_users(status);
+CREATE INDEX idx_sub_users_next_payment ON subscription_users(next_payment_date)
+    WHERE status = 'active';
+-- ↑ リカーリングエンジンが毎日参照するため重要
+```
+
+### 5. announcements（お知らせ）
+
+```sql
+CREATE TABLE announcements (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title           VARCHAR(255) NOT NULL,
+    body            TEXT NOT NULL,
+    announcement_type announcement_type NOT NULL,      -- 障害/メンテ/リリース/お知らせ
+    priority        announcement_priority NOT NULL DEFAULT 'normal',
+    target_type     VARCHAR(20) NOT NULL DEFAULT 'all', -- 'all' or 'specific'
+    target_merchants JSONB DEFAULT '[]',               -- 特定加盟店向けの場合
+    published_at    TIMESTAMPTZ,                       -- 公開日時（NULLで下書き）
+    expires_at      TIMESTAMPTZ,                       -- 有効期限
+    created_by      UUID REFERENCES admin_users(id),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_announcements_published ON announcements(published_at)
+    WHERE published_at IS NOT NULL;
+```
+
+### 6. error_codes（エラーコードマスター）
+
+```sql
+CREATE TABLE error_codes (
+    id              SERIAL PRIMARY KEY,
+    error_code      VARCHAR(20) UNIQUE NOT NULL,       -- エラーコード
+    category        error_category NOT NULL,            -- カテゴリ
+    message_ja      TEXT NOT NULL,                      -- 日本語エラー文言
+    message_en      TEXT,                               -- 英語エラー文言
+    description     TEXT,                               -- 詳細説明
+    resolution      TEXT,                               -- 対処法
+    api_applicable  BOOLEAN NOT NULL DEFAULT true,      -- API決済対応
+    link_applicable BOOLEAN NOT NULL DEFAULT true,      -- リンク決済対応
+    is_active       BOOLEAN NOT NULL DEFAULT true,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+### 7. agents（代理店情報）
+
+```sql
+CREATE TABLE agents (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    agent_code      VARCHAR(20) UNIQUE NOT NULL,       -- 代理店コード
+    agent_name      VARCHAR(255) NOT NULL,             -- 代理店名
+    representative  VARCHAR(100),                      -- 代表者名
+    phone           VARCHAR(20),
+    email           VARCHAR(255) NOT NULL,
+    address         TEXT,
+    commission_rate DECIMAL(5,2),                      -- 基本紹介料率（%）
+    contract_terms  JSONB,                             -- 契約条件（個別設定）
+    status          agent_status NOT NULL DEFAULT 'active',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_agents_status ON agents(status);
+```
+
+### 8. agent_users（代理店ユーザー）
+
+```sql
+CREATE TABLE agent_users (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    agent_id        UUID NOT NULL REFERENCES agents(id),
+    username        VARCHAR(100) UNIQUE NOT NULL,
+    email           VARCHAR(255) NOT NULL,
+    password_hash   VARCHAR(255) NOT NULL,
+    display_name    VARCHAR(100) NOT NULL,
+    role            agent_role NOT NULL DEFAULT 'agent_viewer',
+    is_active       BOOLEAN NOT NULL DEFAULT true,
+    last_login_at   TIMESTAMPTZ,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_agent_users_agent ON agent_users(agent_id);
+```
+
+### 9. agent_merchants（代理店×加盟店紐付け）
+
+```sql
+CREATE TABLE agent_merchants (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    agent_id        UUID NOT NULL REFERENCES agents(id),
+    merchant_id     UUID NOT NULL REFERENCES merchants(id),
+    referred_at     DATE NOT NULL,                     -- 紹介日
+    commission_rate DECIMAL(5,2),                      -- 個別紹介料率（NULLで代理店デフォルト）
+    status          VARCHAR(20) NOT NULL DEFAULT 'active',
+    notes           TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(agent_id, merchant_id)
+);
+
+CREATE INDEX idx_agent_merchants_agent ON agent_merchants(agent_id);
+CREATE INDEX idx_agent_merchants_merchant ON agent_merchants(merchant_id);
+```
+
+### 10. agent_commissions（代理店報酬）
+
+```sql
+CREATE TABLE agent_commissions (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    agent_id        UUID NOT NULL REFERENCES agents(id),
+    merchant_id     UUID NOT NULL REFERENCES merchants(id),
+    period_start    DATE NOT NULL,                     -- 対象期間（開始）
+    period_end      DATE NOT NULL,                     -- 対象期間（終了）
+    total_volume    BIGINT NOT NULL DEFAULT 0,         -- 期間内取引総額
+    commission_rate DECIMAL(5,2) NOT NULL,             -- 適用紹介料率
+    commission_amount BIGINT NOT NULL DEFAULT 0,       -- 報酬額
+    status          commission_status NOT NULL DEFAULT 'pending',
+    paid_at         TIMESTAMPTZ,                       -- 支払日
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_agent_commissions_agent ON agent_commissions(agent_id);
+CREATE INDEX idx_agent_commissions_period ON agent_commissions(period_start, period_end);
+```
+
+---
+
+## 既存テーブルの変更
+
+### merchants テーブル
+
+```sql
+ALTER TABLE merchants ADD COLUMN agent_id UUID REFERENCES agents(id);
+CREATE INDEX idx_merchants_agent ON merchants(agent_id);
+-- 代理店経由の加盟店を紐付け。NULLの場合は直販。
+```
+
+### transactions テーブル
+
+```sql
+ALTER TABLE transactions ADD COLUMN site_id UUID REFERENCES sites(id);
+ALTER TABLE transactions ADD COLUMN subscription_user_id UUID REFERENCES subscription_users(id);
+ALTER TABLE transactions ADD COLUMN payment_link_id UUID REFERENCES payment_links(id);
+ALTER TABLE transactions ADD COLUMN customer_id UUID REFERENCES customers(id);
+CREATE INDEX idx_transactions_site ON transactions(site_id);
+CREATE INDEX idx_transactions_customer ON transactions(customer_id);
+-- 全取引がサイト単位で紐づく。既存データはマイグレーション時にデフォルトサイトを作成して紐付け。
+-- customer_id は決済実行時に名寄せロジックで自動付与。
+```
+
+### merchant_processors テーブル
+
+```sql
+ALTER TABLE merchant_processors ADD COLUMN site_id UUID REFERENCES sites(id);
+CREATE INDEX idx_merchant_processors_site ON merchant_processors(site_id);
+-- 接続先はサイト単位で管理。加盟店全体に適用する場合はsite_id = NULL。
+```
+
+### routing_rules テーブル
+
+```sql
+ALTER TABLE routing_rules ADD COLUMN site_id UUID REFERENCES sites(id);
+CREATE INDEX idx_routing_rules_site ON routing_rules(site_id);
+-- ルーティングルールもサイト単位で設定可能。site_id = NULLの場合は加盟店全体に適用。
+```
+
+### routing_logs テーブル
+
+```sql
+ALTER TABLE routing_logs ADD COLUMN site_id UUID REFERENCES sites(id);
+-- ルーティングログにもサイトIDを記録。
+```
+
+---
+
+## 追加ENUM型（11型）
+
+```sql
+-- 顧客リスクレベル 🆕 v1.2
+CREATE TYPE customer_risk_level AS ENUM (
+    'low', 'medium', 'high', 'blocked'
+);
+
+-- 顧客セグメント 🆕 v1.2
+CREATE TYPE customer_segment AS ENUM (
+    'new',          -- 初回（1回のみ）
+    'returning',    -- リピーター（2-10回）
+    'loyal',        -- ロイヤル（11回以上 or LTV ¥100,000以上）
+    'dormant',      -- 休眠（90日以上取引なし）
+    'churned'       -- 離脱（180日以上取引なし）
+);
+
+-- サイトステータス
+CREATE TYPE site_status AS ENUM (
+    'pending',      -- 審査中
+    'active',       -- 有効
+    'suspended',    -- 一時停止
+    'terminated'    -- 解約
+);
+
+-- 決済リンクタイプ
+CREATE TYPE payment_link_type AS ENUM (
+    'fixed',            -- 一括決済（固定金額）
+    'amount_input',     -- 金額入力型
+    'amount_select'     -- 金額選択型
+);
+
+-- 決済リンクステータス
+CREATE TYPE link_status AS ENUM (
+    'active',       -- 有効
+    'inactive',     -- 無効
+    'expired'       -- 期限切れ
+);
+
+-- サブスクリプションタイプ
+CREATE TYPE subscription_type AS ENUM (
+    'recurring',    -- 継続決済（月額課金等）
+    'installment'   -- 分割決済
+);
+
+-- 課金サイクルタイプ
+CREATE TYPE billing_cycle_type AS ENUM (
+    'interval',     -- 指定間隔（N日ごと）
+    'monthly'       -- 月額（毎月N日）
+);
+
+-- サブスクリプションプランステータス
+CREATE TYPE plan_status AS ENUM (
+    'active', 'paused', 'archived'
+);
+
+-- サブスクリプションユーザーステータス
+CREATE TYPE subscription_user_status AS ENUM (
+    'active',           -- 課金中
+    'paused',           -- 一時停止
+    'stopped',          -- 停止（再開不可）
+    'completed',        -- 分割完了
+    'failed_stopped'    -- 3回失敗で自動停止
+);
+
+-- お知らせタイプ
+CREATE TYPE announcement_type AS ENUM (
+    'incident',     -- 障害情報
+    'maintenance',  -- メンテナンス
+    'release',      -- 機能リリース
+    'info'          -- お知らせ
+);
+
+-- お知らせ優先度
+CREATE TYPE announcement_priority AS ENUM (
+    'critical', 'high', 'normal', 'low'
+);
+
+-- エラーカテゴリ
+CREATE TYPE error_category AS ENUM (
+    'card_error',       -- カード理由
+    'system_error',     -- システムエラー
+    'validation_error', -- 入力エラー
+    'auth_error',       -- 認証エラー
+    'network_error',    -- 通信エラー
+    'processor_error'   -- 接続先エラー
+);
+
+-- 代理店ステータス
+CREATE TYPE agent_status AS ENUM (
+    'active', 'suspended', 'terminated'
+);
+
+-- 代理店ロール
+CREATE TYPE agent_role AS ENUM (
+    'agent_admin',  -- 代理店管理者
+    'agent_viewer'  -- 代理店閲覧者
+);
+
+-- 報酬ステータス
+CREATE TYPE commission_status AS ENUM (
+    'pending', 'confirmed', 'paid'
+);
+```
+
+---
+
+## リカーリングエンジン — リトライロジック
+
+```
+毎日AM 2:00 に実行するバッチジョブ:
+
+1. subscription_users WHERE status = 'active' AND next_payment_date = TODAY を取得
+2. 各ユーザーに対して決済APIを実行
+3. 成功 → consecutive_failures = 0, next_payment_date を次サイクルに更新
+4. 失敗 →
+   a. consecutive_failures += 1
+   b. consecutive_failures < 3 → next_payment_date = TODAY + 10日（リトライ）
+   c. consecutive_failures >= 3 → status = 'failed_stopped'（自動停止、再開不可）
+   d. 停止時は加盟店にメール通知
+
+※分割決済の場合:
+  paid_count >= total_count → status = 'completed'
+```
+
+---
+
+## マイグレーション方針
+
+### 既存データの対応（マルチサイト導入時）
+
+```
+1. 既存の全merchants に対して、デフォルトの sites レコードを1件ずつ自動生成
+   - site_name = merchant.name + " デフォルトサイト"
+   - site_url = merchant.url
+   - status = merchant.status に連動
+2. 既存の transactions.site_id にデフォルトサイトのIDを設定
+3. 既存の merchant_processors.site_id にデフォルトサイトのIDを設定
+4. 既存の routing_rules.site_id はNULL（加盟店全体に適用）のまま
+```
+
+---
+
+## テーブル数サマリー
+
+| 区分 | v1.0 | v1.1追加 | v1.2追加 | 合計 |
+|------|------|---------|---------|------|
+| テーブル | 35 | 10 | 3+2 | **50** |
+| ENUM | 24 | 8 | 3+1 | **36** |
+
+---
+
+## v1.3追加: ローリングリザーブ管理テーブル
+
+### rolling_reserve_settings（リザーブ設定）
+
+加盟店×接続先ごとのリザーブ条件を管理。
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | UUID | PK |
+| merchant_id | UUID | FK → merchants |
+| processor_id | UUID | FK → processors |
+| reserve_rate | DECIMAL(5,2) | リザーブ率（%）。例: 10.00 |
+| reserve_period_days | INT | リザーブ期間（日数）。例: 180 |
+| is_active | BOOLEAN | 有効/無効 |
+| created_at | TIMESTAMP | 作成日時 |
+| updated_at | TIMESTAMP | 更新日時 |
+| updated_by | UUID | FK → users（変更者） |
+
+UNIQUE制約: (merchant_id, processor_id)
+
+### rolling_reserve_transactions（リザーブ留保/解放履歴）
+
+個別の留保・解放トランザクションを記録。
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | UUID | PK |
+| setting_id | UUID | FK → rolling_reserve_settings |
+| merchant_id | UUID | FK → merchants |
+| processor_id | UUID | FK → processors |
+| type | ENUM reserve_tx_type | 'hold'（留保）/ 'release'（解放） |
+| amount | DECIMAL(12,0) | 金額（正数） |
+| balance_after | DECIMAL(12,0) | この取引後のリザーブ残高 |
+| settlement_id | UUID | FK → settlements（NULLable: 期間解放の場合） |
+| source_period | VARCHAR(50) | 対象精算期間 or 留保元期間 |
+| executed_at | TIMESTAMP | 実行日時 |
+| created_at | TIMESTAMP | 作成日時 |
+
+### ENUM: reserve_tx_type
+
+| 値 | 説明 |
+|-----|------|
+| hold | 留保（精算時に売上の一定割合を留保） |
+| release | 解放（リザーブ期間経過後に加盟店へ返還） |

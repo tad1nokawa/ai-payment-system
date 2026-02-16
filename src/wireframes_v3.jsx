@@ -1,0 +1,6467 @@
+import { useState } from "react";
+
+// ─── 共通UIコンポーネント ───
+const Sidebar = ({ items, active, onSelect, title, color }) => (
+  <div className={`w-48 bg-gray-900 text-white flex flex-col h-full`}>
+    <div className={`px-4 py-3 border-b border-gray-700`}>
+      <p className="text-xs text-gray-400">{title}</p>
+      <p className={`text-sm font-bold`} style={{ color }}>{active}</p>
+    </div>
+    <nav className="flex-1 py-2">
+      {items.map(item => (
+        <button
+          key={item.id}
+          onClick={() => onSelect(item.id)}
+          className={`w-full text-left px-4 py-2 text-xs flex items-center gap-2 transition-all ${
+            active === item.id ? "bg-gray-700 text-white" : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+          }`}
+        >
+          <span>{item.icon}</span>
+          <span>{item.label}</span>
+          {item.badge && <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{item.badge}</span>}
+        </button>
+      ))}
+    </nav>
+    <div className="px-4 py-3 border-t border-gray-700 text-xs text-gray-500">v1.0 / AI Payment</div>
+  </div>
+);
+
+const KPICard = ({ label, value, sub, trend, color = "blue" }) => (
+  <div className="bg-white rounded-lg border p-3 flex-1">
+    <p className="text-xs text-gray-400">{label}</p>
+    <p className={`text-lg font-bold text-${color}-700 mt-0.5`}>{value}</p>
+    <div className="flex items-center gap-1 mt-1">
+      {trend && <span className={`text-xs ${trend > 0 ? "text-green-500" : "text-red-500"}`}>{trend > 0 ? "↑" : "↓"}{Math.abs(trend)}%</span>}
+      {sub && <span className="text-xs text-gray-400">{sub}</span>}
+    </div>
+  </div>
+);
+
+const TableHeader = ({ cols }) => (
+  <div className="flex bg-gray-50 border-b text-xs font-semibold text-gray-500 px-3 py-2">
+    {cols.map((c, i) => <div key={i} className={`${c.w}`}>{c.label}</div>)}
+  </div>
+);
+
+const Badge = ({ text, color }) => {
+  const colors = { green: "bg-green-100 text-green-700", red: "bg-red-100 text-red-700", yellow: "bg-yellow-100 text-yellow-700", blue: "bg-blue-100 text-blue-700", gray: "bg-gray-100 text-gray-600", purple: "bg-purple-100 text-purple-700" };
+  return <span className={`text-xs px-1.5 py-0.5 rounded ${colors[color]}`}>{text}</span>;
+};
+
+const MiniChart = ({ data, color = "#3B82F6", h = 30, w = 100 }) => {
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const points = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * (h - 4) - 2}`).join(" ");
+  return <svg width={w} height={h}><polyline points={points} fill="none" stroke={color} strokeWidth="1.5" /></svg>;
+};
+
+// ─── M01: ダッシュボード ───
+const MasterDashboard = () => {
+  const [kpiPeriod, setKpiPeriod] = useState("today");
+  const [chartPeriod, setChartPeriod] = useState("7d");
+  const [chartType, setChartType] = useState("count");
+
+  return (
+  <div className="p-4 space-y-4">
+    <div className="flex justify-between items-center">
+      <h2 className="text-sm font-bold text-gray-800">ダッシュボード</h2>
+      <div className="flex gap-2">
+        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">全システム正常</span>
+        <span className="text-xs text-gray-400">最終更新: 14:32</span>
+      </div>
+    </div>
+
+    {/* AI Summary — ※ reviewer ロールには非表示 / Redisキャッシュ30分 */}
+    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-3">
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-2">
+          <span>🤖</span>
+          <span className="text-xs font-bold text-blue-700">AI サマリー</span>
+        </div>
+        <button className="text-xs text-blue-500 hover:text-blue-700">🔄 再生成</button>
+      </div>
+      <p className="text-xs text-gray-700">本日の取引は順調です。取引量は前日比+8%、決済成功率99.2%。不正検知で2件を自動ブロック済み。例外キューに審査保留3件あり（うち1件は2時間超過）。対応をお願いします。</p>
+    </div>
+
+    {/* KPIs + Period Toggle */}
+    <div className="space-y-2">
+      <div className="flex justify-end">
+        <div className="flex bg-gray-100 rounded p-0.5">
+          {[{k:"today",l:"本日"},{k:"week",l:"今週"},{k:"month",l:"今月"}].map(p => (
+            <button key={p.k} className={`text-xs px-2.5 py-1 rounded ${kpiPeriod === p.k ? "bg-white shadow text-blue-600 font-semibold" : "text-gray-500"}`}
+              onClick={() => setKpiPeriod(p.k)}>{p.l}</button>
+          ))}
+        </div>
+      </div>
+      <div className="flex gap-3">
+        <KPICard label="取引量" value="1,247件" sub="前日比" trend={8} />
+        <KPICard label="売上" value="¥18.3M" sub="前日比" trend={12} />
+        <KPICard label="決済成功率" value="99.2%" sub="目標: 99.0%" color="green" />
+        <KPICard label="チャージバック率" value="0.03%" sub="基準: 1.0%以下" color="green" />
+        <KPICard label="自動化率" value="94.2%" sub="目標: 95%" color="purple" />
+      </div>
+    </div>
+
+    {/* Charts + Exception Queue Preview */}
+    <div className="flex gap-3">
+      <div className="flex-1 bg-white rounded-lg border p-3">
+        <div className="flex justify-between items-center mb-2">
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-bold text-gray-600">取引推移</p>
+            <div className="flex bg-gray-100 rounded p-0.5">
+              {[{k:"count",l:"件数"},{k:"amount",l:"金額"}].map(t => (
+                <button key={t.k} className={`text-xs px-2 py-0.5 rounded ${chartType === t.k ? "bg-white shadow text-blue-600 font-semibold" : "text-gray-400"}`}
+                  onClick={() => setChartType(t.k)}>{t.l}</button>
+              ))}
+            </div>
+          </div>
+          <div className="flex bg-gray-100 rounded p-0.5">
+            {[{k:"7d",l:"7日"},{k:"30d",l:"30日"},{k:"90d",l:"90日"}].map(p => (
+              <button key={p.k} className={`text-xs px-2 py-0.5 rounded ${chartPeriod === p.k ? "bg-white shadow text-blue-600 font-semibold" : "text-gray-400"}`}
+                onClick={() => setChartPeriod(p.k)}>{p.l}</button>
+            ))}
+          </div>
+        </div>
+        {chartType === "count" ? (
+          <div className="h-24 flex items-end gap-1">
+            {[820, 950, 1100, 980, 1150, 1200, 1247].map((v, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center">
+                <div className="w-full bg-blue-400 rounded-t" style={{ height: `${(v / 1300) * 80}px` }} />
+                <span className="text-xs text-gray-400 mt-1">{["月","火","水","木","金","土","日"][i]}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="h-24 flex items-end gap-1">
+            {[12.5, 14.2, 16.8, 15.1, 17.3, 18.0, 18.3].map((v, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center">
+                <div className="w-full bg-emerald-400 rounded-t" style={{ height: `${(v / 20) * 80}px` }} />
+                <span className="text-xs text-gray-400 mt-1">{["月","火","水","木","金","土","日"][i]}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="w-72 bg-white rounded-lg border p-3">
+        <div className="flex justify-between items-center mb-2">
+          <p className="text-xs font-bold text-gray-600">例外キュー</p>
+          <div className="flex items-center gap-2">
+            <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">3件</span>
+            <button className="text-xs text-blue-500 hover:underline">全て見る →</button>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <div className="bg-yellow-50 rounded p-2 border border-yellow-200">
+            <div className="flex justify-between"><span className="text-xs font-semibold text-gray-700">審査保留 #1024</span><Badge text="⚠️ 2h超過" color="red" /></div>
+            <p className="text-xs text-gray-500 mt-1">中リスク加盟店 / AI推薦: 承認</p>
+          </div>
+          <div className="bg-gray-50 rounded p-2 border">
+            <div className="flex justify-between"><span className="text-xs font-semibold text-gray-700">不正検知保留 #5521</span><Badge text="30分前" color="yellow" /></div>
+            <p className="text-xs text-gray-500 mt-1">¥89,000 / リスクスコア: 72</p>
+          </div>
+          <div className="bg-gray-50 rounded p-2 border">
+            <div className="flex justify-between"><span className="text-xs font-semibold text-gray-700">審査保留 #1025</span><Badge text="15分前" color="gray" /></div>
+            <p className="text-xs text-gray-500 mt-1">中リスク / AI推薦: 承認</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Processor Health — 🟢正常 🟡注意 🔴異常 🔵メンテナンス 🟠緊急 */}
+    <div className="bg-white rounded-lg border p-3">
+      <p className="text-xs font-bold text-gray-600 mb-2">接続先ヘルス</p>
+      <div className="flex gap-3">
+        {[
+          { name: "三井住友カード", status: "healthy", rate: "99.5%", ms: "120ms", tag: null },
+          { name: "GMO-PG", status: "healthy", rate: "99.1%", ms: "95ms", tag: null },
+          { name: "JCB直接", status: "maintenance", rate: "-", ms: "-", tag: "メンテナンス" },
+          { name: "PayPay", status: "healthy", rate: "99.8%", ms: "80ms", tag: null },
+        ].map((p, i) => (
+          <div key={i} className="flex-1 bg-gray-50 rounded p-2 flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${
+              p.status === "healthy" ? "bg-green-500" :
+              p.status === "warning" ? "bg-yellow-500" :
+              p.status === "error" ? "bg-red-500" :
+              p.status === "maintenance" ? "bg-blue-500" :
+              "bg-orange-500"
+            }`} />
+            <div>
+              <div className="flex items-center gap-1">
+                <p className="text-xs font-semibold text-gray-700">{p.name}</p>
+                {p.tag && <span className={`text-xs px-1 py-0.5 rounded ${p.status === "maintenance" ? "bg-blue-100 text-blue-600" : "bg-orange-100 text-orange-600"}`}>{p.tag}</span>}
+              </div>
+              <p className="text-xs text-gray-400">{p.tag ? "計画停止中" : `成功率 ${p.rate} / ${p.ms}`}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+  );
+};
+
+// ─── M02: 例外キュー ───
+const MasterExceptionQueue = () => {
+  const [queueFilter, setQueueFilter] = useState("all");
+  return (
+  <div className="p-4 space-y-3">
+    <div className="flex justify-between items-center">
+      <h2 className="text-sm font-bold text-gray-800">例外キュー</h2>
+      <div className="flex gap-2">
+        {[{ k: "all", label: "全て" }, { k: "review", label: "審査保留" }, { k: "fraud", label: "不正検知" }, { k: "url", label: "URL巡回" }, { k: "settlement", label: "精算" }, { k: "done", label: "処理済み" }].map(f => (
+          <button key={f.k} onClick={() => setQueueFilter(f.k)} className={`text-xs px-2 py-1 rounded border ${queueFilter === f.k ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-white text-gray-500"} ${f.k === "done" ? "border-dashed" : ""}`}>{f.label}</button>
+        ))}
+      </div>
+    </div>
+
+    {/* Statistics Bar */}
+    <div className="flex gap-4 text-xs">
+      <div className="flex items-center gap-1.5">
+        <span className="text-gray-400">今日の処理:</span>
+        <span className="font-bold text-gray-700">12件</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="text-gray-400">AI一致率:</span>
+        <span className="font-bold text-green-600">87%</span>
+      </div>
+    </div>
+
+    {/* Detail card */}
+    <div className="bg-white rounded-lg border shadow-sm">
+      <div className="p-3 border-b bg-yellow-50">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Badge text="審査保留" color="yellow" />
+            <span className="text-sm font-bold text-gray-800">#1024 - 株式会社サンプルEC</span>
+            <Badge text="⚠️ 滞留 2時間12分" color="red" />
+          </div>
+          <span className="text-xs text-gray-400">受付: 2026-02-11 12:20</span>
+        </div>
+      </div>
+
+      <div className="p-3">
+        <div className="grid grid-cols-3 gap-4 mb-3">
+          <div>
+            <p className="text-xs text-gray-400 mb-1">AI推薦判定</p>
+            <div className="flex items-center gap-2">
+              <span className="text-lg">✅</span>
+              <div>
+                <p className="text-sm font-bold text-green-700">承認を推薦</p>
+                <p className="text-xs text-gray-500">信頼度: 82%</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400 mb-1">リスクレベル</p>
+            <p className="text-sm font-bold text-yellow-600">中リスク (スコア: 58/100)</p>
+            <p className="text-xs text-gray-500">業種: アパレルEC / 月商予測: ¥3M</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400 mb-1">AI分析サマリー</p>
+            <p className="text-xs text-gray-600">法人設立3年、財務状況は安定。サイト内容に問題なし。反社チェッククリア。唯一の懸念点は取扱商品カテゴリが「高額アパレル」で返品率が業界平均より高い可能性あり。</p>
+          </div>
+        </div>
+
+        <div className="bg-gray-50 rounded p-2 mb-3">
+          <p className="text-xs font-bold text-gray-600 mb-1">AIが収集した主要データ</p>
+          <div className="grid grid-cols-4 gap-2 text-xs">
+            <div><span className="text-gray-400">法人名:</span> 株式会社サンプルEC</div>
+            <div><span className="text-gray-400">設立:</span> 2023年4月</div>
+            <div><span className="text-gray-400">資本金:</span> ¥10M</div>
+            <div><span className="text-gray-400">代表:</span> 山田 太郎</div>
+            <div><span className="text-gray-400">業種:</span> アパレルEC</div>
+            <div><span className="text-gray-400">URL:</span> sample-ec.jp ✅</div>
+            <div><span className="text-gray-400">反社チェック:</span> ✅ クリア</div>
+            <div><span className="text-gray-400">決算書:</span> ✅ 解析済み</div>
+          </div>
+        </div>
+
+        <div className="flex gap-2 justify-end">
+          <button className="px-4 py-2 bg-red-100 text-red-700 rounded text-xs font-semibold hover:bg-red-200">拒否</button>
+          <button className="px-4 py-2 bg-yellow-100 text-yellow-700 rounded text-xs font-semibold hover:bg-yellow-200">差戻し</button>
+          <button className="px-4 py-2 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700">✓ 承認</button>
+        </div>
+      </div>
+    </div>
+
+    {/* Queue list */}
+    <div className="bg-white rounded-lg border">
+      <TableHeader cols={[{ label: "ID", w: "w-16" }, { label: "種別", w: "w-20" }, { label: "対象", w: "flex-1" }, { label: "AI推薦", w: "w-24" }, { label: "滞留時間", w: "w-24" }, { label: "操作", w: "w-32" }]} />
+      {[
+        { id: "#5521", type: "不正検知", target: "¥89,000 / カード決済 / 山本商店", ai: "ブロック推薦", aiColor: "red", time: "30分", timeColor: "gray", locked: false },
+        { id: "#1025", type: "審査保留", target: "合同会社テストショップ / 雑貨EC", ai: "承認推薦", aiColor: "green", time: "15分", timeColor: "gray", locked: true, lockedBy: "田中" },
+      ].map((item, i) => (
+        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${item.locked ? "bg-orange-50" : i % 2 ? "bg-gray-50" : ""}`}>
+          <div className="w-16 font-mono text-gray-600 flex items-center gap-1">{item.locked && <span title={`${item.lockedBy}さんが対応中`}>🔒</span>}{item.id}</div>
+          <div className="w-20"><Badge text={item.type} color="yellow" /></div>
+          <div className="flex-1 text-gray-700">{item.target}</div>
+          <div className="w-24"><Badge text={item.ai} color={item.aiColor} /></div>
+          <div className="w-24"><Badge text={item.time} color={item.timeColor} /></div>
+          <div className="w-32 flex gap-1">
+            <button className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">承認</button>
+            <button className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">拒否</button>
+            <button className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">詳細</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+  );
+};
+
+const merchantData = [
+  { id: "M-001", name: "株式会社ABCマート", status: "有効", sColor: "green", risk: "低", rColor: "green", salesNum: 12500000, sales: "¥12.5M", cbNum: 0.01, cb: "0.01%", successNum: 99.5, success: "99.5%", feeNum: 3.2, fee: "3.2%", riskOrder: 1,
+    processors: [
+      { name: "三井住友カード", brands: "VISA/MC", status: "approved", since: "2025-04", txnCount: 12400 },
+      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "approved", since: "2025-04", txnCount: 8200 },
+      { name: "JCB直接", brands: "JCB", status: "approved", since: "2025-08", txnCount: 3100 },
+      { name: "PayPay", brands: "QR", status: "approved", since: "2025-10", txnCount: 1200 },
+    ]},
+  { id: "M-002", name: "合同会社XYZショップ", status: "有効", sColor: "green", risk: "低", rColor: "green", salesNum: 5800000, sales: "¥5.8M", cbNum: 0.02, cb: "0.02%", successNum: 99.1, success: "99.1%", feeNum: 3.5, fee: "3.5%", riskOrder: 1,
+    processors: [
+      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "approved", since: "2025-06", txnCount: 5400 },
+      { name: "三井住友カード", brands: "VISA/MC", status: "reviewing", since: null, txnCount: 0 },
+      { name: "PayPay", brands: "QR", status: "pending", since: null, txnCount: 0 },
+    ]},
+  { id: "M-003", name: "株式会社サンプルEC", status: "審査中", sColor: "yellow", risk: "中", rColor: "yellow", salesNum: 0, sales: "-", cbNum: 0, cb: "-", successNum: 0, success: "-", feeNum: 3.6, fee: "3.6%", riskOrder: 2,
+    processors: [
+      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "reviewing", since: null, txnCount: 0 },
+    ]},
+  { id: "M-004", name: "有限会社テスト商事", status: "有効", sColor: "green", risk: "中", rColor: "yellow", salesNum: 2100000, sales: "¥2.1M", cbNum: 0.15, cb: "0.15%", successNum: 98.8, success: "98.8%", feeNum: 3.8, fee: "3.8%", riskOrder: 2,
+    processors: [
+      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "approved", since: "2025-09", txnCount: 2800 },
+    ]},
+  { id: "M-005", name: "株式会社グレー産業", status: "停止中", sColor: "red", risk: "高", rColor: "red", salesNum: 0, sales: "¥0", cbNum: 1.2, cb: "1.2%", successNum: 95.2, success: "95.2%", feeNum: 4.5, fee: "4.5%", riskOrder: 3,
+    processors: [
+      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "suspended", since: "2025-07", txnCount: 1500 },
+    ]},
+  { id: "M-006", name: "株式会社トラベルプラス", status: "有効", sColor: "green", risk: "低", rColor: "green", salesNum: 8200000, sales: "¥8.2M", cbNum: 0.03, cb: "0.03%", successNum: 99.3, success: "99.3%", feeNum: 3.3, fee: "3.3%", riskOrder: 1,
+    processors: [
+      { name: "三井住友カード", brands: "VISA/MC", status: "approved", since: "2025-03", txnCount: 9800 },
+      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "approved", since: "2025-03", txnCount: 6200 },
+      { name: "JCB直接", brands: "JCB", status: "approved", since: "2025-07", txnCount: 2100 },
+      { name: "PayPay", brands: "QR", status: "approved", since: "2025-09", txnCount: 800 },
+      { name: "AMEX直接", brands: "AMEX", status: "reviewing", since: null, txnCount: 0 },
+    ]},
+  { id: "M-007", name: "合同会社デジタルワークス", status: "有効", sColor: "green", risk: "低", rColor: "green", salesNum: 3400000, sales: "¥3.4M", cbNum: 0.01, cb: "0.01%", successNum: 99.7, success: "99.7%", feeNum: 3.4, fee: "3.4%", riskOrder: 1,
+    processors: [
+      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "approved", since: "2025-11", txnCount: 1800 },
+      { name: "三井住友カード", brands: "VISA/MC", status: "pending", since: null, txnCount: 0 },
+    ]},
+  { id: "M-008", name: "株式会社フレッシュフーズ", status: "有効", sColor: "green", risk: "中", rColor: "yellow", salesNum: 1500000, sales: "¥1.5M", cbNum: 0.08, cb: "0.08%", successNum: 99.0, success: "99.0%", feeNum: 3.7, fee: "3.7%", riskOrder: 2,
+    processors: [
+      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "approved", since: "2025-12", txnCount: 900 },
+    ]},
+];
+
+const PROC_STATUS = {
+  approved: { label: "✅ 承認済", color: "green" },
+  reviewing: { label: "🔄 審査中", color: "blue" },
+  pending: { label: "⏳ 申請準備中", color: "gray" },
+  suspended: { label: "⛔ 停止", color: "red" },
+  rejected: { label: "❌ 却下", color: "red" },
+};
+
+const SortableHeader = ({ cols, sortKey, sortDir, onSort }) => (
+  <div className="flex bg-gray-50 border-b text-xs font-semibold text-gray-500 px-3 py-2">
+    {cols.map((c, i) => (
+      <div key={i} className={`${c.w} ${c.sortKey ? "cursor-pointer hover:text-blue-600 select-none" : ""} flex items-center gap-1`}
+        onClick={() => c.sortKey && onSort(c.sortKey)}
+      >
+        {c.label}
+        {c.sortKey && sortKey === c.sortKey && (
+          <span className="text-blue-500 text-xs">{sortDir === "asc" ? "▲" : "▼"}</span>
+        )}
+        {c.sortKey && sortKey !== c.sortKey && (
+          <span className="text-gray-300 text-xs">⇅</span>
+        )}
+      </div>
+    ))}
+  </div>
+  );
+
+// ─── M03: 加盟店管理 ───
+const MasterMerchants = () => {
+  const [sortKey, setSortKey] = useState("id");
+  const [sortDir, setSortDir] = useState("asc");
+  const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [expandedId, setExpandedId] = useState(null);
+  const [slidePanel, setSlidePanel] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(null);
+  const [showProcApply, setShowProcApply] = useState(false);
+
+  const handleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const filtered = merchantData
+    .filter(m => {
+      if (statusFilter !== "all" && m.status !== statusFilter) return false;
+      if (searchText && !m.name.includes(searchText) && !m.id.includes(searchText)) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      let va = a[sortKey], vb = b[sortKey];
+      if (typeof va === "string") {
+        const cmp = va.localeCompare(vb, "ja");
+        return sortDir === "asc" ? cmp : -cmp;
+      }
+      return sortDir === "asc" ? va - vb : vb - va;
+    });
+
+  return (
+    <div className="p-4 space-y-3">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <h2 className="text-sm font-bold text-gray-800">加盟店管理 <span className="text-gray-400 font-normal">({filtered.length}件)</span></h2>
+          <button onClick={() => setShowAddModal(true)} className="text-xs bg-blue-600 text-white px-2.5 py-1 rounded hover:bg-blue-700">+ 手動登録</button>
+          <button className="text-xs bg-white text-gray-600 px-2 py-1 rounded border hover:bg-gray-50">📥 CSV</button>
+          <button className="text-xs bg-white text-gray-600 px-2 py-1 rounded border hover:bg-gray-50">📥 Excel</button>
+        </div>
+        <div className="flex gap-2">
+          <input className="text-xs border rounded px-2 py-1 w-48" placeholder="加盟店名 / IDで検索..." value={searchText} onChange={e => setSearchText(e.target.value)} />
+          <select className="text-xs border rounded px-2 py-1" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+            <option value="all">全ステータス</option>
+            <option value="有効">有効</option>
+            <option value="審査中">審査中</option>
+            <option value="停止中">停止中</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Sort indicator */}
+      <div className="flex items-center gap-2 text-xs text-gray-400">
+        <span>並び替え:</span>
+        <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-200">
+          {{ id:"加盟店ID", name:"加盟店名", salesNum:"月間売上", cbNum:"CB率", successNum:"成功率", feeNum:"手数料", riskOrder:"リスク" }[sortKey] || sortKey}
+          {sortDir === "asc" ? " ↑昇順" : " ↓降順"}
+        </span>
+        {sortKey !== "id" && (
+          <button className="text-gray-400 hover:text-gray-600" onClick={() => { setSortKey("id"); setSortDir("asc"); }}>✕ リセット</button>
+        )}
+        <span className="ml-auto text-gray-300">💡 行クリックで接続先審査状況を表示</span>
+      </div>
+
+      <div className="bg-white rounded-lg border">
+        <SortableHeader
+          sortKey={sortKey} sortDir={sortDir} onSort={handleSort}
+          cols={[
+            { label: "加盟店ID", w: "w-24", sortKey: "id" },
+            { label: "加盟店名", w: "flex-1", sortKey: "name" },
+            { label: "ステータス", w: "w-20" },
+            { label: "リスク", w: "w-16", sortKey: "riskOrder" },
+            { label: "接続先", w: "w-16" },
+            { label: "月間売上", w: "w-24", sortKey: "salesNum" },
+            { label: "CB率", w: "w-16", sortKey: "cbNum" },
+            { label: "成功率", w: "w-16", sortKey: "successNum" },
+            { label: "手数料", w: "w-16", sortKey: "feeNum" },
+            { label: "操作", w: "w-14" },
+          ]}
+        />
+        {filtered.map((m, i) => {
+          const approvedCount = m.processors.filter(p => p.status === "approved").length;
+          const totalCount = m.processors.length;
+          const isExpanded = expandedId === m.id;
+          return (
+            <div key={m.id}>
+              <div
+                className={`flex items-center px-3 py-2 text-xs border-b cursor-pointer transition-colors ${isExpanded ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-gray-50 hover:bg-blue-50" : "hover:bg-blue-50"}`}
+                onClick={() => setExpandedId(isExpanded ? null : m.id)}
+              >
+                <div className="w-24 font-mono text-gray-500">{m.id}</div>
+                <div className="flex-1 font-semibold text-gray-700">{m.name}</div>
+                <div className="w-20"><Badge text={m.status} color={m.sColor} /></div>
+                <div className="w-16"><Badge text={m.risk} color={m.rColor} /></div>
+                <div className="w-16">
+                  <span className={`text-xs font-semibold ${approvedCount === 0 ? "text-gray-400" : approvedCount >= 3 ? "text-green-600" : "text-blue-600"}`}>
+                    {approvedCount}/{totalCount}
+                  </span>
+                </div>
+                <div className="w-24 text-right text-gray-600">{m.sales}</div>
+                <div className="w-16 text-right text-gray-600">{m.cb}</div>
+                <div className="w-16 text-right text-gray-600">{m.success}</div>
+                <div className="w-16 text-right text-gray-600">{m.fee}</div>
+                <div className="w-14"><button onClick={(e) => { e.stopPropagation(); setSlidePanel(m); }} className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">詳細</button></div>
+              </div>
+
+              {/* ── Expanded: 接続先審査状況パネル ── */}
+              {isExpanded && (
+                <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-xs font-bold text-gray-700">🔌 接続先審査状況 — {m.name}</p>
+                    <button onClick={() => setShowProcApply(true)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">+ 接続先審査を追加申請</button>
+                  </div>
+
+                  {/* Processor Stage Diagram */}
+                  <div className="bg-white rounded border p-3 mb-2">
+                    <p className="text-xs text-gray-400 mb-2">接続先拡大フロー（段階的に審査追加）</p>
+                    <div className="flex items-center gap-1">
+                      {m.processors.map((proc, pi) => {
+                        const st = PROC_STATUS[proc.status] || { label: proc.status, color: "gray" };
+                        return (
+                          <div key={pi} className="flex items-center gap-1">
+                            <div className={`rounded border px-2.5 py-1.5 text-xs ${
+                              proc.status === "approved" ? "bg-green-50 border-green-300" :
+                              proc.status === "reviewing" ? "bg-blue-50 border-blue-300 animate-pulse" :
+                              proc.status === "suspended" ? "bg-red-50 border-red-300" :
+                              "bg-gray-50 border-gray-200"
+                            }`}>
+                              <div className="font-semibold text-gray-700">{proc.name}</div>
+                              <div className="text-gray-400">{proc.brands}</div>
+                              <div className={`text-${st.color}-600 font-semibold mt-0.5`}>{st.label}</div>
+                            </div>
+                            {pi < m.processors.length - 1 && <span className="text-gray-300 text-xs">→</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Processor Detail Table */}
+                  <div className="bg-white rounded border">
+                    <div className="flex bg-gray-50 border-b text-xs font-semibold text-gray-500 px-3 py-1.5">
+                      <div className="w-36">接続先</div>
+                      <div className="w-28">対応ブランド</div>
+                      <div className="w-24">審査状況</div>
+                      <div className="w-24">承認日</div>
+                      <div className="w-24">累計取引</div>
+                      <div className="w-20">ルーティング</div>
+                      <div className="flex-1">操作</div>
+                    </div>
+                    {m.processors.map((proc, pi) => {
+                      const st = PROC_STATUS[proc.status] || { label: proc.status, color: "gray" };
+                      return (
+                        <div key={pi} className="flex items-center px-3 py-1.5 text-xs border-b last:border-0">
+                          <div className="w-36 font-semibold text-gray-700">{proc.name}</div>
+                          <div className="w-28 text-gray-500">{proc.brands}</div>
+                          <div className="w-24"><Badge text={st.label} color={st.color} /></div>
+                          <div className="w-24 text-gray-400">{proc.since || "—"}</div>
+                          <div className="w-24 text-gray-600">{proc.txnCount > 0 ? proc.txnCount.toLocaleString() + "件" : "—"}</div>
+                          <div className="w-20">
+                            {proc.status === "approved" ? <span className="text-green-600 font-semibold">有効</span> :
+                             proc.status === "reviewing" ? <span className="text-blue-500">審査通過後</span> :
+                             <span className="text-gray-400">—</span>}
+                          </div>
+                          <div className="flex-1 flex gap-1">
+                            {proc.status === "approved" && <button className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">詳細</button>}
+                            {proc.status === "reviewing" && <button className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">審査状況確認</button>}
+                            {proc.status === "pending" && <button className="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">審査申請</button>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* AI Suggestion */}
+                  {m.processors.filter(p => p.status === "approved").length === 1 && m.salesNum > 1000000 && (
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded border border-blue-200 p-2 mt-2">
+                      <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI提案:</span> 月間売上{m.sales}の実績があります。接続先を追加すると、フェイルオーバーやコスト最適化のルーティングが可能になります。三井住友カード直接接続の審査を推薦します。</p>
+                    </div>
+                  )}
+                  {m.processors.filter(p => p.status === "approved").length >= 3 && (
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded border border-green-200 p-2 mt-2">
+                      <p className="text-xs text-green-700">✅ <span className="font-semibold">ルーティング最適化:</span> 3接続先以上が有効です。AIルーティングによるコスト最適化・フェイルオーバーが完全に機能しています。</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {filtered.length === 0 && (
+          <div className="p-6 text-center text-xs text-gray-400">該当する加盟店がありません</div>
+        )}
+      </div>
+
+      {/* ── Slide Panel: 加盟店詳細 ── */}
+      {slidePanel && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSlidePanel(null)} />
+          <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+            <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+              <h3 className="text-sm font-bold text-gray-800">加盟店詳細</h3>
+              <button onClick={() => setSlidePanel(null)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div className="p-4 space-y-4">
+              {/* 企業情報 */}
+              <div>
+                <p className="text-xs font-bold text-gray-600 mb-2">企業情報</p>
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex justify-between"><span className="text-gray-400">法人名</span><span className="font-semibold">{slidePanel.name}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-400">ID</span><span className="font-mono">{slidePanel.id}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-400">ステータス</span><Badge text={slidePanel.status} color={slidePanel.sColor} /></div>
+                  <div className="flex justify-between"><span className="text-gray-400">URL</span><span className="text-blue-600">sample-ec.jp</span></div>
+                </div>
+              </div>
+              {/* リスク情報 */}
+              <div className="border-t pt-3">
+                <p className="text-xs font-bold text-gray-600 mb-2">リスク情報</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs text-gray-400">現在:</span>
+                  <Badge text={slidePanel.risk} color={slidePanel.rColor} />
+                  <span className="text-xs text-gray-400 ml-2">AI判定スコア: 58/100</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400">変更:</span>
+                  <select className="text-xs border rounded px-2 py-1">
+                    <option>低</option><option>中</option><option>高</option>
+                  </select>
+                  <input className="text-xs border rounded px-2 py-1 flex-1" placeholder="変更理由（必須）" />
+                </div>
+              </div>
+              {/* 取引統計 */}
+              <div className="border-t pt-3">
+                <p className="text-xs font-bold text-gray-600 mb-2">取引統計</p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="bg-gray-50 rounded p-2"><span className="text-gray-400">月間売上</span><p className="font-bold">{slidePanel.sales}</p></div>
+                  <div className="bg-gray-50 rounded p-2"><span className="text-gray-400">成功率</span><p className="font-bold">{slidePanel.success}</p></div>
+                  <div className="bg-gray-50 rounded p-2"><span className="text-gray-400">CB率</span><p className="font-bold">{slidePanel.cb}</p></div>
+                  <div className="bg-gray-50 rounded p-2"><span className="text-gray-400">手数料</span><p className="font-bold">{slidePanel.fee}</p></div>
+                </div>
+              </div>
+              {/* 接続先状況 */}
+              <div className="border-t pt-3">
+                <p className="text-xs font-bold text-gray-600 mb-2">接続先状況</p>
+                <div className="space-y-1">
+                  {slidePanel.processors.map((p, i) => {
+                    const st = PROC_STATUS[p.status];
+                    return <div key={i} className="flex justify-between text-xs"><span>{p.name}</span><Badge text={st.label} color={st.color} /></div>;
+                  })}
+                </div>
+              </div>
+              {/* リザーブ設定 */}
+              <div className="border-t pt-3">
+                <p className="text-xs font-bold text-purple-700 mb-2">🔒 リザーブ（デポジット）設定</p>
+                <div className="space-y-2">
+                  {[
+                    { proc: "GMO-PG", rate: "10%", period: "180日", balance: "¥420,000" },
+                    { proc: "三井住友カード", rate: "5%", period: "90日", balance: "¥200,000" },
+                  ].map((r, i) => (
+                    <div key={i} className="bg-purple-50 rounded border border-purple-200 p-2 text-xs">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-gray-700">{r.proc}</span>
+                        <Badge text={`${r.rate} / ${r.period}`} color="purple" />
+                      </div>
+                      <div className="flex gap-3">
+                        <div><span className="text-gray-400">リザーブ率:</span> <input className="w-14 border rounded px-1 py-0.5 text-center" defaultValue={r.rate} /></div>
+                        <div><span className="text-gray-400">期間:</span> <select className="border rounded px-1 py-0.5"><option>90日</option><option selected={r.period==="180日"}>180日</option><option>365日</option></select></div>
+                        <div className="flex-1 text-right"><span className="text-gray-400">残高:</span> <span className="font-bold text-purple-700">{r.balance}</span></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400 mt-1">※ 変更は次回精算から適用されます</p>
+              </div>
+              {/* メモ */}
+              <div className="border-t pt-3">
+                <p className="text-xs font-bold text-gray-600 mb-2">運営メモ</p>
+                <textarea className="w-full text-xs border rounded p-2 h-16" placeholder="メモを入力..." />
+              </div>
+              {/* 操作ボタン */}
+              <div className="border-t pt-3 space-y-2">
+                <button className="w-full py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">保存</button>
+                <div className="flex gap-2">
+                  <button onClick={() => setShowConfirm("suspend")} className="flex-1 py-2 bg-yellow-100 text-yellow-700 rounded text-xs font-semibold hover:bg-yellow-200">⚠ サスペンド</button>
+                  <button onClick={() => setShowConfirm("terminate")} className="flex-1 py-2 bg-red-100 text-red-700 rounded text-xs font-semibold hover:bg-red-200">🚨 解約</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Slide Panel: 手動登録 ── */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setShowAddModal(false)} />
+          <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+            <div className="p-4 border-b bg-blue-50 flex justify-between items-center">
+              <h3 className="text-sm font-bold text-gray-800">加盟店 手動登録</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div className="bg-yellow-50 rounded border border-yellow-200 p-2 text-xs text-yellow-700">⚠️ 手動登録はAI審査をスキップします。audit_logsに記録されます。</div>
+              {[
+                { label: "法人名", placeholder: "株式会社〇〇", required: true },
+                { label: "法人番号", placeholder: "1234567890123（13桁）", required: true },
+                { label: "代表者名", placeholder: "山田 太郎", required: true },
+                { label: "所在地", placeholder: "東京都渋谷区...", required: true },
+                { label: "担当者メール", placeholder: "tanaka@example.com", required: true },
+                { label: "担当者電話", placeholder: "03-1234-5678", required: true },
+                { label: "URL", placeholder: "https://example.com", required: true },
+              ].map((f, i) => (
+                <div key={i}>
+                  <label className="text-xs font-semibold text-gray-600">{f.label} {f.required && <span className="text-red-500">*</span>}</label>
+                  <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder={f.placeholder} />
+                </div>
+              ))}
+              <div>
+                <label className="text-xs font-semibold text-gray-600">業種 <span className="text-red-500">*</span></label>
+                <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                  <option>選択してください</option>
+                  <option>EC（物販）</option><option>EC（デジタル）</option><option>旅行</option>
+                  <option>飲食</option><option>サービス</option><option>教育</option><option>医療</option><option>その他</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-600">月間予想売上 <span className="text-red-500">*</span></label>
+                <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="¥1,000,000" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-600">初期リスクレベル <span className="text-red-500">*</span></label>
+                <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                  <option>低</option><option>中</option><option>高</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-600">登録理由 <span className="text-red-500">*</span></label>
+                <textarea className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 h-16" placeholder="手動登録の理由を入力..." />
+              </div>
+            </div>
+            <div className="p-4 border-t space-y-2">
+              <button onClick={() => setShowAddModal(false)} className="w-full py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">登録する</button>
+              <button onClick={() => setShowAddModal(false)} className="w-full py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">キャンセル</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Confirm Dialog: サスペンド/解約 ── */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowConfirm(null)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[420px] p-6">
+            <h3 className={`text-sm font-bold mb-3 ${showConfirm === "suspend" ? "text-yellow-700" : "text-red-700"}`}>
+              {showConfirm === "suspend" ? "⚠ 加盟店をサスペンドしますか？" : "🚨 加盟店を解約しますか？"}
+            </h3>
+            <p className="text-xs text-gray-600 mb-3">
+              {showConfirm === "suspend" ? "サスペンド中は全サイトの決済処理が停止されます。復帰は管理者が手動で行います。" : "解約後は全データが保持されますが、決済処理は完全に停止されます。未精算分は精算完了後に入金されます。"}
+            </p>
+            <div className="mb-3">
+              <label className="text-xs font-semibold text-gray-600">理由（必須） <span className="text-red-500">*</span></label>
+              <textarea className="w-full text-xs border rounded p-2 h-16 mt-0.5" placeholder="理由を入力..." />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setShowConfirm(null)} className="px-4 py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">キャンセル</button>
+              <button onClick={() => setShowConfirm(null)} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showConfirm === "suspend" ? "bg-yellow-600 hover:bg-yellow-700" : "bg-red-600 hover:bg-red-700"}`}>
+                {showConfirm === "suspend" ? "サスペンドする" : "解約する"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: 接続先審査を追加申請 ── */}
+      {showProcApply && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowProcApply(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
+            <div className="p-4 border-b bg-gray-50 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-sm font-bold text-gray-800">接続先審査を追加申請</h3>
+              <button onClick={() => setShowProcApply(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div>
+                <label className="text-xs font-semibold text-gray-600">接続先 <span className="text-red-500">*</span></label>
+                <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>選択してください</option><option>GMO-PG</option><option>三井住友カード</option><option>JCB直接</option><option>PayPay</option></select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-600">申請理由</label>
+                <textarea className="w-full text-xs border rounded p-2 h-16 mt-0.5" placeholder="追加申請の理由を入力..." />
+              </div>
+              <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">💡 申請後、審査完了まで1〜5営業日かかります</div>
+            </div>
+            <div className="p-4 border-t flex gap-2 justify-end">
+              <button onClick={() => setShowProcApply(false)} className="px-4 py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">キャンセル</button>
+              <button onClick={() => setShowProcApply(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">申請する</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── M05: AI監視 ───
+const MasterAIMonitor = () => {
+  const [aiPeriod, setAiPeriod] = useState("month");
+
+  return (
+  <div className="p-4 space-y-3">
+    <h2 className="text-sm font-bold text-gray-800">AI監視ダッシュボード</h2>
+    <div className="flex gap-3">
+      <KPICard label="全体自動化率" value="94.2%" sub="目標: 95%" color="purple" />
+      <KPICard label="不正検知精度" value="97.8%" sub="FP率: 0.3%" color="green" />
+      <KPICard label="審査自動承認率" value="68%" sub="目標: 80%" color="blue" />
+      <KPICard label="AIチャット完結率" value="82%" sub="目標: 90%" color="blue" />
+    </div>
+
+    {/* AI Modules with version info, toggle, trend */}
+    <div className="grid grid-cols-2 gap-3">
+      {[
+        { name: "不正検知AI", version: "v2.3", lastTrain: "2026-02-09", trainData: "124,500件", enabled: true, trend: "FP率", trendData: [0.4, 0.35, 0.38, 0.3, 0.28, 0.3, 0.3], metrics: [{ l: "日次判定件数", v: "1,247" }, { l: "自動承認", v: "1,182 (94.8%)" }, { l: "自動ブロック", v: "12 (1.0%)" }, { l: "保留→人的判断", v: "53 (4.2%)" }, { l: "偽陽性率(FP率)", v: "0.3%" }] },
+        { name: "審査AI", version: "v1.8", lastTrain: "2026-02-05", trainData: "2,400件", enabled: true, trend: "人間同意率", trendData: [82, 85, 84, 87, 86, 88, 87], metrics: [{ l: "今月の審査件数", v: "24" }, { l: "自動承認（低リスク）", v: "15 (62.5%)" }, { l: "AI推薦→承認", v: "7 (29.2%)" }, { l: "人的審査", v: "2 (8.3%)" }, { l: "平均審査時間", v: "1.8時間" }] },
+        { name: "AIチャットサポート", version: "v1.5", lastTrain: "-", trainData: "-", enabled: true, trend: "AI完結率", trendData: [78, 80, 79, 82, 81, 83, 82], metrics: [{ l: "今月の対話数", v: "342" }, { l: "AI完結", v: "281 (82.2%)" }, { l: "エスカレーション", v: "61 (17.8%)" }, { l: "平均応答時間", v: "2.1秒" }, { l: "CSAT", v: "4.2 / 5.0" }] },
+        { name: "レポートAI", version: "v1.2", lastTrain: "-", trainData: "-", enabled: true, trend: "生成成功率", trendData: [98, 99, 99, 100, 98, 99, 99], metrics: [{ l: "今月の生成数", v: "156" }, { l: "日次サマリー", v: "82" }, { l: "月次レポート", v: "24" }, { l: "カスタム分析", v: "50" }, { l: "平均生成時間", v: "8.3秒" }] },
+      ].map((ai, i) => (
+        <div key={i} className="bg-white rounded-lg border p-3">
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-xs font-bold text-gray-700">🤖 {ai.name}</p>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-400">{ai.version}</span>
+              <div className={`w-8 h-4 rounded-full flex items-center px-0.5 cursor-pointer ${ai.enabled ? "bg-green-500 justify-end" : "bg-gray-300 justify-start"}`}>
+                <div className="w-3 h-3 bg-white rounded-full shadow" />
+              </div>
+            </div>
+          </div>
+          {/* Model info */}
+          <div className="flex gap-3 text-xs text-gray-400 mb-2 pb-2 border-b border-dashed">
+            <span>最終学習: {ai.lastTrain}</span>
+            <span>学習データ: {ai.trainData}</span>
+          </div>
+          {ai.metrics.map((m, j) => (
+            <div key={j} className="flex justify-between text-xs py-1 border-b border-gray-100 last:border-0">
+              <span className="text-gray-500">{m.l}</span>
+              <span className="font-semibold text-gray-700">{m.v}</span>
+            </div>
+          ))}
+          {/* Mini trend chart */}
+          <div className="mt-2 pt-2 border-t">
+            <p className="text-xs text-gray-400 mb-1">{ai.trend}（直近7日）</p>
+            <div className="h-8 flex items-end gap-0.5">
+              {ai.trendData.map((v, j) => (
+                <div key={j} className="flex-1 bg-blue-200 rounded-t" style={{ height: `${(v / Math.max(...ai.trendData)) * 28}px` }} />
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* AI vs Human Consistency Analysis */}
+    <div className="bg-white rounded-lg border p-3">
+      <div className="flex justify-between items-center mb-2">
+        <p className="text-xs font-bold text-gray-700">📊 AI判定 vs 人間判定 一致率分析</p>
+        <div className="flex bg-gray-100 rounded p-0.5">
+          {[{k:"month",l:"今月"},{k:"prev",l:"先月"},{k:"3m",l:"3ヶ月"}].map(p => (
+            <button key={p.k} className={`text-xs px-2 py-0.5 rounded ${aiPeriod === p.k ? "bg-white shadow text-blue-600 font-semibold" : "text-gray-400"}`}
+              onClick={() => setAiPeriod(p.k)}>{p.l}</button>
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { cat: "審査AI", rate: "87%", ok: true, agree: 45, aiYesHumanNo: 3, aiNoHumanYes: 5, disagree: 12 },
+          { cat: "不正検知AI", rate: "92%", ok: true, agree: 120, aiYesHumanNo: 2, aiNoHumanYes: 8, disagree: 15 },
+          { cat: "URL巡回AI", rate: "95%", ok: true, agree: 38, aiYesHumanNo: 1, aiNoHumanYes: 1, disagree: 2 },
+        ].map((c, i) => (
+          <div key={i} className="bg-gray-50 rounded p-2">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs font-bold text-gray-700">{c.cat}</span>
+              <span className={`text-xs font-bold ${c.ok ? "text-green-600" : "text-red-600"}`}>{c.rate}</span>
+            </div>
+            <div className="space-y-0.5 text-xs">
+              <div className="flex justify-between"><span className="text-green-600">✅ AI承認→人間承認</span><span>{c.agree}件</span></div>
+              <div className="flex justify-between"><span className="text-red-500">⚠️ AI承認→人間拒否(甘い)</span><span>{c.aiYesHumanNo}件</span></div>
+              <div className="flex justify-between"><span className="text-yellow-600">⚠️ AI拒否→人間承認(厳しい)</span><span>{c.aiNoHumanYes}件</span></div>
+              <div className="flex justify-between"><span className="text-green-600">✅ AI拒否→人間拒否</span><span>{c.disagree}件</span></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Claude API Usage & Cost */}
+    <div className="bg-white rounded-lg border p-3">
+      <p className="text-xs font-bold text-gray-700 mb-2">💰 Claude API 使用量・コスト（今月）</p>
+      <div className="flex gap-3 mb-2">
+        <div className="flex-1 bg-gray-50 rounded p-2 text-center">
+          <p className="text-xs text-gray-400">月間トークン</p>
+          <p className="text-sm font-bold text-gray-700">2.4M <span className="text-xs text-gray-400 font-normal">(入力 1.8M / 出力 0.6M)</span></p>
+        </div>
+        <div className="flex-1 bg-gray-50 rounded p-2 text-center">
+          <p className="text-xs text-gray-400">API呼出回数</p>
+          <p className="text-sm font-bold text-gray-700">3,842回</p>
+        </div>
+        <div className="flex-1 bg-gray-50 rounded p-2 text-center">
+          <p className="text-xs text-gray-400">月間コスト</p>
+          <p className="text-sm font-bold text-blue-700">¥44,200</p>
+        </div>
+      </div>
+      <div className="flex gap-2 text-xs">
+        {[
+          { name: "審査AI", cost: "¥12,800", pct: 29 },
+          { name: "不正検知AI", cost: "¥8,200", pct: 19 },
+          { name: "チャットAI", cost: "¥14,500", pct: 33 },
+          { name: "レポートAI", cost: "¥5,200", pct: 12 },
+          { name: "URL巡回AI", cost: "¥2,100", pct: 5 },
+          { name: "ルーティングAI", cost: "¥1,400", pct: 2 },
+        ].map((m, i) => (
+          <div key={i} className="flex-1 text-center">
+            <div className="bg-blue-100 rounded-full h-1.5 mb-1"><div className="bg-blue-500 rounded-full h-1.5" style={{ width: `${m.pct}%` }} /></div>
+            <p className="text-gray-500">{m.name}</p>
+            <p className="font-semibold">{m.cost}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+  );
+};
+
+// ─── S01: ダッシュボード ───
+const MerchantDashboard = () => (
+  <div className="p-4 space-y-4">
+    <div className="flex justify-between items-center">
+      <h2 className="text-sm font-bold text-gray-800">ダッシュボード</h2>
+      <div className="flex items-center gap-2">
+        <div className="flex bg-gray-100 rounded p-0.5">
+          {["今日", "今週", "今月"].map((p, i) => (
+            <button key={p} className={`text-xs px-3 py-1 rounded ${i === 2 ? "bg-white shadow text-blue-600 font-semibold" : "text-gray-500"}`}>{p}</button>
+          ))}
+        </div>
+        <span className="text-xs text-gray-400">株式会社ABCマート</span>
+      </div>
+    </div>
+
+    {/* Under Review State (shown when merchant is under review) */}
+    {false && (
+      <div className="bg-yellow-50 rounded-lg border border-yellow-300 p-6 text-center space-y-3">
+        <div className="text-3xl">📋</div>
+        <p className="text-sm font-bold text-yellow-800">現在審査中です</p>
+        <p className="text-xs text-yellow-700">審査完了後にダッシュボードのデータが表示されます。</p>
+        <div className="flex items-center justify-center gap-2">
+          <div className="h-2 w-48 bg-gray-200 rounded-full"><div className="h-2 bg-yellow-500 rounded-full" style={{width:"60%"}} /></div>
+          <span className="text-xs text-yellow-600 font-semibold">60%</span>
+        </div>
+        <p className="text-xs text-gray-500">通常1〜3時間で完了します。結果はメールでお知らせします。</p>
+      </div>
+    )}
+
+    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200 p-3">
+      <div className="flex items-center gap-2 mb-1">
+        <span>🤖</span><span className="text-xs font-bold text-green-700">AI インサイト</span><span className="text-xs text-gray-400">毎日更新</span>
+      </div>
+      <p className="text-xs text-gray-700">昨日の売上は¥412,000で前週比+15%。カード決済が78%を占めています。決済成功率は99.5%と安定。特異なパターンはありません。コンビニ決済の導入で、カート離脱率を約8%改善できる可能性があります。</p>
+    </div>
+
+    <div className="flex gap-3">
+      <KPICard label="今月の売上" value="¥12.5M" sub="前月比" trend={18} />
+      <KPICard label="今日の売上" value="¥412K" sub="前日比" trend={15} />
+      <KPICard label="決済成功率" value="99.5%" sub="" color="green" />
+      <KPICard label="平均単価" value="¥8,200" sub="前月比" trend={3} />
+    </div>
+
+    <div className="flex gap-3">
+      <div className="flex-1 bg-white rounded-lg border p-3">
+        <p className="text-xs font-bold text-gray-600 mb-2">売上推移（直近30日）</p>
+        <div className="flex items-center justify-center h-20">
+          <MiniChart data={[280,310,295,340,380,350,420,390,410,380,420,450,412,440,470,430,460,480,450,490,510,480,520,540,510,550,530,560,580,550]} w={400} h={70} />
+        </div>
+      </div>
+      <div className="w-56 bg-white rounded-lg border p-3">
+        <p className="text-xs font-bold text-gray-600 mb-2">決済手段分布</p>
+        <div className="space-y-2">
+          {[{ name: "クレジットカード", pct: 78, color: "bg-blue-500" }, { name: "銀行振込", pct: 12, color: "bg-green-500" }, { name: "QR決済", pct: 7, color: "bg-purple-500" }, { name: "コンビニ", pct: 3, color: "bg-orange-500" }].map((m, i) => (
+            <div key={i}>
+              <div className="flex justify-between text-xs"><span className="text-gray-600">{m.name}</span><span className="font-semibold">{m.pct}%</span></div>
+              <div className="w-full h-1.5 bg-gray-100 rounded-full mt-0.5"><div className={`h-full ${m.color} rounded-full`} style={{ width: `${m.pct}%` }} /></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <div className="bg-white rounded-lg border p-3">
+      <p className="text-xs font-bold text-gray-600 mb-2">💡 AIからの改善提案</p>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="bg-blue-50 rounded p-2 text-xs text-blue-700">📊 19-21時台の売上が全体の35%を占めています。この時間帯のサーバー応答速度を最適化すると成功率が向上する可能性があります。</div>
+        <div className="bg-green-50 rounded p-2 text-xs text-green-700">💳 3Dセキュアのフリクションレス率が92%です。チャレンジ率をさらに下げるために、デバイス情報の送信を強化しましょう。</div>
+      </div>
+    </div>
+  </div>
+);
+
+// ─── S02: 取引一覧 ───
+const MerchantTransactions = () => (
+  <div className="p-4 space-y-3">
+    <div className="flex justify-between items-center">
+      <h2 className="text-sm font-bold text-gray-800">取引一覧</h2>
+      <div className="flex gap-2">
+        <input className="text-xs border rounded px-2 py-1 w-40" placeholder="注文番号 / 金額で検索" />
+        <select className="text-xs border rounded px-2 py-1"><option>全ステータス</option></select>
+        <input type="date" className="text-xs border rounded px-2 py-1" />
+        <button className="text-xs bg-gray-100 px-2 py-1 rounded border" title="出力項目: 決済ID/日時/金額/ステータス/決済手段/注文番号（カード番号等の機密情報は含みません）">📥 CSV出力</button>
+      </div>
+    </div>
+    <div className="bg-white rounded-lg border">
+      <TableHeader cols={[{ label: "決済ID", w: "w-28" }, { label: "日時", w: "w-32" }, { label: "金額", w: "w-20" }, { label: "ステータス", w: "w-20" }, { label: "決済手段", w: "w-24" }, { label: "カード", w: "w-20" }, { label: "注文番号", w: "flex-1" }, { label: "操作", w: "w-16" }]} />
+      {[
+        { id: "pay_8f3a2b1c", time: "2026-02-11 14:23", amount: "¥12,800", status: "成功", sColor: "green", method: "VISA", card: "****4242", order: "ORD-20260211-001" },
+        { id: "pay_7e2c3d4a", time: "2026-02-11 14:18", amount: "¥5,500", status: "成功", sColor: "green", method: "Mastercard", card: "****8888", order: "ORD-20260211-002" },
+        { id: "pay_6d1b5e9f", time: "2026-02-11 14:12", amount: "¥89,000", status: "ブロック", sColor: "red", method: "VISA", card: "****1234", order: "ORD-20260211-003" },
+        { id: "pay_5c4a6f8e", time: "2026-02-11 13:55", amount: "¥3,200", status: "返金済", sColor: "yellow", method: "JCB", card: "****5678", order: "ORD-20260210-045" },
+        { id: "pay_4b3d7g2h", time: "2026-02-11 13:42", amount: "¥15,600", status: "成功", sColor: "green", method: "PayPay", card: "-", order: "ORD-20260211-004" },
+      ].map((tx, i) => (
+        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
+          <div className="w-28 font-mono text-blue-600">{tx.id}</div>
+          <div className="w-32 text-gray-500">{tx.time}</div>
+          <div className="w-20 font-semibold text-right">{tx.amount}</div>
+          <div className="w-20"><Badge text={tx.status} color={tx.sColor} /></div>
+          <div className="w-24 text-gray-600">{tx.method}</div>
+          <div className="w-20 font-mono text-gray-500">{tx.card}</div>
+          <div className="flex-1 text-gray-500">{tx.order}</div>
+          <div className="w-16"><button className="text-xs text-blue-600 hover:underline">詳細</button></div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ─── S05: API設定 ───
+const MerchantAPISettings = () => (
+  <div className="p-4 space-y-3">
+    <h2 className="text-sm font-bold text-gray-800">API設定</h2>
+    <div className="grid grid-cols-2 gap-4">
+      <div className="bg-white rounded-lg border p-3">
+        <div className="flex items-center gap-2 mb-2"><Badge text="本番環境" color="green" /></div>
+        <div className="space-y-2">
+          <div><p className="text-xs text-gray-400">API公開キー</p><p className="text-xs font-mono bg-gray-50 rounded p-1.5">pk_live_a1b2c3d4e5f6g7h8i9j0...</p></div>
+          <div><p className="text-xs text-gray-400">APIシークレットキー</p><p className="text-xs font-mono bg-gray-50 rounded p-1.5">sk_live_••••••••••••••••••••</p><button className="text-xs text-blue-600 mt-1">表示</button></div>
+        </div>
+      </div>
+      <div className="bg-white rounded-lg border p-3">
+        <div className="flex items-center gap-2 mb-2"><Badge text="テスト環境" color="yellow" /></div>
+        <div className="space-y-2">
+          <div><p className="text-xs text-gray-400">API公開キー</p><p className="text-xs font-mono bg-gray-50 rounded p-1.5">pk_test_z9y8x7w6v5u4t3s2r1q0...</p></div>
+          <div><p className="text-xs text-gray-400">APIシークレットキー</p><p className="text-xs font-mono bg-gray-50 rounded p-1.5">sk_test_••••••••••••••••••••</p><button className="text-xs text-blue-600 mt-1">表示</button></div>
+        </div>
+      </div>
+    </div>
+    <div className="bg-white rounded-lg border p-3">
+      <p className="text-xs font-bold text-gray-700 mb-2">Webhook設定</p>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 bg-gray-50 rounded p-2">
+          <Badge text="本番" color="green" />
+          <span className="text-xs font-mono flex-1">https://api.abc-mart.co.jp/webhooks/payment</span>
+          <Badge text="稼働中" color="green" />
+          <button className="text-xs text-blue-600">編集</button>
+        </div>
+        <div>
+          <p className="text-xs text-gray-400 mb-1">受信イベント:</p>
+          <div className="flex flex-wrap gap-1">
+            {["payment.succeeded", "payment.failed", "payment.refunded", "chargeback.received"].map(e => (
+              <span key={e} className="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">{e}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// ─── S06: AIサポート ───
+const MerchantAIChat = () => (
+  <div className="p-4 flex gap-4 h-full">
+    <div className="flex-1 bg-white rounded-lg border flex flex-col">
+      <div className="p-3 border-b">
+        <p className="text-xs font-bold text-gray-700">🤖 AIサポートチャット</p>
+      </div>
+      <div className="flex-1 p-3 space-y-3 overflow-y-auto">
+        <div className="flex gap-2">
+          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+          <div className="bg-gray-100 rounded-lg p-2 max-w-xs">
+            <p className="text-xs text-gray-700">こんにちは！ABCマートのサポートAIです。取引の照会、API設定の変更、返金処理など、何でもお手伝いします。</p>
+          </div>
+        </div>
+        <div className="flex gap-2 justify-end">
+          <div className="bg-blue-600 rounded-lg p-2 max-w-xs">
+            <p className="text-xs text-white">昨日の売上を教えて</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+          <div className="bg-gray-100 rounded-lg p-2 max-w-sm">
+            <p className="text-xs text-gray-700 mb-2">昨日（2/10）の売上サマリーです：</p>
+            <div className="bg-white rounded p-2 text-xs space-y-1">
+              <div className="flex justify-between"><span className="text-gray-500">総売上:</span><span className="font-bold">¥412,000</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">取引件数:</span><span>48件</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">成功率:</span><span className="text-green-600">99.5%</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">前週比:</span><span className="text-green-600">+15%</span></div>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">詳細レポートが必要でしたら「月次レポートを出して」と言ってください。</p>
+          </div>
+        </div>
+        <div className="flex gap-2 justify-end">
+          <div className="bg-blue-600 rounded-lg p-2 max-w-xs">
+            <p className="text-xs text-white">注文番号 ORD-20260210-045 を返金して</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+          <div className="bg-gray-100 rounded-lg p-2 max-w-sm">
+            <p className="text-xs text-gray-700 mb-2">確認します。以下の取引を返金してよろしいですか？</p>
+            <div className="bg-yellow-50 border border-yellow-200 rounded p-2 text-xs space-y-1">
+              <div className="flex justify-between"><span className="text-gray-500">注文番号:</span><span>ORD-20260210-045</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">金額:</span><span className="font-bold">¥3,200</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">カード:</span><span>JCB ****5678</span></div>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button className="px-3 py-1 bg-red-100 text-red-700 rounded text-xs font-semibold">返金実行</button>
+              <button className="px-3 py-1 bg-gray-100 text-gray-600 rounded text-xs">キャンセル</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="p-3 border-t flex gap-2">
+        <button className="px-2 py-2 text-gray-400 border rounded-lg text-xs hover:bg-gray-50" title="画像ファイルを添付">📎</button>
+        <input className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="メッセージを入力..." />
+        <button className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold">送信</button>
+      </div>
+      <div className="px-3 py-1.5 bg-gray-50 border-t text-xs text-gray-400 text-center">
+        🤖 営業時間外はAIが一次対応します。エスカレーションが必要な場合は営業時間内に担当者から回答します。
+      </div>
+    </div>
+    <div className="w-48">
+      <p className="text-xs font-bold text-gray-600 mb-2">クイックアクション</p>
+      <div className="space-y-1">
+        {["昨日の売上は？", "今月のレポートを出して", "決済成功率は？", "Webhook URLを変更したい", "テスト決済をしたい", "APIキーを再発行したい"].map(q => (
+          <button key={q} className="w-full text-left text-xs bg-white border rounded p-2 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-all">{q}</button>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+// ─── M12: ユーザー管理 ───
+const MasterUserManagement = () => {
+  const [showInviteM04, setShowInviteM04] = useState(false);
+  return (
+  <div className="p-4 space-y-3">
+    <div className="flex justify-between items-center">
+      <h2 className="text-sm font-bold text-gray-800">ユーザー管理（運営スタッフ）</h2>
+      <button onClick={() => setShowInviteM04(true)} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold hover:bg-blue-700">📧 スタッフを招待</button>
+    </div>
+
+    {/* Role Summary */}
+    <div className="flex gap-3">
+      {[
+        { role: "スーパー管理者", count: 1, color: "red", icon: "👑" },
+        { role: "管理者", count: 2, color: "blue", icon: "🔑" },
+        { role: "レビュアー", count: 4, color: "purple", icon: "📋" },
+      ].map((r, i) => (
+        <div key={i} className="flex-1 bg-white rounded-lg border p-3">
+          <div className="flex items-center gap-2 mb-1">
+            <span>{r.icon}</span>
+            <span className="text-xs font-bold text-gray-600">{r.role}</span>
+          </div>
+          <span className={`text-lg font-bold text-${r.color}-600`}>{r.count}名</span>
+        </div>
+      ))}
+    </div>
+
+    {/* Category Assignment Summary */}
+    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-3">
+      <p className="text-xs font-bold text-blue-700 mb-2">💡 カテゴリ担当（レビュアーは複数カテゴリ兼任可能）</p>
+      <div className="flex gap-4 text-xs">
+        {[
+          { cat: "審査", count: 3, icon: "📋", color: "purple" },
+          { cat: "不正検知", count: 2, icon: "🛡️", color: "yellow" },
+          { cat: "URL巡回", count: 2, icon: "🌐", color: "green" },
+          { cat: "精算", count: 1, icon: "💰", color: "blue" },
+        ].map((c, i) => (
+          <div key={i} className="flex items-center gap-1.5">
+            <span>{c.icon}</span>
+            <span className="text-gray-600">{c.cat}</span>
+            <Badge text={`${c.count}名`} color={c.color} />
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* User List */}
+    <div className="bg-white rounded-lg border">
+      <TableHeader cols={[{ label: "名前", w: "w-36" }, { label: "メール", w: "flex-1" }, { label: "ロール", w: "w-24" }, { label: "担当カテゴリ", w: "w-44" }, { label: "MFA", w: "w-16" }, { label: "最終ログイン", w: "w-32" }, { label: "操作", w: "w-28" }]} />
+      {[
+        { name: "田中 太郎", email: "tanaka@company.jp", roleLabel: "スーパー管理者", categories: ["全カテゴリ"], catColors: ["red"], mfa: true, lastLogin: "2026-02-11 14:30", rColor: "red" },
+        { name: "佐藤 花子", email: "sato@company.jp", roleLabel: "管理者", categories: ["全カテゴリ"], catColors: ["blue"], mfa: true, lastLogin: "2026-02-11 13:45", rColor: "blue" },
+        { name: "山田 一郎", email: "yamada@company.jp", roleLabel: "レビュアー", categories: ["審査", "不正検知"], catColors: ["purple", "yellow"], mfa: true, lastLogin: "2026-02-11 14:20", rColor: "purple" },
+        { name: "鈴木 美咲", email: "suzuki@company.jp", roleLabel: "レビュアー", categories: ["不正検知", "URL巡回"], catColors: ["yellow", "green"], mfa: true, lastLogin: "2026-02-11 12:10", rColor: "purple" },
+        { name: "高橋 健太", email: "takahashi@company.jp", roleLabel: "レビュアー", categories: ["URL巡回"], catColors: ["green"], mfa: false, lastLogin: "2026-02-10 18:00", rColor: "purple" },
+        { name: "伊藤 翔", email: "ito@company.jp", roleLabel: "レビュアー", categories: ["審査", "精算"], catColors: ["purple", "blue"], mfa: true, lastLogin: "2026-02-11 09:30", rColor: "purple" },
+      ].map((u, i) => (
+        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
+          <div className="w-36 font-semibold text-gray-700 flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">👤</div>
+            {u.name}
+          </div>
+          <div className="flex-1 text-gray-500">{u.email}</div>
+          <div className="w-24"><Badge text={u.roleLabel} color={u.rColor} /></div>
+          <div className="w-44 flex gap-1 flex-wrap">
+            {u.categories.map((cat, ci) => (
+              <Badge key={ci} text={cat} color={u.catColors[ci] || "gray"} />
+            ))}
+          </div>
+          <div className="w-16">{u.mfa ? <span className="text-green-600">✅</span> : <span className="text-red-500">❌</span>}</div>
+          <div className="w-32 text-gray-400">{u.lastLogin}</div>
+          <div className="w-28 flex gap-1">
+            <button className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">編集</button>
+            <button className="px-2 py-1 bg-red-50 text-red-600 rounded text-xs">無効化</button>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* New Staff Registration Form (Modal Preview) */}
+    <div className="bg-white rounded-lg border p-4">
+      <p className="text-xs font-bold text-gray-600 mb-3">📧 スタッフ招待フォーム（招待メール送信 → リンクからパスワード設定 → アカウント有効化）</p>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs text-gray-500 block mb-1">氏名 *</label>
+          <input className="w-full text-xs border rounded px-2 py-1.5" placeholder="例: 山田 太郎" />
+        </div>
+        <div>
+          <label className="text-xs text-gray-500 block mb-1">メールアドレス *</label>
+          <input className="w-full text-xs border rounded px-2 py-1.5" placeholder="例: yamada@company.jp" />
+        </div>
+        <div>
+          <label className="text-xs text-gray-500 block mb-1">ロール *</label>
+          <select className="w-full text-xs border rounded px-2 py-1.5">
+            <option>選択してください</option>
+            <option>管理者（admin）— 全カテゴリ閲覧・操作可</option>
+            <option>レビュアー（reviewer）— 担当カテゴリのみ</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-xs text-gray-500 block mb-1">MFA設定 *</label>
+          <select className="w-full text-xs border rounded px-2 py-1.5">
+            <option>必須（推奨）</option>
+            <option>任意</option>
+          </select>
+        </div>
+        <div className="col-span-2">
+          <label className="text-xs text-gray-500 block mb-1">担当カテゴリ（レビュアーの場合 / 複数選択可） *</label>
+          <div className="flex gap-3 mt-1">
+            {[
+              { cat: "審査", icon: "📋", checked: true },
+              { cat: "不正検知", icon: "🛡️", checked: true },
+              { cat: "URL巡回", icon: "🌐", checked: false },
+              { cat: "精算", icon: "💰", checked: false },
+            ].map((c, i) => (
+              <label key={i} className={`flex items-center gap-1.5 text-xs px-2 py-1.5 rounded border cursor-pointer ${c.checked ? "bg-blue-50 border-blue-300 text-blue-700" : "bg-white border-gray-200 text-gray-500"}`}>
+                <input type="checkbox" defaultChecked={c.checked} className="w-3 h-3" />
+                <span>{c.icon}</span>
+                <span>{c.cat}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="flex gap-2 mt-3">
+        <button onClick={() => setShowInviteM04(false)} className="px-4 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold">招待メール送信</button>
+        <button onClick={() => setShowInviteM04(false)} className="px-4 py-1.5 bg-gray-100 text-gray-600 rounded text-xs">キャンセル</button>
+      </div>
+    </div>
+
+    {/* ── Modal: 招待確認 ── */}
+    {showInviteM04 && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowInviteM04(false)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
+          <div className="p-4 border-b bg-gray-50 rounded-t-xl flex justify-between items-center">
+            <h3 className="text-sm font-bold text-gray-800">📧 スタッフを招待</h3>
+            <button onClick={() => setShowInviteM04(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+          </div>
+          <div className="p-4 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="text-xs font-semibold text-gray-600">氏名 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 山田 太郎" /></div>
+              <div><label className="text-xs font-semibold text-gray-600">メール <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: yamada@company.jp" /></div>
+              <div><label className="text-xs font-semibold text-gray-600">ロール <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>管理者（admin）</option><option>レビュアー（reviewer）</option></select></div>
+              <div><label className="text-xs font-semibold text-gray-600">MFA <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>必須（推奨）</option><option>任意</option></select></div>
+            </div>
+            <div><label className="text-xs font-semibold text-gray-600">担当カテゴリ</label>
+              <div className="flex gap-2 mt-1">{["加盟店審査","不正検知","精算","技術サポート"].map((c,i) => <label key={i} className="flex items-center gap-1 text-xs"><input type="checkbox" defaultChecked={i<2} />{c}</label>)}</div>
+            </div>
+          </div>
+          <div className="p-4 border-t flex gap-2 justify-end">
+            <button onClick={() => setShowInviteM04(false)} className="px-4 py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">キャンセル</button>
+            <button onClick={() => setShowInviteM04(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">招待メール送信</button>
+          </div>
+        </div>
+      </div>
+    )}
+    </div>
+  );
+};
+
+// ─── M04: 申込・登録管理 ───
+const MasterMerchantApplications = () => {
+  const [appConfirmDialog, setAppConfirmDialog] = useState(null);
+  const [selectedApp, setSelectedApp] = useState("APP-0211-003");
+  const [appStatusFilter, setAppStatusFilter] = useState("all");
+
+  const appList = [
+    { id: "APP-0211-003", name: "株式会社テックショップ", biz: "家電EC", status: "AI審査中", sColor: "blue", ai: "処理中", aColor: "blue", date: "02/11 10:15", step: 3, procStatus: null },
+    { id: "APP-0211-002", name: "合同会社フードデリ", biz: "飲食デリバリー", status: "人間判定待ち", sColor: "yellow", ai: "承認推薦", aColor: "green", date: "02/11 09:00", step: 4, procStatus: null },
+    { id: "APP-0210-008", name: "株式会社ヘルスケアPro", biz: "健康食品EC", status: "人間判定待ち", sColor: "yellow", ai: "要確認", aColor: "yellow", date: "02/10 16:30", step: 4, procStatus: null },
+    { id: "APP-0210-007", name: "株式会社スマートウェア", biz: "アパレルEC", status: "自社承認済み", sColor: "green", ai: "自動承認", aColor: "green", date: "02/10 11:20", step: 5, procStatus: "接続先審査待ち" },
+    { id: "APP-0210-006", name: "株式会社ネクストギア", biz: "スポーツEC", status: "自社承認済み", sColor: "green", ai: "承認推薦", aColor: "green", date: "02/10 09:45", step: 5, procStatus: "接続先審査中" },
+    { id: "APP-0209-005", name: "有限会社グレーマーケット", biz: "雑貨販売", status: "却下", sColor: "red", ai: "却下推薦", aColor: "red", date: "02/09 14:00", step: -1, procStatus: null },
+  ];
+
+  const selectedAppData = appList.find(a => a.id === selectedApp);
+
+  const steps = [
+    { label: "申込受付", done: true },
+    { label: "書類確認", done: true },
+    { label: "AI審査", done: selectedApp === "APP-0211-003" ? false : true, active: selectedApp === "APP-0211-003" },
+    { label: "人間判定", done: selectedApp === "APP-0210-007" || selectedApp === "APP-0210-006", active: selectedApp === "APP-0211-002" || selectedApp === "APP-0210-008" },
+    { label: "自社承認", done: selectedApp === "APP-0210-007" || selectedApp === "APP-0210-006" },
+  ];
+
+  return (
+    <div className="p-4 space-y-3">
+      <div className="flex justify-between items-center">
+        <h2 className="text-sm font-bold text-gray-800">加盟店 申込・登録管理 <span className="text-xs text-gray-400 font-normal ml-2">※自社審査のみ管理。接続先審査は「🔌 接続先管理」で管理</span></h2>
+        <div className="flex gap-2">
+          {[{ k: "all", label: "全て (12)" }, { k: "ai", label: "AI審査中 (3)" }, { k: "human", label: "人間判定待ち (2)" }, { k: "approved", label: "自社承認済み (5)" }, { k: "rejected", label: "却下 (2)" }].map(f => (
+            <button key={f.k} onClick={() => setAppStatusFilter(f.k)} className={`text-xs px-2 py-1 rounded border ${appStatusFilter === f.k ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-white text-gray-500"}`}>{f.label}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Scope Diagram */}
+      <div className="bg-gradient-to-r from-blue-50 via-white to-gray-50 rounded-lg border p-3">
+        <p className="text-xs font-bold text-gray-600 mb-2">📋 審査フロー全体像（この画面の管轄範囲）</p>
+        <div className="flex items-center gap-1 text-xs">
+          <div className="bg-blue-100 border-2 border-blue-400 rounded-lg px-3 py-2 text-center">
+            <p className="font-bold text-blue-700">この画面で管理</p>
+            <p className="text-blue-500 mt-1">申込受付 → 書類確認 → AI審査 → 人間判定 → <span className="font-bold">自社承認</span></p>
+          </div>
+          <span className="text-2xl text-gray-300 mx-1">→</span>
+          <div className="bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-center">
+            <p className="font-semibold text-gray-500">🔌 接続先管理で管理</p>
+            <p className="text-gray-400 mt-1">審査申請 → 書類送付 → 審査 → <span className="font-semibold text-gray-500">条件確定 → 契約 → 決済開始</span></p>
+          </div>
+        </div>
+      </div>
+
+      {/* Pipeline KPIs */}
+      <div className="flex gap-3">
+        <KPICard label="今月の申込数" value="12件" sub="前月比" trend={20} />
+        <KPICard label="AI自動承認率" value="58.3%" sub="目標: 70%" color="blue" />
+        <KPICard label="平均審査時間" value="2.4時間" sub="AI込み" color="green" />
+        <KPICard label="却下率" value="16.7%" sub="業界平均: 25%" color="green" />
+      </div>
+
+      {/* Confirmation Dialog */}
+      {appConfirmDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setAppConfirmDialog(null)}>
+          <div className="bg-white rounded-xl shadow-2xl w-[520px] max-w-[90vw]" onClick={e => e.stopPropagation()}>
+            <div className={`p-4 rounded-t-xl border-b ${
+              appConfirmDialog.type === "approve" ? "bg-green-50" :
+              appConfirmDialog.type === "reject" ? "bg-red-50" :
+              appConfirmDialog.type === "start_proc_review" ? "bg-purple-50" :
+              "bg-blue-50"
+            }`}>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">{appConfirmDialog.icon}</span>
+                <h3 className="text-sm font-bold text-gray-800">{appConfirmDialog.title}</h3>
+              </div>
+            </div>
+            <div className="p-4 space-y-3">
+              <p className="text-xs text-gray-600">{appConfirmDialog.description}</p>
+              <div className="bg-gray-50 rounded border p-3 space-y-1">
+                <div className="flex text-xs"><span className="w-24 text-gray-400">申込ID:</span><span className="font-mono text-gray-700">{appConfirmDialog.appId}</span></div>
+                <div className="flex text-xs"><span className="w-24 text-gray-400">法人名:</span><span className="font-semibold text-gray-700">{appConfirmDialog.merchantName}</span></div>
+                {appConfirmDialog.processorName && (
+                  <div className="flex text-xs"><span className="w-24 text-gray-400">初期接続先:</span><span className="font-semibold text-blue-600">{appConfirmDialog.processorName}</span></div>
+                )}
+              </div>
+              {appConfirmDialog.impacts && (
+                <div className={`rounded border p-2 ${appConfirmDialog.type === "reject" ? "bg-red-50 border-red-200" : "bg-blue-50 border-blue-200"}`}>
+                  <p className="text-xs font-semibold mb-1" style={{color: appConfirmDialog.type === "reject" ? "#b91c1c" : "#1d4ed8"}}>この操作の影響:</p>
+                  <ul className="space-y-0.5">
+                    {appConfirmDialog.impacts.map((imp, i) => (
+                      <li key={i} className="text-xs flex items-center gap-1" style={{color: appConfirmDialog.type === "reject" ? "#dc2626" : "#2563eb"}}>
+                        <span>→</span> {imp}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {appConfirmDialog.type === "reject" && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 mb-1">却下理由（必須）:</p>
+                  <textarea className="w-full border rounded p-2 text-xs h-16" placeholder="却下理由を入力してください..." />
+                </div>
+              )}
+              {appConfirmDialog.type === "start_proc_review" && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 mb-1">初期接続先の選択:</p>
+                  <select className="w-full border rounded p-2 text-xs">
+                    <option>GMO-PG（推奨 — 審査最速 平均7日）</option>
+                    <option>三井住友カード（審査 平均14日）</option>
+                    <option>JCB直接（審査 平均21日）</option>
+                    <option>PayPay（審査 平均5日）</option>
+                  </select>
+                  <p className="text-xs text-gray-400 mt-1">💡 AIの推薦: GMO-PGを初期接続先として開始し、取引実績を積んだ後に直接接続を追加するのが最速です。</p>
+                </div>
+              )}
+              {appConfirmDialog.type !== "reject" && appConfirmDialog.type !== "start_proc_review" && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 mb-1">備考（任意）:</p>
+                  <input className="w-full border rounded p-2 text-xs" placeholder="操作に関するメモを入力..." />
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-xl">
+              <button onClick={() => setAppConfirmDialog(null)} className="px-4 py-2 bg-white text-gray-600 rounded border text-xs font-semibold hover:bg-gray-100">キャンセル</button>
+              <button onClick={() => setAppConfirmDialog(null)} className={`px-4 py-2 rounded text-white text-xs font-semibold ${
+                appConfirmDialog.type === "approve" ? "bg-green-600 hover:bg-green-700" :
+                appConfirmDialog.type === "reject" ? "bg-red-600 hover:bg-red-700" :
+                appConfirmDialog.type === "start_proc_review" ? "bg-purple-600 hover:bg-purple-700" :
+                "bg-blue-600 hover:bg-blue-700"
+              }`}>{appConfirmDialog.confirmLabel}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Application Detail */}
+      <div className="bg-white rounded-lg border shadow-sm">
+        <div className={`p-3 border-b ${
+          selectedAppData?.status === "自社承認済み" ? "bg-green-50" :
+          selectedAppData?.status === "人間判定待ち" ? "bg-yellow-50" :
+          selectedAppData?.status === "却下" ? "bg-red-50" :
+          "bg-blue-50"
+        }`}>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Badge text={selectedAppData?.status || ""} color={selectedAppData?.sColor || "gray"} />
+              <span className="text-sm font-bold text-gray-800">{selectedApp} - {selectedAppData?.name}</span>
+            </div>
+            <span className="text-xs text-gray-400">申込日: {selectedAppData?.date}</span>
+          </div>
+        </div>
+        <div className="p-3">
+          {/* Progress Steps */}
+          <div className="flex items-center gap-1 mb-3">
+            {steps.map((s, i) => (
+              <div key={i} className="flex items-center gap-1 flex-1">
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${s.done ? "bg-green-500 text-white" : s.active ? "bg-blue-500 text-white animate-pulse" : "bg-gray-200 text-gray-400"}`}>
+                  {s.done ? "✓" : s.active ? "⟳" : i + 1}
+                </div>
+                <span className={`text-xs ${s.done ? "text-green-700" : s.active ? "text-blue-700 font-semibold" : "text-gray-400"} ${i === 4 ? "font-bold" : ""}`}>{s.label}</span>
+                {i < 4 && <div className={`flex-1 h-0.5 ${s.done ? "bg-green-300" : "bg-gray-200"}`} />}
+              </div>
+            ))}
+          </div>
+
+          {/* Step Action Buttons (Human-in-the-Loop) */}
+          <div className="flex items-center gap-2 mb-3 p-2 bg-gray-50 rounded-lg border">
+            <span className="text-xs text-gray-500">操作:</span>
+            {/* 人間判定待ちの場合 */}
+            {selectedAppData?.status === "人間判定待ち" && (
+              <>
+                <button onClick={() => setAppConfirmDialog({
+                  type: "approve", icon: "✅", title: "自社承認 — 加盟店を承認", appId: selectedApp, merchantName: selectedAppData.name,
+                  description: "AI審査結果を確認の上、この加盟店を自社承認します。承認後、接続先審査の開始が可能になります。",
+                  impacts: ["加盟店ステータスが「自社承認済み」に変更", "加盟店マスターに登録される", "接続先審査の開始ボタンが有効化される", "※契約書は接続先審査完了・条件確定後に生成されます"],
+                  confirmLabel: "✅ 自社承認する"
+                })} className="px-3 py-1.5 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700 shadow-sm">✅ 承認</button>
+                <button onClick={() => setAppConfirmDialog({
+                  type: "reject", icon: "❌", title: "申込却下", appId: selectedApp, merchantName: selectedAppData.name,
+                  description: "この加盟店の申込を却下します。却下理由は加盟店に通知されます。",
+                  impacts: ["加盟店ステータスが「却下」に変更", "加盟店に却下通知メールが送信される", "再申請には新規の申込が必要"],
+                  confirmLabel: "❌ 却下する"
+                })} className="px-3 py-1.5 bg-white text-red-600 border border-red-300 rounded text-xs font-semibold hover:bg-red-50">❌ 却下</button>
+                <button className="px-3 py-1.5 bg-white text-gray-600 border rounded text-xs hover:bg-gray-100">↩ AI再審査を依頼</button>
+              </>
+            )}
+            {/* AI審査中の場合 — プログレスバー（5段階） */}
+            {selectedAppData?.status === "AI審査中" && (
+              <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 w-full">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-blue-700">🤖 AI審査を実行中...</span>
+                  <span className="text-xs text-blue-500">3/5 ステップ完了 — 60%</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2 mb-2">
+                  <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: "60%" }} />
+                </div>
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex items-center gap-2"><span className="text-green-500">✅</span> 反社チェック... 完了 <span className="text-gray-400 ml-auto">5秒</span></div>
+                  <div className="flex items-center gap-2"><span className="text-green-500">✅</span> 財務分析... 完了 <span className="text-gray-400 ml-auto">8秒</span></div>
+                  <div className="flex items-center gap-2"><span className="text-green-500">✅</span> サイト分析... 完了 <span className="text-gray-400 ml-auto">25秒</span></div>
+                  <div className="flex items-center gap-2"><span className="text-blue-500 animate-pulse">🔄</span> リスクスコア算出... 実行中</div>
+                  <div className="flex items-center gap-2"><span className="text-gray-300">⏳</span> 総合判定... 待機中</div>
+                </div>
+                <p className="text-xs text-gray-400 mt-2">※ 通常30秒〜2分で完了。3分超過でタイムアウト</p>
+              </div>
+            )}
+            {/* 自社承認済みの場合 → 接続先審査開始ボタン */}
+            {selectedAppData?.status === "自社承認済み" && selectedAppData?.procStatus === "接続先審査待ち" && (
+              <>
+                <button onClick={() => setAppConfirmDialog({
+                  type: "start_proc_review", icon: "🔌", title: "接続先審査を開始", appId: selectedApp, merchantName: selectedAppData.name,
+                  description: "自社承認が完了しました。初期接続先を選択して審査を開始してください。審査に必要な書類は申込データから自動生成されます。",
+                  impacts: [
+                    "選択した接続先に審査申請が送信される",
+                    "申込時の書類（登記簿・本人確認・決算書等）が審査パッケージとして転送される",
+                    "接続先管理画面の「審査フロー管理」タブに案件が追加される",
+                    "以降の審査進捗は「🔌 接続先管理」画面で管理"
+                  ],
+                  processorName: "GMO-PG（AI推薦）",
+                  confirmLabel: "🔌 接続先審査を開始"
+                })} className="px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700 shadow-sm ring-2 ring-purple-300 ring-offset-1">🔌 接続先審査を開始</button>
+                <span className="text-xs text-gray-400 ml-1">→ 接続先管理画面に審査案件が作成されます</span>
+              </>
+            )}
+            {selectedAppData?.status === "自社承認済み" && selectedAppData?.procStatus === "接続先審査中" && (
+              <div className="flex items-center gap-2">
+                <Badge text="接続先審査中" color="blue" />
+                <span className="text-xs text-gray-500">接続先審査は「🔌 接続先管理」画面で進行中です →</span>
+                <button className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs border border-blue-200 font-semibold hover:bg-blue-200">🔌 接続先管理を開く</button>
+              </div>
+            )}
+            {selectedAppData?.status === "却下" && (
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-red-500">この申込は却下されています</span>
+                <button onClick={() => setAppConfirmDialog({
+                  type: "reapply", icon: "🔄", title: "再申込を許可",
+                  appId: selectedApp, merchantName: selectedAppData.name,
+                  description: "この申込のデータを引き継いで再申込を許可しますか？加盟店に再申込リンクがメール送信されます。",
+                  impacts: ["申込フォーム（P01）に既存データがプリセットされた状態で再申込リンクが生成", "加盟店担当者にメール通知"],
+                  confirmLabel: "🔄 再申込を許可する"
+                })} className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold hover:bg-blue-200 border border-blue-200">🔄 再申込を許可</button>
+              </div>
+            )}
+          </div>
+
+          {/* Info Grid */}
+          <div className="grid grid-cols-3 gap-4 mb-3">
+            <div className="bg-gray-50 rounded p-2">
+              <p className="text-xs font-bold text-gray-600 mb-1">申込企業情報</p>
+              <div className="text-xs space-y-1 text-gray-600">
+                <div>法人名: 株式会社テックショップ</div>
+                <div>代表者: 佐々木 健一</div>
+                <div>設立: 2022年8月</div>
+                <div>資本金: ¥5,000,000</div>
+                <div>業種: 家電・ガジェットEC</div>
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded p-2">
+              <p className="text-xs font-bold text-gray-600 mb-1">申込内容</p>
+              <div className="text-xs space-y-1 text-gray-600">
+                <div>希望決済: VISA / MC / JCB</div>
+                <div>月間予想売上: ¥5M</div>
+                <div>平均単価: ¥15,000</div>
+                <div>サイトURL: techshop.jp</div>
+                <div>提出書類: 5/5 完了 ✅</div>
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded p-2">
+              <p className="text-xs font-bold text-gray-600 mb-1">AI審査進捗（自社審査）</p>
+              <div className="text-xs space-y-1.5">
+                <div className="flex items-center gap-2"><span className="text-green-500">✅</span> 反社チェック: クリア</div>
+                <div className="flex items-center gap-2"><span className="text-green-500">✅</span> サイト内容確認: 問題なし</div>
+                <div className="flex items-center gap-2"><span className="text-green-500">✅</span> 決算書解析: 財務健全</div>
+                <div className="flex items-center gap-2"><span className="text-blue-500 animate-pulse">⟳</span> 業界リスク評価: 処理中...</div>
+                <div className="flex items-center gap-2"><span className="text-gray-300">○</span> 総合判定: 待機中</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Post-approval: 接続先審査ステータスサマリー */}
+          {selectedAppData?.status === "自社承認済み" && (
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200 p-3">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-xs font-bold text-green-700">✅ 自社審査完了 → 接続先審査フェーズ</p>
+                {selectedAppData.procStatus === "接続先審査中" && <Badge text="接続先審査中" color="blue" />}
+                {selectedAppData.procStatus === "接続先審査待ち" && <Badge text="接続先審査未開始" color="yellow" />}
+              </div>
+              <div className="flex gap-4 text-xs text-gray-600">
+                <div><span className="text-gray-400">自社承認日:</span> 2026-02-10</div>
+                <div><span className="text-gray-400">承認者:</span> admin@aipaymentsys.com</div>
+                <div><span className="text-gray-400">AI判定:</span> <span className="text-green-600 font-semibold">承認推薦（信頼度92%）</span></div>
+                {selectedAppData.procStatus === "接続先審査中" && (
+                  <div><span className="text-gray-400">初期接続先:</span> <span className="text-blue-600 font-semibold">GMO-PG（審査中 — 3日経過）</span></div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Applications List */}
+      <div className="bg-white rounded-lg border">
+        <TableHeader cols={[{ label: "申込ID", w: "w-36" }, { label: "法人名", w: "flex-1" }, { label: "業種", w: "w-24" }, { label: "自社審査", w: "w-24" }, { label: "AI判定", w: "w-24" }, { label: "接続先審査", w: "w-28" }, { label: "申込日", w: "w-24" }, { label: "操作", w: "w-20" }]} />
+        {appList.map((a, i) => (
+          <div key={i} className={`flex items-center px-3 py-2 text-xs border-b cursor-pointer transition-colors ${selectedApp === a.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-gray-50 hover:bg-blue-50" : "hover:bg-blue-50"}`}
+               onClick={() => setSelectedApp(a.id)}>
+            <div className="w-36 font-mono text-gray-500">{a.id}</div>
+            <div className="flex-1 font-semibold text-gray-700">{a.name}</div>
+            <div className="w-24 text-gray-500">{a.biz}</div>
+            <div className="w-24"><Badge text={a.status} color={a.sColor} /></div>
+            <div className="w-24"><Badge text={a.ai} color={a.aColor} /></div>
+            <div className="w-28">
+              {a.procStatus ? <Badge text={a.procStatus} color={a.procStatus === "接続先審査中" ? "blue" : "yellow"} /> : <span className="text-gray-300">—</span>}
+            </div>
+            <div className="w-24 text-gray-400">{a.date}</div>
+            <div className="w-20"><button className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">詳細</button></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─── M08: 精算・入金 ───
+const MasterSettlement = () => (
+  <div className="p-4 space-y-3">
+    <div className="flex justify-between items-center">
+      <h2 className="text-sm font-bold text-gray-800">精算・入金管理</h2>
+      <div className="flex gap-2">
+        <select className="text-xs border rounded px-2 py-1"><option>2026年2月</option><option>2026年1月</option></select>
+        <button className="text-xs bg-green-600 text-white px-3 py-1 rounded font-semibold">精算バッチ実行</button>
+      </div>
+    </div>
+
+    {/* KPIs */}
+    <div className="flex gap-3">
+      <KPICard label="今月精算総額" value="¥45.2M" sub="前月比" trend={5} />
+      <KPICard label="入金完了" value="38件" sub="全42件中" color="green" />
+      <KPICard label="入金エラー" value="2件" sub="要対応" color="red" />
+      <KPICard label="保留中" value="2件" sub="CB調査中" color="yellow" />
+    </div>
+
+    {/* Settlement Batch Status */}
+    <div className="bg-white rounded-lg border p-3">
+      <p className="text-xs font-bold text-gray-600 mb-2">精算バッチ状況（直近5回）</p>
+      <div className="space-y-2">
+        {[
+          { date: "2026-02-11", status: "完了", count: "248件", amount: "¥8.2M", errors: 0, color: "green" },
+          { date: "2026-02-10", status: "完了", count: "312件", amount: "¥10.5M", errors: 1, color: "green" },
+          { date: "2026-02-09", status: "完了", count: "189件", amount: "¥6.3M", errors: 0, color: "green" },
+          { date: "2026-02-08", status: "完了（エラーあり）", count: "276件", amount: "¥9.1M", errors: 2, color: "yellow" },
+          { date: "2026-02-07", status: "完了", count: "234件", amount: "¥7.8M", errors: 0, color: "green" },
+        ].map((b, i) => (
+          <div key={i} className="flex items-center gap-3 text-xs">
+            <span className="w-24 text-gray-500">{b.date}</span>
+            <Badge text={b.status} color={b.color} />
+            <span className="text-gray-600">{b.count}</span>
+            <span className="font-semibold text-gray-700">{b.amount}</span>
+            {b.errors > 0 && <Badge text={`エラー ${b.errors}件`} color="red" />}
+            <button className="ml-auto px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">詳細</button>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Payout Error Details */}
+    <div className="bg-white rounded-lg border p-3">
+      <div className="flex items-center gap-2 mb-2">
+        <p className="text-xs font-bold text-red-600">⚠ 入金エラー（要対応）</p>
+        <Badge text="2件" color="red" />
+      </div>
+      {[
+        { id: "PAY-0211-019", merchant: "M-019 飲食チェーン店", amount: "¥1,240,000", error: "口座情報不一致（支店コード誤り）", date: "02/11" },
+        { id: "PAY-0210-033", merchant: "M-033 サブスクサービス", amount: "¥580,000", error: "入金限度額超過", date: "02/10" },
+      ].map((e, i) => (
+        <div key={i} className="bg-red-50 border border-red-200 rounded p-2 mb-2">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-xs font-semibold text-gray-700">{e.id} - {e.merchant}</span>
+            <span className="text-xs font-bold text-red-600">{e.amount}</span>
+          </div>
+          <p className="text-xs text-red-600 mb-2">エラー: {e.error}</p>
+          <div className="flex gap-2">
+            <button className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">加盟店に連絡</button>
+            <button className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">手動で再実行</button>
+            <button className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">例外キューに送る</button>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* Rolling Reserve */}
+    <div className="bg-purple-50 rounded-lg border border-purple-200 p-3">
+      <p className="text-xs font-bold text-purple-700 mb-2">🔒 ローリングリザーブ（デポジット）</p>
+      <div className="grid grid-cols-4 gap-3">
+        {[
+          { label: "リザーブ総額", value: "¥4,520,000", color: "text-purple-700" },
+          { label: "今月解放予定", value: "¥1,280,000", color: "text-green-600" },
+          { label: "来月解放予定", value: "¥1,640,000", color: "text-blue-600" },
+          { label: "新規留保（今月）", value: "¥2,130,000", color: "text-gray-700" },
+        ].map((r, i) => (
+          <div key={i} className="bg-white rounded border p-2 text-center">
+            <p className="text-xs text-gray-400">{r.label}</p>
+            <p className={`text-sm font-bold ${r.color}`}>{r.value}</p>
+          </div>
+        ))}
+      </div>
+      {/* Reserve Search */}
+      <div className="flex gap-2 mt-3">
+        <div className="flex items-center border rounded bg-white">
+          <span className="text-xs text-gray-400 pl-2">🔍</span>
+          <input className="text-xs px-2 py-1 w-48 outline-none" placeholder="加盟店ID・名前で検索" />
+        </div>
+        <select className="text-xs border rounded px-2 py-1 bg-white"><option>全接続先</option><option>GMO-PG</option><option>三井住友カード</option></select>
+        <select className="text-xs border rounded px-2 py-1 bg-white"><option>全種別</option><option>留保</option><option>解放</option></select>
+        <button className="text-xs bg-purple-600 text-white px-3 py-1 rounded">検索</button>
+      </div>
+      {/* Reserve per Merchant */}
+      <div className="bg-white rounded border mt-2">
+        <TableHeader cols={[{ label: "加盟店", w: "flex-1" }, { label: "接続先", w: "w-28" }, { label: "リザーブ率", w: "w-20" }, { label: "期間", w: "w-16" }, { label: "残高", w: "w-24" }, { label: "次回解放", w: "w-24" }, { label: "解放予定日", w: "w-24" }]} />
+        {[
+          { m: "ABCマート", proc: "GMO-PG", rate: "10%", period: "180日", bal: "¥420,000", next: "¥120,000", date: "2026-03-07" },
+          { m: "ABCマート", proc: "三井住友", rate: "5%", period: "90日", bal: "¥200,000", next: "¥60,000", date: "2026-03-07" },
+          { m: "XYZショップ", proc: "GMO-PG", rate: "10%", period: "180日", bal: "¥185,000", next: "¥92,000", date: "2026-03-14" },
+          { m: "トラベルプラス", proc: "GMO-PG", rate: "15%", period: "180日", bal: "¥510,000", next: "¥340,000", date: "2026-03-07" },
+        ].map((r, i) => (
+          <div key={i} className={`flex items-center px-3 py-1.5 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
+            <div className="flex-1 font-semibold text-gray-700">{r.m}</div>
+            <div className="w-28 text-gray-600">{r.proc}</div>
+            <div className="w-20 text-center"><Badge text={r.rate} color="purple" /></div>
+            <div className="w-16 text-center text-gray-500">{r.period}</div>
+            <div className="w-24 text-right font-bold text-purple-700">{r.bal}</div>
+            <div className="w-24 text-right text-green-600">{r.next}</div>
+            <div className="w-24 text-right text-gray-400">{r.date}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Merchant Breakdown */}
+    <div className="bg-white rounded-lg border p-3">
+      <div className="flex justify-between items-center mb-2">
+        <p className="text-xs font-bold text-gray-600">加盟店別 精算内訳</p>
+        <button className="text-xs text-blue-600 hover:underline">全加盟店を表示 →</button>
+      </div>
+      <div className="bg-white rounded-lg border">
+        <TableHeader cols={[{ label: "加盟店", w: "flex-1" }, { label: "売上総額", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "CB差引", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-28" }]} />
+        {[
+          { merchant: "M-001 ABCマート", sales: "¥4,200,000", fee: "¥127,500", cb: "¥0", hold: "¥420,000", release: "¥280,000", payout: "¥3,932,500" },
+          { merchant: "M-002 XYZショップ", sales: "¥1,850,000", fee: "¥58,870", cb: "¥12,000", hold: "¥185,000", release: "¥92,000", payout: "¥1,686,130" },
+          { merchant: "M-003 トラベルプラス", sales: "¥5,100,000", fee: "¥183,600", cb: "¥245,000", hold: "¥510,000", release: "¥340,000", payout: "¥4,501,400" },
+        ].map((m, i) => (
+          <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
+            <div className="flex-1 font-semibold text-gray-700">{m.merchant}</div>
+            <div className="w-28 text-right text-gray-600">{m.sales}</div>
+            <div className="w-24 text-right text-red-500">-{m.fee}</div>
+            <div className="w-20 text-right text-red-500">{m.cb !== "¥0" ? `-${m.cb}` : "—"}</div>
+            <div className="w-24 text-right text-purple-500">-{m.hold}</div>
+            <div className="w-24 text-right text-green-500">+{m.release}</div>
+            <div className="w-28 text-right font-bold text-gray-800">{m.payout}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Payout List */}
+    <div className="bg-white rounded-lg border">
+      <TableHeader cols={[{ label: "入金ID", w: "w-28" }, { label: "加盟店", w: "flex-1" }, { label: "精算期間", w: "w-36" }, { label: "入金額", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "ステータス", w: "w-24" }, { label: "入金日", w: "w-24" }]} />
+      {[
+        { id: "PAY-0211-001", merchant: "M-001 ABCマート", period: "02/04 〜 02/10", amount: "¥3,825,000", fee: "¥127,500", status: "入金完了", sColor: "green", date: "02/12" },
+        { id: "PAY-0211-002", merchant: "M-002 XYZショップ", period: "02/04 〜 02/10", amount: "¥1,682,000", fee: "¥58,870", status: "入金完了", sColor: "green", date: "02/12" },
+        { id: "PAY-0211-003", merchant: "M-004 テスト商事", period: "02/04 〜 02/10", amount: "¥612,000", fee: "¥23,256", status: "保留", sColor: "yellow", date: "-" },
+      ].map((p, i) => (
+        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
+          <div className="w-28 font-mono text-gray-500">{p.id}</div>
+          <div className="flex-1 font-semibold text-gray-700">{p.merchant}</div>
+          <div className="w-36 text-gray-500">{p.period}</div>
+          <div className="w-28 text-right font-semibold text-gray-700">{p.amount}</div>
+          <div className="w-24 text-right text-gray-500">{p.fee}</div>
+          <div className="w-24"><Badge text={p.status} color={p.sColor} /></div>
+          <div className="w-24 text-gray-400">{p.date}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ─── M13: システム設定 ───
+const MasterSystemSettings = () => {
+  const [sysTab, setSysTab] = useState(0);
+  return (
+  <div className="p-4 space-y-3">
+    <h2 className="text-sm font-bold text-gray-800">システム設定</h2>
+
+    {/* Tab navigation */}
+    <div className="flex gap-1 border-b">
+      {["決済手段", "接続先管理", "通知設定", "API設定", "セキュリティ"].map((tab, i) => (
+        <button key={i} onClick={() => setSysTab(i)} className={`text-xs px-3 py-2 border-b-2 ${sysTab === i ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-gray-400 hover:text-gray-600"}`}>{tab}</button>
+      ))}
+    </div>
+
+    {/* Payment Methods */}
+    <div className="bg-white rounded-lg border p-3">
+      <p className="text-xs font-bold text-gray-600 mb-3">有効な決済手段</p>
+      <div className="space-y-2">
+        {[
+          { name: "クレジットカード（VISA / MC / JCB / AMEX）", status: true, processor: "三井住友カード / GMO-PG", fee: "3.0% 〜 3.6%" },
+          { name: "銀行振込（バーチャル口座）", status: true, processor: "GMO-PG", fee: "¥300/件" },
+          { name: "QRコード決済（PayPay）", status: true, processor: "PayPay直接", fee: "1.98%" },
+          { name: "コンビニ決済", status: true, processor: "GMO-PG", fee: "¥200/件" },
+          { name: "Apple Pay / Google Pay", status: false, processor: "未設定", fee: "-" },
+        ].map((m, i) => (
+          <div key={i} className="flex items-center gap-3 p-2 rounded border text-xs">
+            <div className={`w-8 h-5 rounded-full relative cursor-pointer ${m.status ? "bg-green-500" : "bg-gray-300"}`}>
+              <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${m.status ? "right-0.5" : "left-0.5"}`} />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-700">{m.name}</p>
+              <p className="text-gray-400">接続先: {m.processor} / 手数料: {m.fee}</p>
+            </div>
+            <button className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">設定</button>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Notification Settings */}
+    <div className="bg-white rounded-lg border p-3">
+      <p className="text-xs font-bold text-gray-600 mb-3">通知設定</p>
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { event: "例外キュー — 新規追加", slack: true, email: true, sms: false },
+          { event: "例外キュー — 滞留1時間超", slack: true, email: true, sms: true },
+          { event: "不正検知 — 自動ブロック", slack: true, email: false, sms: false },
+          { event: "入金エラー発生", slack: true, email: true, sms: true },
+          { event: "プロセッサー障害", slack: true, email: true, sms: true },
+          { event: "URL巡回 — 異常検知", slack: true, email: true, sms: false },
+          { event: "日次精算完了", slack: true, email: false, sms: false },
+          { event: "新規加盟店申込", slack: true, email: false, sms: false },
+        ].map((n, i) => (
+          <div key={i} className="flex items-center text-xs gap-3 p-1.5 rounded hover:bg-gray-50">
+            <span className="flex-1 text-gray-700">{n.event}</span>
+            <label className="flex items-center gap-1"><input type="checkbox" defaultChecked={n.slack} className="w-3 h-3" /><span className="text-gray-400">Slack</span></label>
+            <label className="flex items-center gap-1"><input type="checkbox" defaultChecked={n.email} className="w-3 h-3" /><span className="text-gray-400">Email</span></label>
+            <label className="flex items-center gap-1"><input type="checkbox" defaultChecked={n.sms} className="w-3 h-3" /><span className="text-gray-400">SMS</span></label>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Approval Flow Notice */}
+    <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">
+      🔒 セキュリティ系設定（パスワードポリシー/IP制限/2FA設定等）の変更は <strong>admin申請 → super_admin承認</strong> が必要です。
+    </div>
+
+    {/* Maintenance Mode */}
+    <div className="bg-white rounded-lg border p-3">
+      <div className="flex justify-between items-center mb-2">
+        <p className="text-xs font-bold text-gray-700">🔧 メンテナンスモード</p>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-5 rounded-full bg-gray-300 relative cursor-pointer">
+            <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow" />
+          </div>
+          <span className="text-xs text-gray-400">OFF</span>
+        </div>
+      </div>
+      <p className="text-xs text-gray-500">ON時: 管理画面・加盟店画面をメンテナンス表示に切替。<span className="font-semibold text-green-600">決済処理（Zone A）は停止しません。</span></p>
+    </div>
+
+    {/* Backup Settings */}
+    <div className="bg-white rounded-lg border p-3">
+      <div className="flex justify-between items-center mb-2">
+        <p className="text-xs font-bold text-gray-700">💾 バックアップ設定</p>
+        <button className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">手動バックアップ実行</button>
+      </div>
+      <div className="space-y-1.5 text-xs">
+        {[
+          { target: "DB（PostgreSQL）", schedule: "毎日 AM4:00", lastRun: "2026-02-12 04:00", status: "成功", retention: "30日" },
+          { target: "S3（ファイルストレージ）", schedule: "毎日 AM5:00", lastRun: "2026-02-12 05:00", status: "成功", retention: "90日" },
+        ].map((b, i) => (
+          <div key={i} className="flex items-center gap-3 p-2 rounded border">
+            <span className="w-40 font-semibold text-gray-700">{b.target}</span>
+            <span className="text-gray-500">{b.schedule}</span>
+            <span className="text-gray-400">前回: {b.lastRun}</span>
+            <Badge text={b.status} color="green" />
+            <span className="text-gray-400">保持: {b.retention}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Audit Log */}
+    <div className="bg-white rounded-lg border p-3">
+      <div className="flex justify-between items-center mb-2">
+        <p className="text-xs font-bold text-gray-700">📝 設定変更 監査ログ（直近）</p>
+        <button className="text-xs text-blue-600 hover:underline">全ログ検索 →</button>
+      </div>
+      <div className="space-y-1 text-xs">
+        {[
+          { time: "02/12 10:15", user: "田中太郎", action: "通知設定変更", detail: "不正検知→Email: OFF→ON", role: "admin" },
+          { time: "02/11 16:30", user: "佐藤花子", action: "決済手段変更", detail: "Apple Pay: OFF→ON", role: "admin" },
+          { time: "02/11 09:00", user: "田中太郎", action: "セキュリティ設定", detail: "IP制限追加 → 承認待ち", role: "admin" },
+        ].map((l, i) => (
+          <div key={i} className="flex items-center gap-2 p-1.5 rounded border">
+            <span className="w-24 text-gray-400">{l.time}</span>
+            <span className="w-20 text-gray-600">{l.user}</span>
+            <Badge text={l.role} color="blue" />
+            <span className="w-28 font-semibold text-gray-700">{l.action}</span>
+            <span className="flex-1 text-gray-500">{l.detail}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+  );
+};
+
+// ─── S07: ユーザー管理 ───
+const MerchantUserManagement = () => {
+  const [showInviteS07, setShowInviteS07] = useState(false);
+  return (
+  <div className="p-4 space-y-3">
+    <div className="flex justify-between items-center">
+      <h2 className="text-sm font-bold text-gray-800">ユーザー管理</h2>
+      <button onClick={() => setShowInviteS07(!showInviteS07)} className="text-xs bg-green-600 text-white px-3 py-1.5 rounded font-semibold hover:bg-green-700">+ スタッフを招待</button>
+    </div>
+
+    {showInviteS07 && (
+      <div className="bg-green-50 rounded-lg border border-green-200 p-3 space-y-3">
+        <div className="flex justify-between items-center"><p className="text-xs font-bold text-green-700">📧 スタッフ招待</p><button onClick={() => setShowInviteS07(false)} className="text-gray-400 text-sm">✕</button></div>
+        <div className="grid grid-cols-2 gap-2">
+          <div><label className="text-xs text-gray-500">氏名 *</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 田中 花子" /></div>
+          <div><label className="text-xs text-gray-500">メール *</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: tanaka@shop.jp" /></div>
+          <div><label className="text-xs text-gray-500">権限 *</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>管理者</option><option>スタッフ</option><option>閲覧のみ</option></select></div>
+          <div><label className="text-xs text-gray-500">MFA *</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>必須</option><option>任意</option></select></div>
+        </div>
+        <div className="flex gap-2 justify-end">
+          <button onClick={() => setShowInviteS07(false)} className="px-3 py-1.5 text-xs text-gray-500 border rounded">キャンセル</button>
+          <button onClick={() => setShowInviteS07(false)} className="px-3 py-1.5 text-xs bg-green-600 text-white rounded font-semibold">招待メール送信</button>
+        </div>
+      </div>
+    )}
+
+    <div className="bg-white rounded-lg border">
+      <TableHeader cols={[{ label: "名前", w: "w-36" }, { label: "メール", w: "flex-1" }, { label: "権限", w: "w-28" }, { label: "MFA", w: "w-14" }, { label: "最終ログイン", w: "w-32" }, { label: "操作", w: "w-28" }]} />
+      {[
+        { name: "佐々木 健一", email: "sasaki@techshop.jp", role: "オーナー", rColor: "purple", mfa: true, last: "2026-02-11 14:30" },
+        { name: "中村 美月", email: "nakamura@techshop.jp", role: "管理者", rColor: "blue", mfa: true, last: "2026-02-11 12:00" },
+        { name: "小林 大輔", email: "kobayashi@techshop.jp", role: "スタッフ", rColor: "green", mfa: true, last: "2026-02-10 18:20" },
+        { name: "渡辺 さくら", email: "watanabe@techshop.jp", role: "閲覧のみ", rColor: "gray", mfa: false, last: "2026-02-08 10:00" },
+      ].map((u, i) => (
+        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
+          <div className="w-36 font-semibold text-gray-700 flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-xs">👤</div>
+            {u.name}
+          </div>
+          <div className="flex-1 text-gray-500">{u.email}</div>
+          <div className="w-28"><Badge text={u.role} color={u.rColor} /></div>
+          <div className="w-14">{u.mfa ? "✅" : "❌"}</div>
+          <div className="w-32 text-gray-400">{u.last}</div>
+          <div className="w-28 flex gap-1">
+            <button className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">編集</button>
+            {u.role !== "オーナー" && <button className="px-2 py-1 bg-red-50 text-red-600 rounded text-xs">削除</button>}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* Permission Matrix */}
+    <div className="bg-white rounded-lg border p-3">
+      <p className="text-xs font-bold text-gray-600 mb-2">権限マトリクス</p>
+      <div className="text-xs">
+        <div className="flex bg-gray-50 py-1.5 px-2 font-semibold text-gray-500 border-b">
+          <div className="w-36">機能</div>
+          <div className="w-20 text-center">オーナー</div>
+          <div className="w-20 text-center">管理者</div>
+          <div className="w-20 text-center">スタッフ</div>
+          <div className="w-20 text-center">閲覧のみ</div>
+        </div>
+        {[
+          { feat: "ダッシュボード閲覧", perms: [true, true, true, true] },
+          { feat: "取引一覧・詳細", perms: [true, true, true, true] },
+          { feat: "返金処理の実行", perms: [true, true, false, false] },
+          { feat: "APIキー発行・管理", perms: [true, false, false, false] },
+          { feat: "Webhook設定", perms: [true, true, false, false] },
+          { feat: "ユーザー管理", perms: [true, false, false, false] },
+          { feat: "口座・会社情報変更", perms: [true, false, false, false] },
+        ].map((r, i) => (
+          <div key={i} className={`flex py-1.5 px-2 ${i % 2 ? "bg-gray-50" : ""}`}>
+            <div className="w-36 text-gray-700">{r.feat}</div>
+            {r.perms.map((p, j) => <div key={j} className="w-20 text-center">{p ? "✅" : "—"}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+  );
+};
+
+// ─── S04: 入金確認 ───
+const MerchantPayouts = () => {
+  const [payoutTab, setPayoutTab] = useState("payout");
+  return (
+  <div className="p-4 space-y-3">
+    <div className="flex justify-between items-center">
+      <h2 className="text-sm font-bold text-gray-800">入金確認</h2>
+      <div className="flex gap-2">
+        <select className="text-xs border rounded px-2 py-1"><option>2026年2月</option><option>2026年1月</option></select>
+      </div>
+    </div>
+
+    <div className="flex gap-3">
+      <KPICard label="今月の入金済み" value="¥3,825,000" sub="3回入金" color="green" />
+      <KPICard label="次回入金予定" value="¥1,248,000" sub="2/14（金）" color="blue" />
+      <KPICard label="リザーブ残高" value="¥620,000" sub="解放予定 ¥180,000" color="purple" />
+      <KPICard label="手数料合計" value="¥127,500" sub="率: 3.2%" />
+    </div>
+
+    {/* Tab */}
+    <div className="flex gap-1 border-b">
+      {[{ id: "payout", label: "入金履歴" }, { id: "reserve", label: "リザーブ（デポジット）" }].map(t => (
+        <button key={t.id} onClick={() => setPayoutTab(t.id)} className={`text-xs px-4 py-2 border-b-2 ${payoutTab === t.id ? "border-green-500 text-green-700 font-semibold" : "border-transparent text-gray-400"}`}>{t.label}</button>
+      ))}
+    </div>
+
+    {payoutTab === "payout" && (<>
+    {/* Next Payout Preview */}
+    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-3">
+      <div className="flex justify-between items-center mb-2">
+        <p className="text-xs font-bold text-blue-700">💰 次回入金プレビュー</p>
+        <Badge text="2/14（金）振込予定" color="blue" />
+      </div>
+      <div className="grid grid-cols-5 gap-3 text-xs">
+        <div><span className="text-gray-500">精算期間:</span> <span className="font-semibold">02/04 〜 02/10</span></div>
+        <div><span className="text-gray-500">総売上:</span> <span className="font-semibold">¥1,290,000</span></div>
+        <div><span className="text-gray-500">手数料:</span> <span className="text-red-500">-¥41,280</span></div>
+        <div><span className="text-gray-500">リザーブ留保:</span> <span className="text-purple-600">-¥129,000</span></div>
+        <div><span className="text-gray-500">入金額:</span> <span className="font-bold text-blue-700">¥1,119,720</span></div>
+      </div>
+    </div>
+
+    {/* Search */}
+    <div className="flex gap-2">
+      <input className="text-xs border rounded px-2 py-1 w-40" placeholder="精算期間で検索" />
+      <select className="text-xs border rounded px-2 py-1"><option>全ステータス</option><option>入金済み</option><option>処理中</option><option>保留</option></select>
+      <input type="date" className="text-xs border rounded px-2 py-1" />
+      <span className="text-xs text-gray-400">〜</span>
+      <input type="date" className="text-xs border rounded px-2 py-1" />
+      <button className="text-xs bg-green-600 text-white px-3 py-1 rounded">検索</button>
+      <button className="text-xs bg-gray-100 px-2 py-1 rounded border" title="CSV出力">📥 CSV</button>
+    </div>
+
+    {/* Payout History */}
+    <div className="bg-white rounded-lg border">
+      <TableHeader cols={[{ label: "入金日", w: "w-20" }, { label: "精算期間", w: "w-32" }, { label: "総売上", w: "w-24" }, { label: "手数料", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-24" }, { label: "ステータス", w: "w-20" }, { label: "明細", w: "w-14" }]} />
+      {[
+        { date: "02/07", period: "01/28〜02/03", sales: "¥1,450,000", fee: "-¥46,400", hold: "-¥145,000", release: "+¥92,000", payout: "¥1,350,600", status: "入金済み", sColor: "green" },
+        { date: "01/31", period: "01/21〜01/27", sales: "¥1,180,000", fee: "-¥37,760", hold: "-¥118,000", release: "+¥88,000", payout: "¥1,112,240", status: "入金済み", sColor: "green" },
+        { date: "01/24", period: "01/14〜01/20", sales: "¥980,000", fee: "-¥31,360", hold: "-¥98,000", release: "+¥0", payout: "¥850,640", status: "入金済み", sColor: "green" },
+      ].map((p, i) => (
+        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
+          <div className="w-20 text-gray-600">{p.date}</div>
+          <div className="w-32 text-gray-500">{p.period}</div>
+          <div className="w-24 text-right text-gray-600">{p.sales}</div>
+          <div className="w-20 text-right text-red-500">{p.fee}</div>
+          <div className="w-24 text-right text-purple-500">{p.hold}</div>
+          <div className="w-24 text-right text-green-600">{p.release}</div>
+          <div className="w-24 text-right font-semibold text-gray-700">{p.payout}</div>
+          <div className="w-20"><Badge text={p.status} color={p.sColor} /></div>
+          <div className="w-14"><button className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">📄</button></div>
+        </div>
+      ))}
+    </div>
+    </>)}
+
+    {payoutTab === "reserve" && (
+    <div className="space-y-3">
+      {/* Reserve Summary */}
+      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200 p-3">
+        <p className="text-xs font-bold text-purple-700 mb-2">🔒 ローリングリザーブ（デポジット）</p>
+        <div className="grid grid-cols-4 gap-3">
+          {[
+            { label: "現在のリザーブ残高", value: "¥620,000", color: "text-purple-700" },
+            { label: "今月解放予定", value: "¥180,000", color: "text-green-600" },
+            { label: "来月解放予定", value: "¥210,000", color: "text-blue-600" },
+            { label: "今月新規留保", value: "¥263,000", color: "text-gray-700" },
+          ].map((r, i) => (
+            <div key={i} className="bg-white rounded border p-2 text-center">
+              <p className="text-xs text-gray-400">{r.label}</p>
+              <p className={`text-sm font-bold ${r.color}`}>{r.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Reserve Conditions */}
+      <div className="bg-white rounded-lg border p-3">
+        <p className="text-xs font-bold text-gray-700 mb-2">適用中のリザーブ条件</p>
+        <div className="space-y-1">
+          {[
+            { proc: "GMO-PG", rate: "10%", period: "180日", balance: "¥420,000", next: "¥120,000（3月解放）" },
+            { proc: "三井住友カード", rate: "5%", period: "90日", balance: "¥200,000", next: "¥60,000（3月解放）" },
+          ].map((c, i) => (
+            <div key={i} className="flex items-center gap-3 p-2 rounded border text-xs">
+              <span className="w-32 font-semibold text-gray-700">{c.proc}</span>
+              <Badge text={`${c.rate} / ${c.period}`} color="purple" />
+              <span className="flex-1 text-gray-500">残高: <span className="font-bold text-purple-700">{c.balance}</span></span>
+              <span className="text-gray-400">次回解放: {c.next}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Reserve History Search */}
+      <div className="flex gap-2">
+        <select className="text-xs border rounded px-2 py-1"><option>全種別</option><option>留保</option><option>解放</option></select>
+        <input type="date" className="text-xs border rounded px-2 py-1" />
+        <span className="text-xs text-gray-400">〜</span>
+        <input type="date" className="text-xs border rounded px-2 py-1" />
+        <button className="text-xs bg-purple-600 text-white px-3 py-1 rounded">検索</button>
+      </div>
+
+      {/* Reserve Transaction History */}
+      <div className="bg-white rounded-lg border">
+        <TableHeader cols={[{ label: "日付", w: "w-24" }, { label: "種別", w: "w-16" }, { label: "接続先", w: "w-32" }, { label: "対象精算", w: "w-32" }, { label: "金額", w: "w-24" }, { label: "残高", w: "w-24" }]} />
+        {[
+          { date: "2026-02-07", type: "留保", tColor: "purple", proc: "GMO-PG", target: "01/28〜02/03精算分", amount: "-¥145,000", balance: "¥620,000" },
+          { date: "2026-02-07", type: "解放", tColor: "green", proc: "三井住友カード", target: "2025年8月留保分", amount: "+¥60,000", balance: "¥475,000" },
+          { date: "2026-01-31", type: "留保", tColor: "purple", proc: "GMO-PG", target: "01/21〜01/27精算分", amount: "-¥118,000", balance: "¥535,000" },
+          { date: "2026-01-31", type: "留保", tColor: "purple", proc: "三井住友カード", target: "01/21〜01/27精算分", amount: "-¥59,000", balance: "¥653,000" },
+          { date: "2026-01-24", type: "解放", tColor: "green", proc: "GMO-PG", target: "2025年7月留保分", amount: "+¥92,000", balance: "¥712,000" },
+        ].map((r, i) => (
+          <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
+            <div className="w-24 text-gray-500">{r.date}</div>
+            <div className="w-16"><Badge text={r.type} color={r.tColor} /></div>
+            <div className="w-32 text-gray-600">{r.proc}</div>
+            <div className="w-32 text-gray-400">{r.target}</div>
+            <div className={`w-24 text-right font-semibold ${r.type === "解放" ? "text-green-600" : "text-purple-600"}`}>{r.amount}</div>
+            <div className="w-24 text-right text-gray-700">{r.balance}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+    )}
+    </div>
+  );
+};
+
+// ─── P01: 加盟店申込フォーム ───
+const MerchantApplicationForm = () => {
+  const [step, setStep] = useState(0);
+  const steps = ["企業情報", "事業内容", "決済設定", "書類提出", "確認・申込"];
+  const [submitted, setSubmitted] = useState(false);
+
+  if (submitted) {
+    return (
+      <div className="min-h-full bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
+        <div className="max-w-md text-center py-16">
+          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center text-2xl mx-auto mb-4">✅</div>
+          <h2 className="text-lg font-bold text-gray-800 mb-2">申込を受付しました</h2>
+          <p className="text-xs text-gray-500 mb-3">申込番号: <span className="font-mono font-bold text-blue-600">APP-2026-0211-009</span></p>
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-4 mb-4 text-left">
+            <p className="text-xs font-bold text-blue-700 mb-2">🤖 AI審査を開始しました <span className="font-normal text-blue-500 animate-pulse">● リアルタイム更新中（WebSocket）</span></p>
+            <div className="text-xs text-gray-600 space-y-1.5">
+              <div className="flex items-center gap-2"><span className="text-blue-500 animate-pulse">⟳</span> 反社チェック... 照合中</div>
+              <div className="flex items-center gap-2"><span className="text-blue-500 animate-pulse">⟳</span> Webサイト解析... クロール中</div>
+              <div className="flex items-center gap-2"><span className="text-gray-300">○</span> 決算書解析... 待機中</div>
+              <div className="flex items-center gap-2"><span className="text-gray-300">○</span> 業界リスク評価... 待機中</div>
+              <div className="flex items-center gap-2"><span className="text-gray-300">○</span> 総合判定... 待機中</div>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mb-4">審査状況はメール（sato@techshop.jp）に随時通知されます。<br/>通常、AI審査は1〜3時間で完了します。</p>
+          <button onClick={() => { setSubmitted(false); setStep(0); }} className="px-4 py-2 bg-gray-100 text-gray-600 rounded text-xs">フォームに戻る</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-full bg-gradient-to-b from-gray-50 to-white">
+      <div className="max-w-2xl mx-auto py-6 px-4">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg mb-3">
+            <span className="text-lg font-bold">⬡</span>
+            <span className="text-sm font-bold">AI Payment</span>
+          </div>
+          <h1 className="text-base font-bold text-gray-800">加盟店 新規申込フォーム</h1>
+          <p className="text-xs text-gray-500 mt-1">AI審査により、最短即日で審査が完了します</p>
+          <div className="mt-2 inline-flex items-center gap-1.5 bg-green-50 text-green-700 text-xs px-3 py-1 rounded-full border border-green-200">
+            <span>💾</span> 入力内容はステップごとに自動保存されます。途中で閉じても再開できます。
+          </div>
+        </div>
+
+        {/* Progress Steps */}
+        <div className="flex items-center gap-1 mb-6 px-4">
+          {steps.map((s, i) => (
+            <div key={i} className="flex items-center gap-1 flex-1">
+              <div
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold cursor-pointer transition-all ${
+                  i < step ? "bg-green-500 text-white" : i === step ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-400"
+                }`}
+                onClick={() => i <= step && setStep(i)}
+              >
+                {i < step ? "✓" : i + 1}
+              </div>
+              <span className={`text-xs ${i < step ? "text-green-600" : i === step ? "text-blue-600 font-semibold" : "text-gray-400"}`}>{s}</span>
+              {i < 4 && <div className={`flex-1 h-0.5 ${i < step ? "bg-green-300" : "bg-gray-200"}`} />}
+            </div>
+          ))}
+        </div>
+
+        {/* ═══ Step 1: 企業情報 ═══ */}
+        {step === 0 && (
+          <div className="bg-white rounded-lg border shadow-sm p-4 space-y-3">
+            <p className="text-xs font-bold text-gray-700 border-b pb-2">Step 1: 企業情報</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">法人名 *</label>
+                <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 株式会社サンプル" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">法人番号（13桁）</label>
+                <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 1234567890123" />
+                <span className="text-xs text-gray-400 mt-0.5">入力時にリアルタイムで国税庁DB照合+重複申込チェック</span>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">代表者名 *</label>
+                <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 山田 太郎" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">設立年月 *</label>
+                <input className="w-full text-xs border rounded px-3 py-2" type="month" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">資本金 *</label>
+                <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 5,000,000" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">従業員数</label>
+                <select className="w-full text-xs border rounded px-3 py-2">
+                  <option>1〜5名</option><option>6〜20名</option><option>21〜50名</option><option>51名以上</option>
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className="text-xs text-gray-500 block mb-1">本社所在地 *</label>
+                <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 東京都渋谷区..." />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">担当者名 *</label>
+                <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 佐藤 花子" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">担当者メール *</label>
+                <input className="w-full text-xs border rounded px-3 py-2" type="email" placeholder="例: sato@techshop.jp" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">担当者電話番号 *</label>
+                <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 03-1234-5678" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">WebサイトURL *</label>
+                <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: https://example.jp" />
+              </div>
+            </div>
+            <div className="bg-blue-50 rounded p-2 border border-blue-200">
+              <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI審査のポイント:</span> 法人番号を入力すると、国税庁データベースと自動照合します。WebサイトURLからサイト内容のAI解析も自動で行います。</p>
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <button onClick={() => setStep(1)} className="px-6 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">次へ: 事業内容 →</button>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ Step 2: 事業内容 ═══ */}
+        {step === 1 && (
+          <div className="bg-white rounded-lg border shadow-sm p-4 space-y-3">
+            <p className="text-xs font-bold text-gray-700 border-b pb-2">Step 2: 事業内容</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">業種 *</label>
+                <select className="w-full text-xs border rounded px-3 py-2">
+                  <option>選択してください</option>
+                  <option>物販EC（衣料・雑貨）</option>
+                  <option>物販EC（家電・ガジェット）</option>
+                  <option>デジタルコンテンツ</option>
+                  <option>サブスクリプション</option>
+                  <option>旅行・宿泊</option>
+                  <option>飲食・デリバリー</option>
+                  <option>教育・スクール</option>
+                  <option>その他</option>
+                </select>
+                <input className="w-full text-xs border rounded px-3 py-2 mt-1 hidden" placeholder="「その他」を選択した場合、業種を入力してください（必須）" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">ビジネスモデル *</label>
+                <select className="w-full text-xs border rounded px-3 py-2">
+                  <option>選択してください</option>
+                  <option>BtoC（消費者向け）</option>
+                  <option>BtoB（法人向け）</option>
+                  <option>CtoC（個人間取引）</option>
+                  <option>BtoBtoC</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">月間予想売上 *</label>
+                <select className="w-full text-xs border rounded px-3 py-2">
+                  <option>選択してください</option>
+                  <option>〜¥500,000</option>
+                  <option>¥500,000〜¥1,000,000</option>
+                  <option>¥1,000,000〜¥5,000,000</option>
+                  <option>¥5,000,000〜¥10,000,000</option>
+                  <option>¥10,000,000以上</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">平均取引単価 *</label>
+                <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 5,000" />
+              </div>
+              <div className="col-span-2">
+                <label className="text-xs text-gray-500 block mb-1">取扱商品・サービスの説明 *</label>
+                <textarea className="w-full text-xs border rounded px-3 py-2 h-16 resize-none" placeholder="例: オリジナルブランドのアパレル商品をECサイトで販売。メインターゲットは20〜30代女性。" />
+              </div>
+              <div className="col-span-2">
+                <label className="text-xs text-gray-500 block mb-1">過去のカード決済利用経験</label>
+                <div className="flex gap-4 mt-1">
+                  {["初めて", "他社で利用中", "他社から乗り換え"].map((opt, i) => (
+                    <label key={i} className="flex items-center gap-1.5 text-xs text-gray-600">
+                      <input type="radio" name="experience" className="w-3 h-3" defaultChecked={i===0} />{opt}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="bg-blue-50 rounded p-2 border border-blue-200">
+              <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI審査のポイント:</span> 業種と取扱商品の組み合わせでリスクレベルを自動判定します。詳しく記載いただくと審査がスムーズに進みます。</p>
+            </div>
+            <div className="flex justify-between pt-2 border-t">
+              <button onClick={() => setStep(0)} className="px-6 py-2 bg-gray-100 text-gray-600 rounded text-xs font-semibold hover:bg-gray-200">← 戻る</button>
+              <button onClick={() => setStep(2)} className="px-6 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">次へ: 決済設定 →</button>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ Step 3: 決済設定 ═══ */}
+        {step === 2 && (
+          <div className="bg-white rounded-lg border shadow-sm p-4 space-y-3">
+            <p className="text-xs font-bold text-gray-700 border-b pb-2">Step 3: 決済設定</p>
+
+            <div>
+              <label className="text-xs text-gray-500 block mb-2">利用したい決済手段 *（複数選択可）</label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { name: "VISA / Mastercard", icon: "💳", desc: "手数料 3.0%〜", checked: true },
+                  { name: "JCB", icon: "💳", desc: "手数料 3.3%〜", checked: true },
+                  { name: "American Express", icon: "💳", desc: "手数料 3.5%〜", checked: false },
+                  { name: "銀行振込", icon: "🏦", desc: "¥300/件", checked: false },
+                  { name: "コンビニ決済", icon: "🏪", desc: "¥200/件", checked: false },
+                  { name: "QRコード（PayPay）", icon: "📱", desc: "手数料 1.98%", checked: true },
+                ].map((m, i) => (
+                  <label key={i} className={`flex items-center gap-2 text-xs p-2.5 rounded border cursor-pointer transition-all ${m.checked ? "bg-blue-50 border-blue-300" : "bg-white border-gray-200 hover:border-gray-300"}`}>
+                    <input type="checkbox" defaultChecked={m.checked} className="w-3.5 h-3.5" />
+                    <span>{m.icon}</span>
+                    <div>
+                      <span className="font-semibold text-gray-700">{m.name}</span>
+                      <span className="text-gray-400 ml-1">({m.desc})</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">入金サイクル *</label>
+                <select className="w-full text-xs border rounded px-3 py-2">
+                  <option>月末締め / 翌月末払い</option>
+                  <option>15日・月末締め / 翌月15日・末日払い</option>
+                  <option>週次入金（毎週金曜）</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">入金先口座 *</label>
+                <select className="w-full text-xs border rounded px-3 py-2">
+                  <option>普通口座</option>
+                  <option>当座口座</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">銀行名 *</label>
+                <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 三菱UFJ銀行" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">支店名 *</label>
+                <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 渋谷支店" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">口座番号 *</label>
+                <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 1234567" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">口座名義（カナ） *</label>
+                <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: カ）サンプル" />
+              </div>
+            </div>
+
+            <div className="bg-blue-50 rounded p-2 border border-blue-200">
+              <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI審査のポイント:</span> 口座名義と法人名の照合を自動で行います。法人名義と一致しない場合、確認の連絡をさせていただく場合があります。</p>
+            </div>
+
+            <div className="flex justify-between pt-2 border-t">
+              <button onClick={() => setStep(1)} className="px-6 py-2 bg-gray-100 text-gray-600 rounded text-xs font-semibold hover:bg-gray-200">← 戻る</button>
+              <button onClick={() => setStep(3)} className="px-6 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">次へ: 書類提出 →</button>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ Step 4: 書類提出 ═══ */}
+        {step === 3 && (
+          <div className="bg-white rounded-lg border shadow-sm p-4 space-y-3">
+            <p className="text-xs font-bold text-gray-700 border-b pb-2">Step 4: 書類提出</p>
+
+            <div className="space-y-3">
+              {[
+                { name: "登記簿謄本（履歴事項全部証明書）", required: true, desc: "発行から3ヶ月以内のもの", status: "uploaded", fileName: "tokibo_20260205.pdf" },
+                { name: "代表者の本人確認書類", required: true, desc: "運転免許証・パスポート・マイナンバーカード等", status: "uploaded", fileName: "id_tanaka.jpg" },
+                { name: "直近の決算書（2期分）", required: true, desc: "損益計算書・貸借対照表", status: "pending" },
+                { name: "サイトの特定商取引法表記のスクリーンショット", required: true, desc: "特定商取引法に基づく表記ページ", status: "pending" },
+                { name: "古物商許可証（該当する場合）", required: false, desc: "中古品を取り扱う場合のみ", status: "na" },
+              ].map((doc, i) => (
+                <div key={i} className={`rounded border p-3 ${doc.status === "uploaded" ? "bg-green-50 border-green-200" : doc.status === "na" ? "bg-gray-50 border-gray-200" : "bg-white"}`}>
+                  <div className="flex justify-between items-start mb-1">
+                    <div>
+                      <span className="text-xs font-semibold text-gray-700">{doc.name}</span>
+                      {doc.required && <span className="text-red-500 text-xs ml-1">*</span>}
+                      {!doc.required && <span className="text-gray-400 text-xs ml-1">(任意)</span>}
+                    </div>
+                    {doc.status === "uploaded" && <Badge text="✅ アップロード済" color="green" />}
+                    {doc.status === "pending" && <Badge text="⬆ 未提出" color="yellow" />}
+                    {doc.status === "na" && <Badge text="— 該当なし" color="gray" />}
+                  </div>
+                  <p className="text-xs text-gray-400 mb-2">{doc.desc}</p>
+                  {doc.status === "uploaded" && (
+                    <div className="flex items-center gap-2 text-xs text-green-700 bg-green-100 rounded px-2 py-1">
+                      <span>📎 {doc.fileName}</span>
+                      <span className="text-green-500">🛡️ スキャン済</span>
+                      <button className="text-red-500 hover:text-red-700 ml-auto">削除</button>
+                    </div>
+                  )}
+                  {doc.status === "pending" && (
+                    <div className="border-2 border-dashed border-gray-300 rounded p-3 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all">
+                      <p className="text-xs text-gray-400">📁 クリックまたはドラッグ&ドロップでアップロード</p>
+                      <p className="text-xs text-gray-300 mt-0.5">PDF / JPG / PNG（最大10MB）</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-blue-50 rounded p-2 border border-blue-200">
+              <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI審査のポイント:</span> アップロードされた書類はAI-OCRで自動読取され、申込内容との整合性を確認します。決算書からは財務健全性スコアを自動算出します。</p>
+            </div>
+
+            <div className="flex justify-between pt-2 border-t">
+              <button onClick={() => setStep(2)} className="px-6 py-2 bg-gray-100 text-gray-600 rounded text-xs font-semibold hover:bg-gray-200">← 戻る</button>
+              <button onClick={() => setStep(4)} className="px-6 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">次へ: 確認・申込 →</button>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ Step 5: 確認・申込 ═══ */}
+        {step === 4 && (
+          <div className="bg-white rounded-lg border shadow-sm p-4 space-y-3">
+            <p className="text-xs font-bold text-gray-700 border-b pb-2">Step 5: 確認・申込</p>
+
+            {/* Summary Cards */}
+            <div className="space-y-2">
+              <div className="bg-gray-50 rounded p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-xs font-bold text-gray-600">📋 企業情報</p>
+                  <button onClick={() => setStep(0)} className="text-xs text-blue-600 hover:underline">編集</button>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
+                  <div><span className="text-gray-400">法人名:</span> 株式会社テックショップ</div>
+                  <div><span className="text-gray-400">代表者:</span> 佐々木 健一</div>
+                  <div><span className="text-gray-400">設立:</span> 2022年8月</div>
+                  <div><span className="text-gray-400">資本金:</span> ¥5,000,000</div>
+                  <div><span className="text-gray-400">所在地:</span> 東京都渋谷区...</div>
+                  <div><span className="text-gray-400">URL:</span> techshop.jp</div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-xs font-bold text-gray-600">🏢 事業内容</p>
+                  <button onClick={() => setStep(1)} className="text-xs text-blue-600 hover:underline">編集</button>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
+                  <div><span className="text-gray-400">業種:</span> 物販EC（家電・ガジェット）</div>
+                  <div><span className="text-gray-400">モデル:</span> BtoC</div>
+                  <div><span className="text-gray-400">月間予想:</span> ¥5,000,000〜</div>
+                  <div><span className="text-gray-400">平均単価:</span> ¥15,000</div>
+                  <div className="col-span-2"><span className="text-gray-400">経験:</span> 他社で利用中</div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-xs font-bold text-gray-600">💳 決済設定</p>
+                  <button onClick={() => setStep(2)} className="text-xs text-blue-600 hover:underline">編集</button>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                  <div><span className="text-gray-400">決済手段:</span> VISA / MC / JCB / PayPay</div>
+                  <div><span className="text-gray-400">入金サイクル:</span> 月末締め / 翌月末払い</div>
+                  <div><span className="text-gray-400">銀行:</span> 三菱UFJ銀行 渋谷支店</div>
+                  <div><span className="text-gray-400">口座:</span> 普通 1234567 カ）テックショップ</div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-xs font-bold text-gray-600">📁 書類提出</p>
+                  <button onClick={() => setStep(3)} className="text-xs text-blue-600 hover:underline">編集</button>
+                </div>
+                <div className="text-xs space-y-1">
+                  <div className="flex items-center gap-2 text-gray-600"><span className="text-green-500">✅</span> 登記簿謄本 — tokibo_20260205.pdf</div>
+                  <div className="flex items-center gap-2 text-gray-600"><span className="text-green-500">✅</span> 本人確認書類 — id_tanaka.jpg</div>
+                  <div className="flex items-center gap-2 text-yellow-600"><span className="text-yellow-500">⚠</span> 決算書 — <span className="font-semibold">未提出（審査中にアップロード可）</span></div>
+                  <div className="flex items-center gap-2 text-yellow-600"><span className="text-yellow-500">⚠</span> 特定商取引法表記 — <span className="font-semibold">未提出（審査中にアップロード可）</span></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Terms */}
+            <div className="border rounded p-3">
+              <label className="flex items-start gap-2 text-xs cursor-pointer">
+                <input type="checkbox" className="w-3.5 h-3.5 mt-0.5" defaultChecked />
+                <span className="text-gray-600">
+                  <span className="text-blue-600 underline">利用規約</span>および
+                  <span className="text-blue-600 underline">プライバシーポリシー</span>に同意します。
+                  申込内容に虚偽がないことを確認し、AI審査による自動判定が行われることに同意します。
+                </span>
+              </label>
+            </div>
+
+            <div className="bg-green-50 rounded p-2 border border-green-200">
+              <p className="text-xs text-green-700">🤖 申込後、AIが自動的に審査を開始します。通常1〜3時間で結果をメールでお知らせします。人間による追加確認が必要な場合は、別途ご連絡いたします。</p>
+            </div>
+
+            <div className="flex justify-between pt-2 border-t">
+              <button onClick={() => setStep(3)} className="px-6 py-2 bg-gray-100 text-gray-600 rounded text-xs font-semibold hover:bg-gray-200">← 戻る</button>
+              <button onClick={() => setSubmitted(true)} className="px-8 py-2.5 bg-green-600 text-white rounded text-xs font-bold hover:bg-green-700 shadow-sm">✓ この内容で申込む</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ─── M10: ルーティング ───
+const MasterRouting = () => {
+  const [selectedMerchant, setSelectedMerchant] = useState("M-001");
+  const [merchantSearch, setMerchantSearch] = useState("");
+  const [showMerchantDropdown, setShowMerchantDropdown] = useState(false);
+  const [showAddRouteRule, setShowAddRouteRule] = useState(false);
+  const currentMerchant = merchantData.find(m => m.id === selectedMerchant);
+  const filteredMerchants = merchantData.filter(m => m.status === "有効").filter(m =>
+    merchantSearch === "" || m.name.toLowerCase().includes(merchantSearch.toLowerCase()) || m.id.toLowerCase().includes(merchantSearch.toLowerCase())
+  );
+  const approvedProcs = currentMerchant?.processors.filter(p => p.status === "approved") || [];
+
+  return (
+    <div className="p-4 space-y-3">
+      <div className="flex justify-between items-center">
+        <h2 className="text-sm font-bold text-gray-800">ルーティング設定</h2>
+        <div className="flex gap-2 items-center">
+          <div className="relative">
+            <div className="flex items-center border rounded bg-white">
+              <span className="text-xs text-gray-400 pl-2">🔍</span>
+              <input
+                className="text-xs px-2 py-1 w-64 outline-none"
+                placeholder="加盟店を検索（ID・名前）"
+                value={merchantSearch}
+                onChange={e => { setMerchantSearch(e.target.value); setShowMerchantDropdown(true); }}
+                onFocus={() => setShowMerchantDropdown(true)}
+              />
+              {selectedMerchant && (
+                <button className="text-xs text-gray-400 pr-2 hover:text-red-400" onClick={() => { setSelectedMerchant(""); setMerchantSearch(""); }}>✕</button>
+              )}
+            </div>
+            {showMerchantDropdown && (
+              <div className="absolute right-0 top-full mt-1 w-80 bg-white border rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+                <div className="px-3 py-1.5 text-xs text-gray-400 border-b bg-gray-50">
+                  {filteredMerchants.length}件 / {merchantData.filter(m => m.status === "有効").length}社
+                </div>
+                <button
+                  className={`w-full text-left px-3 py-2 text-xs hover:bg-blue-50 border-b ${!selectedMerchant ? "bg-blue-50 font-bold" : ""}`}
+                  onClick={() => { setSelectedMerchant(""); setMerchantSearch(""); setShowMerchantDropdown(false); }}
+                >--- グローバル設定 ---</button>
+                {filteredMerchants.map(m => (
+                  <button
+                    key={m.id}
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-blue-50 border-b flex items-center justify-between ${selectedMerchant === m.id ? "bg-blue-50 font-bold" : ""}`}
+                    onClick={() => { setSelectedMerchant(m.id); setMerchantSearch(m.name); setShowMerchantDropdown(false); }}
+                  >
+                    <span><span className="font-mono text-gray-400">{m.id}</span> {m.name}</span>
+                    <span className="text-gray-400">{m.processors.filter(p=>p.status==="approved").length}接続先</span>
+                  </button>
+                ))}
+                {filteredMerchants.length === 0 && (
+                  <div className="px-3 py-4 text-xs text-gray-400 text-center">該当する加盟店がありません</div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Core Concept */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-3">
+        <p className="text-xs font-bold text-blue-700 mb-1">🤖 AIルーティングの仕組み</p>
+        <p className="text-xs text-gray-600">
+          決済リクエスト受信 → <span className="font-semibold text-blue-700">加盟店の承認済み接続先を取得</span> → ルーティングルールを適用 → AI最適化 → 接続先決定。
+          加盟店ごとに<span className="font-semibold text-red-600">審査通過済みの接続先からのみ</span>ルーティングされます。接続先が1つの場合、その接続先に固定されます。
+        </p>
+      </div>
+
+      {/* Selected Merchant's Available Processors */}
+      {currentMerchant && (
+        <div className="bg-white rounded-lg border p-3">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-bold text-gray-700">🔌 {currentMerchant.name} — 利用可能な接続先</p>
+            <div className="flex gap-1">
+              <Badge text={`承認済: ${approvedProcs.length}`} color="green" />
+              <Badge text={`審査中: ${currentMerchant.processors.filter(p=>p.status==="reviewing").length}`} color="blue" />
+              <Badge text={`準備中: ${currentMerchant.processors.filter(p=>p.status==="pending").length}`} color="gray" />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            {currentMerchant.processors.map((proc, i) => {
+              const st = PROC_STATUS[proc.status];
+              return (
+                <div key={i} className={`flex-1 rounded border p-2 text-xs ${
+                  proc.status === "approved" ? "bg-green-50 border-green-200" :
+                  proc.status === "reviewing" ? "bg-blue-50 border-blue-200 opacity-60" :
+                  proc.status === "suspended" ? "bg-red-50 border-red-200 opacity-40" :
+                  "bg-gray-50 border-gray-200 opacity-40"
+                }`}>
+                  <div className="font-semibold text-gray-700">{proc.name}</div>
+                  <div className="text-gray-400">{proc.brands}</div>
+                  <Badge text={st.label} color={st.color} />
+                  {proc.status === "approved" && <div className="mt-1 text-gray-500">{proc.txnCount.toLocaleString()}件処理</div>}
+                </div>
+              );
+            })}
+          </div>
+          {approvedProcs.length <= 1 && (
+            <div className="bg-yellow-50 rounded border border-yellow-200 p-2 mt-2">
+              <p className="text-xs text-yellow-700">⚠️ <span className="font-semibold">接続先が{approvedProcs.length}つのみ:</span> フェイルオーバー・コスト最適化が利用できません。接続先を追加すると、障害時の自動切替やAI最適ルーティングが有効になります。</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Routing Rules */}
+      <div className="bg-white rounded-lg border p-3">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-bold text-gray-700">📋 ルーティングルール（優先順位順）</p>
+          <button onClick={() => setShowAddRouteRule(true)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">+ ルール追加</button>
+        </div>
+        <div className="space-y-2">
+          {[
+            { priority: 1, name: "接続先制約フィルタ", type: "システム", desc: "加盟店の承認済み接続先のみに絞り込み", scope: "全加盟店（自動）", enabled: true, locked: true },
+            { priority: 2, name: "ブランドマッピング", type: "ルール", desc: "カードブランドに応じた接続先マッピング", scope: "グローバル", enabled: true, locked: false },
+            { priority: 3, name: "加盟店固定ルーティング", type: "ルール", desc: "特定加盟店を特定接続先に固定", scope: "加盟店指定", enabled: true, locked: false },
+            { priority: 4, name: "金額閾値ルーティング", type: "ルール", desc: "高額決済（¥100,000以上）は直接接続先へ", scope: "グローバル", enabled: true, locked: false },
+            { priority: 5, name: "コスト最適化（AI）", type: "AI", desc: "手数料率を考慮しAIが最安接続先を選択", scope: "接続先2+の加盟店", enabled: true, locked: false },
+            { priority: 6, name: "成功率最適化（AI）", type: "AI", desc: "時間帯・カード種別の成功率をAIが分析し最適化", scope: "接続先2+の加盟店", enabled: true, locked: false },
+            { priority: 7, name: "重み付け分散", type: "ルール", desc: "トラフィックを接続先間で比率分散（A:70%, B:30%等）", scope: "加盟店指定", enabled: false, locked: false },
+            { priority: 8, name: "フェイルオーバー", type: "システム", desc: "プライマリ障害時にセカンダリへ自動切替", scope: "接続先2+の加盟店", enabled: true, locked: false },
+            { priority: 9, name: "カスケードリトライ", type: "システム", desc: "接続先Aで失敗 → B → C と順次再試行", scope: "接続先2+の加盟店", enabled: true, locked: false },
+          ].map((rule, i) => (
+            <div key={i} className={`flex items-center gap-3 p-2 rounded border text-xs ${rule.locked ? "bg-gray-50 border-gray-300" : ""}`}>
+              <span className="w-6 h-6 flex items-center justify-center bg-gray-100 rounded text-gray-500 font-bold">{rule.priority}</span>
+              <div className={`w-8 h-5 rounded-full relative cursor-pointer ${rule.enabled ? "bg-green-500" : "bg-gray-300"} ${rule.locked ? "opacity-60" : ""}`}>
+                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${rule.enabled ? "right-0.5" : "left-0.5"}`} />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-700">{rule.name}</span>
+                  <Badge text={rule.type} color={rule.type === "AI" ? "purple" : rule.type === "システム" ? "blue" : "gray"} />
+                  {rule.locked && <span className="text-gray-400">🔒</span>}
+                </div>
+                <p className="text-gray-400 mt-0.5">{rule.desc}</p>
+              </div>
+              <div className="w-40 text-gray-400">{rule.scope}</div>
+              {!rule.locked && <button className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">編集</button>}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Routing Flow Diagram */}
+      <div className="bg-white rounded-lg border p-3">
+        <p className="text-xs font-bold text-gray-700 mb-2">🔀 ルーティング判定フロー</p>
+        <div className="bg-gray-50 rounded p-3">
+          <div className="flex items-center justify-center gap-1 text-xs flex-wrap">
+            {[
+              { label: "決済リクエスト", color: "bg-gray-200 text-gray-700" },
+              { label: "→" },
+              { label: "①加盟店の承認済み\n接続先を取得", color: "bg-red-100 text-red-700 border border-red-300" },
+              { label: "→" },
+              { label: "②ブランド\nマッピング", color: "bg-blue-100 text-blue-700" },
+              { label: "→" },
+              { label: "③固定/閾値\nルール適用", color: "bg-blue-100 text-blue-700" },
+              { label: "→" },
+              { label: "④AI最適化\n(コスト/成功率)", color: "bg-purple-100 text-purple-700" },
+              { label: "→" },
+              { label: "⑤接続先決定", color: "bg-green-100 text-green-700" },
+            ].map((step, i) => (
+              step.color ? (
+                <div key={i} className={`${step.color} rounded px-2 py-1.5 text-center whitespace-pre-line font-semibold`}>{step.label}</div>
+              ) : (
+                <span key={i} className="text-gray-300 font-bold">→</span>
+              )
+            ))}
+          </div>
+          <div className="text-center mt-2">
+            <span className="text-xs text-gray-400">接続先が1つのみの加盟店 → ②〜④をスキップ → そのまま⑤で確定</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Routing Performance */}
+      <div className="bg-white rounded-lg border p-3">
+        <p className="text-xs font-bold text-gray-700 mb-2">📊 ルーティング実績（直近7日）</p>
+        <div className="flex gap-3 mb-3">
+          <KPICard label="総決済件数" value="8,729件" sub="前週比" trend={6} />
+          <KPICard label="AI最適化適用率" value="42.3%" sub="接続先2+の加盟店" color="purple" />
+          <KPICard label="フェイルオーバー発動" value="12件" sub="成功率: 100%" color="green" />
+          <KPICard label="推定コスト削減" value="¥38,200" sub="AI最適化による" color="green" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-xs text-gray-500 mb-1">接続先別トラフィック分布</p>
+            <div className="space-y-1.5">
+              {[
+                { name: "GMO-PG", pct: 45, count: "3,928件", color: "bg-blue-500" },
+                { name: "三井住友カード", pct: 30, count: "2,619件", color: "bg-green-500" },
+                { name: "JCB直接", pct: 12, count: "1,047件", color: "bg-purple-500" },
+                { name: "PayPay", pct: 10, count: "873件", color: "bg-orange-500" },
+                { name: "その他", pct: 3, count: "262件", color: "bg-gray-400" },
+              ].map((p, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs">
+                  <span className="w-28 text-gray-600">{p.name}</span>
+                  <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
+                    <div className={`h-full ${p.color} rounded-full`} style={{ width: `${p.pct}%` }} />
+                  </div>
+                  <span className="w-16 text-right text-gray-500">{p.pct}%</span>
+                  <span className="w-20 text-right text-gray-400">{p.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 mb-1">加盟店別 接続先数の分布</p>
+            <div className="space-y-2">
+              {[
+                { label: "1接続先のみ", count: 3, merchants: "M-004, M-005, M-008", note: "フェイルオーバー不可", color: "yellow" },
+                { label: "2接続先", count: 2, merchants: "M-002, M-007", note: "基本フェイルオーバー可", color: "blue" },
+                { label: "3接続先以上", count: 2, merchants: "M-001, M-006", note: "AI最適化フル稼働", color: "green" },
+                { label: "審査中（0接続先）", count: 1, merchants: "M-003", note: "決済未開始", color: "gray" },
+              ].map((g, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs">
+                  <Badge text={g.label} color={g.color} />
+                  <span className="font-semibold text-gray-700">{g.count}社</span>
+                  <span className="text-gray-400">{g.note}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Cascade / Failover Config */}
+      <div className="bg-white rounded-lg border p-3">
+        <p className="text-xs font-bold text-gray-700 mb-2">⚡ フェイルオーバー / カスケード設定</p>
+        <div className="space-y-2">
+          {[
+            { primary: "三井住友カード", secondary: "GMO-PG", tertiary: "—", trigger: "HTTP 5xx / タイムアウト 10秒", retries: 2, status: "稼働中", sColor: "green" },
+            { primary: "JCB直接", secondary: "GMO-PG (JCB)", tertiary: "—", trigger: "HTTP 5xx / タイムアウト 10秒", retries: 1, status: "稼働中", sColor: "green" },
+            { primary: "PayPay", secondary: "—", tertiary: "—", trigger: "—", retries: 0, status: "単独（切替不可）", sColor: "gray" },
+          ].map((f, i) => (
+            <div key={i} className="flex items-center gap-3 p-2 rounded border text-xs">
+              <div className="flex items-center gap-1">
+                <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-semibold">{f.primary}</span>
+                {f.secondary !== "—" && <><span className="text-gray-300">→</span><span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{f.secondary}</span></>}
+                {f.tertiary !== "—" && <><span className="text-gray-300">→</span><span className="bg-gray-100 text-gray-500 px-2 py-0.5 rounded">{f.tertiary}</span></>}
+              </div>
+              <span className="text-gray-400 flex-1">{f.trigger}</span>
+              <Badge text={f.status} color={f.sColor} />
+              <button className="px-2 py-1 bg-gray-100 text-gray-600 rounded">編集</button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Simulation */}
+      <div className="bg-yellow-50 rounded-lg border border-yellow-300 p-3">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-bold text-yellow-800">🧪 ルール変更シミュレーション</p>
+          <button className="text-xs bg-yellow-600 text-white px-3 py-1 rounded font-semibold">過去30日データで実行</button>
+        </div>
+        <p className="text-xs text-yellow-700 mb-2">ルール変更前に、過去取引データでの影響を確認できます。</p>
+        <div className="bg-white rounded border p-2 grid grid-cols-4 gap-2 text-xs">
+          <div className="text-center"><span className="text-gray-400">接続先振り分け変更</span><p className="font-bold text-blue-700">GMO-PG +12% / 三井住友 -12%</p></div>
+          <div className="text-center"><span className="text-gray-400">コスト差分</span><p className="font-bold text-green-700">-¥23,400/月</p></div>
+          <div className="text-center"><span className="text-gray-400">成功率変化</span><p className="font-bold text-green-700">98.2% → 98.5%</p></div>
+          <div className="text-center"><span className="text-gray-400">影響加盟店</span><p className="font-bold text-gray-700">5社</p></div>
+        </div>
+      </div>
+
+      {/* Maintenance Mode */}
+      <div className="bg-white rounded-lg border p-3">
+        <div className="flex justify-between items-center mb-2">
+          <p className="text-xs font-bold text-gray-700">🔧 接続先メンテナンスモード</p>
+          <span className="text-xs text-gray-400">メンテ中の接続先はルーティング対象から自動除外されます</span>
+        </div>
+        <div className="space-y-1.5">
+          {[
+            { name: "三井住友カード", status: false },
+            { name: "GMO-PG", status: false },
+            { name: "JCB直接", status: false },
+            { name: "PayPay", status: true },
+          ].map((p, i) => (
+            <div key={i} className={`flex items-center gap-3 p-2 rounded border text-xs ${p.status ? "bg-blue-50 border-blue-200" : ""}`}>
+              <div className={`w-8 h-5 rounded-full relative cursor-pointer ${p.status ? "bg-blue-500" : "bg-gray-300"}`}>
+                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${p.status ? "right-0.5" : "left-0.5"}`} />
+              </div>
+              <span className="font-semibold text-gray-700">{p.name}</span>
+              {p.status && <Badge text="🔵 メンテナンス中" color="blue" />}
+              {!p.status && <Badge text="稼働中" color="green" />}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Routing Log */}
+      <div className="bg-white rounded-lg border p-3">
+        <div className="flex justify-between items-center mb-2">
+          <p className="text-xs font-bold text-gray-700">📊 ルーティングログ（直近）</p>
+          <button className="text-xs text-blue-600 hover:underline">全ログ検索 →</button>
+        </div>
+        <TableHeader cols={[{ label: "日時", w: "w-28" }, { label: "取引ID", w: "w-36" }, { label: "加盟店", w: "w-32" }, { label: "ブランド", w: "w-16" }, { label: "AI判定", w: "flex-1" }, { label: "選択", w: "w-24" }, { label: "結果", w: "w-16" }, { label: "F/O", w: "w-12" }]} />
+        {[
+          { time: "14:52:31", txn: "TXN-14523", merchant: "ABCマート", brand: "VISA", ai: "GMO(92) > 三井住友(78) > JCB(65)", selected: "GMO-PG", result: "成功", fo: "—" },
+          { time: "14:51:40", txn: "TXN-14520", merchant: "トラベルプラス", brand: "VISA", ai: "GMO(88)", selected: "GMO-PG", result: "失敗", fo: "→三井" },
+          { time: "14:51:22", txn: "TXN-14519", merchant: "スタイルプラス", brand: "VISA", ai: "GMO(85) > 三井住友(72)", selected: "GMO-PG", result: "成功", fo: "—" },
+          { time: "14:50:58", txn: "TXN-14518", merchant: "ABCマート", brand: "QR", ai: "PayPay(固定)", selected: "PayPay", result: "成功", fo: "—" },
+        ].map((l, i) => (
+          <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
+            <div className="w-28 text-gray-400 font-mono">{l.time}</div>
+            <div className="w-36 font-mono text-gray-500">{l.txn}</div>
+            <div className="w-32 text-gray-700">{l.merchant}</div>
+            <div className="w-16"><Badge text={l.brand} color="blue" /></div>
+            <div className="flex-1 text-gray-500 font-mono">{l.ai}</div>
+            <div className="w-24 font-semibold text-gray-700">{l.selected}</div>
+            <div className="w-16"><Badge text={l.result} color={l.result === "成功" ? "green" : "red"} /></div>
+            <div className="w-12 text-center">{l.fo !== "—" ? <span className="text-yellow-600 font-semibold">{l.fo}</span> : "—"}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Modal: ルーティングルール追加 ── */}
+      {showAddRouteRule && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowAddRouteRule(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[520px] max-h-[85vh] overflow-y-auto">
+            <div className="p-4 border-b bg-gray-50 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-sm font-bold text-gray-800">ルーティングルール追加</h3>
+              <button onClick={() => setShowAddRouteRule(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div><label className="text-xs font-semibold text-gray-600">ルール名 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 高額取引はGMO-PG優先" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-gray-600">条件タイプ <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>金額範囲</option><option>ブランド</option><option>加盟店</option><option>時間帯</option><option>地域</option></select></div>
+                <div><label className="text-xs font-semibold text-gray-600">優先接続先 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>GMO-PG</option><option>三井住友カード</option><option>JCB直接</option><option>PayPay</option></select></div>
+              </div>
+              <div className="bg-gray-50 rounded border p-3 space-y-2">
+                <p className="text-xs font-bold text-gray-600">条件詳細</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <div><label className="text-xs text-gray-500">フィールド</label><select className="w-full text-xs border rounded px-2 py-1"><option>金額</option><option>ブランド</option><option>BIN</option></select></div>
+                  <div><label className="text-xs text-gray-500">演算子</label><select className="w-full text-xs border rounded px-2 py-1"><option>≧（以上）</option><option>＜（未満）</option><option>＝</option></select></div>
+                  <div><label className="text-xs text-gray-500">値</label><input className="w-full text-xs border rounded px-2 py-1" placeholder="500000" /></div>
+                </div>
+                <button className="text-xs text-blue-600 hover:underline">+ AND条件を追加</button>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-gray-600">フォールバック先</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>自動（AI判定）</option><option>三井住友カード</option><option>JCB直接</option></select></div>
+                <div><label className="text-xs font-semibold text-gray-600">優先度</label><input type="number" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="5" min="1" max="99" /></div>
+              </div>
+            </div>
+            <div className="p-4 border-t flex gap-2 justify-end">
+              <button onClick={() => setShowAddRouteRule(false)} className="px-4 py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">キャンセル</button>
+              <button onClick={() => setShowAddRouteRule(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">ルールを作成</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── M09: 接続先管理 ───
+const processorList = [
+  { id: "PROC-001", name: "三井住友カード", type: "アクワイアラー直接", brands: ["VISA","MC"], protocol: "専用プロトコル", status: "稼働中", sColor: "green", uptime: "99.95%", merchants: 3, reviewing: 1, avgReviewDays: 14 },
+  { id: "PROC-002", name: "GMO-PG", type: "カードプロセッサー", brands: ["VISA","MC","JCB","AMEX"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.91%", merchants: 7, reviewing: 1, avgReviewDays: 7 },
+  { id: "PROC-003", name: "JCB直接", type: "アクワイアラー直接", brands: ["JCB"], protocol: "専用プロトコル", status: "稼働中", sColor: "green", uptime: "99.93%", merchants: 2, reviewing: 0, avgReviewDays: 21 },
+  { id: "PROC-004", name: "PayPay", type: "QR決済事業者", brands: ["QR"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.98%", merchants: 2, reviewing: 0, avgReviewDays: 5 },
+  { id: "PROC-005", name: "AMEX直接", type: "アクワイアラー直接", brands: ["AMEX"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.90%", merchants: 0, reviewing: 1, avgReviewDays: 30 },
+];
+
+const reviewFlowData = [
+  {
+    merchantId: "M-002", merchantName: "合同会社XYZショップ", processorId: "PROC-001", processorName: "三井住友カード",
+    status: "reviewing", appliedAt: "2026-01-28", currentStep: 3, totalSteps: 7,
+    timeline: [
+      { step: "審査申請", date: "01/28", status: "done", note: "自動申請" },
+      { step: "書類送付", date: "01/28", status: "done", note: "申込データから自動生成" },
+      { step: "接続先審査中", date: "01/29〜", status: "active", note: "三井住友カード側で審査中" },
+      { step: "追加書類対応", date: "—", status: "pending", note: "" },
+      { step: "条件確定", date: "—", status: "pending", note: "手数料率・入金サイクル等" },
+      { step: "契約書送付", date: "—", status: "pending", note: "条件を反映した契約書を加盟店に送付" },
+      { step: "決済開始", date: "—", status: "pending", note: "加盟店が契約書に署名後" },
+    ],
+    documents: [
+      { name: "加盟店審査申請書", type: "自動生成", format: "PDF", size: "245KB", date: "01/28", status: "sent", auto: true },
+      { name: "登記簿謄本", type: "申込時提出", format: "PDF", size: "1.2MB", date: "01/28", status: "sent", auto: false },
+      { name: "代表者本人確認書類", type: "申込時提出", format: "JPEG", size: "890KB", date: "01/28", status: "sent", auto: false },
+      { name: "直近2期分決算書", type: "申込時提出", format: "PDF", size: "3.4MB", date: "01/28", status: "sent", auto: false },
+      { name: "サイトスクリーンショット", type: "自動生成", format: "PNG", size: "2.1MB", date: "01/28", status: "sent", auto: true },
+      { name: "特定商取引法表記", type: "申込時提出", format: "PNG", size: "560KB", date: "01/28", status: "sent", auto: false },
+    ],
+    additionalRequests: [],
+  },
+  {
+    merchantId: "M-006", merchantName: "株式会社トラベルプラス", processorId: "PROC-005", processorName: "AMEX直接",
+    status: "additional_docs", appliedAt: "2026-01-15", currentStep: 4, totalSteps: 7,
+    timeline: [
+      { step: "審査申請", date: "01/15", status: "done", note: "手動申請" },
+      { step: "書類送付", date: "01/15", status: "done", note: "申込データ + 追加資料" },
+      { step: "接続先審査中", date: "01/16〜02/05", status: "done", note: "一次審査通過" },
+      { step: "追加書類対応", date: "02/06〜", status: "active", note: "追加書類を要求された" },
+      { step: "条件確定", date: "—", status: "pending", note: "手数料率・入金サイクル等" },
+      { step: "契約書送付", date: "—", status: "pending", note: "条件を反映した契約書を加盟店に送付" },
+      { step: "決済開始", date: "—", status: "pending", note: "加盟店が契約書に署名後" },
+    ],
+    documents: [
+      { name: "加盟店審査申請書", type: "自動生成", format: "PDF", size: "245KB", date: "01/15", status: "sent", auto: true },
+      { name: "登記簿謄本", type: "申込時提出", format: "PDF", size: "1.1MB", date: "01/15", status: "sent", auto: false },
+      { name: "代表者本人確認書類", type: "申込時提出", format: "JPEG", size: "920KB", date: "01/15", status: "sent", auto: false },
+      { name: "直近2期分決算書", type: "申込時提出", format: "PDF", size: "4.2MB", date: "01/15", status: "sent", auto: false },
+      { name: "サイトスクリーンショット", type: "自動生成", format: "PNG", size: "1.8MB", date: "01/15", status: "sent", auto: true },
+      { name: "旅行業登録証", type: "追加要求", format: "—", size: "—", date: "—", status: "waiting", auto: false },
+      { name: "過去6ヶ月のCB実績レポート", type: "追加要求", format: "—", size: "—", date: "—", status: "waiting", auto: false },
+    ],
+    additionalRequests: [
+      { date: "02/06", from: "AMEX審査部", items: ["旅行業登録証の写し", "過去6ヶ月のチャージバック実績レポート"], deadline: "02/13", status: "対応中" },
+    ],
+  },
+];
+
+const approvedHistory = [
+  { merchantName: "株式会社ABCマート", processorName: "PayPay", approvedAt: "2025-10-18", reviewDays: 4, docs: 5 },
+  { merchantName: "株式会社ABCマート", processorName: "JCB直接", approvedAt: "2025-08-22", reviewDays: 18, docs: 6 },
+  { merchantName: "株式会社トラベルプラス", processorName: "JCB直接", approvedAt: "2025-07-10", reviewDays: 16, docs: 7 },
+  { merchantName: "合同会社XYZショップ", processorName: "GMO-PG", approvedAt: "2025-06-05", reviewDays: 5, docs: 5 },
+  { merchantName: "株式会社ABCマート", processorName: "GMO-PG", approvedAt: "2025-04-12", reviewDays: 6, docs: 5 },
+];
+
+const MasterProcessors = () => {
+  const [selectedProc, setSelectedProc] = useState(null);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [confirmDialog, setConfirmDialog] = useState(null);
+  const [showAddProc, setShowAddProc] = useState(false);
+
+  return (
+    <div className="p-4 space-y-3">
+      <div className="flex justify-between items-center">
+        <h2 className="text-sm font-bold text-gray-800">接続先管理</h2>
+        <div className="flex gap-2">
+          <button onClick={() => setShowAddProc(true)} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold hover:bg-blue-700">+ 接続先追加</button>
+        </div>
+      </div>
+
+      {/* Tab navigation */}
+      <div className="flex gap-1 border-b">
+        {[
+          { id: "overview", label: "接続先一覧", badge: null },
+          { id: "reviews", label: "審査フロー管理", badge: 2 },
+          { id: "history", label: "審査完了履歴", badge: null },
+          { id: "documents", label: "審査資料管理", badge: 1 },
+        ].map((tab) => (
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 flex items-center gap-1 ${activeTab === tab.id ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-gray-400 hover:text-gray-600"}`}>
+            {tab.label}
+            {tab.badge && <span className="bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{tab.badge}</span>}
+          </button>
+        ))}
+      </div>
+
+      {/* ═══ Tab: 接続先一覧 ═══ */}
+      {activeTab === "overview" && (
+        <div className="space-y-3">
+          <div className="flex gap-3">
+            <KPICard label="有効接続先" value="5社" sub="" color="green" />
+            <KPICard label="審査進行中" value="2件" sub="XYZショップ / トラベルプラス" color="blue" />
+            <KPICard label="追加書類待ち" value="1件" sub="要対応" color="yellow" />
+            <KPICard label="平均審査日数" value="12日" sub="全接続先平均" />
+          </div>
+
+          <div className="bg-white rounded-lg border">
+            <TableHeader cols={[{ label: "接続先ID", w: "w-24" }, { label: "接続先名", w: "w-36" }, { label: "種別", w: "w-36" }, { label: "対応ブランド", w: "w-32" }, { label: "稼働率", w: "w-20" }, { label: "承認済加盟店", w: "w-24" }, { label: "審査中", w: "w-16" }, { label: "状態", w: "w-20" }, { label: "操作", w: "w-16" }]} />
+            {processorList.map((p, i) => (
+              <div key={p.id} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""} hover:bg-blue-50 cursor-pointer`} onClick={() => setSelectedProc(selectedProc === p.id ? null : p.id)}>
+                <div className="w-24 font-mono text-gray-500">{p.id}</div>
+                <div className="w-36 font-semibold text-gray-700">{p.name}</div>
+                <div className="w-36 text-gray-500">{p.type}</div>
+                <div className="w-32 flex gap-1 flex-wrap">{p.brands.map(b => <Badge key={b} text={b} color="blue" />)}</div>
+                <div className="w-20 text-green-600 font-semibold">{p.uptime}</div>
+                <div className="w-24 text-center text-gray-700 font-semibold">{p.merchants}社</div>
+                <div className="w-16 text-center">{p.reviewing > 0 ? <Badge text={`${p.reviewing}件`} color="yellow" /> : <span className="text-gray-300">—</span>}</div>
+                <div className="w-20"><Badge text={p.status} color={p.sColor} /></div>
+                <div className="w-16"><button className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">設定</button></div>
+              </div>
+            ))}
+          </div>
+
+          {/* Processor Detail Expand */}
+          {selectedProc && (() => {
+            const p = processorList.find(x => x.id === selectedProc);
+            const linkedMerchants = merchantData.filter(m => m.processors.some(mp => mp.name === p.name));
+            return (
+              <div className="bg-blue-50 rounded-lg border border-blue-200 p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-xs font-bold text-gray-700">🔌 {p.name} — 加盟店接続状況</p>
+                  <button onClick={() => setSelectedProc(null)} className="text-xs text-gray-400 hover:text-gray-600">✕ 閉じる</button>
+                </div>
+                <div className="bg-white rounded border">
+                  <div className="flex bg-gray-50 border-b text-xs font-semibold text-gray-500 px-3 py-1.5">
+                    <div className="w-24">加盟店ID</div><div className="flex-1">加盟店名</div><div className="w-24">審査状況</div><div className="w-24">承認日</div><div className="w-24">累計取引</div><div className="w-20">書類</div>
+                  </div>
+                  {linkedMerchants.map((m) => {
+                    const mp = m.processors.find(x => x.name === p.name);
+                    const st = PROC_STATUS[mp.status];
+                    return (
+                      <div key={m.id} className="flex items-center px-3 py-1.5 text-xs border-b last:border-0">
+                        <div className="w-24 font-mono text-gray-500">{m.id}</div>
+                        <div className="flex-1 text-gray-700">{m.name}</div>
+                        <div className="w-24"><Badge text={st.label} color={st.color} /></div>
+                        <div className="w-24 text-gray-400">{mp.since || "—"}</div>
+                        <div className="w-24 text-gray-600">{mp.txnCount > 0 ? mp.txnCount.toLocaleString() + "件" : "—"}</div>
+                        <div className="w-20">
+                          {mp.status === "approved" ? <button className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">📄 DL</button> :
+                           mp.status === "reviewing" ? <button className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">📋 管理</button> :
+                           <span className="text-gray-300">—</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
+      {/* ═══ Tab: 審査フロー管理 ═══ */}
+      {activeTab === "reviews" && (
+        <div className="space-y-3">
+          {/* Alert: 追加書類要求 */}
+          <div className="bg-yellow-50 rounded-lg border border-yellow-300 p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm">⚠️</span>
+              <span className="text-xs font-bold text-yellow-800">追加書類要求あり（対応期限: 2026-02-13）</span>
+            </div>
+            <p className="text-xs text-yellow-700">AMEX直接 → 株式会社トラベルプラス: 旅行業登録証の写し、過去6ヶ月のCB実績レポート が要求されています。</p>
+          </div>
+
+          {/* Confirmation Dialog */}
+          {confirmDialog && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setConfirmDialog(null)}>
+              <div className="bg-white rounded-xl shadow-2xl w-[520px] max-w-[90vw]" onClick={e => e.stopPropagation()}>
+                {/* Dialog Header */}
+                <div className={`p-4 rounded-t-xl border-b ${
+                  confirmDialog.type === "approve" ? "bg-green-50" :
+                  confirmDialog.type === "reject" ? "bg-red-50" :
+                  confirmDialog.type === "send_docs" ? "bg-blue-50" :
+                  confirmDialog.type === "request_docs" ? "bg-yellow-50" :
+                  confirmDialog.type === "conditions" ? "bg-indigo-50" :
+                  "bg-gray-50"
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{
+                      confirmDialog.type === "approve" ? "✅" :
+                      confirmDialog.type === "reject" ? "❌" :
+                      confirmDialog.type === "send_docs" ? "📤" :
+                      confirmDialog.type === "request_docs" ? "📩" :
+                      confirmDialog.type === "conditions" ? "📋" :
+                      "⚡"
+                    }</span>
+                    <h3 className="text-sm font-bold text-gray-800">{confirmDialog.title}</h3>
+                  </div>
+                </div>
+
+                {/* Dialog Body */}
+                <div className="p-4 space-y-3">
+                  <p className="text-xs text-gray-600">{confirmDialog.description}</p>
+
+                  {/* 対象情報 */}
+                  <div className="bg-gray-50 rounded border p-3 space-y-1">
+                    <div className="flex text-xs"><span className="w-24 text-gray-400">加盟店:</span><span className="font-semibold text-gray-700">{confirmDialog.merchantName}</span></div>
+                    <div className="flex text-xs"><span className="w-24 text-gray-400">接続先:</span><span className="font-semibold text-gray-700">{confirmDialog.processorName}</span></div>
+                    <div className="flex text-xs"><span className="w-24 text-gray-400">現在ステップ:</span><span className="text-blue-600">{confirmDialog.currentStep}</span></div>
+                    {confirmDialog.nextStep && (
+                      <div className="flex text-xs"><span className="w-24 text-gray-400">次のステップ:</span><span className="font-semibold text-green-600">{confirmDialog.nextStep}</span></div>
+                    )}
+                  </div>
+
+                  {/* 影響範囲 */}
+                  {confirmDialog.impacts && (
+                    <div className="bg-blue-50 rounded border border-blue-200 p-2">
+                      <p className="text-xs font-semibold text-blue-700 mb-1">この操作の影響:</p>
+                      <ul className="space-y-0.5">
+                        {confirmDialog.impacts.map((imp, i) => (
+                          <li key={i} className="text-xs text-blue-600 flex items-center gap-1">
+                            <span>→</span> {imp}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* 却下の場合の理由入力 */}
+                  {confirmDialog.type === "reject" && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-600 mb-1">却下理由（必須）:</p>
+                      <textarea className="w-full border rounded p-2 text-xs h-16" placeholder="却下理由を入力してください..." />
+                    </div>
+                  )}
+
+                  {/* 条件確定フォーム */}
+                  {confirmDialog.type === "conditions" && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold text-gray-600">接続先から提示された条件:</p>
+                      <div className="bg-gray-50 rounded border p-3 space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-xs text-gray-500 block mb-0.5">VISA 手数料率 (%)</label>
+                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 3.25" defaultValue="3.25" />
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-500 block mb-0.5">Mastercard 手数料率 (%)</label>
+                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 3.25" defaultValue="3.25" />
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-500 block mb-0.5">JCB 手数料率 (%)</label>
+                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 3.50" defaultValue="3.50" />
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-500 block mb-0.5">AMEX 手数料率 (%)</label>
+                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 3.80" defaultValue="" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-xs text-gray-500 block mb-0.5">トランザクション費 (円/件)</label>
+                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 10" defaultValue="10" />
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-500 block mb-0.5">月額固定費 (円)</label>
+                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 0" defaultValue="0" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-xs text-gray-500 block mb-0.5">入金サイクル</label>
+                            <select className="w-full border rounded p-1.5 text-xs">
+                              <option>月末締め / 翌月末払い</option>
+                              <option>月末締め / 翌々月5日払い</option>
+                              <option>15日・月末締め / 翌月15日・月末払い</option>
+                              <option>週次入金（毎週金曜日）</option>
+                              <option>その他（備考欄に記載）</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-500 block mb-0.5">初回入金留保期間</label>
+                            <select className="w-full border rounded p-1.5 text-xs">
+                              <option>なし</option>
+                              <option>初月留保（翌月から通常サイクル）</option>
+                              <option>初回2ヶ月留保</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-xs text-gray-500 block mb-0.5">チャージバック手数料 (円/件)</label>
+                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 1500" defaultValue="1500" />
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-500 block mb-0.5">取引上限額 (円/件)</label>
+                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 500000" defaultValue="500000" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-xs text-gray-500 block mb-0.5">特記事項・個別条件</label>
+                          <textarea className="w-full border rounded p-1.5 text-xs h-14" placeholder="接続先から提示された個別条件があれば記載（例: 初年度は手数料0.25%割引、3Dセキュア必須、月間上限3000万円 等）" />
+                        </div>
+                      </div>
+                      <div className="bg-blue-50 rounded border border-blue-200 p-2">
+                        <p className="text-xs text-blue-600">💡 ここで登録した条件は以下に自動反映されます:</p>
+                        <ul className="text-xs text-blue-500 ml-3 mt-1 space-y-0.5">
+                          <li>→ 契約書PDF（次のステップで自動生成）</li>
+                          <li>→ ルーティングエンジンのコスト最適化パラメータ</li>
+                          <li>→ 精算エンジンの入金スケジュール</li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 備考入力 */}
+                  {confirmDialog.type !== "reject" && confirmDialog.type !== "conditions" && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-600 mb-1">備考（任意）:</p>
+                      <input className="w-full border rounded p-2 text-xs" placeholder="操作に関するメモを入力..." />
+                    </div>
+                  )}
+
+                  {/* 警告 */}
+                  {confirmDialog.type === "approve" && (
+                    <div className="bg-yellow-50 rounded border border-yellow-200 p-2">
+                      <p className="text-xs text-yellow-700">⚠️ 審査完了後、この加盟店の接続先は<span className="font-bold">ルーティング対象に追加</span>されます。承認済み接続先が複数になる場合、AIルーティングが自動的に有効化されます。</p>
+                    </div>
+                  )}
+                  {confirmDialog.type === "reject" && (
+                    <div className="bg-red-50 rounded border border-red-200 p-2">
+                      <p className="text-xs text-red-700">⚠️ 却下すると、この接続先の審査ステータスが<span className="font-bold">「rejected」に変更</span>され、ルーティング対象から除外されます。再申請には新規の審査プロセスが必要です。</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Dialog Footer */}
+                <div className="flex justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-xl">
+                  <button onClick={() => setConfirmDialog(null)} className="px-4 py-2 bg-white text-gray-600 rounded border text-xs font-semibold hover:bg-gray-100">キャンセル</button>
+                  <button
+                    onClick={() => setConfirmDialog(null)}
+                    className={`px-4 py-2 rounded text-white text-xs font-semibold ${
+                      confirmDialog.type === "approve" ? "bg-green-600 hover:bg-green-700" :
+                      confirmDialog.type === "reject" ? "bg-red-600 hover:bg-red-700" :
+                      confirmDialog.type === "conditions" ? "bg-indigo-600 hover:bg-indigo-700" :
+                      "bg-blue-600 hover:bg-blue-700"
+                    }`}
+                  >
+                    {confirmDialog.confirmLabel}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {reviewFlowData.map((review, ri) => (
+            <div key={ri} className="bg-white rounded-lg border shadow-sm">
+              {/* Header */}
+              <div className={`p-3 border-b ${review.status === "additional_docs" ? "bg-yellow-50" : "bg-blue-50"}`}>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Badge text={review.status === "additional_docs" ? "追加書類待ち" : "審査中"} color={review.status === "additional_docs" ? "yellow" : "blue"} />
+                    <span className="text-sm font-bold text-gray-800">{review.merchantName} → {review.processorName}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-gray-400">申請日: {review.appliedAt}</span>
+                    <span className="text-xs text-gray-400">経過: {Math.floor((new Date('2026-02-11') - new Date(review.appliedAt.replace(/\//g,'-'))) / 86400000)}日</span>
+                    <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded">Step {review.currentStep}/{review.totalSteps}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3">
+                {/* Timeline with Action Buttons */}
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-bold text-gray-600">📋 審査フロー</p>
+                  <p className="text-xs text-gray-400">💡 各ステップのボタンをクリックしてフローを進行</p>
+                </div>
+                <div className="space-y-2 mb-4">
+                  {review.timeline.map((step, si) => (
+                    <div key={si} className={`flex items-center gap-3 p-2 rounded-lg border ${
+                      step.status === "done" ? "bg-green-50 border-green-200" :
+                      step.status === "active" ? "bg-blue-50 border-blue-300 shadow-sm" :
+                      "bg-gray-50 border-gray-200"
+                    }`}>
+                      {/* Step indicator */}
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                        step.status === "done" ? "bg-green-500 text-white" :
+                        step.status === "active" ? "bg-blue-500 text-white ring-2 ring-blue-300 ring-offset-1" :
+                        "bg-gray-200 text-gray-400"
+                      }`}>
+                        {step.status === "done" ? "✓" : si + 1}
+                      </div>
+
+                      {/* Step info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className={`text-xs font-semibold ${step.status === "done" ? "text-green-700" : step.status === "active" ? "text-blue-700" : "text-gray-400"}`}>{step.step}</p>
+                          {step.status === "done" && <span className="text-xs text-green-500">{step.date}</span>}
+                          {step.status === "active" && <Badge text="現在のステップ" color="blue" />}
+                        </div>
+                        {step.note && <p className="text-xs text-gray-400 mt-0.5">{step.note}</p>}
+                      </div>
+
+                      {/* Action buttons per step */}
+                      <div className="flex gap-1 flex-shrink-0">
+                        {/* Step 1: 審査申請 */}
+                        {si === 0 && step.status === "active" && (
+                          <button onClick={() => setConfirmDialog({
+                            type: "advance", title: "審査申請を実行", description: "接続先に対して審査申請を送信します。申込データから審査申請書を自動生成し、必要書類と合わせて送付準備を行います。",
+                            merchantName: review.merchantName, processorName: review.processorName, currentStep: "審査申請", nextStep: "書類送付",
+                            impacts: ["審査申請書（PDF）を自動生成", "審査ステータスが reviewing に変更", "接続先の審査部門に通知が送信される"],
+                            confirmLabel: "審査申請を実行"
+                          })} className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 shadow-sm">▶ 審査申請を実行</button>
+                        )}
+
+                        {/* Step 2: 書類送付 */}
+                        {si === 1 && step.status === "active" && (
+                          <button onClick={() => setConfirmDialog({
+                            type: "send_docs", title: "書類を接続先に送付", description: "準備済みの審査資料を接続先の審査部門に送付します。送付前に書類の内容を確認してください。",
+                            merchantName: review.merchantName, processorName: review.processorName, currentStep: "書類送付", nextStep: "接続先審査中",
+                            impacts: ["全書類が接続先審査部門に送付される", "送付日時が記録される", "接続先側の審査プロセスが開始される"],
+                            confirmLabel: "📤 書類を送付する"
+                          })} className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 shadow-sm">📤 書類を送付</button>
+                        )}
+
+                        {/* Step 3: 接続先審査中 → 審査結果を記録 */}
+                        {si === 2 && step.status === "active" && (
+                          <>
+                            <button onClick={() => setConfirmDialog({
+                              type: "advance", title: "一次審査通過を記録", description: "接続先から一次審査通過の連絡を受けた場合、次のステップに進めます。追加書類の要求がある場合は「追加書類要求」を選択してください。",
+                              merchantName: review.merchantName, processorName: review.processorName, currentStep: "接続先審査中", nextStep: "追加書類対応 or 審査完了",
+                              impacts: ["審査進捗が更新される", "タイムライン上の日時が記録される"],
+                              confirmLabel: "✓ 一次審査通過を記録"
+                            })} className="px-3 py-1.5 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700 shadow-sm">✓ 審査通過</button>
+                            <button onClick={() => setConfirmDialog({
+                              type: "request_docs", title: "追加書類要求を登録", description: "接続先から追加書類の提出を求められた場合に登録します。要求された書類と期限を記録します。",
+                              merchantName: review.merchantName, processorName: review.processorName, currentStep: "接続先審査中", nextStep: "追加書類対応",
+                              impacts: ["追加書類要求がシステムに登録される", "対応期限が設定される", "担当者にアラート通知が送信される"],
+                              confirmLabel: "📩 追加要求を登録"
+                            })} className="px-3 py-1.5 bg-yellow-500 text-white rounded text-xs font-semibold hover:bg-yellow-600 shadow-sm">📩 追加書類要求</button>
+                            <button onClick={() => setConfirmDialog({
+                              type: "reject", title: "審査却下を記録", description: "接続先から審査却下の通知を受けた場合に記録します。却下理由の入力が必要です。",
+                              merchantName: review.merchantName, processorName: review.processorName, currentStep: "接続先審査中", nextStep: "—（審査終了）",
+                              impacts: ["審査ステータスが rejected に変更", "ルーティング対象から除外", "加盟店にメール通知が送信される"],
+                              confirmLabel: "❌ 却下を記録"
+                            })} className="px-2 py-1.5 bg-white text-red-600 border border-red-300 rounded text-xs font-semibold hover:bg-red-50">✕ 却下</button>
+                          </>
+                        )}
+
+                        {/* Step 4: 追加書類対応 */}
+                        {si === 3 && step.status === "active" && (
+                          <>
+                            <button onClick={() => setConfirmDialog({
+                              type: "send_docs", title: "追加書類を送付", description: "追加で要求された書類をアップロード・送付します。全ての要求書類が揃っていることを確認してください。",
+                              merchantName: review.merchantName, processorName: review.processorName, currentStep: "追加書類対応", nextStep: "接続先で再審査",
+                              impacts: ["追加書類が接続先に送付される", "追加要求のステータスが completed に変更", "接続先側の再審査が開始される"],
+                              confirmLabel: "📤 追加書類を送付"
+                            })} className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 shadow-sm">📤 追加書類を送付</button>
+                            <button onClick={() => setConfirmDialog({
+                              type: "advance", title: "追加審査の結果を記録", description: "追加書類送付後、接続先からの審査結果を記録します。",
+                              merchantName: review.merchantName, processorName: review.processorName, currentStep: "追加書類対応", nextStep: "審査完了",
+                              impacts: ["審査フローが次のステップに進む"],
+                              confirmLabel: "✓ 結果を記録"
+                            })} className="px-3 py-1.5 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700 shadow-sm">✓ 審査通過</button>
+                          </>
+                        )}
+
+                        {/* Step 5: 条件確定 */}
+                        {si === 4 && step.status === "active" && (
+                          <>
+                            <button onClick={() => setConfirmDialog({
+                              type: "conditions", title: "接続先の条件を登録", description: "接続先から提示された取引条件を登録します。これらの条件は契約書に反映されます。接続先ごとに条件が異なるため、提示された内容を正確に入力してください。",
+                              merchantName: review.merchantName, processorName: review.processorName, currentStep: "条件確定", nextStep: "契約書送付",
+                              impacts: ["入力した条件が契約書に自動反映される", "手数料率がルーティングのコスト最適化計算に使用される", "入金サイクルが精算エンジンに登録される"],
+                              confirmLabel: "📋 条件を確定・登録"
+                            })} className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 shadow-sm">📋 条件を登録</button>
+                          </>
+                        )}
+
+                        {/* Step 6: 契約書送付 */}
+                        {si === 5 && step.status === "active" && (
+                          <>
+                            <button onClick={() => setConfirmDialog({
+                              type: "advance", title: "契約書を生成・送付", description: "接続先の条件（手数料率・入金サイクル等）を反映した契約書を生成し、加盟店に送付します。加盟店の署名を待ちます。",
+                              merchantName: review.merchantName, processorName: review.processorName, currentStep: "契約書送付", nextStep: "加盟店署名待ち → 決済開始",
+                              impacts: ["条件を反映した契約書PDFが自動生成される", "加盟店にメール通知 + 電子署名リクエストが送信される", "加盟店の署名完了後、決済開始ステップに進行可能"],
+                              confirmLabel: "📄 契約書を生成・送付"
+                            })} className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 shadow-sm">📄 契約書を生成・送付</button>
+                            <button className="px-2 py-1.5 bg-white text-gray-600 border rounded text-xs hover:bg-gray-100">👁 契約書プレビュー</button>
+                          </>
+                        )}
+
+                        {/* Step 7: 決済開始（最終有効化） */}
+                        {si === 6 && step.status === "active" && (
+                          <>
+                            <button onClick={() => setConfirmDialog({
+                              type: "approve", title: "🎉 決済開始 — 接続先を有効化", description: "加盟店が契約書に署名済みであることを確認し、この接続先を有効化します。有効化後、決済トラフィックがこの接続先にもルーティングされるようになります。",
+                              merchantName: review.merchantName, processorName: review.processorName, currentStep: "決済開始", nextStep: "ルーティング有効化",
+                              impacts: [
+                                "merchant_processors のステータスが approved に変更",
+                                "ルーティングエンジンの接続先候補に追加される",
+                                "承認済み接続先が2社以上になる場合、AIルーティングが自動有効化",
+                                "加盟店に決済開始メール通知が送信される",
+                                "確定した手数料率がコスト最適化ルーティングに反映される",
+                                "審査書類・契約書が完了履歴に移動"
+                              ],
+                              confirmLabel: "🎉 決済開始・接続先を有効化"
+                            })} className="px-3 py-1.5 bg-green-600 text-white rounded text-xs font-bold hover:bg-green-700 shadow-sm ring-2 ring-green-300 ring-offset-1">🎉 決済開始・有効化</button>
+                            <button onClick={() => setConfirmDialog({
+                              type: "reject", title: "契約不成立", description: "条件が折り合わない等の理由で契約不成立とします。",
+                              merchantName: review.merchantName, processorName: review.processorName, currentStep: "決済開始", nextStep: "—（審査終了）",
+                              impacts: ["審査ステータスが rejected に変更", "ルーティング対象から除外", "加盟店にメール通知が送信される"],
+                              confirmLabel: "❌ 契約不成立"
+                            })} className="px-2 py-1.5 bg-white text-red-600 border border-red-300 rounded text-xs font-semibold hover:bg-red-50">✕ 契約不成立</button>
+                          </>
+                        )}
+
+                        {/* Done steps: 完了ラベル */}
+                        {step.status === "done" && (
+                          <span className="text-xs text-green-500 px-2 py-1">完了 {step.date}</span>
+                        )}
+                        {/* Pending steps: まだ到達していない */}
+                        {step.status === "pending" && (
+                          <span className="text-xs text-gray-300 px-2 py-1">未到達</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Additional document requests */}
+                {review.additionalRequests.length > 0 && (
+                  <div className="bg-yellow-50 rounded border border-yellow-200 p-2 mb-3">
+                    <p className="text-xs font-bold text-yellow-800 mb-1">📩 接続先からの追加書類要求</p>
+                    {review.additionalRequests.map((req, qi) => (
+                      <div key={qi} className="text-xs">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-gray-500">{req.date}</span>
+                          <span className="text-gray-600">{req.from}</span>
+                          <Badge text={`期限: ${req.deadline}`} color="red" />
+                          <Badge text={req.status} color="yellow" />
+                        </div>
+                        <ul className="ml-4 space-y-0.5">
+                          {req.items.map((item, ii) => (
+                            <li key={ii} className="text-yellow-700 flex items-center gap-1">
+                              <span>📎</span> {item}
+                              <button className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">アップロード</button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Documents */}
+                <p className="text-xs font-bold text-gray-600 mb-1">📄 審査資料一覧</p>
+                <div className="bg-gray-50 rounded border">
+                  <div className="flex bg-gray-100 border-b text-xs font-semibold text-gray-500 px-3 py-1">
+                    <div className="w-48">書類名</div><div className="w-24">種別</div><div className="w-16">形式</div><div className="w-16">サイズ</div><div className="w-20">送付日</div><div className="w-20">状態</div><div className="flex-1">操作</div>
+                  </div>
+                  {review.documents.map((doc, di) => (
+                    <div key={di} className={`flex items-center px-3 py-1 text-xs border-b last:border-0 ${doc.status === "waiting" ? "bg-yellow-50" : ""}`}>
+                      <div className="w-48 text-gray-700 flex items-center gap-1">
+                        {doc.auto && <span className="text-blue-500" title="申込データから自動生成">🤖</span>}
+                        {doc.name}
+                      </div>
+                      <div className="w-24"><Badge text={doc.type} color={doc.auto ? "blue" : doc.type === "追加要求" ? "yellow" : "gray"} /></div>
+                      <div className="w-16 text-gray-400">{doc.format}</div>
+                      <div className="w-16 text-gray-400">{doc.size}</div>
+                      <div className="w-20 text-gray-400">{doc.date}</div>
+                      <div className="w-20">
+                        <Badge text={doc.status === "sent" ? "送付済" : "未提出"} color={doc.status === "sent" ? "green" : "yellow"} />
+                      </div>
+                      <div className="flex-1 flex gap-1">
+                        {doc.status === "sent" && <button className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">⬇ DL</button>}
+                        {doc.status === "sent" && <button className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">👁 プレビュー</button>}
+                        {doc.status === "waiting" && <button className="px-2 py-0.5 bg-blue-500 text-white rounded text-xs">📎 アップロード</button>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2 mt-2 justify-end">
+                  <button className="px-3 py-1 bg-gray-100 text-gray-600 rounded text-xs border">📦 全書類を一括DL（ZIP）</button>
+                  <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs border border-blue-200">📤 接続先向け審査パッケージ生成</button>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* 審査フロー操作ログ */}
+          <div className="bg-white rounded-lg border p-3">
+            <p className="text-xs font-bold text-gray-700 mb-2">📝 操作ログ（直近の審査フロー操作）</p>
+            <div className="space-y-1">
+              {[
+                { time: "02/11 10:32", user: "admin@aipaymentsys.com", action: "書類送付", target: "XYZショップ → 三井住友カード", detail: "審査資料6件を送付" },
+                { time: "02/06 14:15", user: "admin@aipaymentsys.com", action: "追加書類要求を登録", target: "トラベルプラス → AMEX直接", detail: "旅行業登録証、CB実績レポート" },
+                { time: "02/05 09:40", user: "reviewer01@aipaymentsys.com", action: "一次審査通過を記録", target: "トラベルプラス → AMEX直接", detail: "" },
+                { time: "01/28 11:20", user: "admin@aipaymentsys.com", action: "審査申請を実行", target: "XYZショップ → 三井住友カード", detail: "申請書を自動生成" },
+                { time: "01/15 09:05", user: "admin@aipaymentsys.com", action: "審査申請を実行", target: "トラベルプラス → AMEX直接", detail: "手動申請" },
+              ].map((log, i) => (
+                <div key={i} className="flex items-center gap-3 text-xs py-1 border-b last:border-0">
+                  <span className="w-24 text-gray-400 font-mono">{log.time}</span>
+                  <span className="w-44 text-gray-500">{log.user}</span>
+                  <Badge text={log.action} color={log.action.includes("却下") ? "red" : log.action.includes("通過") || log.action.includes("完了") ? "green" : "blue"} />
+                  <span className="flex-1 text-gray-600">{log.target}</span>
+                  <span className="text-gray-400">{log.detail}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ Tab: 審査完了履歴 ═══ */}
+      {activeTab === "history" && (
+        <div className="space-y-3">
+          <div className="flex gap-3">
+            <KPICard label="審査通過（累計）" value="12件" sub="全接続先合計" color="green" />
+            <KPICard label="審査却下（累計）" value="1件" sub="" color="red" />
+            <KPICard label="平均審査日数" value="12日" sub="却下除く" />
+            <KPICard label="最短審査" value="4日" sub="PayPay" color="green" />
+          </div>
+
+          <div className="bg-white rounded-lg border">
+            <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "接続先", w: "w-32" }, { label: "承認日", w: "w-28" }, { label: "審査日数", w: "w-20" }, { label: "提出書類", w: "w-20" }, { label: "結果", w: "w-20" }, { label: "書類", w: "w-20" }]} />
+            {approvedHistory.map((h, i) => (
+              <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
+                <div className="flex-1 font-semibold text-gray-700">{h.merchantName}</div>
+                <div className="w-32 text-gray-600">{h.processorName}</div>
+                <div className="w-28 text-gray-500">{h.approvedAt}</div>
+                <div className="w-20 text-center"><Badge text={`${h.reviewDays}日`} color={h.reviewDays <= 7 ? "green" : h.reviewDays <= 14 ? "blue" : "yellow"} /></div>
+                <div className="w-20 text-center text-gray-500">{h.docs}件</div>
+                <div className="w-20"><Badge text="✅ 承認" color="green" /></div>
+                <div className="w-20"><button className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">📄 DL</button></div>
+              </div>
+            ))}
+          </div>
+
+          {/* AI insight */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-3">
+            <p className="text-xs font-bold text-blue-700 mb-1">🤖 AI分析: 審査傾向</p>
+            <div className="grid grid-cols-3 gap-3 text-xs text-gray-600">
+              <div>GMO-PGは審査が最速（平均7日）で、カードプロセッサー経由のため審査基準が比較的緩やか。新規加盟店の初期接続先として最適。</div>
+              <div>アクワイアラー直接接続（三井住友/JCB/AMEX）は審査が厳格（14〜30日）。取引実績が十分に蓄積された加盟店に推薦。</div>
+              <div>追加書類要求は直接接続の審査で45%の確率で発生。事前に業界固有の許認可証を準備しておくと審査期間を短縮できます。</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ Tab: 審査資料管理 ═══ */}
+      {activeTab === "documents" && (
+        <div className="space-y-3">
+          {/* Storage Architecture */}
+          <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg border p-3">
+            <p className="text-xs font-bold text-gray-700 mb-2">📁 審査資料ストレージ構成</p>
+            <div className="flex gap-4 text-xs">
+              <div className="flex-1 bg-white rounded border p-2">
+                <p className="font-semibold text-blue-600 mb-1">☁️ S3（ファイル本体）</p>
+                <p className="text-gray-500">s3://aipayment-documents-prod/</p>
+                <p className="text-gray-400 mt-1">AES-256暗号化 / バージョニング有効 / ライフサイクル: 7年保管</p>
+              </div>
+              <div className="text-gray-300 flex items-center">⟷</div>
+              <div className="flex-1 bg-white rounded border p-2">
+                <p className="font-semibold text-green-600 mb-1">🗄️ RDS（メタデータ）</p>
+                <p className="text-gray-500">review_documents テーブル</p>
+                <p className="text-gray-400 mt-1">ファイルパス / ステータス / アップロード日時 / 送付日時 / 種別</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Document type templates */}
+          <div className="bg-white rounded-lg border p-3">
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-xs font-bold text-gray-700">📋 審査書類テンプレート（接続先への送付パッケージ）</p>
+              <button className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded border border-blue-200">テンプレート編集</button>
+            </div>
+            <div className="space-y-1.5">
+              {[
+                { name: "加盟店審査申請書", source: "自動生成", desc: "申込フォームのデータからPDFを自動生成（法人名・代表者・業種・月間売上等）", required: true, auto: true },
+                { name: "登記簿謄本", source: "申込時アップロード", desc: "加盟店が申込Step4で提出した書類をそのまま転送", required: true, auto: false },
+                { name: "代表者本人確認書類", source: "申込時アップロード", desc: "運転免許証 / パスポート / マイナンバーカード", required: true, auto: false },
+                { name: "直近2期分決算書", source: "申込時アップロード", desc: "財務諸表・損益計算書", required: true, auto: false },
+                { name: "サイトスクリーンショット", source: "自動生成", desc: "URL巡回システムが自動キャプチャしたサイト画像", required: true, auto: true },
+                { name: "特定商取引法表記", source: "申込時アップロード", desc: "特商法に基づく表記ページのスクリーンショット", required: true, auto: false },
+                { name: "古物商許可証", source: "申込時アップロード（任意）", desc: "中古品販売の場合のみ必要", required: false, auto: false },
+              ].map((t, i) => (
+                <div key={i} className="flex items-center gap-2 p-2 rounded border text-xs hover:bg-gray-50">
+                  <span className={`w-5 text-center ${t.auto ? "text-blue-500" : "text-gray-400"}`}>{t.auto ? "🤖" : "📎"}</span>
+                  <div className="w-40 font-semibold text-gray-700">{t.name}</div>
+                  <Badge text={t.source} color={t.auto ? "blue" : "gray"} />
+                  <span className="flex-1 text-gray-400">{t.desc}</span>
+                  <span className={t.required ? "text-red-500" : "text-gray-300"}>{t.required ? "必須" : "任意"}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Data model reference */}
+          <div className="bg-white rounded-lg border p-3">
+            <p className="text-xs font-bold text-gray-700 mb-2">🗄️ review_documents テーブル定義</p>
+            <div className="bg-gray-50 rounded border">
+              <div className="flex bg-gray-100 border-b text-xs font-semibold text-gray-500 px-3 py-1">
+                <div className="w-36">カラム</div><div className="w-28">型</div><div className="w-12">必須</div><div className="flex-1">説明</div>
+              </div>
+              {[
+                ["id", "UUID", "✅", "ドキュメントID（PK）"],
+                ["merchant_id", "UUID", "✅", "加盟店ID（FK → merchants）"],
+                ["processor_id", "UUID", "✅", "接続先ID（FK → processors）"],
+                ["document_type", "ENUM", "✅", "application_form / registration / id_doc / financial / screenshot / stl / license / additional"],
+                ["file_path", "TEXT", "✅", "S3上のファイルパス（s3://bucket/merchant_id/processor_id/filename）"],
+                ["file_name", "TEXT", "✅", "オリジナルファイル名"],
+                ["file_size", "INTEGER", "✅", "ファイルサイズ（bytes）"],
+                ["mime_type", "TEXT", "✅", "application/pdf, image/jpeg 等"],
+                ["source", "ENUM", "✅", "auto_generated / merchant_upload / additional_request"],
+                ["status", "ENUM", "✅", "draft / ready / sent / received / verified"],
+                ["uploaded_at", "TIMESTAMP", "✅", "アップロード日時"],
+                ["sent_at", "TIMESTAMP", "", "接続先への送付日時"],
+                ["request_id", "UUID", "", "追加要求ID（追加書類の場合のみ FK → additional_requests）"],
+              ].map((row, i) => (
+                <div key={i} className={`flex items-center px-3 py-1 text-xs border-b last:border-0 ${i % 2 ? "bg-gray-50" : ""}`}>
+                  <div className="w-36 font-mono text-blue-600">{row[0]}</div>
+                  <div className="w-28 text-gray-500">{row[1]}</div>
+                  <div className="w-12">{row[2]}</div>
+                  <div className="flex-1 text-gray-600">{row[3]}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* additional_requests table */}
+          <div className="bg-white rounded-lg border p-3">
+            <p className="text-xs font-bold text-gray-700 mb-2">🗄️ additional_requests テーブル定義</p>
+            <div className="bg-gray-50 rounded border">
+              <div className="flex bg-gray-100 border-b text-xs font-semibold text-gray-500 px-3 py-1">
+                <div className="w-36">カラム</div><div className="w-28">型</div><div className="w-12">必須</div><div className="flex-1">説明</div>
+              </div>
+              {[
+                ["id", "UUID", "✅", "追加要求ID（PK）"],
+                ["merchant_processor_id", "UUID", "✅", "加盟店×接続先の組合せID（FK → merchant_processors）"],
+                ["requested_by", "TEXT", "✅", "要求元（接続先の審査部門名等）"],
+                ["requested_at", "TIMESTAMP", "✅", "要求日時"],
+                ["deadline", "DATE", "", "対応期限"],
+                ["items", "JSONB", "✅", "要求された書類リスト（配列）"],
+                ["status", "ENUM", "✅", "open / partially_submitted / completed / expired"],
+                ["completed_at", "TIMESTAMP", "", "全書類提出完了日時"],
+              ].map((row, i) => (
+                <div key={i} className={`flex items-center px-3 py-1 text-xs border-b last:border-0 ${i % 2 ? "bg-gray-50" : ""}`}>
+                  <div className="w-36 font-mono text-blue-600">{row[0]}</div>
+                  <div className="w-28 text-gray-500">{row[1]}</div>
+                  <div className="w-12">{row[2]}</div>
+                  <div className="flex-1 text-gray-600">{row[3]}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: 接続先追加 ── */}
+      {showAddProc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowAddProc(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[520px] max-h-[85vh] overflow-y-auto">
+            <div className="p-4 border-b bg-gray-50 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-sm font-bold text-gray-800">接続先を追加</h3>
+              <button onClick={() => setShowAddProc(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div><label className="text-xs font-semibold text-gray-600">接続先名 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: GMO-PG" /></div>
+              <div><label className="text-xs font-semibold text-gray-600">接続種別 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>アクワイアラ</option><option>PSP（決済代行）</option><option>ウォレット</option></select></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-gray-600">対応ブランド <span className="text-red-500">*</span></label>
+                  <div className="flex flex-wrap gap-2 mt-1">{["VISA","Mastercard","JCB","AMEX","Diners"].map((b,i) => <label key={i} className="flex items-center gap-1 text-xs"><input type="checkbox" defaultChecked={i<3} />{b}</label>)}</div>
+                </div>
+                <div><label className="text-xs font-semibold text-gray-600">通貨 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>JPY</option><option>USD</option><option>EUR</option></select></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-gray-600">API Base URL <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="https://api.example.com/v1" /></div>
+                <div><label className="text-xs font-semibold text-gray-600">API認証方式</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>Bearer Token</option><option>Basic Auth</option><option>HMAC署名</option></select></div>
+              </div>
+              <div><label className="text-xs font-semibold text-gray-600">担当者メール</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="contact@processor.jp" /></div>
+              <div><label className="text-xs font-semibold text-gray-600">備考</label><textarea className="w-full text-xs border rounded p-2 h-12 mt-0.5" placeholder="接続に関するメモ..." /></div>
+            </div>
+            <div className="p-4 border-t flex gap-2 justify-end">
+              <button onClick={() => setShowAddProc(false)} className="px-4 py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">キャンセル</button>
+              <button onClick={() => setShowAddProc(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">接続先を追加</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── メインApp ───
+// ─── M06: 注文管理 ───
+const MasterTransactionMonitor = () => {
+  const [activeTab, setActiveTab] = useState("realtime");
+  const [selectedTxn, setSelectedTxn] = useState(null);
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [searchSlide, setSearchSlide] = useState(null);
+  const [refundDialog, setRefundDialog] = useState(null);
+
+  const txnData = [
+    { id: "TXN-20260211-14523", merchant: "株式会社ABCマート", amount: 12800, brand: "VISA", processor: "GMO-PG", status: "成功", sColor: "green", time: "14:52:31", responseMs: 320, routing: "AI最適化", is3ds: true },
+    { id: "TXN-20260211-14522", merchant: "合同会社XYZショップ", amount: 3400, brand: "MC", processor: "三井住友カード", status: "成功", sColor: "green", time: "14:52:18", responseMs: 450, routing: "ブランドマッピング", is3ds: true },
+    { id: "TXN-20260211-14521", merchant: "株式会社ABCマート", amount: 89000, brand: "JCB", processor: "JCB直接", status: "成功", sColor: "green", time: "14:51:55", responseMs: 280, routing: "加盟店固定", is3ds: false },
+    { id: "TXN-20260211-14520", merchant: "株式会社トラベルプラス", amount: 245000, brand: "VISA", processor: "GMO-PG", status: "失敗", sColor: "red", time: "14:51:40", responseMs: 5020, routing: "AI最適化", is3ds: true, error: "タイムアウト（接続先無応答）", failover: "三井住友カードでリトライ → 成功" },
+    { id: "TXN-20260211-14519", merchant: "有限会社スタイルプラス", amount: 6500, brand: "VISA", processor: "GMO-PG", status: "成功", sColor: "green", time: "14:51:22", responseMs: 310, routing: "コスト最適化", is3ds: true },
+    { id: "TXN-20260211-14518", merchant: "株式会社ABCマート", amount: 1500, brand: "QR", processor: "PayPay", status: "成功", sColor: "green", time: "14:50:58", responseMs: 180, routing: "ブランドマッピング", is3ds: false },
+    { id: "TXN-20260211-14517", merchant: "合同会社XYZショップ", amount: 27800, brand: "AMEX", processor: "GMO-PG", status: "3DS待ち", sColor: "yellow", time: "14:50:45", responseMs: null, routing: "ブランドマッピング", is3ds: true },
+    { id: "TXN-20260211-14516", merchant: "株式会社トラベルプラス", amount: 158000, brand: "VISA", processor: "GMO-PG", status: "不正検知", sColor: "red", time: "14:50:12", responseMs: null, routing: "—", is3ds: false, error: "不正スコア 0.92（閾値 0.8超過）→ 例外キューへ" },
+  ];
+
+  const searchResults = [
+    { id: "TXN-20260210-13201", merchant: "株式会社ABCマート", amount: 45000, brand: "VISA", processor: "GMO-PG", status: "返金済", sColor: "purple", date: "2026-02-10 16:30:22", refundAmount: 45000 },
+    { id: "TXN-20260210-12888", merchant: "合同会社XYZショップ", amount: 8900, brand: "MC", processor: "三井住友カード", status: "成功", sColor: "green", date: "2026-02-10 14:12:05" },
+    { id: "TXN-20260210-12500", merchant: "株式会社トラベルプラス", amount: 320000, brand: "VISA", processor: "GMO-PG", status: "成功", sColor: "green", date: "2026-02-10 11:45:33" },
+    { id: "TXN-20260209-11200", merchant: "有限会社スタイルプラス", amount: 12500, brand: "JCB", processor: "JCB直接", status: "成功", sColor: "green", date: "2026-02-09 19:20:11" },
+    { id: "TXN-20260209-10800", merchant: "株式会社ABCマート", amount: 67000, brand: "AMEX", processor: "GMO-PG", status: "キャンセル", sColor: "gray", date: "2026-02-09 15:08:44" },
+  ];
+
+  const filtered = filterStatus === "all" ? txnData : txnData.filter(t => t.status === filterStatus);
+
+  return (
+    <div className="p-4 space-y-3">
+      <div className="flex justify-between items-center">
+        <h2 className="text-sm font-bold text-gray-800">注文管理</h2>
+      </div>
+
+      {/* Tab Switch */}
+      <div className="flex gap-1 border-b">
+        <button onClick={() => setActiveTab("realtime")} className={`text-xs px-4 py-2 border-b-2 flex items-center gap-1.5 ${activeTab === "realtime" ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-gray-400"}`}>
+          {activeTab === "realtime" && <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
+          リアルタイム
+        </button>
+        <button onClick={() => setActiveTab("search")} className={`text-xs px-4 py-2 border-b-2 ${activeTab === "search" ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-gray-400"}`}>
+          🔍 取引検索
+        </button>
+      </div>
+
+      {/* ===== REALTIME TAB ===== */}
+      {activeTab === "realtime" && (
+        <div className="space-y-3">
+          {/* KPIs */}
+          <div className="flex gap-3">
+            <KPICard label="今日の決済件数" value="1,847件" sub="前日比" trend={12} />
+            <KPICard label="決済総額" value="¥23.4M" sub="前日比" trend={8} />
+            <KPICard label="成功率" value="98.2%" sub="目標: 99%" color="green" />
+            <KPICard label="平均レスポンス" value="342ms" sub="目標: 500ms以内" color="green" />
+            <KPICard label="不正検知" value="3件" sub="例外キュー送り" color="red" />
+          </div>
+
+          {/* Live indicator + Filter */}
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2 items-center">
+              <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" /><span className="text-xs text-red-600 font-bold">🔴 LIVE</span>
+              <span className="text-xs text-gray-400">5秒ごと更新</span>
+            </div>
+            <div className="flex gap-1">
+              {[{ id: "all", label: "全て", count: 8 }, { id: "成功", label: "成功", count: 5 }, { id: "失敗", label: "失敗", count: 1 }, { id: "3DS待ち", label: "3DS待ち", count: 1 }, { id: "不正検知", label: "不正検知", count: 1 }].map(f => (
+                <button key={f.id} onClick={() => setFilterStatus(f.id)} className={`text-xs px-2 py-1 rounded border ${filterStatus === f.id ? "bg-blue-50 text-blue-600 border-blue-200 font-semibold" : "bg-white text-gray-500"}`}>
+                  {f.label} ({f.count})
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Alert */}
+          {txnData.some(t => t.status === "失敗") && (
+            <div className="bg-red-50 rounded-lg border border-red-300 p-2 flex items-center gap-2">
+              <span className="text-sm">🚨</span>
+              <span className="text-xs text-red-700 font-semibold">GMO-PGでタイムアウトが発生（14:51:40）— フェイルオーバーで三井住友カードにリトライ済み</span>
+              <button className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-1 rounded border border-red-200">詳細を確認</button>
+            </div>
+          )}
+
+          {/* Transaction Feed */}
+          <div className="bg-white rounded-lg border">
+            <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "接続先", w: "w-28" }, { label: "ルーティング", w: "w-28" }, { label: "応答", w: "w-16" }, { label: "3DS", w: "w-10" }, { label: "状態", w: "w-20" }, { label: "時刻", w: "w-20" }]} />
+            {filtered.map((t, i) => (
+              <div key={t.id} className={`flex items-center px-3 py-2 text-xs border-b cursor-pointer transition-colors ${selectedTxn === t.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-gray-50 hover:bg-blue-50" : "hover:bg-blue-50"} ${t.status === "失敗" || t.status === "不正検知" ? "bg-red-50" : ""}`}
+                   onClick={() => setSelectedTxn(selectedTxn === t.id ? null : t.id)}>
+                <div className="w-40 font-mono text-gray-500">{t.id}</div>
+                <div className="flex-1 text-gray-700">{t.merchant}</div>
+                <div className="w-24 text-right font-semibold text-gray-800">¥{t.amount.toLocaleString()}</div>
+                <div className="w-16"><Badge text={t.brand} color="blue" /></div>
+                <div className="w-28 text-gray-500">{t.processor}</div>
+                <div className="w-28"><Badge text={t.routing} color={t.routing.includes("AI") ? "purple" : "gray"} /></div>
+                <div className="w-16 text-gray-400">{t.responseMs ? t.responseMs + "ms" : "—"}</div>
+                <div className="w-10 text-center">{t.is3ds ? "🔒" : "—"}</div>
+                <div className="w-20"><Badge text={t.status} color={t.sColor} /></div>
+                <div className="w-20 text-gray-400 font-mono">{t.time}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Expanded Detail */}
+          {selectedTxn && (() => {
+            const t = txnData.find(x => x.id === selectedTxn);
+            return (
+              <div className="bg-blue-50 rounded-lg border border-blue-200 p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-xs font-bold text-gray-700">🔍 取引詳細 — {t.id}</p>
+                  <div className="flex gap-2">
+                    <button onClick={() => { setActiveTab("search"); setSelectedTxn(null); }} className="text-xs text-blue-600 hover:underline">取引検索タブで開く →</button>
+                    <button onClick={() => setSelectedTxn(null)} className="text-xs text-gray-400 hover:text-gray-600">✕</button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 gap-3 text-xs">
+                  <div className="bg-white rounded border p-2">
+                    <p className="font-semibold text-gray-600 mb-1">基本情報</p>
+                    <div className="space-y-0.5 text-gray-500">
+                      <div>加盟店: {t.merchant}</div>
+                      <div>金額: ¥{t.amount.toLocaleString()}</div>
+                      <div>ブランド: {t.brand}</div>
+                      <div>カード番号: **** **** **** 1234</div>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded border p-2">
+                    <p className="font-semibold text-gray-600 mb-1">ルーティング判定</p>
+                    <div className="space-y-0.5 text-gray-500">
+                      <div>判定理由: {t.routing}</div>
+                      <div>選択接続先: {t.processor}</div>
+                      <div>候補: GMO-PG, 三井住友, JCB直接</div>
+                      <div>判定時間: 3ms</div>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded border p-2">
+                    <p className="font-semibold text-gray-600 mb-1">3Dセキュア</p>
+                    <div className="space-y-0.5 text-gray-500">
+                      <div>3DS: {t.is3ds ? "適用済み（v2.0）" : "未適用"}</div>
+                      <div>認証結果: {t.is3ds ? "成功" : "—"}</div>
+                      <div>ECI: {t.is3ds ? "05" : "—"}</div>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded border p-2">
+                    <p className="font-semibold text-gray-600 mb-1">接続先レスポンス</p>
+                    <div className="space-y-0.5 text-gray-500">
+                      <div>レスポンスタイム: {t.responseMs ? t.responseMs + "ms" : "—"}</div>
+                      <div>コード: {t.status === "成功" ? "00（正常完了）" : t.error ? "TO（タイムアウト）" : "—"}</div>
+                      {t.error && <div className="text-red-600">{t.error}</div>}
+                      {t.failover && <div className="text-green-600">{t.failover}</div>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Stats Row */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold text-gray-600 mb-2">接続先別 レスポンスタイム</p>
+              <div className="space-y-1.5">
+                {[
+                  { name: "PayPay", avg: 180, color: "bg-green-500" },
+                  { name: "JCB直接", avg: 280, color: "bg-green-500" },
+                  { name: "GMO-PG", avg: 320, color: "bg-green-500" },
+                  { name: "三井住友", avg: 450, color: "bg-yellow-500" },
+                ].map((p, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <span className="w-20 text-gray-600">{p.name}</span>
+                    <div className="flex-1 bg-gray-100 rounded h-3"><div className={`${p.color} rounded h-3`} style={{ width: `${Math.min(p.avg / 6, 100)}%` }} /></div>
+                    <span className="w-16 text-right text-gray-500">avg {p.avg}ms</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold text-gray-600 mb-2">ブランド別 決済件数</p>
+              <div className="space-y-1.5">
+                {[
+                  { brand: "VISA", count: 823, pct: 44.5, color: "bg-blue-500" },
+                  { brand: "MC", count: 412, pct: 22.3, color: "bg-red-500" },
+                  { brand: "JCB", count: 356, pct: 19.3, color: "bg-green-500" },
+                  { brand: "AMEX", count: 134, pct: 7.3, color: "bg-purple-500" },
+                  { brand: "QR", count: 122, pct: 6.6, color: "bg-yellow-500" },
+                ].map((b, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <span className="w-12 text-gray-600 font-semibold">{b.brand}</span>
+                    <div className="flex-1 bg-gray-100 rounded h-3"><div className={`${b.color} rounded h-3`} style={{ width: `${b.pct}%` }} /></div>
+                    <span className="w-12 text-right text-gray-600">{b.count}件</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold text-gray-600 mb-2">時間帯別 決済推移</p>
+              <div className="flex items-end gap-1 h-20">
+                {[20, 15, 8, 5, 3, 4, 12, 45, 78, 95, 110, 125, 130, 118, 105].map((v, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center">
+                    <div className="bg-blue-400 rounded-t w-full" style={{ height: `${(v / 130) * 64}px` }} />
+                    <span className="text-gray-400 mt-0.5" style={{fontSize: "7px"}}>{i}時</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== SEARCH TAB ===== */}
+      {activeTab === "search" && (
+        <div className="space-y-3">
+          {/* Search Form */}
+          <div className="bg-white rounded-lg border p-3">
+            <p className="text-xs font-bold text-gray-600 mb-2">🔍 検索条件</p>
+            <div className="grid grid-cols-4 gap-2">
+              <div><label className="text-xs text-gray-400">取引ID</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="TXN-..." /></div>
+              <div><label className="text-xs text-gray-400">加盟店名</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="加盟店名で検索" /></div>
+              <div><label className="text-xs text-gray-400">カード下4桁</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="1234" maxLength={4} /></div>
+              <div><label className="text-xs text-gray-400">ブランド</label>
+                <div className="flex gap-1 mt-0.5">{["VISA","MC","JCB","AMEX","QR"].map(b => <label key={b} className="text-xs flex items-center gap-0.5"><input type="checkbox" className="w-3 h-3" />{b}</label>)}</div>
+              </div>
+              <div><label className="text-xs text-gray-400">金額（最小）</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="¥0" /></div>
+              <div><label className="text-xs text-gray-400">金額（最大）</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="¥999,999" /></div>
+              <div><label className="text-xs text-gray-400">開始日時</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5" defaultValue="2026-02-05" /></div>
+              <div><label className="text-xs text-gray-400">終了日時</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5" defaultValue="2026-02-12" /></div>
+            </div>
+            <div className="flex justify-between items-center mt-2">
+              <div className="flex gap-1 text-xs">
+                <span className="text-gray-400">ステータス:</span>
+                {["成功","失敗","返金済","キャンセル","3DS失敗"].map(s => <label key={s} className="flex items-center gap-0.5"><input type="checkbox" className="w-3 h-3" defaultChecked />{s}</label>)}
+              </div>
+              <div className="flex gap-2">
+                <button className="text-xs text-gray-400 hover:text-gray-600">検索条件をクリア</button>
+                <button className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold">検索</button>
+              </div>
+            </div>
+          </div>
+
+          {/* Search Results */}
+          <div className="bg-white rounded-lg border">
+            <div className="flex justify-between items-center px-3 py-2 border-b">
+              <span className="text-xs text-gray-500">検索結果: 5件（1/1ページ）</span>
+              <div className="flex gap-1 text-xs">
+                <span className="text-gray-400">表示:</span>
+                {["20","50","100"].map(n => <button key={n} className={`px-1.5 py-0.5 rounded ${n === "20" ? "bg-blue-100 text-blue-600" : "text-gray-400"}`}>{n}件</button>)}
+              </div>
+            </div>
+            <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "ステータス", w: "w-20" }, { label: "日時", w: "w-36" }, { label: "操作", w: "w-36" }]} />
+            {searchResults.map((t, i) => (
+              <div key={t.id} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""} hover:bg-blue-50 cursor-pointer`}
+                   onClick={() => setSearchSlide(t)}>
+                <div className="w-40 font-mono text-gray-500">{t.id}</div>
+                <div className="flex-1 text-gray-700">{t.merchant}</div>
+                <div className="w-24 text-right font-semibold">¥{t.amount.toLocaleString()}</div>
+                <div className="w-16"><Badge text={t.brand} color="blue" /></div>
+                <div className="w-20"><Badge text={t.status} color={t.sColor} /></div>
+                <div className="w-36 text-gray-400 font-mono">{t.date}</div>
+                <div className="w-36 flex gap-1" onClick={e => e.stopPropagation()}>
+                  {t.status === "成功" && (
+                    <>
+                      <button onClick={() => setRefundDialog({ ...t, type: "full" })} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs border border-purple-200">返金</button>
+                      <button onClick={() => setRefundDialog({ ...t, type: "cancel" })} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs border border-red-200">キャンセル</button>
+                    </>
+                  )}
+                  {t.status === "返金済" && <span className="text-xs text-purple-500">返金済 ¥{t.refundAmount?.toLocaleString()}</span>}
+                  {t.status === "キャンセル" && <span className="text-xs text-gray-400">キャンセル済</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Role Permission Notice */}
+          <div className="bg-gray-50 rounded border p-2 flex items-center gap-2 text-xs text-gray-400">
+            <span>🔒</span>
+            <span>返金・キャンセル操作は super_admin / admin のみ。reviewer は閲覧のみです。</span>
+          </div>
+        </div>
+      )}
+
+      {/* ===== Refund/Cancel Dialog ===== */}
+      {refundDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setRefundDialog(null)}>
+          <div className="bg-white rounded-xl shadow-2xl w-[440px]" onClick={e => e.stopPropagation()}>
+            <div className={`p-4 rounded-t-xl border-b ${refundDialog.type === "cancel" ? "bg-red-50" : "bg-purple-50"}`}>
+              <h3 className="text-sm font-bold text-gray-800">{refundDialog.type === "cancel" ? "🚫 取引キャンセル" : "💜 返金処理"}</h3>
+            </div>
+            <div className="p-4 space-y-3">
+              <div className="bg-gray-50 rounded border p-2 space-y-1 text-xs">
+                <div className="flex"><span className="w-20 text-gray-400">取引ID:</span><span className="font-mono">{refundDialog.id}</span></div>
+                <div className="flex"><span className="w-20 text-gray-400">加盟店:</span><span className="font-semibold">{refundDialog.merchant}</span></div>
+                <div className="flex"><span className="w-20 text-gray-400">金額:</span><span className="font-bold">¥{refundDialog.amount.toLocaleString()}</span></div>
+              </div>
+              {refundDialog.type !== "cancel" && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 mb-1">返金種別:</p>
+                  <div className="flex gap-2">
+                    <label className="text-xs flex items-center gap-1"><input type="radio" name="refundType" defaultChecked /> 全額返金（¥{refundDialog.amount.toLocaleString()}）</label>
+                    <label className="text-xs flex items-center gap-1"><input type="radio" name="refundType" /> 一部返金</label>
+                  </div>
+                  <input className="w-full text-xs border rounded px-2 py-1.5 mt-1" placeholder="一部返金の場合: 金額を入力" />
+                </div>
+              )}
+              <p className="text-xs text-gray-400">{refundDialog.type === "cancel" ? "この取引をキャンセルしますか？" : "処理に1-3営業日かかります"}</p>
+            </div>
+            <div className="flex justify-end gap-2 p-4 border-t">
+              <button onClick={() => setRefundDialog(null)} className="px-4 py-2 text-xs text-gray-600 border rounded">キャンセル</button>
+              <button onClick={() => setRefundDialog(null)} className={`px-4 py-2 text-xs text-white rounded font-semibold ${refundDialog.type === "cancel" ? "bg-red-600" : "bg-purple-600"}`}>
+                {refundDialog.type === "cancel" ? "キャンセルする" : "返金する"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== Search Slide Panel ===== */}
+      {searchSlide && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSearchSlide(null)} />
+          <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+            <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+              <h3 className="text-sm font-bold text-gray-800">取引詳細</h3>
+              <button onClick={() => setSearchSlide(null)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div className="p-4 space-y-3 text-xs">
+              <div className="space-y-1.5">
+                <div className="flex justify-between"><span className="text-gray-400">取引ID</span><span className="font-mono">{searchSlide.id}</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">加盟店</span><span className="font-semibold">{searchSlide.merchant}</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">金額</span><span className="font-bold">¥{searchSlide.amount.toLocaleString()}</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">ブランド</span><Badge text={searchSlide.brand} color="blue" /></div>
+                <div className="flex justify-between"><span className="text-gray-400">ステータス</span><Badge text={searchSlide.status} color={searchSlide.sColor} /></div>
+                <div className="flex justify-between"><span className="text-gray-400">日時</span><span>{searchSlide.date}</span></div>
+              </div>
+              <div className="border-t pt-3">
+                <p className="font-bold text-gray-600 mb-1">返金履歴</p>
+                {searchSlide.status === "返金済" ? (
+                  <div className="bg-purple-50 rounded p-2">
+                    <div className="flex justify-between"><span className="text-gray-400">返金日</span><span>2026-02-10 17:00</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">返金額</span><span className="font-bold text-purple-600">¥{searchSlide.refundAmount?.toLocaleString()}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">操作者</span><span>admin@aipaymentsys.com</span></div>
+                  </div>
+                ) : <span className="text-gray-400">返金履歴なし</span>}
+              </div>
+              <div className="border-t pt-3">
+                <p className="font-bold text-gray-600 mb-1">関連取引（同一カード下4桁）</p>
+                <div className="space-y-1">
+                  {["TXN-...-13100 ¥8,200 成功", "TXN-...-12900 ¥3,400 成功", "TXN-...-12000 ¥15,600 成功"].map((r, i) => (
+                    <div key={i} className="text-gray-500 bg-gray-50 rounded px-2 py-1">{r}</div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── M07: 不正検知設定 ───
+const MasterFraudSettings = () => {
+  const [ruleTab, setRuleTab] = useState("rules");
+  const [showAddRule, setShowAddRule] = useState(false);
+  const [testMode, setTestMode] = useState(false);
+  const [showAddBlock, setShowAddBlock] = useState(null);
+
+  const fraudRules = [
+    { id: "FR-001", name: "高額取引チェック", type: "金額閾値", condition: "金額 > ¥500,000", action: "例外キュー送り", priority: 1, enabled: true, hits30d: 12 },
+    { id: "FR-002", name: "短時間連続取引", type: "速度チェック", condition: "同一カード 5分以内に3件以上", action: "自動ブロック", priority: 2, enabled: true, hits30d: 8 },
+    { id: "FR-003", name: "海外カード制限", type: "地域制限", condition: "発行国 ≠ JP かつ 金額 > ¥100,000", action: "例外キュー送り", priority: 3, enabled: true, hits30d: 23 },
+    { id: "FR-004", name: "深夜帯高額", type: "時間帯+金額", condition: "0:00〜6:00 かつ 金額 > ¥200,000", action: "例外キュー送り", priority: 4, enabled: true, hits30d: 3 },
+    { id: "FR-005", name: "AIスコア閾値", type: "AI判定", condition: "不正スコア > 0.80", action: "自動ブロック", priority: 5, enabled: true, hits30d: 15 },
+    { id: "FR-006", name: "AIスコア注意", type: "AI判定", condition: "不正スコア > 0.60 かつ ≤ 0.80", action: "例外キュー送り（確認）", priority: 6, enabled: true, hits30d: 42 },
+    { id: "FR-007", name: "初回大口取引", type: "パターン", condition: "初回取引 かつ 金額 > ¥300,000", action: "例外キュー送り", priority: 7, enabled: false, hits30d: 0 },
+    { id: "FR-008", name: "BINブロックリスト", type: "リスト照合", condition: "BIN がブロックリストに一致", action: "自動ブロック", priority: 8, enabled: true, hits30d: 5 },
+  ];
+
+  return (
+    <div className="p-4 space-y-3">
+      <div className="flex justify-between items-center">
+        <h2 className="text-sm font-bold text-gray-800">不正検知設定</h2>
+        <div className="flex gap-2">
+          <button onClick={() => setTestMode(!testMode)} className={`text-xs px-3 py-1 rounded border font-semibold ${testMode ? "bg-yellow-500 text-white border-yellow-500" : "bg-yellow-100 text-yellow-700 border-yellow-300"}`}>{testMode ? "🧪 テスト中" : "🧪 テストモード"}</button>
+          <button onClick={() => setShowAddRule(true)} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ ルール追加</button>
+        </div>
+      </div>
+
+      {/* KPIs */}
+      <div className="flex gap-3">
+        <KPICard label="今月の検知件数" value="89件" sub="前月比" trend={-15} />
+        <KPICard label="自動ブロック" value="28件" sub="31.5%" color="red" />
+        <KPICard label="例外キュー送り" value="61件" sub="68.5%" color="yellow" />
+        <KPICard label="誤検知率" value="4.2%" sub="目標: 5%以下" color="green" />
+        <KPICard label="AI判定精度" value="96.8%" sub="モデル v2.1" color="blue" />
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 border-b">
+        {[{ id: "rules", label: "ルール管理" }, { id: "ai", label: "AIモデル設定" }, { id: "lists", label: "ブロック/ホワイトリスト" }, { id: "log", label: "検知ログ" }, { id: "merchant", label: "加盟店別設定" }].map(tab => (
+          <button key={tab.id} onClick={() => setRuleTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 ${ruleTab === tab.id ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-gray-400"}`}>{tab.label}</button>
+        ))}
+      </div>
+
+      {/* Tab: ルール管理 */}
+      {ruleTab === "rules" && (
+        <div className="space-y-3">
+          {/* Approval Flow Notice */}
+          <div className="bg-blue-50 rounded border border-blue-200 p-2 flex items-center gap-2 text-xs">
+            <span>🔒</span>
+            <span className="text-blue-700">ルール変更は <strong>admin → super_admin の2段階承認</strong>が必要です。super_adminは直接変更可能。</span>
+          </div>
+          <div className="bg-white rounded-lg border">
+            <TableHeader cols={[{ label: "ID", w: "w-20" }, { label: "ルール名", w: "w-36" }, { label: "種別", w: "w-24" }, { label: "条件", w: "flex-1" }, { label: "アクション", w: "w-36" }, { label: "優先度", w: "w-14" }, { label: "30日検知", w: "w-20" }, { label: "有効", w: "w-14" }, { label: "操作", w: "w-28" }]} />
+            {fraudRules.map((r, i) => (
+              <div key={r.id} className={`flex items-center px-3 py-2 text-xs border-b ${!r.enabled ? "opacity-50" : ""} ${i % 2 ? "bg-gray-50" : ""}`}>
+                <div className="w-20 font-mono text-gray-400">{r.id}</div>
+                <div className="w-36 font-semibold text-gray-700">{r.name}</div>
+                <div className="w-24"><Badge text={r.type} color={r.type === "AI判定" ? "purple" : r.type === "速度チェック" ? "blue" : "gray"} /></div>
+                <div className="flex-1 text-gray-500 font-mono">{r.condition}</div>
+                <div className="w-36"><Badge text={r.action} color={r.action.includes("ブロック") ? "red" : "yellow"} /></div>
+                <div className="w-14 text-center text-gray-600">{r.priority}</div>
+                <div className="w-20 text-center text-gray-600">{r.hits30d}件</div>
+                <div className="w-14 text-center">{r.enabled ? <span className="text-green-500">●</span> : <span className="text-gray-300">○</span>}</div>
+                <div className="w-28 flex gap-1">
+                  <button className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">編集</button>
+                  <button className="px-1.5 py-1 bg-yellow-100 text-yellow-700 rounded text-xs">🧪</button>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Simulation Panel */}
+          <div className="bg-yellow-50 rounded-lg border border-yellow-300 p-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-bold text-yellow-800">🧪 シミュレーション実行</p>
+              <button className="text-xs bg-yellow-600 text-white px-3 py-1 rounded font-semibold">過去30日データで実行</button>
+            </div>
+            <p className="text-xs text-yellow-700 mb-2">ルール変更前に、過去30日の取引データに対して変更後のルールを適用し、影響を確認できます。</p>
+            <div className="bg-white rounded border p-2">
+              <p className="text-xs text-gray-500 mb-1">シミュレーション結果（例）:</p>
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="bg-green-50 rounded p-1.5 text-center"><span className="text-gray-400">ブロック増加</span><p className="font-bold text-green-700">+8件</p></div>
+                <div className="bg-red-50 rounded p-1.5 text-center"><span className="text-gray-400">ブロック減少</span><p className="font-bold text-red-700">-2件</p></div>
+                <div className="bg-blue-50 rounded p-1.5 text-center"><span className="text-gray-400">影響加盟店</span><p className="font-bold text-blue-700">3社</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: AIモデル設定 */}
+      {ruleTab === "ai" && (
+        <div className="space-y-3">
+          <div className="bg-white rounded-lg border p-3">
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-xs font-bold text-gray-700">🤖 不正検知AIモデル</p>
+              <Badge text="v2.1 稼働中" color="green" />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-gray-50 rounded border p-2">
+                <p className="text-xs font-semibold text-gray-600 mb-2">閾値設定</p>
+                <div className="space-y-2">
+                  <div>
+                    <div className="flex justify-between text-xs mb-1"><span className="text-gray-500">自動ブロック閾値</span><span className="font-semibold text-red-600">0.80</span></div>
+                    <div className="w-full bg-gray-200 rounded h-2"><div className="bg-red-500 rounded h-2" style={{ width: "80%" }} /></div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs mb-1"><span className="text-gray-500">要確認閾値</span><span className="font-semibold text-yellow-600">0.60</span></div>
+                    <div className="w-full bg-gray-200 rounded h-2"><div className="bg-yellow-500 rounded h-2" style={{ width: "60%" }} /></div>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">閾値を下げると検知率↑ 誤検知率↑</p>
+                  <p className="text-xs text-gray-400">閾値を上げると検知率↓ 誤検知率↓</p>
+                </div>
+              </div>
+              <div className="bg-gray-50 rounded border p-2">
+                <p className="text-xs font-semibold text-gray-600 mb-2">モデル性能</p>
+                <div className="space-y-1.5 text-xs text-gray-600">
+                  <div className="flex justify-between"><span>精度（Accuracy）</span><span className="text-green-600 font-semibold">96.8%</span></div>
+                  <div className="flex justify-between"><span>適合率（Precision）</span><span className="text-green-600 font-semibold">95.8%</span></div>
+                  <div className="flex justify-between"><span>再現率（Recall）</span><span className="text-blue-600 font-semibold">91.2%</span></div>
+                  <div className="flex justify-between"><span>F1スコア</span><span className="text-blue-600 font-semibold">93.5%</span></div>
+                  <div className="flex justify-between"><span>誤検知率（FPR）</span><span className="text-green-600 font-semibold">4.2%</span></div>
+                  <div className="flex justify-between"><span>学習データ</span><span className="text-gray-500">125,000件</span></div>
+                  <div className="flex justify-between"><span>最終学習</span><span className="text-gray-500">2026-02-01</span></div>
+                </div>
+              </div>
+              <div className="bg-gray-50 rounded border p-2">
+                <p className="text-xs font-semibold text-gray-600 mb-2">特徴量の重要度（Top 5）</p>
+                <div className="space-y-1.5">
+                  {[
+                    { name: "取引金額", imp: 0.23 },
+                    { name: "カード利用頻度", imp: 0.19 },
+                    { name: "デバイスフィンガープリント", imp: 0.16 },
+                    { name: "地域不一致スコア", imp: 0.14 },
+                    { name: "時間帯リスク", imp: 0.11 },
+                  ].map((f, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs">
+                      <span className="w-40 text-gray-600">{f.name}</span>
+                      <div className="flex-1 bg-gray-200 rounded h-2"><div className="bg-blue-500 rounded h-2" style={{ width: `${f.imp * 400}%` }} /></div>
+                      <span className="w-10 text-right text-gray-500">{(f.imp * 100).toFixed(0)}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-yellow-50 rounded-lg border border-yellow-300 p-3">
+            <p className="text-xs font-bold text-yellow-800 mb-1">🧪 テストモード（シャドーモード）</p>
+            <p className="text-xs text-yellow-700 mb-2">シャドーモード: 判定するが実際の取引には影響しません。新ルールやモデルの影響を安全にテストできます。</p>
+          </div>
+          {/* Auto Retrain Schedule */}
+          <div className="bg-white rounded-lg border p-3">
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-xs font-bold text-gray-700">🔄 自動再学習スケジュール</p>
+              <Badge text="毎週日曜 AM3:00" color="blue" />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 text-xs">
+                <div className="flex items-center gap-1.5"><span className="w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs">1</span><span className="text-gray-600">自動再学習</span></div>
+                <span className="text-gray-300">→</span>
+                <div className="flex items-center gap-1.5"><span className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs">2</span><span className="text-gray-600">シャドーモード 1週間</span></div>
+                <span className="text-gray-300">→</span>
+                <div className="flex items-center gap-1.5"><span className="w-5 h-5 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-xs">3</span><span className="text-gray-600">精度比較レポート</span></div>
+                <span className="text-gray-300">→</span>
+                <div className="flex items-center gap-1.5"><span className="w-5 h-5 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs">4</span><span className="text-gray-600 font-semibold">人間が切替判断</span></div>
+              </div>
+              {/* New model ready banner */}
+              <div className="bg-green-50 rounded border border-green-300 p-2">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-xs font-bold text-green-800">✅ 新モデル v2.4 が準備できました</p>
+                    <p className="text-xs text-green-700 mt-0.5">偽陽性率: <span className="font-semibold">0.3% → 0.2%</span>（改善）/ 検知率: 96.8% → 97.1%（改善）</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="px-3 py-1.5 bg-white text-gray-600 rounded text-xs border">却下</button>
+                    <button className="px-3 py-1.5 bg-green-600 text-white rounded text-xs font-semibold">✅ 本番に切替</button>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-4 text-xs text-gray-400">
+                <span>次回実行: 2026-02-16 AM3:00</span>
+                <span>前回結果: 2026-02-09 成功（v2.3 → v2.4 シャドー中）</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: ブロック/ホワイトリスト */}
+      {ruleTab === "lists" && (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white rounded-lg border p-3">
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-xs font-bold text-red-600">🚫 ブロックリスト</p>
+              <button onClick={() => setShowAddBlock("block")} className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded border border-red-200">+ 追加</button>
+            </div>
+            <div className="space-y-1">
+              {[
+                { type: "BIN", value: "411111", reason: "不正利用報告多数", added: "02/05" },
+                { type: "IP", value: "192.168.x.x", reason: "自動攻撃検知", added: "02/08" },
+                { type: "メール", value: "*@temp-mail.xxx", reason: "使い捨てメール", added: "01/28" },
+              ].map((b, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs p-1.5 border rounded">
+                  <Badge text={b.type} color="red" />
+                  <span className="font-mono text-gray-700">{b.value}</span>
+                  <span className="text-gray-400 flex-1">{b.reason}</span>
+                  <span className="text-gray-400">{b.added}</span>
+                  <button className="text-red-400 hover:text-red-600">✕</button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-white rounded-lg border p-3">
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-xs font-bold text-green-600">✅ ホワイトリスト</p>
+              <button onClick={() => setShowAddBlock("white")} className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded border border-green-200">+ 追加</button>
+            </div>
+            <div className="space-y-1">
+              {[
+                { type: "加盟店", value: "M-001 ABCマート", reason: "自社テスト用", added: "01/15" },
+                { type: "IP", value: "10.0.x.x", reason: "社内ネットワーク", added: "01/15" },
+              ].map((w, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs p-1.5 border rounded">
+                  <Badge text={w.type} color="green" />
+                  <span className="font-mono text-gray-700">{w.value}</span>
+                  <span className="text-gray-400 flex-1">{w.reason}</span>
+                  <span className="text-gray-400">{w.added}</span>
+                  <button className="text-red-400 hover:text-red-600">✕</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: 検知ログ */}
+      {ruleTab === "log" && (
+        <div className="bg-white rounded-lg border">
+          <TableHeader cols={[{ label: "日時", w: "w-32" }, { label: "取引ID", w: "w-36" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "検知ルール", w: "w-36" }, { label: "AIスコア", w: "w-20" }, { label: "アクション", w: "w-28" }, { label: "結果", w: "w-20" }]} />
+          {[
+            { time: "02/11 14:50", txn: "TXN-14516", merchant: "トラベルプラス", amount: "¥158,000", rule: "AIスコア閾値", score: "0.92", action: "自動ブロック", result: "正検知", rColor: "green" },
+            { time: "02/11 12:15", txn: "TXN-12103", merchant: "ABCマート", amount: "¥520,000", rule: "高額取引チェック", score: "0.45", action: "例外キュー", result: "正常取引", rColor: "yellow" },
+            { time: "02/11 09:30", txn: "TXN-09288", merchant: "XYZショップ", amount: "¥8,500", rule: "短時間連続取引", score: "0.72", action: "例外キュー", result: "正検知", rColor: "green" },
+            { time: "02/10 22:10", txn: "TXN-22041", merchant: "スタイルプラス", amount: "¥250,000", rule: "深夜帯高額", score: "0.55", action: "例外キュー", result: "正常取引", rColor: "yellow" },
+          ].map((l, i) => (
+            <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
+              <div className="w-32 text-gray-400 font-mono">{l.time}</div>
+              <div className="w-36 font-mono text-gray-500">{l.txn}</div>
+              <div className="flex-1 text-gray-700">{l.merchant}</div>
+              <div className="w-24 text-right font-semibold">{l.amount}</div>
+              <div className="w-36"><Badge text={l.rule} color="purple" /></div>
+              <div className="w-20 text-center font-mono">{l.score}</div>
+              <div className="w-28"><Badge text={l.action} color={l.action === "自動ブロック" ? "red" : "yellow"} /></div>
+              <div className="w-20"><Badge text={l.result} color={l.rColor} /></div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Tab: 加盟店別設定 */}
+      {ruleTab === "merchant" && (
+        <div className="space-y-3">
+          <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">
+            💡 加盟店ごとにグローバルルールの閾値をオーバーライドできます。業態に合わせた柔軟な設定で<strong>健全な決済を止めない</strong>ことが目的です。
+          </div>
+          <div className="bg-white rounded-lg border p-3">
+            <div className="flex items-center gap-3 mb-3">
+              <label className="text-xs font-bold text-gray-600">加盟店選択:</label>
+              <div className="relative">
+                <div className="flex items-center border rounded bg-white">
+                  <span className="text-xs text-gray-400 pl-2">🔍</span>
+                  <input className="text-xs px-2 py-1.5 w-56 outline-none" placeholder="ID・名前で検索" />
+                </div>
+              </div>
+              <Badge text="M-001 株式会社ABCマート" color="blue" />
+              <button onClick={() => setShowAddBlock("custom")} className="text-xs bg-blue-600 text-white px-3 py-1 rounded">+ カスタム設定を追加</button>
+            </div>
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-gray-50 border-b">
+                  <th className="text-left p-2 text-gray-500 font-semibold">ルール</th>
+                  <th className="text-center p-2 text-gray-500 font-semibold">グローバル値</th>
+                  <th className="text-center p-2 text-gray-500 font-semibold">カスタム値</th>
+                  <th className="text-center p-2 text-gray-500 font-semibold">差分</th>
+                  <th className="text-center p-2 text-gray-500 font-semibold">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { rule: "高額取引チェック", global: "¥500,000", custom: "¥2,000,000", diff: "↑ 緩和" },
+                  { rule: "海外カード制限", global: "¥100,000", custom: "¥500,000", diff: "↑ 緩和" },
+                  { rule: "深夜帯高額", global: "¥200,000", custom: "¥1,000,000", diff: "↑ 緩和" },
+                  { rule: "AIスコア ブロック閾値", global: "0.70", custom: "0.80", diff: "↑ 緩和" },
+                ].map((r, i) => (
+                  <tr key={i} className="border-b">
+                    <td className="p-2 font-semibold text-gray-700">{r.rule} <span className="text-yellow-500">⚠️</span></td>
+                    <td className="p-2 text-center text-gray-400">{r.global}</td>
+                    <td className="p-2 text-center font-bold text-blue-700">{r.custom}</td>
+                    <td className="p-2 text-center font-semibold text-blue-600">{r.diff}</td>
+                    <td className="p-2 text-center"><button className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">編集</button> <button className="px-2 py-0.5 bg-red-100 text-red-600 rounded text-xs">削除</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="bg-yellow-50 rounded border border-yellow-300 p-2 flex items-center justify-between">
+            <span className="text-xs text-yellow-800">🧪 この加盟店の過去取引データでシミュレーションを実行できます</span>
+            <button className="text-xs bg-yellow-600 text-white px-3 py-1 rounded font-semibold">シミュレーション実行</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: ルール追加 ── */}
+
+      {/* ── Modal: ブロック/ホワイトリスト追加 ── */}
+      {showAddBlock && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowAddBlock(null)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+            <div className={`p-4 border-b rounded-t-xl flex justify-between items-center ${showAddBlock === "block" ? "bg-red-50" : "bg-green-50"}`}>
+              <h3 className="text-sm font-bold text-gray-800">{showAddBlock === "block" ? "🚫 ブロックリストに追加" : "✅ ホワイトリストに追加"}</h3>
+              <button onClick={() => setShowAddBlock(null)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div><label className="text-xs font-semibold text-gray-600">種別 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>BIN（カード番号先頭6桁）</option><option>IPアドレス</option><option>デバイスID</option><option>メールアドレス</option></select></div>
+              <div><label className="text-xs font-semibold text-gray-600">値 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 411111 / 192.168.1.1" /></div>
+              <div><label className="text-xs font-semibold text-gray-600">理由 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="追加理由を入力" /></div>
+              <div><label className="text-xs font-semibold text-gray-600">有効期限</label><div className="flex gap-2 mt-0.5"><select className="text-xs border rounded px-2 py-1.5"><option>永久</option><option>日時指定</option></select><input type="date" className="text-xs border rounded px-2 py-1.5" /></div></div>
+              <div className="bg-gray-50 rounded border p-2 text-xs text-gray-500">💡 CSVで一括追加する場合は「ブロック/ホワイトリスト」タブのCSVアップロード機能をご利用ください</div>
+            </div>
+            <div className="p-4 border-t flex gap-2 justify-end">
+              <button onClick={() => setShowAddBlock(null)} className="px-4 py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">キャンセル</button>
+              <button onClick={() => setShowAddBlock(null)} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showAddBlock === "block" ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}`}>追加する</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAddRule && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowAddRule(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[560px] max-h-[85vh] overflow-y-auto">
+            <div className="p-4 border-b bg-gray-50 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-sm font-bold text-gray-800">不正検知ルール追加</h3>
+              <button onClick={() => setShowAddRule(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div className="p-4 space-y-4">
+              {/* ルール種別 */}
+              <div>
+                <label className="text-xs font-semibold text-gray-600">ルール種別 <span className="text-red-500">*</span></label>
+                <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                  <option>選択してください</option>
+                  <option>金額閾値</option>
+                  <option>速度チェック（連続取引）</option>
+                  <option>地域制限</option>
+                  <option>時間帯+金額</option>
+                  <option>AI判定スコア</option>
+                  <option>パターン検知</option>
+                  <option>リスト照合（BIN/カード）</option>
+                  <option>カスタム条件</option>
+                </select>
+              </div>
+              {/* ルール名 */}
+              <div>
+                <label className="text-xs font-semibold text-gray-600">ルール名 <span className="text-red-500">*</span></label>
+                <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 高額取引チェック" />
+              </div>
+              {/* 条件設定 */}
+              <div className="bg-gray-50 rounded border p-3 space-y-3">
+                <p className="text-xs font-bold text-gray-600">条件設定</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-xs text-gray-500">対象フィールド <span className="text-red-500">*</span></label>
+                    <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                      <option>金額</option>
+                      <option>カード発行国</option>
+                      <option>BIN</option>
+                      <option>AIスコア</option>
+                      <option>取引回数（時間窓）</option>
+                      <option>時間帯</option>
+                      <option>初回取引フラグ</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">演算子 <span className="text-red-500">*</span></label>
+                    <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                      <option>＞（より大きい）</option>
+                      <option>≧（以上）</option>
+                      <option>＝（等しい）</option>
+                      <option>≠（等しくない）</option>
+                      <option>＜（より小さい）</option>
+                      <option>含む</option>
+                      <option>含まない</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">値 <span className="text-red-500">*</span></label>
+                    <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 500000" />
+                  </div>
+                </div>
+                <button className="text-xs text-blue-600 hover:underline">+ AND条件を追加</button>
+              </div>
+              {/* アクション */}
+              <div>
+                <label className="text-xs font-semibold text-gray-600">検知時のアクション <span className="text-red-500">*</span></label>
+                <div className="flex gap-3 mt-1">
+                  {[
+                    { label: "自動ブロック", desc: "即時ブロック", color: "border-red-300 bg-red-50" },
+                    { label: "例外キュー送り", desc: "目視確認", color: "border-yellow-300 bg-yellow-50" },
+                    { label: "フラグのみ", desc: "記録のみ", color: "border-gray-300 bg-gray-50" },
+                  ].map((a, i) => (
+                    <label key={i} className={`flex-1 rounded border-2 p-2 text-center cursor-pointer text-xs ${i === 1 ? a.color + " font-bold" : a.color}`}>
+                      <input type="radio" name="action" className="sr-only" defaultChecked={i === 1} />
+                      <p className="font-semibold">{a.label}</p>
+                      <p className="text-gray-400 mt-0.5">{a.desc}</p>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              {/* 優先順位 */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-gray-600">優先順位 <span className="text-red-500">*</span></label>
+                  <input type="number" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="9" min="1" max="99" />
+                  <p className="text-xs text-gray-400 mt-0.5">数字が小さいほど先に評価</p>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-600">適用スコープ</label>
+                  <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                    <option>グローバル（全加盟店）</option>
+                    <option>加盟店指定</option>
+                  </select>
+                </div>
+              </div>
+              {/* テストモード */}
+              <div className="bg-blue-50 rounded border border-blue-200 p-2 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-blue-700">🧪 テストモードで作成</p>
+                  <p className="text-xs text-blue-500">実際のブロックは行わず、検知ログにのみ記録します</p>
+                </div>
+                <div className="w-10 h-5 rounded-full bg-blue-500 relative cursor-pointer">
+                  <div className="absolute top-0.5 right-0.5 w-4 h-4 bg-white rounded-full shadow" />
+                </div>
+              </div>
+            </div>
+            {/* Footer */}
+            <div className="p-4 border-t flex gap-2 justify-end">
+              <button onClick={() => setShowAddRule(false)} className="px-4 py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">キャンセル</button>
+              <button onClick={() => setShowAddRule(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">ルールを作成</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── M11: レポート ───
+const MasterReport = () => {
+  const [showReportModal, setShowReportModal] = useState(null);
+  const [reportTab, setReportTab] = useState("summary");
+  return (
+  <div className="p-4 space-y-3">
+    <div className="flex justify-between items-center">
+      <h2 className="text-sm font-bold text-gray-800">レポート</h2>
+      <div className="flex gap-2">
+        <button onClick={() => setShowReportModal("generate")} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ レポート生成</button>
+      </div>
+    </div>
+
+    <div className="flex gap-3">
+      <KPICard label="今月の生成数" value="34件" sub="" />
+      <KPICard label="定期配信設定" value="8件" sub="アクティブ" color="green" />
+      <KPICard label="AI要約付き" value="12件" sub="35.3%" color="blue" />
+    </div>
+
+    {/* Report Templates */}
+    <div className="bg-white rounded-lg border p-3">
+      <p className="text-xs font-bold text-gray-700 mb-2">📄 レポートテンプレート</p>
+      <div className="grid grid-cols-3 gap-2">
+        {[
+          { name: "日次精算レポート", icon: "💰", desc: "日別の精算金額・件数・手数料", schedule: "毎日 9:00", formats: ["PDF", "CSV"] },
+          { name: "月次サマリーレポート", icon: "📊", desc: "月次の売上・トレンド・KPI", schedule: "毎月1日 9:00", formats: ["PDF", "Excel"] },
+          { name: "加盟店別レポート", icon: "🏢", desc: "加盟店ごとの取引・精算・CB状況", schedule: "手動", formats: ["PDF", "CSV"] },
+          { name: "接続先別パフォーマンス", icon: "🔌", desc: "接続先の成功率・レスポンス・コスト", schedule: "週次（月曜）", formats: ["PDF"] },
+          { name: "チャージバックレポート", icon: "🔄", desc: "CB発生状況・勝率・金額", schedule: "手動", formats: ["PDF", "CSV"] },
+          { name: "不正検知レポート", icon: "🛡️", desc: "検知件数・誤検知率・AIモデル精度", schedule: "週次（月曜）", formats: ["PDF"] },
+        ].map((t, i) => (
+          <div key={i} className="border rounded-lg p-3 hover:bg-blue-50 cursor-pointer transition-colors">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm">{t.icon}</span>
+              <span className="text-xs font-bold text-gray-700">{t.name}</span>
+            </div>
+            <p className="text-xs text-gray-400 mb-2">{t.desc}</p>
+            <div className="flex items-center justify-between">
+              <div className="flex gap-1">{t.formats.map(f => <Badge key={f} text={f} color="blue" />)}</div>
+              <span className="text-xs text-gray-400">{t.schedule}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* AI Summary example */}
+    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-3">
+      <p className="text-xs font-bold text-blue-700 mb-1">🤖 AI要約（月次サマリー 2026年1月）</p>
+      <p className="text-xs text-gray-600 leading-relaxed">1月の決済総額は前月比+12%の¥180.5Mでした。成功率は98.5%で目標を達成。GMO-PG経由の取引が全体の48%を占め、コスト最適化ルーティングにより推定¥120Kの手数料削減を実現しました。チャージバック率は0.8%で業界平均を下回っています。注意点として、月末にかけてAMEX経由のタイムアウトが増加傾向（P99: 1200ms）にあり、接続先への確認を推奨します。</p>
+    </div>
+
+    {/* Recent Reports */}
+    <div className="bg-white rounded-lg border">
+      <div className="flex justify-between items-center p-3 border-b">
+        <p className="text-xs font-bold text-gray-700">📂 生成済みレポート（直近）</p>
+        <button className="text-xs text-blue-600">すべて表示 →</button>
+      </div>
+      <TableHeader cols={[{ label: "生成日", w: "w-28" }, { label: "レポート名", w: "flex-1" }, { label: "期間", w: "w-32" }, { label: "形式", w: "w-16" }, { label: "AI要約", w: "w-16" }, { label: "生成者", w: "w-28" }, { label: "操作", w: "w-24" }]} />
+      {[
+        { date: "02/11 09:00", name: "日次精算レポート", period: "2026-02-10", format: "PDF", ai: true, by: "自動（定期）" },
+        { date: "02/10 09:00", name: "日次精算レポート", period: "2026-02-09", format: "PDF", ai: true, by: "自動（定期）" },
+        { date: "02/10 14:30", name: "加盟店別レポート（ABCマート）", period: "2026年1月", format: "CSV", ai: false, by: "admin@..." },
+        { date: "02/03 09:00", name: "接続先別パフォーマンス", period: "2026-W05", format: "PDF", ai: true, by: "自動（定期）" },
+        { date: "02/01 09:00", name: "月次サマリーレポート", period: "2026年1月", format: "PDF", ai: true, by: "自動（定期）" },
+      ].map((r, i) => (
+        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
+          <div className="w-28 text-gray-400">{r.date}</div>
+          <div className="flex-1 font-semibold text-gray-700">{r.name}</div>
+          <div className="w-32 text-gray-500">{r.period}</div>
+          <div className="w-16"><Badge text={r.format} color="blue" /></div>
+          <div className="w-16 text-center">{r.ai ? "🤖" : "—"}</div>
+          <div className="w-28 text-gray-400">{r.by}</div>
+          <div className="w-24 flex gap-1">
+            <button className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">⬇ DL</button>
+            <button className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">👁</button>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* Scheduled Reports */}
+    <div className="bg-white rounded-lg border p-3">
+      <div className="flex justify-between items-center mb-2">
+        <p className="text-xs font-bold text-gray-700">⏰ 定期配信スケジュール</p>
+        <button onClick={() => setShowReportModal("schedule")} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded border border-blue-200">+ スケジュール追加</button>
+      </div>
+      <div className="space-y-1">
+        {[
+          { name: "日次精算レポート", schedule: "毎日 9:00", recipients: "admin@..., finance@...", format: "PDF", enabled: true },
+          { name: "月次サマリー", schedule: "毎月1日 9:00", recipients: "admin@..., ceo@...", format: "PDF + Excel", enabled: true },
+          { name: "接続先パフォーマンス", schedule: "毎週月曜 9:00", recipients: "admin@...", format: "PDF", enabled: true },
+          { name: "不正検知レポート", schedule: "毎週月曜 9:00", recipients: "admin@..., security@...", format: "PDF", enabled: true },
+        ].map((s, i) => (
+          <div key={i} className="flex items-center gap-3 text-xs p-2 border rounded">
+            <span className={`w-2 h-2 rounded-full ${s.enabled ? "bg-green-500" : "bg-gray-300"}`} />
+            <span className="w-44 font-semibold text-gray-700">{s.name}</span>
+            <span className="w-32 text-gray-500">{s.schedule}</span>
+            <span className="flex-1 text-gray-400">{s.recipients}</span>
+            <Badge text={s.format} color="blue" />
+            <button className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">編集</button>
+          </div>
+        ))}
+      </div>
+      <div className="mt-2 flex gap-2 text-xs">
+        <span className="text-gray-400">配信先:</span>
+        <label className="flex items-center gap-1"><input type="checkbox" defaultChecked className="w-3 h-3" /> メール</label>
+        <label className="flex items-center gap-1"><input type="checkbox" defaultChecked className="w-3 h-3" /> Slack</label>
+        <span className="text-gray-300">|</span>
+        <span className="text-gray-400">Slack Webhook:</span>
+        <span className="text-green-600">✅ 設定済み</span>
+      </div>
+      <div className="mt-2 bg-red-50 rounded border border-red-200 p-2 text-xs text-red-700">
+        ⚠️ 自動生成失敗時はadminにメール+Slack通知。リトライは手動で再実行してください。
+      </div>
+    </div>
+
+    {/* Custom Report Builder */}
+    <div className="bg-white rounded-lg border p-3">
+      <div className="flex justify-between items-center mb-2">
+        <p className="text-xs font-bold text-gray-700">🛠️ カスタムレポート作成</p>
+        <button onClick={() => setShowReportModal("custom")} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ 新規レポート作成</button>
+      </div>
+      <p className="text-xs text-gray-500 mb-2">テンプレートの項目を自由に組み合わせて独自レポートを作成できます。定期配信にも設定可能。</p>
+      <div className="flex gap-2 flex-wrap">
+        {["取引サマリー", "精算明細", "CB分析", "接続先別パフォーマンス", "ブランド別分析", "時間帯別分析", "加盟店別内訳"].map(item => (
+          <label key={item} className="text-xs flex items-center gap-1 px-2 py-1 border rounded cursor-pointer hover:bg-blue-50">
+            <input type="checkbox" className="w-3 h-3" />
+            {item}
+          </label>
+        ))}
+      </div>
+    </div>
+
+    {/* ── Modal: レポート生成/スケジュール/カスタム ── */}
+    {showReportModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowReportModal(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[520px]">
+          <div className="p-4 border-b bg-gray-50 rounded-t-xl flex justify-between items-center">
+            <h3 className="text-sm font-bold text-gray-800">{showReportModal === "generate" ? "📊 レポート生成" : showReportModal === "schedule" ? "📅 スケジュール追加" : "📝 新規レポート作成"}</h3>
+            <button onClick={() => setShowReportModal(null)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+          </div>
+          <div className="p-4 space-y-3">
+            {showReportModal === "generate" && (<>
+              <div><label className="text-xs font-semibold text-gray-600">レポート種別 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>日次サマリー</option><option>月次レポート</option><option>不正検知レポート</option><option>精算レポート</option><option>加盟店別レポート</option></select></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-gray-600">対象期間</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
+                <div><label className="text-xs font-semibold text-gray-600">〜</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
+              </div>
+              <div><label className="text-xs font-semibold text-gray-600">出力形式</label><div className="flex gap-2 mt-1">{["PDF","CSV","Excel"].map(f => <label key={f} className="flex items-center gap-1 text-xs"><input type="radio" name="format" defaultChecked={f==="PDF"} />{f}</label>)}</div></div>
+            </>)}
+            {showReportModal === "schedule" && (<>
+              <div><label className="text-xs font-semibold text-gray-600">レポート種別 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>日次サマリー</option><option>週次レポート</option><option>月次レポート</option></select></div>
+              <div><label className="text-xs font-semibold text-gray-600">スケジュール <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>毎日 09:00</option><option>毎週月曜 09:00</option><option>毎月1日 09:00</option></select></div>
+              <div><label className="text-xs font-semibold text-gray-600">送信先メール</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="admin@company.jp" /></div>
+            </>)}
+            {showReportModal === "custom" && (<>
+              <div><label className="text-xs font-semibold text-gray-600">レポート名 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="カスタムレポート名" /></div>
+              <div><label className="text-xs font-semibold text-gray-600">含める項目 <span className="text-red-500">*</span></label>
+                <div className="flex flex-wrap gap-2 mt-1">{["取引数","売上金額","手数料","CB件数","不正検知","接続先別","加盟店別","時間帯別"].map((c,i) => <label key={i} className="flex items-center gap-1 text-xs border rounded px-2 py-1 cursor-pointer hover:bg-blue-50"><input type="checkbox" defaultChecked={i<4} />{c}</label>)}</div>
+              </div>
+              <div><label className="text-xs font-semibold text-gray-600">グラフ種別</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>折れ線グラフ</option><option>棒グラフ</option><option>円グラフ</option><option>表のみ</option></select></div>
+            </>)}
+          </div>
+          <div className="p-4 border-t flex gap-2 justify-end">
+            <button onClick={() => setShowReportModal(null)} className="px-4 py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">キャンセル</button>
+            <button onClick={() => setShowReportModal(null)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">{showReportModal === "generate" ? "生成する" : showReportModal === "schedule" ? "スケジュール登録" : "レポート作成"}</button>
+          </div>
+        </div>
+      </div>
+    )}
+    </div>
+  );
+};
+
+// ─── S03: 売上レポート ───
+const MerchantSalesReport = () => (
+  <div className="p-4 space-y-3">
+    <div className="flex justify-between items-center">
+      <h2 className="text-sm font-bold text-gray-800">売上レポート</h2>
+      <div className="flex gap-2">
+        <select className="text-xs border rounded px-2 py-1"><option>今月（2026年2月）</option><option>先月（2026年1月）</option><option>カスタム</option></select>
+        <button className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border">📥 CSV</button>
+        <button className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">📄 PDF出力</button>
+      </div>
+    </div>
+
+    {/* KPIs */}
+    <div className="flex gap-3">
+      <KPICard label="今月の売上" value="¥4.8M" sub="前月比" trend={15} />
+      <KPICard label="決済件数" value="342件" sub="前月比" trend={8} />
+      <KPICard label="平均単価" value="¥14,035" sub="前月比" trend={6} />
+      <KPICard label="成功率" value="98.5%" sub="" color="green" />
+      <KPICard label="CB件数" value="2件" sub="CB率 0.6%" color="green" />
+    </div>
+
+    {/* Daily Chart */}
+    <div className="bg-white rounded-lg border p-3">
+      <p className="text-xs font-bold text-gray-700 mb-2">📊 日別売上推移（2026年2月）</p>
+      <div className="flex items-end gap-1 h-32">
+        {[320, 410, 380, 520, 480, 120, 90, 450, 510, 490, 560].map((v, i) => (
+          <div key={i} className="flex-1 flex flex-col items-center">
+            <span className="text-xs text-gray-400 mb-1" style={{fontSize: "8px"}}>¥{(v/100).toFixed(0)}万</span>
+            <div className="bg-blue-400 hover:bg-blue-500 rounded-t w-full cursor-pointer transition-colors" style={{ height: `${(v / 560) * 100}px` }} />
+            <span className="text-xs text-gray-400 mt-1" style={{fontSize: "9px"}}>{i + 1}日</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Brand breakdown + Payout schedule */}
+    <div className="grid grid-cols-2 gap-3">
+      <div className="bg-white rounded-lg border p-3">
+        <p className="text-xs font-bold text-gray-700 mb-2">💳 ブランド別内訳</p>
+        <div className="space-y-2">
+          {[
+            { brand: "VISA", count: 152, amount: "¥2.14M", pct: 44.5, color: "bg-blue-500" },
+            { brand: "Mastercard", count: 78, amount: "¥1.09M", pct: 22.8, color: "bg-red-500" },
+            { brand: "JCB", count: 65, amount: "¥0.92M", pct: 19.0, color: "bg-green-500" },
+            { brand: "AMEX", count: 25, amount: "¥0.41M", pct: 8.5, color: "bg-purple-500" },
+            { brand: "PayPay(QR)", count: 22, amount: "¥0.24M", pct: 5.2, color: "bg-yellow-500" },
+          ].map((b, i) => (
+            <div key={i} className="flex items-center gap-2 text-xs">
+              <span className="w-20 text-gray-700 font-semibold">{b.brand}</span>
+              <div className="flex-1 bg-gray-100 rounded h-3"><div className={`${b.color} rounded h-3`} style={{ width: `${b.pct}%` }} /></div>
+              <span className="w-12 text-right text-gray-500">{b.count}件</span>
+              <span className="w-16 text-right text-gray-600 font-semibold">{b.amount}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="bg-white rounded-lg border p-3">
+        <p className="text-xs font-bold text-gray-700 mb-2">💰 入金予定</p>
+        <div className="space-y-2">
+          <div className="bg-green-50 rounded border border-green-200 p-2">
+            <div className="flex justify-between text-xs mb-0.5">
+              <span className="text-green-700 font-semibold">次回入金</span>
+              <span className="text-green-800 font-bold">¥3,245,600</span>
+            </div>
+            <div className="flex justify-between text-xs text-green-600">
+              <span>2026年2月28日（金）</span>
+              <span>1月分精算</span>
+            </div>
+          </div>
+          <div className="bg-gray-50 rounded border p-2">
+            <div className="flex justify-between text-xs mb-0.5">
+              <span className="text-gray-600">翌々回入金</span>
+              <span className="text-gray-700 font-semibold">¥4,800,000（見込）</span>
+            </div>
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>2026年3月31日（火）</span>
+              <span>2月分精算</span>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400">入金サイクル: 月末締め / 翌月末払い</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Transaction List (masked) */}
+    <div className="bg-white rounded-lg border">
+      <div className="flex justify-between items-center p-3 border-b">
+        <p className="text-xs font-bold text-gray-700">取引明細</p>
+        <div className="flex gap-2">
+          <select className="text-xs border rounded px-2 py-1"><option>全ブランド</option><option>VISA</option><option>MC</option><option>JCB</option></select>
+          <select className="text-xs border rounded px-2 py-1"><option>全ステータス</option><option>成功</option><option>失敗</option><option>返金</option></select>
+        </div>
+      </div>
+      <TableHeader cols={[{ label: "取引ID", w: "w-36" }, { label: "日時", w: "w-32" }, { label: "カード", w: "w-28" }, { label: "ブランド", w: "w-16" }, { label: "金額", w: "w-24" }, { label: "状態", w: "w-16" }, { label: "操作", w: "w-16" }]} />
+      {[
+        { id: "TXN-14523", time: "02/11 14:52", card: "**** 1234", brand: "VISA", amount: "¥12,800", status: "成功", sColor: "green" },
+        { id: "TXN-14521", time: "02/11 14:51", card: "**** 5678", brand: "JCB", amount: "¥89,000", status: "成功", sColor: "green" },
+        { id: "TXN-14518", time: "02/11 14:50", card: "—", brand: "QR", amount: "¥1,500", status: "成功", sColor: "green" },
+        { id: "TXN-13801", time: "02/11 11:20", card: "**** 9012", brand: "MC", amount: "¥3,200", status: "返金済", sColor: "yellow" },
+      ].map((t, i) => (
+        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
+          <div className="w-36 font-mono text-gray-500">{t.id}</div>
+          <div className="w-32 text-gray-400">{t.time}</div>
+          <div className="w-28 font-mono text-gray-500">{t.card}</div>
+          <div className="w-16"><Badge text={t.brand} color="blue" /></div>
+          <div className="w-24 text-right font-semibold text-gray-800">{t.amount}</div>
+          <div className="w-16"><Badge text={t.status} color={t.sColor} /></div>
+          <div className="w-16"><button className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">詳細</button></div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ─── S08: アカウント設定 ───
+const MerchantAccountSettings = () => {
+  const [showInviteS08, setShowInviteS08] = useState(false);
+  const [accTab, setAccTab] = useState("company");
+
+  return (
+    <div className="p-4 space-y-3">
+      <h2 className="text-sm font-bold text-gray-800">アカウント設定</h2>
+
+      <div className="flex gap-1 border-b">
+        {[{ id: "company", label: "会社情報" }, { id: "bank", label: "振込先口座" }, { id: "api", label: "APIキー" }, { id: "security", label: "セキュリティ" }, { id: "members", label: "メンバー管理" }, { id: "notifications", label: "通知設定" }, { id: "contract", label: "契約情報" }].map(tab => (
+          <button key={tab.id} onClick={() => setAccTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 ${accTab === tab.id ? "border-green-500 text-green-600 font-semibold" : "border-transparent text-gray-400"}`}>{tab.label}</button>
+        ))}
+      </div>
+
+      {/* Tab: 会社情報 */}
+      {accTab === "company" && (
+        <div className="bg-white rounded-lg border p-4 max-w-2xl">
+          <div className="bg-yellow-50 rounded border border-yellow-200 p-2 mb-3 text-xs text-yellow-700">
+            ⚠️ 会社情報の変更は<strong>運営の承認が必要</strong>です。変更内容によっては書類再提出（登記簿等）をお願いする場合があります。
+          </div>
+          <div className="space-y-3">
+            {[
+              { label: "法人名", value: "株式会社ABCマート", editable: false },
+              { label: "代表者", value: "山田 太郎", editable: true },
+              { label: "住所", value: "東京都渋谷区神宮前1-2-3 ABCビル5F", editable: true },
+              { label: "電話番号", value: "03-1234-5678", editable: true },
+              { label: "メールアドレス", value: "info@abcmart-ec.jp", editable: true },
+              { label: "業種", value: "家電・ガジェットEC", editable: false },
+              { label: "サイトURL", value: "https://abcmart-ec.jp", editable: true },
+            ].map((f, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <label className="w-28 text-xs text-gray-500 text-right">{f.label}</label>
+                <input className={`flex-1 border rounded px-3 py-1.5 text-xs ${f.editable ? "" : "bg-gray-50 text-gray-400"}`} defaultValue={f.value} readOnly={!f.editable} />
+                {!f.editable && <span className="text-xs text-gray-400">変更不可</span>}
+              </div>
+            ))}
+            <div className="flex justify-end mt-3">
+              <button className="px-4 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">変更申請を送信</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: 振込先口座 */}
+      {accTab === "bank" && (
+        <div className="space-y-3 max-w-2xl">
+          <div className="bg-yellow-50 rounded-lg border border-yellow-300 p-2">
+            <p className="text-xs text-yellow-700">⚠️ 口座情報の変更には本人確認が必要です。変更申請後、審査完了まで1〜3営業日かかります。</p>
+          </div>
+          <div className="bg-white rounded-lg border p-4">
+            <p className="text-xs font-bold text-gray-700 mb-3">現在の振込先口座</p>
+            <div className="space-y-2">
+              {[
+                { label: "銀行名", value: "三菱UFJ銀行" },
+                { label: "支店名", value: "渋谷支店（150）" },
+                { label: "口座種別", value: "普通" },
+                { label: "口座番号", value: "****567" },
+                { label: "口座名義", value: "カ）エービーシーマート" },
+              ].map((f, i) => (
+                <div key={i} className="flex items-center gap-3 text-xs">
+                  <span className="w-24 text-gray-500 text-right">{f.label}</span>
+                  <span className="font-semibold text-gray-700">{f.value}</span>
+                </div>
+              ))}
+            </div>
+            <button className="mt-3 px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded text-xs font-semibold border border-yellow-300">🔄 口座変更を申請</button>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: APIキー */}
+      {accTab === "api" && (
+        <div className="space-y-3 max-w-2xl">
+          <div className="bg-white rounded-lg border p-4">
+            <p className="text-xs font-bold text-gray-700 mb-3">APIキー</p>
+            <div className="space-y-3">
+              <div className="border rounded p-3">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-xs font-semibold text-gray-700">テスト環境</span>
+                  <Badge text="テスト" color="yellow" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <input className="flex-1 border rounded px-3 py-1.5 text-xs font-mono bg-gray-50" value="sk_test_4eC39HqLyjWDarjtT1zdp7dc" readOnly />
+                  <button className="px-2 py-1.5 bg-gray-100 text-gray-600 rounded text-xs border">コピー</button>
+                  <button className="px-2 py-1.5 bg-red-100 text-red-600 rounded text-xs border border-red-200">再発行</button>
+                </div>
+              </div>
+              <div className="border rounded p-3">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-xs font-semibold text-gray-700">本番環境</span>
+                  <Badge text="本番" color="green" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <input className="flex-1 border rounded px-3 py-1.5 text-xs font-mono bg-gray-50" value="sk_live_••••••••••••••••••••••dc" readOnly />
+                  <button className="px-2 py-1.5 bg-gray-100 text-gray-600 rounded text-xs border">表示</button>
+                  <button className="px-2 py-1.5 bg-red-100 text-red-600 rounded text-xs border border-red-200">再発行</button>
+                </div>
+              </div>
+              <div className="border rounded p-3">
+                <p className="text-xs font-semibold text-gray-700 mb-1">Webhook URL</p>
+                <div className="flex items-center gap-2">
+                  <input className="flex-1 border rounded px-3 py-1.5 text-xs" defaultValue="https://abcmart-ec.jp/webhook/payment" />
+                  <button className="px-2 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold">保存</button>
+                  <button className="px-2 py-1.5 bg-gray-100 text-gray-600 rounded text-xs border">テスト送信</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: セキュリティ */}
+      {accTab === "security" && (
+        <div className="space-y-3 max-w-2xl">
+          <div className="bg-white rounded-lg border p-4">
+            <p className="text-xs font-bold text-gray-700 mb-3">🔐 2段階認証（MFA）</p>
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded border border-green-200">
+              <div>
+                <p className="text-xs font-semibold text-green-700">有効（認証アプリ連携済み）</p>
+                <p className="text-xs text-green-600 mt-0.5">Google Authenticator で設定済み</p>
+              </div>
+              <button className="px-3 py-1 bg-white text-gray-600 rounded text-xs border">設定変更</button>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg border p-4">
+            <p className="text-xs font-bold text-gray-700 mb-3">パスワード変更</p>
+            <div className="space-y-2">
+              <input className="w-full border rounded px-3 py-1.5 text-xs" type="password" placeholder="現在のパスワード" />
+              <input className="w-full border rounded px-3 py-1.5 text-xs" type="password" placeholder="新しいパスワード" />
+              <input className="w-full border rounded px-3 py-1.5 text-xs" type="password" placeholder="新しいパスワード（確認）" />
+              <button className="px-4 py-2 bg-blue-600 text-white rounded text-xs font-semibold">パスワードを変更</button>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg border p-4">
+            <p className="text-xs font-bold text-gray-700 mb-2">ログイン履歴</p>
+            <div className="space-y-1">
+              {[
+                { time: "02/11 09:15", ip: "203.0.113.xxx", device: "Chrome / Mac OS", status: "成功" },
+                { time: "02/10 18:30", ip: "203.0.113.xxx", device: "Safari / iPhone", status: "成功" },
+                { time: "02/10 08:45", ip: "198.51.100.xxx", device: "Chrome / Windows", status: "失敗（MFA）" },
+              ].map((l, i) => (
+                <div key={i} className="flex items-center text-xs gap-3 py-1 border-b last:border-0">
+                  <span className="w-28 text-gray-400">{l.time}</span>
+                  <span className="w-28 font-mono text-gray-500">{l.ip}</span>
+                  <span className="flex-1 text-gray-600">{l.device}</span>
+                  <Badge text={l.status} color={l.status === "成功" ? "green" : "red"} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: メンバー管理 */}
+      {accTab === "members" && (
+        <div className="space-y-3">
+          <div className="flex justify-end">
+            <button onClick={() => setShowInviteS08(true)} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ メンバー招待</button>
+          </div>
+          <div className="bg-white rounded-lg border">
+            <TableHeader cols={[{ label: "名前", w: "flex-1" }, { label: "メール", w: "w-48" }, { label: "権限", w: "w-20" }, { label: "MFA", w: "w-14" }, { label: "最終ログイン", w: "w-28" }, { label: "操作", w: "w-20" }]} />
+            {[
+              { name: "山田 太郎", email: "yamada@abcmart-ec.jp", role: "管理者", mfa: true, last: "02/11 09:15" },
+              { name: "鈴木 花子", email: "suzuki@abcmart-ec.jp", role: "一般", mfa: true, last: "02/10 14:20" },
+              { name: "佐藤 次郎", email: "sato@abcmart-ec.jp", role: "一般", mfa: false, last: "02/08 11:30" },
+            ].map((m, i) => (
+              <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
+                <div className="flex-1 font-semibold text-gray-700">{m.name}</div>
+                <div className="w-48 text-gray-500">{m.email}</div>
+                <div className="w-20"><Badge text={m.role} color={m.role === "管理者" ? "blue" : "gray"} /></div>
+                <div className="w-14 text-center">{m.mfa ? <span className="text-green-500">●</span> : <span className="text-red-400">○</span>}</div>
+                <div className="w-28 text-gray-400">{m.last}</div>
+                <div className="w-20"><button className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">編集</button></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tab: 通知設定 */}
+      {accTab === "notifications" && (
+        <div className="bg-white rounded-lg border p-4 max-w-2xl">
+          <p className="text-xs font-bold text-gray-700 mb-3">メール通知設定</p>
+          <div className="space-y-2">
+            {[
+              { label: "決済成功通知", desc: "決済が成功するたびに通知", enabled: false },
+              { label: "決済失敗通知", desc: "決済が失敗した場合に通知", enabled: true },
+              { label: "入金完了通知", desc: "口座への入金が完了した場合に通知", enabled: true },
+              { label: "チャージバック通知", desc: "チャージバックが発生した場合に通知", enabled: true },
+              { label: "セキュリティアラート", desc: "不審なログイン試行や設定変更があった場合", enabled: true },
+              { label: "月次レポート", desc: "毎月の売上レポートをメールで受信", enabled: true },
+            ].map((n, i) => (
+              <div key={i} className="flex items-center justify-between p-2 border rounded">
+                <div>
+                  <p className="text-xs font-semibold text-gray-700">{n.label}</p>
+                  <p className="text-xs text-gray-400">{n.desc}</p>
+                </div>
+                <div className={`w-10 h-5 rounded-full cursor-pointer flex items-center px-0.5 ${n.enabled ? "bg-blue-500 justify-end" : "bg-gray-300 justify-start"}`}>
+                  <div className="w-4 h-4 bg-white rounded-full shadow" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tab: 契約情報 */}
+      {accTab === "contract" && (
+        <div className="space-y-3 max-w-2xl">
+          <div className="bg-white rounded-lg border p-4">
+            <p className="text-xs font-bold text-gray-700 mb-3">現在の契約情報</p>
+            <div className="space-y-2 text-xs">
+              {[
+                { label: "契約日", value: "2025-04-12" },
+                { label: "契約ステータス", value: "有効", badge: true, bColor: "green" },
+                { label: "利用可能ブランド", value: "VISA / MC / JCB / PayPay" },
+                { label: "接続先（承認済み）", value: "GMO-PG, PayPay, JCB直接" },
+              ].map((c, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <span className="w-36 text-gray-500 text-right">{c.label}</span>
+                  {c.badge ? <Badge text={c.value} color={c.bColor} /> : <span className="font-semibold text-gray-700">{c.value}</span>}
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 p-2 bg-gray-50 rounded border">
+              <p className="text-xs text-gray-400">💡 手数料率・入金サイクル等の契約条件の詳細は、契約書PDFをご確認ください。条件変更をご希望の場合はお問い合わせください。</p>
+            </div>
+            <button className="mt-2 px-3 py-1 bg-gray-100 text-gray-600 rounded text-xs border">📄 契約書PDFをダウンロード</button>
+            <div className="mt-4 pt-3 border-t">
+              <p className="text-xs font-bold text-red-600 mb-1">アカウント解約</p>
+              <p className="text-xs text-gray-500 mb-2">解約申請後、運営にて対応いたします。未精算の処理完了後に解約が確定します。</p>
+              <button className="px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs border border-red-200 hover:bg-red-100">解約申請を送信</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: メンバー招待 ── */}
+      {showInviteS08 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowInviteS08(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+            <div className="p-4 border-b bg-gray-50 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-sm font-bold text-gray-800">📧 メンバー招待</h3>
+              <button onClick={() => setShowInviteS08(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div><label className="text-xs font-semibold text-gray-600">メールアドレス <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: member@company.jp" /></div>
+              <div><label className="text-xs font-semibold text-gray-600">権限 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>管理者</option><option>スタッフ</option><option>閲覧のみ</option></select></div>
+              <div><label className="text-xs font-semibold text-gray-600">MFA設定</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>必須（推奨）</option><option>任意</option></select></div>
+            </div>
+            <div className="p-4 border-t flex gap-2 justify-end">
+              <button onClick={() => setShowInviteS08(false)} className="px-4 py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">キャンセル</button>
+              <button onClick={() => setShowInviteS08(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">招待メール送信</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── S09: 決済リンク管理 ───
+const MerchantPaymentLinks = () => {
+  const [showPreview, setShowPreview] = useState(false);
+  const [showGenerated, setShowGenerated] = useState(false);
+  const [tab, setTab] = useState("create");
+  const tabs = [
+    { id: "create", label: "新規作成" },
+    { id: "list", label: "リンク一覧" },
+    { id: "stats", label: "利用状況" },
+  ];
+  return (
+    <div className="p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-bold text-gray-800">決済リンク管理</h2>
+      </div>
+      <div className="flex gap-1">{tabs.map(t => (
+        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-green-500 text-green-700 bg-green-50 font-bold" : "border-transparent text-gray-400"}`}>{t.label}</button>
+      ))}</div>
+      {tab === "create" && (
+        <div className="bg-white rounded-lg border p-4 space-y-4">
+          <p className="text-xs font-bold text-gray-600">決済タイプを選択</p>
+          <div className="grid grid-cols-3 gap-3">
+            {[{ icon: "💴", name: "固定金額", desc: "指定した金額で決済" }, { icon: "✏️", name: "金額入力型", desc: "顧客が金額を入力" }, { icon: "📋", name: "金額選択型", desc: "選択肢から選ぶ" }].map((t, i) => (
+              <div key={i} className={`border-2 rounded-lg p-3 text-center cursor-pointer hover:border-green-400 ${i === 0 ? "border-green-500 bg-green-50" : "border-gray-200"}`}>
+                <p className="text-xl">{t.icon}</p>
+                <p className="text-xs font-bold mt-1">{t.name}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{t.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-3 mt-3">
+            {["商品名 *", "決済金額 *", "注文IDプレフィックス", "有効期限"].map(f => (
+              <div key={f}><label className="text-xs text-gray-500">{f}</label><input className="w-full border rounded px-2 py-1.5 text-xs mt-0.5" placeholder={f.replace(" *", "")} /></div>
+            ))}
+          </div>
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <input type="checkbox" /> <span>ユーザーID入力を求める</span>
+            <span className="ml-4">利用可能回数:</span><input className="border rounded px-2 py-1 w-16 text-xs" placeholder="無制限" />
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setShowPreview(!showPreview)} className="flex-1 py-2 bg-gray-100 text-gray-600 rounded text-xs font-bold border hover:bg-gray-200">👁 プレビュー</button>
+            <button onClick={() => setShowGenerated(true)} className="flex-1 py-2 bg-green-600 text-white rounded text-xs font-bold hover:bg-green-700">🔗 決済リンクを生成</button>
+          </div>
+          <div className="bg-green-50 border border-green-200 rounded p-3 text-xs">
+            <p className="font-bold text-green-700">✅ 決済リンクが生成されました！</p>
+            <div className="flex items-center gap-2 mt-2">
+              <input className="flex-1 border rounded px-2 py-1 bg-white text-xs" value="https://pay.aipayment.jp/l/abc123xyz" readOnly />
+              <button className="px-2 py-1 bg-green-600 text-white rounded text-xs">📋 コピー</button>
+              <button className="px-2 py-1 bg-gray-100 rounded text-xs border">📧 メール</button>
+              <button className="px-2 py-1 bg-gray-100 rounded text-xs border">QR</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {tab === "list" && (
+        <div className="bg-white rounded-lg border">
+          <div className="p-3 border-b flex gap-2">
+            <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="商品名 / リンクIDで検索" />
+            <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>有効</option><option>無効</option><option>期限切れ</option></select>
+          </div>
+          <TableHeader cols={[{ label: "リンクID", w: "w-24" }, { label: "商品名", w: "flex-1" }, { label: "タイプ", w: "w-16" }, { label: "金額", w: "w-20" }, { label: "利用回数", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-24" }]} />
+          {[{ id: "LNK-001", name: "プレミアムプラン", type: "固定", amt: "¥9,800", uses: "12/∞", st: "有効", stc: "green" },
+            { id: "LNK-002", name: "寄付金", type: "入力", amt: "—", uses: "45/100", st: "有効", stc: "green" },
+            { id: "LNK-003", name: "コース選択", type: "選択", amt: "選択式", uses: "3/10", st: "有効", stc: "green" },
+            { id: "LNK-004", name: "キャンペーン", type: "固定", amt: "¥1,980", uses: "100/100", st: "上限到達", stc: "yellow" }
+          ].map((r, i) => (
+            <div key={i} className="flex px-3 py-2 text-xs border-b hover:bg-gray-50 items-center">
+              <div className="w-24 text-blue-600 font-mono">{r.id}</div>
+              <div className="flex-1">{r.name}</div>
+              <div className="w-16"><Badge text={r.type} color="blue" /></div>
+              <div className="w-20">{r.amt}</div>
+              <div className="w-16">{r.uses}</div>
+              <div className="w-16"><Badge text={r.st} color={r.stc} /></div>
+              <div className="w-24 flex gap-1">
+                <button className="px-1.5 py-0.5 bg-gray-100 rounded text-xs border">📋</button>
+                <button className="px-1.5 py-0.5 bg-gray-100 rounded text-xs border">QR</button>
+                <button className="px-1.5 py-0.5 bg-gray-100 rounded text-xs border">⏸</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {tab === "stats" && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-4 gap-3">
+            <KPICard label="総リンク数" value="24" color="green" />
+            <KPICard label="アクティブ" value="18" color="blue" />
+            <KPICard label="総利用回数" value="1,247" color="green" />
+            <KPICard label="総売上額" value="¥4,823,600" color="green" />
+          </div>
+          <div className="bg-white rounded-lg border p-3">
+            <p className="text-xs font-bold mb-2">リンク別実績</p>
+            <TableHeader cols={[{ label: "商品名", w: "flex-1" }, { label: "利用回数", w: "w-20" }, { label: "売上額", w: "w-24" }, { label: "成功率", w: "w-16" }, { label: "最終利用日", w: "w-24" }]} />
+            {[["プレミアムプラン", "842", "¥8,251,600", "98.2%", "2026-02-13"], ["寄付金", "245", "¥1,230,000", "96.7%", "2026-02-12"], ["コース選択", "160", "¥960,000", "97.5%", "2026-02-11"]].map((r, i) => (
+              <div key={i} className="flex px-3 py-2 text-xs border-b">
+                <div className="flex-1">{r[0]}</div><div className="w-20">{r[1]}</div><div className="w-24 font-bold">{r[2]}</div><div className="w-16 text-green-600">{r[3]}</div><div className="w-24 text-gray-400">{r[4]}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: 決済ページプレビュー ── */}
+      {showPreview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowPreview(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[380px]">
+            <div className="p-4 border-b bg-gray-50 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-sm font-bold text-gray-800">👁 決済ページプレビュー</h3>
+              <button onClick={() => setShowPreview(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div className="p-4">
+              <div className="bg-white border-2 border-dashed rounded-lg p-4 text-center space-y-3">
+                <div className="w-12 h-12 bg-green-100 rounded-full mx-auto flex items-center justify-center text-2xl">💳</div>
+                <p className="text-sm font-bold text-gray-800">サンプルショップ</p>
+                <p className="text-xs text-gray-500">商品A × 1点</p>
+                <p className="text-lg font-bold text-gray-800">¥3,980</p>
+                <div className="space-y-2">
+                  <input className="w-full text-xs border rounded px-3 py-2" placeholder="カード番号" disabled />
+                  <div className="flex gap-2"><input className="flex-1 text-xs border rounded px-3 py-2" placeholder="有効期限" disabled /><input className="flex-1 text-xs border rounded px-3 py-2" placeholder="CVC" disabled /></div>
+                  <button className="w-full py-2 bg-green-600 text-white rounded text-xs font-bold" disabled>お支払い</button>
+                </div>
+                <p className="text-xs text-gray-300">Powered by AQUAGATES</p>
+              </div>
+            </div>
+            <div className="p-4 border-t"><button onClick={() => setShowPreview(false)} className="w-full py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">閉じる</button></div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: リンク生成完了 ── */}
+      {showGenerated && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowGenerated(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+            <div className="p-4 border-b bg-green-50 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-sm font-bold text-green-700">✅ 決済リンクを生成しました</h3>
+              <button onClick={() => setShowGenerated(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div className="bg-gray-50 rounded border p-3"><p className="text-xs text-gray-400 mb-1">決済リンクURL</p><p className="text-xs font-mono text-blue-600 break-all">https://pay.aquagates.com/link/PL-20260216-001</p></div>
+              <div className="flex gap-2">
+                <button className="flex-1 py-2 bg-green-600 text-white rounded text-xs font-bold">📋 コピー</button>
+                <button className="flex-1 py-2 bg-gray-100 text-gray-600 rounded text-xs border">📧 メール送信</button>
+                <button className="flex-1 py-2 bg-gray-100 text-gray-600 rounded text-xs border">QRコード</button>
+              </div>
+              <div className="text-xs text-gray-400 text-center">有効期限: 2026-03-16 23:59</div>
+            </div>
+            <div className="p-4 border-t"><button onClick={() => setShowGenerated(false)} className="w-full py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">閉じる</button></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── S10: 継続・分割決済管理 ───
+const MerchantSubscriptions = () => {
+  const [showCreatePlan, setShowCreatePlan] = useState(false);
+  const [tab, setTab] = useState("plans");
+  const tabs = [{ id: "plans", label: "商品設定" }, { id: "users", label: "ユーザー管理" }, { id: "history", label: "決済履歴" }];
+  return (
+    <div className="p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-bold text-gray-800">継続・分割決済管理</h2>
+      </div>
+      <div className="flex gap-1">{tabs.map(t => (
+        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-green-500 text-green-700 bg-green-50 font-bold" : "border-transparent text-gray-400"}`}>{t.label}</button>
+      ))}</div>
+      {tab === "plans" && (
+        <div className="space-y-3">
+          <button onClick={() => setShowCreatePlan(!showCreatePlan)} className="px-3 py-1.5 bg-green-600 text-white rounded text-xs font-bold">+ プラン作成</button>
+          <div className="bg-white rounded-lg border">
+            <TableHeader cols={[{ label: "プラン名", w: "flex-1" }, { label: "タイプ", w: "w-16" }, { label: "金額", w: "w-24" }, { label: "サイクル", w: "w-20" }, { label: "ユーザー数", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]} />
+            {[{ name: "月額スタンダード", type: "継続", amt: "¥2,980/月", cycle: "毎月1日", users: "342", st: "active" },
+              { name: "年間プレミアム", type: "継続", amt: "¥29,800/年", cycle: "365日", users: "89", st: "active" },
+              { name: "3回分割払い", type: "分割", amt: "¥15,000(3回)", cycle: "毎月15日", users: "56", st: "active" },
+              { name: "旧プラン", type: "継続", amt: "¥1,980/月", cycle: "毎月1日", users: "12", st: "archived" }
+            ].map((r, i) => (
+              <div key={i} className="flex px-3 py-2 text-xs border-b hover:bg-gray-50 items-center">
+                <div className="flex-1 font-bold">{r.name}</div>
+                <div className="w-16"><Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} /></div>
+                <div className="w-24">{r.amt}</div>
+                <div className="w-20 text-gray-500">{r.cycle}</div>
+                <div className="w-16 text-center">{r.users}</div>
+                <div className="w-16"><Badge text={r.st === "active" ? "有効" : "アーカイブ"} color={r.st === "active" ? "green" : "gray"} /></div>
+                <div className="w-16"><button className="text-blue-600 text-xs">編集</button></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {tab === "users" && (
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="ユーザーID / メールで検索" />
+            <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>🟢 課金中</option><option>🔴 自動停止</option><option>🔵 完了</option></select>
+          </div>
+          <div className="bg-white rounded-lg border">
+            <TableHeader cols={[{ label: "ユーザーID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "プラン", w: "w-28" }, { label: "カード", w: "w-16" }, { label: "次回決済", w: "w-20" }, { label: "失敗", w: "w-10" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-28" }]} />
+            {[{ uid: "USR-001", email: "user1@example.com", plan: "月額スタンダード", card: "*4242", next: "03/01", fails: "0", st: "課金中", stc: "green" },
+              { uid: "USR-002", email: "user2@example.com", plan: "3回分割払い", card: "*1234", next: "03/15", fails: "0", st: "課金中", stc: "green" },
+              { uid: "USR-003", email: "user3@example.com", plan: "月額スタンダード", card: "*5678", next: "02/23", fails: "2", st: "リトライ中", stc: "yellow" },
+              { uid: "USR-004", email: "user4@example.com", plan: "月額スタンダード", card: "*9999", next: "—", fails: "3", st: "自動停止", stc: "red" }
+            ].map((r, i) => (
+              <div key={i} className="flex px-3 py-2 text-xs border-b hover:bg-gray-50 items-center">
+                <div className="w-24 font-mono text-blue-600">{r.uid}</div>
+                <div className="flex-1">{r.email}</div>
+                <div className="w-28">{r.plan}</div>
+                <div className="w-16 font-mono">{r.card}</div>
+                <div className="w-20">{r.next}</div>
+                <div className="w-10 text-center">{r.fails !== "0" && <span className="text-red-600 font-bold">{r.fails}</span>}{r.fails === "0" && "—"}</div>
+                <div className="w-16"><Badge text={r.st} color={r.stc} /></div>
+                <div className="w-28 flex gap-1">{r.st === "課金中" && <><button className="px-1.5 py-0.5 bg-yellow-50 text-yellow-700 rounded text-xs border border-yellow-200">一時停止</button><button className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200">カード変更URL</button></>}{r.st === "一時停止" && <button className="px-1.5 py-0.5 bg-green-50 text-green-600 rounded text-xs border border-green-200">再開</button>}{r.st === "リトライ中" && <button className="px-1.5 py-0.5 bg-red-50 text-red-600 rounded text-xs border border-red-200">永久停止</button>}</div>
+              </div>
+            ))}
+          </div>
+          <div className="bg-yellow-50 border border-yellow-200 rounded p-2 text-xs text-yellow-700">⚠️ リトライロジック: 失敗→10日後再トライ→3回連続失敗で自動停止（再開不可）</div>
+        </div>
+      )}
+      {tab === "history" && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-3 gap-3">
+            <KPICard label="今月 成功" value="487件" sub="¥1,452,260" color="green" />
+            <KPICard label="今月 失敗" value="12件" color="red" />
+            <KPICard label="リトライ中" value="3件" color="yellow" />
+          </div>
+          <div className="bg-white rounded-lg border">
+            <TableHeader cols={[{ label: "実行日", w: "w-24" }, { label: "ユーザーID", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "金額", w: "w-20" }, { label: "結果", w: "w-14" }, { label: "リトライ", w: "w-14" }, { label: "エラー", w: "w-20" }]} />
+            {[["02/13 02:00", "USR-001", "月額スタンダード", "¥2,980", "成功", "—", "—"], ["02/13 02:00", "USR-003", "月額スタンダード", "¥2,980", "失敗", "2回目", "E-Card01"], ["02/13 02:00", "USR-004", "月額スタンダード", "¥2,980", "失敗", "3回目", "E-Card01"]].map((r, i) => (
+              <div key={i} className="flex px-3 py-2 text-xs border-b">
+                <div className="w-24 text-gray-400">{r[0]}</div><div className="w-24 font-mono text-blue-600">{r[1]}</div><div className="flex-1">{r[2]}</div><div className="w-20">{r[3]}</div>
+                <div className="w-14"><Badge text={r[4]} color={r[4] === "成功" ? "green" : "red"} /></div><div className="w-14 text-gray-500">{r[5]}</div><div className="w-20 text-red-500 font-mono">{r[6]}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: プラン作成 ── */}
+      {showCreatePlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowCreatePlan(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
+            <div className="p-4 border-b bg-gray-50 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-sm font-bold text-gray-800">+ サブスクリプションプラン作成</h3>
+              <button onClick={() => setShowCreatePlan(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div><label className="text-xs font-semibold text-gray-600">プラン名 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: スタンダードプラン" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-gray-600">金額 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="¥2,980" /></div>
+                <div><label className="text-xs font-semibold text-gray-600">課金サイクル <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>月額</option><option>年額</option><option>週額</option></select></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-gray-600">トライアル期間</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>なし</option><option>7日間</option><option>14日間</option><option>30日間</option></select></div>
+                <div><label className="text-xs font-semibold text-gray-600">リトライ回数</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>3回（推奨）</option><option>1回</option><option>5回</option></select></div>
+              </div>
+              <div><label className="text-xs font-semibold text-gray-600">説明</label><textarea className="w-full text-xs border rounded p-2 h-12 mt-0.5" placeholder="プランの説明..." /></div>
+            </div>
+            <div className="p-4 border-t flex gap-2 justify-end">
+              <button onClick={() => setShowCreatePlan(false)} className="px-4 py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">キャンセル</button>
+              <button onClick={() => setShowCreatePlan(false)} className="px-4 py-2 text-xs bg-green-600 text-white rounded font-semibold hover:bg-green-700">プランを作成</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── M14: リカーリング管理 ───
+const MasterRecurring = () => {
+  const [tab, setTab] = useState("overview");
+  const tabs = [
+    { id: "overview", label: "概況" },
+    { id: "plans", label: "プラン検索" },
+    { id: "users", label: "ユーザー検索" },
+    { id: "logs", label: "バッチログ" },
+  ];
+  return (
+    <div className="p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-bold text-gray-800">リカーリング管理</h2>
+      </div>
+      <div className="flex gap-1">{tabs.map(t => (
+        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-blue-500 text-blue-700 bg-blue-50 font-bold" : "border-transparent text-gray-400"}`}>{t.label}</button>
+      ))}</div>
+      {tab === "overview" && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-4 gap-3">
+            <KPICard label="アクティブプラン" value="156" color="blue" />
+            <KPICard label="課金中ユーザー" value="12,847" color="blue" />
+            <KPICard label="本日の処理予定" value="423件" color="blue" />
+            <KPICard label="リトライ中" value="18件" sub="要注意" color="red" />
+          </div>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
+            <span className="text-lg">🔴</span>
+            <div className="text-xs"><span className="font-bold text-red-700">自動停止急増アラート：</span><span className="text-red-600">直近24hの自動停止が前日比250%（5件 → 12件）。接続先の障害の可能性があります</span></div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-2">本日の実行予定</p>
+              <TableHeader cols={[{ label: "時刻", w: "w-14" }, { label: "加盟店", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "対象数", w: "w-14" }, { label: "状態", w: "w-14" }]} />
+              {[["02:00", "ABC商事", "月額スタンダード", "342", "完了"], ["02:00", "XYZ物産", "年間プレミアム", "89", "完了"], ["14:00", "DEF Inc", "月額ライト", "56", "待機中"]].map((r, i) => (
+                <div key={i} className="flex px-3 py-1.5 text-xs border-b">
+                  <div className="w-14 text-gray-400">{r[0]}</div><div className="w-24">{r[1]}</div><div className="flex-1">{r[2]}</div><div className="w-14 text-center">{r[3]}</div><div className="w-14"><Badge text={r[4]} color={r[4] === "完了" ? "green" : "yellow"} /></div>
+                </div>
+              ))}
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-2">直近バッチ実行結果</p>
+              <TableHeader cols={[{ label: "実行日時", w: "w-28" }, { label: "処理", w: "w-12" }, { label: "成功", w: "w-12" }, { label: "失敗", w: "w-12" }, { label: "状態", w: "w-14" }]} />
+              {[["2026-02-13 02:00", "423", "411", "12", "完了"], ["2026-02-12 02:00", "398", "391", "7", "完了"], ["2026-02-11 02:00", "412", "406", "6", "完了"]].map((r, i) => (
+                <div key={i} className="flex px-3 py-1.5 text-xs border-b">
+                  <div className="w-28 text-gray-400">{r[0]}</div><div className="w-12">{r[1]}</div><div className="w-12 text-green-600">{r[2]}</div><div className="w-12 text-red-600">{r[3]}</div><div className="w-14"><Badge text={r[4]} color="green" /></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      {tab === "plans" && (
+        <div className="bg-white rounded-lg border">
+          <div className="p-3 border-b flex gap-2">
+            <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="加盟店名 / プラン名で検索" />
+            <select className="border rounded px-2 py-1 text-xs"><option>全タイプ</option><option>継続</option><option>分割</option></select>
+            <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>有効</option><option>アーカイブ</option></select>
+            <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs">検索</button>
+          </div>
+          <TableHeader cols={[{ label: "プランID", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "サイト", w: "w-20" }, { label: "プラン名", w: "flex-1" }, { label: "タイプ", w: "w-14" }, { label: "金額", w: "w-24" }, { label: "ユーザー", w: "w-16" }, { label: "状態", w: "w-14" }]} />
+          {[{ id: "PLN-001", m: "ABC商事", s: "ECサイトA", name: "月額スタンダード", type: "継続", amt: "¥0→¥2,980/月", users: "342/400", st: "有効" },
+            { id: "PLN-002", m: "XYZ物産", s: "ストア", name: "年間プレミアム", type: "継続", amt: "¥29,800/年", users: "89/120", st: "有効" },
+            { id: "PLN-003", m: "ABC商事", s: "ECサイトA", name: "3回分割払い", type: "分割", amt: "¥15,000(3回)", users: "56/—", st: "有効" }
+          ].map((r, i) => (
+            <div key={i} className="flex px-3 py-2 text-xs border-b hover:bg-gray-50 items-center">
+              <div className="w-24 font-mono text-blue-600">{r.id}</div><div className="w-24">{r.m}</div><div className="w-20 text-gray-500">{r.s}</div><div className="flex-1 font-bold">{r.name}</div><div className="w-14"><Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} /></div><div className="w-24 text-xs">{r.amt}</div><div className="w-16">{r.users}</div><div className="w-14"><Badge text={r.st} color="green" /></div>
+            </div>
+          ))}
+        </div>
+      )}
+      {tab === "users" && (
+        <div className="bg-white rounded-lg border">
+          <div className="p-3 border-b flex gap-2">
+            <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="メール / ユーザーIDで検索" />
+            <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>課金中</option><option>一時停止</option><option>自動停止</option></select>
+            <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs">検索</button>
+          </div>
+          <TableHeader cols={[{ label: "ユーザーID", w: "w-20" }, { label: "メール", w: "w-32" }, { label: "加盟店", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "状態", w: "w-16" }, { label: "次回決済", w: "w-20" }, { label: "失敗", w: "w-10" }, { label: "操作", w: "w-20" }]} />
+          {[{ id: "U-5521", email: "t***@gmail.com", m: "ABC商事", plan: "月額スタンダード", st: "課金中", stc: "green", next: "2026-03-01", fail: "0" },
+            { id: "U-3302", email: "s***@yahoo.co.jp", m: "XYZ物産", plan: "年間プレミアム", st: "リトライ中", stc: "yellow", next: "2026-02-23", fail: "1" },
+            { id: "U-1108", email: "k***@icloud.com", m: "ABC商事", plan: "月額スタンダード", st: "自動停止", stc: "red", next: "—", fail: "3" }
+          ].map((r, i) => (
+            <div key={i} className="flex px-3 py-2 text-xs border-b hover:bg-gray-50 items-center">
+              <div className="w-20 font-mono">{r.id}</div><div className="w-32 text-gray-500">{r.email}</div><div className="w-24">{r.m}</div><div className="flex-1">{r.plan}</div><div className="w-16"><Badge text={r.st} color={r.stc} /></div><div className="w-20 text-gray-400">{r.next}</div><div className="w-10 text-center">{r.fail !== "0" ? <span className="text-red-600 font-bold">{r.fail}</span> : "0"}</div>
+              <div className="w-20 flex gap-1"><button className="text-blue-600 text-xs">詳細</button><button className="text-red-500 text-xs">強制停止</button></div>
+            </div>
+          ))}
+        </div>
+      )}
+      {tab === "logs" && (
+        <div className="bg-white rounded-lg border">
+          <TableHeader cols={[{ label: "実行日時", w: "w-32" }, { label: "バッチID", w: "w-20" }, { label: "処理件数", w: "w-16" }, { label: "成功", w: "w-14" }, { label: "失敗", w: "w-14" }, { label: "リトライ", w: "w-14" }, { label: "処理時間", w: "w-14" }, { label: "状態", w: "w-16" }, { label: "", w: "w-10" }]} />
+          {[["2026-02-13 02:00:05", "B-4521", "423", "411", "12", "8", "4.2s", "完了"],
+            ["2026-02-12 02:00:03", "B-4520", "398", "391", "7", "5", "3.8s", "完了"],
+            ["2026-02-11 02:00:04", "B-4519", "412", "406", "6", "4", "3.9s", "完了"],
+            ["2026-02-10 02:00:02", "B-4518", "389", "385", "4", "3", "3.5s", "完了"]
+          ].map((r, i) => (
+            <div key={i} className="flex px-3 py-2 text-xs border-b hover:bg-gray-50 items-center">
+              <div className="w-32 text-gray-400">{r[0]}</div><div className="w-20 font-mono">{r[1]}</div><div className="w-16">{r[2]}</div><div className="w-14 text-green-600">{r[3]}</div><div className="w-14 text-red-600">{r[4]}</div><div className="w-14 text-yellow-600">{r[5]}</div><div className="w-14">{r[6]}</div><div className="w-16"><Badge text={r[7]} color="green" /></div><div className="w-10"><button className="text-blue-600 text-xs">詳細</button></div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── M15: 代理店管理 ───
+const MasterAgents = () => {
+  const [showAddAgent, setShowAddAgent] = useState(false);
+  const [tab, setTab] = useState("list");
+  const tabs = [{ id: "list", label: "代理店一覧" }, { id: "register", label: "代理店登録" }, { id: "conditions", label: "条件設定" }, { id: "commissions", label: "報酬管理" }];
+  return (
+    <div className="p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-bold text-gray-800">代理店管理</h2>
+      </div>
+      <div className="flex gap-1">{tabs.map(t => (
+        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-blue-500 text-blue-700 bg-blue-50 font-bold" : "border-transparent text-gray-400"}`}>{t.label}</button>
+      ))}</div>
+      {tab === "list" && (
+        <div className="bg-white rounded-lg border">
+          <div className="p-3 border-b"><input className="border rounded px-2 py-1 text-xs w-full" placeholder="代理店名 / コードで検索" /></div>
+          <TableHeader cols={[{ label: "コード", w: "w-20" }, { label: "代理店名", w: "flex-1" }, { label: "代表者", w: "w-20" }, { label: "紹介加盟店数", w: "w-20" }, { label: "紹介料率", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]} />
+          {[{ code: "AG-001", name: "デジタルパートナーズ", rep: "田中太郎", merchants: "23", rate: "5.0%", st: "active" },
+            { code: "AG-002", name: "ウェブコンサル合同会社", rep: "佐藤花子", merchants: "12", rate: "4.5%", st: "active" },
+            { code: "AG-003", name: "ITソリューションズ", rep: "鈴木一郎", merchants: "8", rate: "5.0%", st: "active" }
+          ].map((r, i) => (
+            <div key={i} className="flex px-3 py-2 text-xs border-b hover:bg-gray-50 items-center">
+              <div className="w-20 font-mono">{r.code}</div>
+              <div className="flex-1 font-bold">{r.name}</div>
+              <div className="w-20">{r.rep}</div>
+              <div className="w-20 text-center">{r.merchants}社</div>
+              <div className="w-16">{r.rate}</div>
+              <div className="w-16"><Badge text="有効" color="green" /></div>
+              <div className="w-16"><button className="text-blue-600 text-xs">詳細</button></div>
+            </div>
+          ))}
+        </div>
+      )}
+      {tab === "register" && (
+        <div className="bg-white rounded-lg border p-4 space-y-3 max-w-lg">
+          <p className="text-xs font-bold">新規代理店登録</p>
+          {["代理店名 *", "代表者名 *", "メール *", "電話番号", "住所", "基本紹介料率(%) *"].map(f => (
+            <div key={f}><label className="text-xs text-gray-500">{f}</label><input className="w-full border rounded px-2 py-1.5 text-xs mt-0.5" placeholder={f.replace(" *", "")} /></div>
+          ))}
+          <div><label className="text-xs text-gray-500">契約条件メモ</label><textarea className="w-full border rounded px-2 py-1.5 text-xs mt-0.5 h-16" /></div>
+          <button onClick={() => setShowAddAgent(true)} className="w-full py-2 bg-blue-600 text-white rounded text-xs font-bold">代理店を登録する</button>
+        </div>
+      )}
+      {tab === "commissions" && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <select className="border rounded px-2 py-1 text-xs"><option>2026年2月</option><option>2026年1月</option></select>
+            <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs">今月の報酬を計算</button>
+            <button className="px-3 py-1 bg-gray-100 text-gray-600 rounded text-xs border">📥 CSV出力</button>
+          </div>
+          <div className="bg-white rounded-lg border">
+            <TableHeader cols={[{ label: "代理店", w: "flex-1" }, { label: "対象加盟店", w: "w-16" }, { label: "取引総額", w: "w-24" }, { label: "料率", w: "w-14" }, { label: "報酬額", w: "w-24" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]} />
+            {[["デジタルパートナーズ", "23", "¥45,200,000", "5.0%", "¥2,260,000", "pending"], ["ウェブコンサル合同会社", "12", "¥18,500,000", "4.5%", "¥832,500", "confirmed"], ["ITソリューションズ", "8", "¥8,300,000", "5.0%", "¥415,000", "paid"]].map((r, i) => (
+              <div key={i} className="flex px-3 py-2 text-xs border-b items-center">
+                <div className="flex-1 font-bold">{r[0]}</div><div className="w-16 text-center">{r[1]}社</div><div className="w-24">{r[2]}</div><div className="w-14">{r[3]}</div><div className="w-24 font-bold text-green-700">{r[4]}</div>
+                <div className="w-16"><Badge text={r[5] === "pending" ? "未確認" : r[5] === "confirmed" ? "確認済" : "支払済"} color={r[5] === "pending" ? "yellow" : r[5] === "confirmed" ? "blue" : "green"} /></div>
+                <div className="w-16">{r[5] === "pending" && <button className="text-blue-600 text-xs">承認</button>}{r[5] === "confirmed" && <button className="text-green-600 text-xs">支払</button>}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {tab === "conditions" && (
+        <div className="bg-white rounded-lg border p-4">
+          <p className="text-xs font-bold mb-3">代理店別 条件設定</p>
+          <TableHeader cols={[{ label: "代理店", w: "flex-1" }, { label: "基本料率", w: "w-20" }, { label: "契約開始", w: "w-24" }, { label: "操作", w: "w-14" }]} />
+          {[["デジタルパートナーズ", "5.0%", "2025-04-01"], ["ウェブコンサル合同会社", "4.5%", "2025-07-15"], ["ITソリューションズ", "5.0%", "2025-10-01"]].map((r, i) => (
+            <div key={i} className="flex px-3 py-2 text-xs border-b items-center"><div className="flex-1">{r[0]}</div><div className="w-20">{r[1]}</div><div className="w-24 text-gray-400">{r[2]}</div><div className="w-14"><button className="text-blue-600">編集</button></div></div>
+          ))}
+        </div>
+      )}
+
+      {/* ── Modal: 代理店登録 ── */}
+      {showAddAgent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowAddAgent(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
+            <div className="p-4 border-b bg-gray-50 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-sm font-bold text-gray-800">代理店を登録</h3>
+              <button onClick={() => setShowAddAgent(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div><label className="text-xs font-semibold text-gray-600">法人名 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="株式会社〇〇" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-gray-600">代理店コード <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="AG-XXX" /></div>
+                <div><label className="text-xs font-semibold text-gray-600">種別 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>紹介型</option><option>取次型</option></select></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-gray-600">担当者名 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="山田 太郎" /></div>
+                <div><label className="text-xs font-semibold text-gray-600">メール <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="agent@example.com" /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-gray-600">報酬率（%）<span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="0.1" /></div>
+                <div><label className="text-xs font-semibold text-gray-600">契約期間</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>1年</option><option>2年</option><option>無期限</option></select></div>
+              </div>
+            </div>
+            <div className="p-4 border-t flex gap-2 justify-end">
+              <button onClick={() => setShowAddAgent(false)} className="px-4 py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">キャンセル</button>
+              <button onClick={() => setShowAddAgent(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">登録する</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── D01: 代理店ダッシュボード ───
+const AgentDashboard = () => (
+  <div className="p-4 space-y-3">
+    <div className="flex items-center justify-between">
+      <h2 className="text-sm font-bold text-gray-800">代理店ダッシュボード</h2>
+    </div>
+    <div className="grid grid-cols-4 gap-3">
+      <KPICard label="紹介加盟店（稼働中）" value="23社" color="green" />
+      <KPICard label="今月の取引総額" value="¥45.2M" trend={8.3} color="green" />
+      <KPICard label="今月の報酬見込み" value="¥2,260,000" color="green" />
+      <KPICard label="先月の報酬確定額" value="¥2,105,000" sub="支払済" color="blue" />
+    </div>
+    <div className="grid grid-cols-2 gap-3">
+      <div className="bg-white rounded-lg border p-3">
+        <p className="text-xs font-bold mb-2">加盟店ステータス</p>
+        <div className="flex items-center gap-4 py-4 justify-center">
+          <div className="text-center"><div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold">23</div><p className="text-xs text-gray-500 mt-1">稼働中</p></div>
+          <div className="text-center"><div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-700 font-bold">3</div><p className="text-xs text-gray-500 mt-1">審査中</p></div>
+          <div className="text-center"><div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold">1</div><p className="text-xs text-gray-500 mt-1">停止中</p></div>
+        </div>
+      </div>
+      <div className="bg-white rounded-lg border p-3">
+        <p className="text-xs font-bold mb-2">月別報酬推移（直近6ヶ月）</p>
+        <div className="flex items-end gap-2 h-24 px-2">
+          {[60, 72, 68, 85, 90, 95].map((h, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center">
+              <div className="w-full bg-orange-400 rounded-t" style={{ height: `${h}%` }} />
+              <p className="text-xs text-gray-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+    <div className="bg-white rounded-lg border p-3">
+      <p className="text-xs font-bold mb-2">最新の紹介加盟店</p>
+      {[["ネットショップ太郎", "2026-02-10", "審査中", "yellow"], ["ファッションEC123", "2026-01-25", "稼働中", "green"], ["フード通販ABC", "2026-01-15", "稼働中", "green"]].map((r, i) => (
+        <div key={i} className="flex items-center py-2 border-b text-xs last:border-0">
+          <div className="flex-1 font-bold">{r[0]}</div>
+          <div className="w-24 text-gray-400">{r[1]}</div>
+          <Badge text={r[2]} color={r[3]} />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ─── D02: 加盟店一覧 ───
+const AgentMerchants = () => (
+  <div className="p-4 space-y-3">
+    <div className="flex items-center justify-between">
+      <h2 className="text-sm font-bold text-gray-800">加盟店一覧（自分の紹介のみ）</h2>
+    </div>
+    <div className="flex gap-2"><input className="border rounded px-2 py-1 text-xs flex-1" placeholder="加盟店名で検索" /><select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option></select></div>
+    <div className="bg-white rounded-lg border">
+      <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "法人名", w: "w-28" }, { label: "ステータス", w: "w-16" }, { label: "月間取引額", w: "w-24" }, { label: "紹介日", w: "w-20" }, { label: "適用料率", w: "w-16" }]} />
+      {[["ECサイトA", "ABC商事", "稼働中", "green", "¥5,200,000", "2025-06-01", "5.0%"],
+        ["オンラインストアB", "XYZ物産", "稼働中", "green", "¥3,100,000", "2025-08-15", "5.0%"],
+        ["ネットショップ太郎", "太郎合同会社", "審査中", "yellow", "—", "2026-02-10", "5.0%"]
+      ].map((r, i) => (
+        <div key={i} className="flex px-3 py-2 text-xs border-b hover:bg-gray-50 items-center">
+          <div className="flex-1 font-bold">{r[0]}</div>
+          <div className="w-28 text-gray-500">{r[1]}</div>
+          <div className="w-16"><Badge text={r[2]} color={r[3]} /></div>
+          <div className="w-24">{r[4]}</div>
+          <div className="w-20 text-gray-400">{r[5]}</div>
+          <div className="w-16">{r[6]}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ─── D03: 報告書 ───
+const AgentReports = () => (
+  <div className="p-4 space-y-3">
+    <div className="flex items-center justify-between">
+      <h2 className="text-sm font-bold text-gray-800">報告書</h2>
+    </div>
+    <div className="bg-white rounded-lg border">
+      <TableHeader cols={[{ label: "対象月", w: "w-20" }, { label: "対象加盟店", w: "w-16" }, { label: "取引総額", w: "w-24" }, { label: "報酬額", w: "w-24" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-32" }]} />
+      {[["2026年2月", "23社", "¥45,200,000", "¥2,260,000", "pending", "未確認"],
+        ["2026年1月", "22社", "¥42,100,000", "¥2,105,000", "paid", "支払済"],
+        ["2025年12月", "21社", "¥38,500,000", "¥1,925,000", "paid", "支払済"]
+      ].map((r, i) => (
+        <div key={i} className="flex px-3 py-2 text-xs border-b hover:bg-gray-50 items-center">
+          <div className="w-20 font-bold">{r[0]}</div>
+          <div className="w-16 text-center">{r[1]}</div>
+          <div className="w-24">{r[2]}</div>
+          <div className="w-24 font-bold text-green-700">{r[3]}</div>
+          <div className="w-16"><Badge text={r[5]} color={r[4] === "paid" ? "green" : "yellow"} /></div>
+          <div className="w-32 flex gap-1"><button className="px-2 py-0.5 bg-gray-100 rounded text-xs border">📄 PDF</button><button className="px-2 py-0.5 bg-gray-100 rounded text-xs border">📥 CSV</button><button className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200">詳細</button></div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ─── D04: 申込紹介 ───
+const AgentReferral = () => (
+  <div className="p-4 space-y-3">
+    <div className="flex items-center justify-between">
+      <h2 className="text-sm font-bold text-gray-800">申込紹介</h2>
+    </div>
+    <div className="grid grid-cols-2 gap-4">
+      <div className="bg-white rounded-lg border p-4 space-y-3">
+        <p className="text-xs font-bold">新規加盟店 紹介申請</p>
+        {["法人名 *", "代表者名 *", "担当者名 *", "担当者メール *", "担当者電話 *", "サイトURL *", "月間予想売上 *"].map(f => (
+          <div key={f}><label className="text-xs text-gray-500">{f}</label><input className="w-full border rounded px-2 py-1.5 text-xs mt-0.5" /></div>
+        ))}
+        <div><label className="text-xs text-gray-500">業種</label><select className="w-full border rounded px-2 py-1.5 text-xs mt-0.5"><option>選択してください</option><option>EC物販</option><option>デジタルコンテンツ</option><option>サービス業</option></select></div>
+        <div><label className="text-xs text-gray-500">備考</label><textarea className="w-full border rounded px-2 py-1.5 text-xs mt-0.5 h-12" /></div>
+        <button className="w-full py-2 bg-orange-500 text-white rounded text-xs font-bold hover:bg-orange-600">紹介申請を送信</button>
+      </div>
+      <div className="space-y-3">
+        <p className="text-xs font-bold">申請履歴</p>
+        <div className="bg-white rounded-lg border">
+          {[["太郎合同会社", "2026-02-10", "審査中", "yellow"], ["DEFサービス", "2026-01-20", "承認済", "green"], ["GHIマーケット", "2025-12-05", "否認", "red"]].map((r, i) => (
+            <div key={i} className="flex items-center px-3 py-2 text-xs border-b">
+              <div className="flex-1 font-bold">{r[0]}</div>
+              <div className="w-20 text-gray-400">{r[1]}</div>
+              <Badge text={r[2]} color={r[3]} />
+            </div>
+          ))}
+        </div>
+        <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-700">
+          <p className="font-bold">紹介フロー</p>
+          <p className="mt-1">① 紹介申請 → ② 運営確認 → ③ 加盟店にP01 URLを送信 → ④ 正式申込 → ⑤ 審査 → ⑥ 承認後自動紐付け</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// ─── D05: 代理店アカウント設定 ───
+const AgentAccountSettings = () => {
+  const [showInviteD05, setShowInviteD05] = useState(false);
+  return (
+  <div className="p-4 space-y-3">
+    <div className="flex items-center justify-between">
+      <h2 className="text-sm font-bold text-gray-800">アカウント設定</h2>
+    </div>
+    <div className="grid grid-cols-3 gap-4">
+      <div className="bg-white rounded-lg border p-4 space-y-2">
+        <p className="text-xs font-bold">代理店情報（閲覧のみ）</p>
+        {[["代理店コード", "AG-001"], ["代理店名", "デジタルパートナーズ"], ["代表者", "田中太郎"], ["メール", "info@digital-partners.jp"], ["電話", "03-1234-5678"]].map(([l, v], i) => (
+          <div key={i} className="flex text-xs"><span className="w-24 text-gray-400">{l}</span><span className="font-bold">{v}</span></div>
+        ))}
+        <p className="text-xs text-gray-400 mt-2">※ 変更は運営にお問い合わせください</p>
+      </div>
+      <div className="bg-white rounded-lg border p-4 space-y-2">
+        <p className="text-xs font-bold">スタッフ管理</p>
+        {[["田中太郎", "admin", "2026-02-13"], ["田中次郎", "viewer", "2026-02-10"]].map(([n, r, d], i) => (
+          <div key={i} className="flex items-center text-xs border-b py-1.5"><span className="flex-1">{n}</span><Badge text={r} color={r === "admin" ? "blue" : "gray"} /><span className="w-20 text-gray-400 text-right">{d}</span></div>
+        ))}
+        <button onClick={() => setShowInviteD05(true)} className="w-full py-1.5 bg-orange-50 text-orange-600 rounded text-xs border border-orange-200 mt-2">+ スタッフを招待</button>
+      </div>
+      <div className="bg-white rounded-lg border p-4 space-y-2">
+        <p className="text-xs font-bold">セキュリティ</p>
+        <button className="w-full py-1.5 bg-gray-50 rounded text-xs border">🔑 パスワード変更</button>
+        <button className="w-full py-1.5 bg-gray-50 rounded text-xs border">📱 MFA設定</button>
+        <div className="mt-2"><p className="text-xs text-gray-400 mb-1">最近のログイン</p>
+          {[["2026-02-13 09:15", "103.xx.xx.xx"], ["2026-02-12 14:30", "103.xx.xx.xx"]].map(([d, ip], i) => (
+            <div key={i} className="flex text-xs text-gray-500 py-0.5"><span className="flex-1">{d}</span><span>{ip}</span></div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    {/* ── Modal: スタッフ招待 ── */}
+    {showInviteD05 && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowInviteD05(false)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[400px]">
+          <div className="p-4 border-b bg-orange-50 rounded-t-xl flex justify-between items-center">
+            <h3 className="text-sm font-bold text-gray-800">📧 スタッフを招待</h3>
+            <button onClick={() => setShowInviteD05(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+          </div>
+          <div className="p-4 space-y-3">
+            <div><label className="text-xs font-semibold text-gray-600">メールアドレス <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="staff@agency.jp" /></div>
+            <div><label className="text-xs font-semibold text-gray-600">権限 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>管理者</option><option>閲覧のみ</option></select></div>
+          </div>
+          <div className="p-4 border-t flex gap-2 justify-end">
+            <button onClick={() => setShowInviteD05(false)} className="px-4 py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">キャンセル</button>
+            <button onClick={() => setShowInviteD05(false)} className="px-4 py-2 text-xs bg-orange-500 text-white rounded font-semibold hover:bg-orange-600">招待メール送信</button>
+          </div>
+        </div>
+      </div>
+    )}
+    </div>
+  );
+};
+
+// ─── M16: 顧客管理（運営） ───
+const MasterCustomers = () => {
+  const [tab, setTab] = useState("search");
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const tabs = [{ id: "search", label: "顧客検索" }, { id: "analysis", label: "顧客分析" }];
+  const customers = [
+    { id: "CUS-00001", email: "t***@example.com", card: "VISA *4242", merchant: "ABC商事", txn: 47, ltv: "¥892,600", last: "02/13 14:22", sub: "課金中", risk: "low", segment: "ロイヤル" },
+    { id: "CUS-00002", email: "s***@gmail.com", card: "MC *1234", merchant: "XYZ物産", txn: 12, ltv: "¥156,800", last: "02/12 09:45", sub: "なし", risk: "low", segment: "リピーター" },
+    { id: "CUS-00003", email: "h***@yahoo.co.jp", card: "JCB *5678", merchant: "ABC商事", txn: 3, ltv: "¥45,200", last: "02/10 18:30", sub: "停止", risk: "medium", segment: "リピーター" },
+    { id: "CUS-00004", email: "k***@company.jp", card: "VISA *9999", merchant: "DEFサービス", txn: 1, ltv: "¥9,800", last: "02/08 11:00", sub: "なし", risk: "high", segment: "初回" },
+    { id: "CUS-00005", email: "m***@icloud.com", card: "AMEX *3456", merchant: "ABC商事", txn: 89, ltv: "¥2,345,000", last: "02/13 16:05", sub: "課金中", risk: "low", segment: "ロイヤル" },
+  ];
+  const riskColors = { low: "green", medium: "yellow", high: "red", blocked: "gray" };
+  const segColors = { "ロイヤル": "purple", "リピーター": "blue", "初回": "gray" };
+  return (
+    <div className="p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-bold text-gray-800">顧客管理</h2>
+      </div>
+      <div className="flex gap-1">{tabs.map(t => (
+        <button key={t.id} onClick={() => { setTab(t.id); setSelectedCustomer(null); }} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-blue-500 text-blue-700 bg-blue-50 font-bold" : "border-transparent text-gray-400"}`}>{t.label}</button>
+      ))}</div>
+
+      {tab === "search" && !selectedCustomer && (
+        <div className="space-y-3">
+          <div className="bg-white rounded-lg border p-3">
+            <p className="text-xs font-bold mb-2">検索条件</p>
+            <div className="grid grid-cols-4 gap-2">
+              <div><label className="text-xs text-gray-400">メール / 名前</label><input className="w-full border rounded px-2 py-1 text-xs mt-0.5" placeholder="検索..." /></div>
+              <div><label className="text-xs text-gray-400">カード下4桁</label><input className="w-full border rounded px-2 py-1 text-xs mt-0.5" placeholder="4242" /></div>
+              <div><label className="text-xs text-gray-400">加盟店</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全加盟店</option><option>ABC商事</option><option>XYZ物産</option></select></div>
+              <div><label className="text-xs text-gray-400">リスク</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全レベル</option><option>🟢 低</option><option>🟡 中</option><option>🔴 高</option></select></div>
+            </div>
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              <div><label className="text-xs text-gray-400">サブスク状態</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全て</option><option>課金中</option><option>停止</option><option>なし</option></select></div>
+              <div><label className="text-xs text-gray-400">セグメント</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全て</option><option>ロイヤル</option><option>リピーター</option><option>初回</option></select></div>
+              <div><label className="text-xs text-gray-400">LTV範囲</label><div className="flex gap-1 mt-0.5"><input className="w-full border rounded px-2 py-1 text-xs" placeholder="¥0" /><span className="text-xs text-gray-400 mt-1">〜</span><input className="w-full border rounded px-2 py-1 text-xs" placeholder="上限なし" /></div></div>
+              <div className="flex items-end"><button className="w-full py-1 bg-blue-600 text-white rounded text-xs font-bold">🔍 検索</button></div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg border">
+            <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "最終取引", w: "w-24" }, { label: "サブスク", w: "w-14" }, { label: "セグメント", w: "w-16" }, { label: "リスク", w: "w-12" }]} />
+            {customers.map((c, i) => (
+              <div key={i} onClick={() => setSelectedCustomer(c)} className="flex px-3 py-2 text-xs border-b hover:bg-blue-50 cursor-pointer items-center">
+                <div className="w-24 font-mono text-blue-600">{c.id}</div>
+                <div className="flex-1">{c.email}</div>
+                <div className="w-24 font-mono text-xs">{c.card}</div>
+                <div className="w-24 text-gray-500">{c.merchant}</div>
+                <div className="w-16 text-center">{c.txn}</div>
+                <div className="w-24 font-bold">{c.ltv}</div>
+                <div className="w-24 text-gray-400">{c.last}</div>
+                <div className="w-14"><Badge text={c.sub} color={c.sub === "課金中" ? "green" : c.sub === "停止" ? "red" : "gray"} /></div>
+                <div className="w-16"><Badge text={c.segment} color={segColors[c.segment] || "gray"} /></div>
+                <div className="w-12"><Badge text={c.risk === "low" ? "低" : c.risk === "medium" ? "中" : "高"} color={riskColors[c.risk]} /></div>
+              </div>
+            ))}
+          </div>
+          <div className="text-xs text-gray-400 text-right">5件表示 / 全12,847件</div>
+        </div>
+      )}
+
+      {tab === "search" && selectedCustomer && (
+        <div className="grid grid-cols-5 gap-3">
+          <div className="col-span-2 space-y-3">
+            <div className="bg-white rounded-lg border p-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-bold">プロファイル</p>
+                <button onClick={() => setSelectedCustomer(null)} className="text-xs text-blue-600">← 一覧に戻る</button>
+              </div>
+              <div className="space-y-2">
+                {[["顧客ID", selectedCustomer.id], ["メール", selectedCustomer.email], ["カード", selectedCustomer.card], ["加盟店", selectedCustomer.merchant], ["初回取引", "2024-08-15"], ["最終取引", selectedCustomer.last]].map(([l, v], i) => (
+                  <div key={i} className="flex text-xs items-center"><span className="w-20 text-gray-400">{l}</span><span className="font-bold">{v}</span>{l === "メール" && <button className="ml-2 px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded border border-blue-200 text-xs">🔓 マスク解除</button>}</div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-2">リスク & セグメント</p>
+              <div className="flex gap-2 mb-2">
+                <Badge text={`リスク: ${selectedCustomer.risk === "low" ? "低" : "中"}`} color={riskColors[selectedCustomer.risk]} />
+                <Badge text={selectedCustomer.segment} color={segColors[selectedCustomer.segment] || "gray"} />
+                {selectedCustomer.sub !== "なし" && <Badge text={`サブスク: ${selectedCustomer.sub}`} color={selectedCustomer.sub === "課金中" ? "green" : "red"} />}
+              </div>
+              <div className="flex text-xs"><span className="w-20 text-gray-400">AIスコア</span><span className="font-bold">23/100（低リスク）</span></div>
+              <div className="flex text-xs mt-1"><span className="w-20 text-gray-400">CB件数</span><span>0件</span></div>
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-2">タグ</p>
+              <div className="flex gap-1 flex-wrap">
+                {selectedCustomer.segment === "ロイヤル" && <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">VIP</span>}
+                <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">{selectedCustomer.segment}</span>
+                <button className="text-xs px-2 py-0.5 bg-gray-100 text-gray-400 rounded-full border border-dashed">+ タグ追加</button>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-2">メモ</p>
+              <div className="space-y-1.5">
+                <div className="bg-gray-50 rounded p-2 text-xs"><p className="text-gray-400">2026-02-10 — admin田中</p><p>問い合わせあり。返金対応完了。</p></div>
+              </div>
+              <div className="flex gap-1 mt-2"><input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="メモを追加..." /><button className="px-2 py-1 bg-blue-600 text-white rounded text-xs">追加</button></div>
+            </div>
+            <div className="flex gap-2">
+              <button className="flex-1 py-1.5 bg-red-50 text-red-600 rounded text-xs border border-red-200">🚫 ブロック</button>
+              <button className="flex-1 py-1.5 bg-green-50 text-green-600 rounded text-xs border border-green-200">✅ ホワイトリスト</button>
+              <button className="flex-1 py-1.5 bg-gray-50 text-gray-600 rounded text-xs border">M06で開く</button>
+            </div>
+          </div>
+          <div className="col-span-3 space-y-3">
+            <div className="bg-white rounded-lg border p-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-bold">取引統計</p>
+                <div className="flex gap-2 text-xs">
+                  <span>取引: <b>{selectedCustomer.txn}件</b></span>
+                  <span>成功率: <b className="text-green-600">97.8%</b></span>
+                  <span>平均単価: <b>¥{Math.round(parseInt(selectedCustomer.ltv.replace(/[¥,]/g, "")) / selectedCustomer.txn).toLocaleString()}</b></span>
+                  <span>LTV: <b className="text-blue-700">{selectedCustomer.ltv}</b></span>
+                </div>
+              </div>
+              <div className="flex items-end gap-1 h-16 px-1">
+                {[35, 42, 38, 55, 48, 62].map((h, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center">
+                    <div className="w-full bg-blue-400 rounded-t" style={{ height: `${h}%` }} />
+                    <p className="text-xs text-gray-400 mt-0.5">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-bold">取引タイムライン</p>
+                <div className="flex gap-1">
+                  <select className="border rounded px-1.5 py-0.5 text-xs"><option>全ステータス</option></select>
+                  <select className="border rounded px-1.5 py-0.5 text-xs"><option>直近30日</option></select>
+                </div>
+              </div>
+              {[
+                { date: "02/13 14:22", amt: "¥2,980", brand: "VISA", st: "成功", stc: "green", note: "月額スタンダード（自動決済）" },
+                { date: "02/10 11:05", amt: "¥12,800", brand: "VISA", st: "成功", stc: "green", note: "" },
+                { date: "02/05 09:30", amt: "¥4,500", brand: "VISA", st: "返金済", stc: "purple", note: "一部返金 ¥2,000" },
+                { date: "01/28 16:45", amt: "¥2,980", brand: "VISA", st: "成功", stc: "green", note: "月額スタンダード（自動決済）" },
+                { date: "01/15 13:20", amt: "¥35,000", brand: "VISA", st: "成功", stc: "green", note: "" },
+                { date: "01/08 10:00", amt: "¥2,980", brand: "VISA", st: "失敗", stc: "red", note: "E-Card01: 残高不足 → リトライ成功" },
+              ].map((t, i) => (
+                <div key={i} className="flex items-center py-1.5 border-b last:border-0 text-xs">
+                  <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: t.stc === "green" ? "#22c55e" : t.stc === "red" ? "#ef4444" : "#a855f7" }} />
+                  <div className="w-24 text-gray-400">{t.date}</div>
+                  <div className="w-20 font-bold">{t.amt}</div>
+                  <div className="w-12 font-mono text-gray-500">{t.brand}</div>
+                  <div className="w-14"><Badge text={t.st} color={t.stc} /></div>
+                  <div className="flex-1 text-gray-400">{t.note}</div>
+                </div>
+              ))}
+              <div className="text-center mt-2"><button className="text-xs text-blue-600">さらに表示 →</button></div>
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-2">カード情報</p>
+              <div className="flex gap-3">
+                {[{ brand: "VISA", last4: "4242", exp: "12/27", lastUsed: "02/13", active: true }, { brand: "VISA", last4: "8888", exp: "03/25", lastUsed: "2024-12", active: false }].map((c, i) => (
+                  <div key={i} className={`border rounded p-2 text-xs flex-1 ${c.active ? "border-blue-200 bg-blue-50" : "border-gray-200 bg-gray-50"}`}>
+                    <div className="flex items-center justify-between"><span className="font-bold">{c.brand} *{c.last4}</span>{c.active && <Badge text="メイン" color="blue" />}{!c.active && <Badge text="未使用" color="gray" />}</div>
+                    <div className="text-gray-400 mt-1">有効期限: {c.exp} | 最終使用: {c.lastUsed}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab === "analysis" && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-5 gap-3">
+            <KPICard label="総顧客数" value="12,847" trend={5.2} color="blue" />
+            <KPICard label="アクティブ（30日）" value="4,231" sub="32.9%" color="green" />
+            <KPICard label="平均LTV" value="¥48,320" trend={3.1} color="blue" />
+            <KPICard label="リピート率" value="34.7%" trend={1.8} color="green" />
+            <KPICard label="今月新規" value="623" trend={-2.1} color="blue" />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-3">セグメント分布</p>
+              <div className="space-y-2">
+                {[{ seg: "ロイヤル（11回以上）", pct: 8, cnt: "1,028", color: "bg-purple-400" }, { seg: "リピーター（2-10回）", pct: 27, cnt: "3,469", color: "bg-blue-400" }, { seg: "初回（1回のみ）", pct: 45, cnt: "5,781", color: "bg-gray-300" }, { seg: "休眠（90日+）", pct: 15, cnt: "1,927", color: "bg-yellow-300" }, { seg: "離脱（180日+）", pct: 5, cnt: "642", color: "bg-red-300" }].map((s, i) => (
+                  <div key={i} className="text-xs">
+                    <div className="flex justify-between mb-0.5"><span>{s.seg}</span><span className="text-gray-400">{s.cnt}人 ({s.pct}%)</span></div>
+                    <div className="w-full bg-gray-100 rounded-full h-2"><div className={`${s.color} h-2 rounded-full`} style={{ width: `${s.pct * 2}%` }} /></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-3">月別 新規 vs リピーター</p>
+              <div className="flex items-end gap-1 h-32 px-1">
+                {[{ n: 580, r: 320 }, { n: 610, r: 340 }, { n: 550, r: 360 }, { n: 640, r: 380 }, { n: 670, r: 410 }, { n: 623, r: 395 }].map((d, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center">
+                    <div className="w-full flex flex-col">
+                      <div className="w-full bg-blue-300 rounded-t" style={{ height: `${d.r / 10}px` }} />
+                      <div className="w-full bg-gray-300" style={{ height: `${d.n / 10}px` }} />
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-center gap-4 mt-2 text-xs"><span className="flex items-center gap-1"><span className="w-3 h-2 bg-gray-300 rounded" />新規</span><span className="flex items-center gap-1"><span className="w-3 h-2 bg-blue-300 rounded" />リピーター</span></div>
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-3">LTV分布</p>
+              <div className="flex items-end gap-1 h-32 px-1">
+                {[{ range: "〜¥1万", h: 85 }, { range: "¥1-5万", h: 60 }, { range: "¥5-10万", h: 35 }, { range: "¥10-50万", h: 20 }, { range: "¥50万〜", h: 8 }].map((d, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center">
+                    <div className="w-full bg-green-400 rounded-t" style={{ height: `${d.h}%` }} />
+                    <p className="text-xs text-gray-400 mt-1 leading-tight text-center">{d.range}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg border p-3">
+            <p className="text-xs font-bold mb-2">加盟店別 顧客数（TOP10）</p>
+            {[["ABC商事", 3420, 34], ["XYZ物産", 2150, 22], ["DEFサービス", 1890, 19], ["GHIオンライン", 1240, 12], ["JKLマーケット", 980, 10]].map((r, i) => (
+              <div key={i} className="flex items-center text-xs py-1">
+                <div className="w-32 font-bold">{r[0]}</div>
+                <div className="flex-1"><div className="w-full bg-gray-100 rounded-full h-3"><div className="bg-blue-500 h-3 rounded-full" style={{ width: `${r[2] * 3}%` }} /></div></div>
+                <div className="w-20 text-right text-gray-500">{r[1].toLocaleString()}人</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── S11: 顧客管理（加盟店） ───
+const MerchantCustomers = () => {
+  const [tab, setTab] = useState("list");
+  const [detail, setDetail] = useState(null);
+  const tabs = [{ id: "list", label: "顧客一覧" }, { id: "analysis", label: "顧客分析" }];
+  const customers = [
+    { id: "CUS-00001", email: "t***@example.com", card: "VISA *4242", txn: 47, ltv: "¥892,600", repeat: "ロイヤル", sub: "課金中", last: "02/13 14:22", tags: ["VIP"] },
+    { id: "CUS-00002", email: "s***@gmail.com", card: "MC *1234", txn: 12, ltv: "¥156,800", repeat: "リピーター", sub: "なし", last: "02/12 09:45", tags: [] },
+    { id: "CUS-00003", email: "h***@yahoo.co.jp", card: "JCB *5678", txn: 3, ltv: "¥45,200", repeat: "リピーター", sub: "停止", last: "02/10 18:30", tags: ["要確認"] },
+    { id: "CUS-00004", email: "k***@company.jp", card: "VISA *9999", txn: 1, ltv: "¥9,800", repeat: "初回", sub: "なし", last: "02/08 11:00", tags: [] },
+    { id: "CUS-00005", email: "m***@icloud.com", card: "AMEX *3456", txn: 89, ltv: "¥2,345,000", repeat: "ロイヤル", sub: "課金中", last: "02/13 16:05", tags: ["VIP", "大口"] },
+  ];
+  const repeatColors = { "ロイヤル": "purple", "リピーター": "blue", "初回": "gray" };
+  return (
+    <div className="p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-bold text-gray-800">顧客管理</h2>
+        <div className="flex items-center gap-2">
+          <select className="border rounded px-2 py-1 text-xs"><option>🏢 ECサイトA</option><option>全サイト合算</option></select>
+        </div>
+      </div>
+      <div className="flex gap-1">{tabs.map(t => (
+        <button key={t.id} onClick={() => { setTab(t.id); setDetail(null); }} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-green-500 text-green-700 bg-green-50 font-bold" : "border-transparent text-gray-400"}`}>{t.label}</button>
+      ))}</div>
+
+      {tab === "list" && !detail && (
+        <div className="space-y-3">
+          <div className="bg-white rounded-lg border p-3">
+            <div className="flex gap-2">
+              <input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="🔍 メール / 名前 / 顧客IDで検索" />
+              <input className="w-24 border rounded px-2 py-1 text-xs" placeholder="カード下4桁" />
+              <select className="border rounded px-2 py-1 text-xs"><option>全セグメント</option><option>ロイヤル</option><option>リピーター</option><option>初回</option></select>
+              <select className="border rounded px-2 py-1 text-xs"><option>全サブスク</option><option>課金中</option><option>停止</option></select>
+              <button className="px-3 py-1 bg-green-600 text-white rounded text-xs">検索</button>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg border">
+            <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "リピート", w: "w-16" }, { label: "サブスク", w: "w-14" }, { label: "最終取引", w: "w-24" }, { label: "タグ", w: "w-20" }]} />
+            {customers.map((c, i) => (
+              <div key={i} onClick={() => setDetail(c)} className="flex px-3 py-2 text-xs border-b hover:bg-green-50 cursor-pointer items-center">
+                <div className="w-24 font-mono text-green-700">{c.id}</div>
+                <div className="flex-1">{c.email}</div>
+                <div className="w-24 font-mono">{c.card}</div>
+                <div className="w-16 text-center">{c.txn}</div>
+                <div className="w-24 font-bold">{c.ltv}</div>
+                <div className="w-16"><Badge text={c.repeat} color={repeatColors[c.repeat]} /></div>
+                <div className="w-14"><Badge text={c.sub} color={c.sub === "課金中" ? "green" : c.sub === "停止" ? "red" : "gray"} /></div>
+                <div className="w-24 text-gray-400">{c.last}</div>
+                <div className="w-20 flex gap-0.5">{c.tags.map((t, j) => <span key={j} className="text-xs px-1 py-0 bg-purple-100 text-purple-700 rounded">{t}</span>)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {tab === "list" && detail && (
+        <div className="grid grid-cols-5 gap-3">
+          <div className="col-span-2 space-y-3">
+            <div className="bg-white rounded-lg border p-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-bold">顧客プロファイル</p>
+                <button onClick={() => setDetail(null)} className="text-xs text-green-600">← 一覧に戻る</button>
+              </div>
+              {[["顧客ID", detail.id], ["メール", detail.email], ["カード", detail.card], ["初回取引", "2024-08-15"], ["最終取引", detail.last], ["取引回数", `${detail.txn}回`], ["LTV", detail.ltv]].map(([l, v], i) => (
+                <div key={i} className="flex text-xs py-0.5"><span className="w-20 text-gray-400">{l}</span><span className="font-bold">{v}</span></div>
+              ))}
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-1">セグメント & サブスク</p>
+              <div className="flex gap-2 mt-1">
+                <Badge text={detail.repeat} color={repeatColors[detail.repeat]} />
+                {detail.sub !== "なし" && <Badge text={`サブスク: ${detail.sub}`} color={detail.sub === "課金中" ? "green" : "red"} />}
+              </div>
+              {detail.sub === "課金中" && <div className="mt-2 text-xs text-gray-500 bg-green-50 rounded p-1.5">月額スタンダード ¥2,980/月<br/>次回: 2026-03-01 → <button className="text-green-600 underline">S10で開く</button></div>}
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-1">タグ</p>
+              <div className="flex gap-1 flex-wrap mt-1">
+                {detail.tags.map((t, i) => <span key={i} className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">{t}</span>)}
+                <button className="text-xs px-2 py-0.5 bg-gray-100 text-gray-400 rounded-full border border-dashed">+ タグ追加</button>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-1">メモ</p>
+              <div className="bg-gray-50 rounded p-2 text-xs"><p className="text-gray-400">2026-02-10 — admin山田</p><p>電話で問い合わせあり。サブスク解約方法をご案内。</p></div>
+              <div className="flex gap-1 mt-2"><input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="メモを追加..." /><button className="px-2 py-1 bg-green-600 text-white rounded text-xs">追加</button></div>
+            </div>
+            <div className="flex gap-2">
+              <button className="flex-1 py-1.5 bg-gray-50 text-gray-600 rounded text-xs border">S02 取引一覧で開く</button>
+              <button className="flex-1 py-1.5 bg-gray-50 text-gray-600 rounded text-xs border">📥 CSV出力</button>
+            </div>
+          </div>
+          <div className="col-span-3 space-y-3">
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-2">月別利用推移</p>
+              <div className="flex items-end gap-1 h-16 px-1">
+                {[35, 42, 38, 55, 48, 62].map((h, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center">
+                    <div className="w-full bg-green-400 rounded-t" style={{ height: `${h}%` }} />
+                    <p className="text-xs text-gray-400 mt-0.5">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-4 mt-2 text-xs text-gray-500">
+                <span>成功率: <b className="text-green-600">97.8%</b></span>
+                <span>平均単価: <b>¥18,990</b></span>
+                <span>CB: <b>0件</b></span>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-bold">取引履歴</p>
+                <select className="border rounded px-1.5 py-0.5 text-xs"><option>全て</option><option>成功のみ</option><option>返金/CB</option></select>
+              </div>
+              {[
+                { date: "02/13 14:22", amt: "¥2,980", brand: "VISA", st: "成功", stc: "green" },
+                { date: "02/10 11:05", amt: "¥12,800", brand: "VISA", st: "成功", stc: "green" },
+                { date: "02/05 09:30", amt: "¥4,500", brand: "VISA", st: "返金済", stc: "purple" },
+                { date: "01/28 16:45", amt: "¥2,980", brand: "VISA", st: "成功", stc: "green" },
+                { date: "01/15 13:20", amt: "¥35,000", brand: "VISA", st: "成功", stc: "green" },
+              ].map((t, i) => (
+                <div key={i} className="flex items-center py-1.5 border-b last:border-0 text-xs">
+                  <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: t.stc === "green" ? "#22c55e" : "#a855f7" }} />
+                  <div className="w-24 text-gray-400">{t.date}</div>
+                  <div className="w-20 font-bold">{t.amt}</div>
+                  <div className="w-12 font-mono text-gray-500">{t.brand}</div>
+                  <div className="flex-1"><Badge text={t.st} color={t.stc} /></div>
+                </div>
+              ))}
+              <div className="text-center mt-2"><button className="text-xs text-green-600">全{detail.txn}件を表示 →</button></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab === "analysis" && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-5 gap-3">
+            <KPICard label="総顧客数" value="3,420" color="green" />
+            <KPICard label="アクティブ" value="1,205" sub="35.2%" color="green" />
+            <KPICard label="平均LTV" value="¥52,140" trend={4.2} color="green" />
+            <KPICard label="リピート率" value="38.5%" trend={2.1} color="green" />
+            <KPICard label="今月新規" value="187" color="green" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-3">セグメント分布</p>
+              <div className="flex items-center justify-center gap-6 py-3">
+                {[{ seg: "ロイヤル", cnt: 274, pct: "8%", color: "bg-purple-500" }, { seg: "リピーター", cnt: 1044, pct: "30.5%", color: "bg-blue-500" }, { seg: "初回", cnt: 1540, pct: "45%", color: "bg-gray-400" }, { seg: "休眠", cnt: 432, pct: "12.6%", color: "bg-yellow-400" }, { seg: "離脱", cnt: 130, pct: "3.8%", color: "bg-red-400" }].map((s, i) => (
+                  <div key={i} className="text-center">
+                    <div className={`w-12 h-12 rounded-full ${s.color} flex items-center justify-center text-white text-xs font-bold`}>{s.pct}</div>
+                    <p className="text-xs mt-1 font-bold">{s.seg}</p>
+                    <p className="text-xs text-gray-400">{s.cnt}人</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border p-3">
+              <p className="text-xs font-bold mb-3">リピート率推移（12ヶ月）</p>
+              <div className="flex items-end gap-0.5 h-24 px-1">
+                {[30, 31, 32, 33, 34, 33, 34, 35, 36, 37, 38, 38.5].map((v, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center">
+                    <div className="w-full bg-green-400 rounded-t" style={{ height: `${v * 2.5}%` }} />
+                    <p className="text-xs text-gray-400 mt-0.5" style={{ fontSize: "9px" }}>{["3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "1", "2"][i]}月</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg border p-3">
+            <p className="text-xs font-bold mb-2">取引頻度分布</p>
+            <div className="grid grid-cols-4 gap-3">
+              {[{ label: "1回のみ", cnt: 1540, pct: 45 }, { label: "2-5回", cnt: 820, pct: 24 }, { label: "6-10回", cnt: 524, pct: 15 }, { label: "11回以上", cnt: 536, pct: 16 }].map((d, i) => (
+                <div key={i} className="text-center">
+                  <div className="w-full bg-gray-100 rounded-full h-4 mb-1"><div className="bg-green-500 h-4 rounded-full" style={{ width: `${d.pct * 2}%` }} /></div>
+                  <p className="text-xs font-bold">{d.label}</p>
+                  <p className="text-xs text-gray-400">{d.cnt.toLocaleString()}人 ({d.pct}%)</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── P02: 決済ページ ───
+const PaymentPage = () => {
+  const [screen, setScreen] = useState("input");
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-bold text-gray-800">決済ページ</h2>
+          <div className="flex gap-1">
+            {[{ id: "input", label: "入力" }, { id: "processing", label: "処理中" }, { id: "complete", label: "完了" }, { id: "error", label: "エラー" }, { id: "link_error", label: "リンク無効" }].map(s => (
+              <button key={s.id} onClick={() => setScreen(s.id)} className={`px-2 py-0.5 rounded text-xs ${screen === s.id ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-500"}`}>{s.label}</button>
+            ))}
+          </div>
+        </div>
+
+        {screen === "input" && (
+          <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
+            <div className="bg-gray-900 text-white px-6 py-4">
+              <div className="flex items-center gap-2"><span className="text-lg">🔒</span><span className="text-sm font-bold">安全なお支払い</span></div>
+            </div>
+            <div className="px-6 py-4 bg-blue-50 border-b">
+              <p className="text-xs text-gray-500">お支払い先: 〇〇ショップ</p>
+              <p className="text-sm font-bold mt-1">プレミアムプラン</p>
+              <p className="text-2xl font-bold text-blue-700 mt-1">¥9,800</p>
+            </div>
+            <div className="px-6 py-4 space-y-3">
+              <div><label className="text-xs text-gray-500">カード番号</label><input className="w-full border rounded px-3 py-2 text-sm mt-0.5" placeholder="1234 5678 9012 3456" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs text-gray-500">有効期限</label><input className="w-full border rounded px-3 py-2 text-sm mt-0.5" placeholder="MM/YY" /></div>
+                <div><label className="text-xs text-gray-500">セキュリティコード</label><input className="w-full border rounded px-3 py-2 text-sm mt-0.5" placeholder="CVC" /></div>
+              </div>
+              <div><label className="text-xs text-gray-500">カード名義</label><input className="w-full border rounded px-3 py-2 text-sm mt-0.5" placeholder="TARO YAMADA" /></div>
+              <button onClick={() => setScreen("processing")} className="w-full py-3 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 mt-2">💳 ¥9,800 を支払う</button>
+              <div className="flex items-center justify-center gap-3 text-xs text-gray-400 pt-2">
+                <span>🔒 SSL暗号化通信</span><span>|</span><span>PCI DSS準拠</span>
+              </div>
+              <div className="flex justify-center gap-2 pt-1">
+                {["VISA", "MC", "JCB", "AMEX"].map(b => (
+                  <span key={b} className="text-xs px-1.5 py-0.5 bg-gray-100 rounded border">{b}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {screen === "processing" && (
+          <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
+            <div className="bg-gray-900 text-white px-6 py-4">
+              <div className="flex items-center gap-2"><span className="text-lg">🔒</span><span className="text-sm font-bold">安全なお支払い</span></div>
+            </div>
+            <div className="px-6 py-16 text-center">
+              <div className="animate-spin w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full mx-auto" />
+              <p className="text-sm font-bold mt-4 text-gray-700">決済処理中…</p>
+              <p className="text-xs text-gray-400 mt-2">ブラウザを閉じないでください</p>
+              <div className="mt-6 flex gap-2 justify-center">
+                <button onClick={() => setScreen("complete")} className="px-3 py-1 bg-green-100 text-green-700 rounded text-xs">→ 成功</button>
+                <button onClick={() => setScreen("error")} className="px-3 py-1 bg-red-100 text-red-700 rounded text-xs">→ 失敗</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {screen === "complete" && (
+          <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
+            <div className="bg-green-600 text-white px-6 py-6 text-center">
+              <div className="text-4xl mb-2">✅</div>
+              <p className="text-lg font-bold">お支払い完了</p>
+            </div>
+            <div className="px-6 py-4">
+              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                {[["商品名", "プレミアムプラン"], ["お支払い金額", "¥9,800"], ["注文番号", "ORD-20260213-0042"], ["日時", "2026/02/13 14:30"], ["カード", "VISA **** 4242"]].map(([k, v], i) => (
+                  <div key={i} className="flex justify-between text-xs">
+                    <span className="text-gray-500">{k}</span>
+                    <span className="font-bold">{v}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-400 text-center mt-3">※ 決済完了メールを送信しました</p>
+              <button className="w-full py-2 bg-gray-100 text-gray-600 rounded-lg text-sm mt-3 border">ページを閉じる</button>
+            </div>
+            <div className="flex items-center justify-center gap-3 text-xs text-gray-400 py-3 border-t">
+              <span>🔒 SSL暗号化通信</span><span>|</span><span>PCI DSS準拠</span>
+            </div>
+          </div>
+        )}
+
+        {screen === "error" && (
+          <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
+            <div className="bg-red-600 text-white px-6 py-6 text-center">
+              <div className="text-4xl mb-2">❌</div>
+              <p className="text-lg font-bold">お支払いに失敗しました</p>
+            </div>
+            <div className="px-6 py-4 text-center">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-2">
+                <p className="text-sm text-red-700">カードの利用限度額を超えています</p>
+                <p className="text-xs text-red-500 mt-1">別のカードでお試しいただくか、カード会社にお問い合わせください</p>
+              </div>
+              <div className="flex gap-2 mt-4">
+                <button onClick={() => setScreen("input")} className="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold">もう一度試す</button>
+                <button className="flex-1 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm border">ページを閉じる</button>
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-3 text-xs text-gray-400 py-3 border-t">
+              <span>🔒 SSL暗号化通信</span><span>|</span><span>PCI DSS準拠</span>
+            </div>
+          </div>
+        )}
+
+        {screen === "link_error" && (
+          <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
+            <div className="bg-gray-900 text-white px-6 py-4">
+              <div className="flex items-center gap-2"><span className="text-lg">🔒</span><span className="text-sm font-bold">安全なお支払い</span></div>
+            </div>
+            <div className="px-6 py-12 text-center">
+              <div className="text-4xl mb-3">⚠️</div>
+              <p className="text-sm font-bold text-gray-700">この決済リンクは無効です</p>
+              <p className="text-xs text-gray-400 mt-2">リンクの有効期限が過ぎているか、利用可能回数に達しています</p>
+              <div className="bg-gray-50 rounded-lg p-3 mt-4 text-xs text-gray-500">
+                お支払い先にお問い合わせください
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-3 text-xs text-gray-400 py-3 border-t">
+              <span>🔒 SSL暗号化通信</span><span>|</span><span>PCI DSS準拠</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const masterMenuItems = [
+  // ── 概要 ──
+  { id: "dashboard", icon: "📊", label: "ダッシュボード" },
+  { id: "queue", icon: "⚡", label: "例外キュー", badge: 3 },
+  // ── 取引・顧客 ──
+  { id: "txn", icon: "💳", label: "注文管理" },
+  { id: "customers", icon: "👤", label: "顧客管理" },
+  // ── 加盟店・代理店 ──
+  { id: "merchants", icon: "🏢", label: "加盟店管理" },
+  { id: "applications", icon: "📝", label: "申込・登録管理", badge: 2 },
+  { id: "agents", icon: "🤝", label: "代理店管理" },
+  // ── 決済・精算 ──
+  { id: "recurring", icon: "🔄", label: "リカーリング管理" },
+  { id: "settlement", icon: "💰", label: "精算・入金" },
+  // ── インフラ・セキュリティ ──
+  { id: "processors", icon: "🔌", label: "接続先管理", badge: 2 },
+  { id: "routing", icon: "🔀", label: "ルーティング" },
+  { id: "fraud", icon: "🛡️", label: "不正検知設定" },
+  { id: "ai", icon: "🤖", label: "AI監視" },
+  // ── 分析・管理 ──
+  { id: "report", icon: "📈", label: "レポート" },
+  { id: "users", icon: "👥", label: "ユーザー管理" },
+  { id: "settings", icon: "⚙️", label: "システム設定" },
+];
+
+const merchantMenuItems = [
+  // ── 概要 ──
+  { id: "m_dashboard", icon: "📊", label: "ダッシュボード" },
+  // ── 取引・顧客 ──
+  { id: "m_transactions", icon: "💳", label: "取引一覧" },
+  { id: "m_customers", icon: "👤", label: "顧客管理" },
+  // ── 決済商品 ──
+  { id: "m_links", icon: "🔗", label: "決済リンク管理" },
+  { id: "m_subscriptions", icon: "🔄", label: "継続・分割決済" },
+  // ── 売上・入金 ──
+  { id: "m_report", icon: "📈", label: "売上レポート" },
+  { id: "m_payout", icon: "💰", label: "入金確認" },
+  // ── 設定 ──
+  { id: "m_api", icon: "🔧", label: "API設定" },
+  { id: "m_users", icon: "👥", label: "ユーザー管理" },
+  { id: "m_account", icon: "⚙️", label: "アカウント設定" },
+  // ── サポート ──
+  { id: "m_chat", icon: "🤖", label: "AIサポート" },
+];
+
+const agentMenuItems = [
+  { id: "d_dashboard", icon: "📊", label: "ダッシュボード" },
+  { id: "d_merchants", icon: "🏢", label: "加盟店一覧" },
+  { id: "d_reports", icon: "📋", label: "報告書" },
+  { id: "d_referral", icon: "📝", label: "申込紹介" },
+  { id: "d_account", icon: "⚙️", label: "アカウント設定" },
+];
+
+export default function Wireframes() {
+  const [view, setView] = useState("master");
+  const [masterPage, setMasterPage] = useState("dashboard");
+  const [merchantPage, setMerchantPage] = useState("m_dashboard");
+  const [agentPage, setAgentPage] = useState("d_dashboard");
+
+  const renderMaster = () => {
+    switch (masterPage) {
+      case "dashboard": return <MasterDashboard />;
+      case "queue": return <MasterExceptionQueue />;
+      case "merchants": return <MasterMerchants />;
+      case "applications": return <MasterMerchantApplications />;
+      case "ai": return <MasterAIMonitor />;
+      case "settlement": return <MasterSettlement />;
+      case "users": return <MasterUserManagement />;
+      case "settings": return <MasterSystemSettings />;
+      case "routing": return <MasterRouting />;
+      case "processors": return <MasterProcessors />;
+      case "txn": return <MasterTransactionMonitor />;
+      case "fraud": return <MasterFraudSettings />;
+      case "report": return <MasterReport />;
+      case "recurring": return <MasterRecurring />;
+      case "agents": return <MasterAgents />;
+      case "customers": return <MasterCustomers />;
+      default: return <div className="p-4 text-sm text-gray-400 flex items-center justify-center h-64">この画面は詳細設計フェーズで実装します</div>;
+    }
+  };
+
+  const renderMerchant = () => {
+    switch (merchantPage) {
+      case "m_dashboard": return <MerchantDashboard />;
+      case "m_transactions": return <MerchantTransactions />;
+      case "m_api": return <MerchantAPISettings />;
+      case "m_chat": return <MerchantAIChat />;
+      case "m_payout": return <MerchantPayouts />;
+      case "m_users": return <MerchantUserManagement />;
+      case "m_report": return <MerchantSalesReport />;
+      case "m_account": return <MerchantAccountSettings />;
+      case "m_links": return <MerchantPaymentLinks />;
+      case "m_subscriptions": return <MerchantSubscriptions />;
+      case "m_customers": return <MerchantCustomers />;
+      default: return <div className="p-4 text-sm text-gray-400 flex items-center justify-center h-64">この画面は詳細設計フェーズで実装します</div>;
+    }
+  };
+
+  const renderAgent = () => {
+    switch (agentPage) {
+      case "d_dashboard": return <AgentDashboard />;
+      case "d_merchants": return <AgentMerchants />;
+      case "d_reports": return <AgentReports />;
+      case "d_referral": return <AgentReferral />;
+      case "d_account": return <AgentAccountSettings />;
+      default: return <div className="p-4 text-sm text-gray-400 flex items-center justify-center h-64">この画面は詳細設計フェーズで実装します</div>;
+    }
+  };
+
+  return (
+    <div className="h-screen flex flex-col bg-gray-100 font-sans">
+      {/* Top toggle */}
+      <div className="bg-gray-900 px-4 py-2 flex items-center gap-4">
+        <span className="text-xs text-gray-400">画面切替:</span>
+        <button onClick={() => setView("master")} className={`text-xs px-3 py-1 rounded ${view === "master" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"}`}>
+          マスター管理画面
+        </button>
+        <button onClick={() => setView("merchant")} className={`text-xs px-3 py-1 rounded ${view === "merchant" ? "bg-green-600 text-white" : "text-gray-400 hover:text-white"}`}>
+          加盟店管理画面
+        </button>
+        <button onClick={() => setView("agent")} className={`text-xs px-3 py-1 rounded ${view === "agent" ? "bg-orange-600 text-white" : "text-gray-400 hover:text-white"}`}>
+          代理店管理画面
+        </button>
+        <button onClick={() => setView("apply")} className={`text-xs px-3 py-1 rounded ${view === "apply" ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white"}`}>
+          加盟店 新規申込
+        </button>
+        <button onClick={() => setView("payment")} className={`text-xs px-3 py-1 rounded ${view === "payment" ? "bg-indigo-600 text-white" : "text-gray-400 hover:text-white"}`}>
+          決済ページ
+        </button>
+        <span className="text-xs text-gray-600 ml-auto">WIREFRAME v3 / 全34画面実装</span>
+      </div>
+
+      {/* Main content */}
+      <div className="flex flex-1 overflow-hidden">
+        {view === "master" ? (
+          <>
+            <Sidebar items={masterMenuItems} active={masterPage} onSelect={setMasterPage} title="マスター管理" color="#60A5FA" />
+            <div className="flex-1 overflow-y-auto">{renderMaster()}</div>
+          </>
+        ) : view === "merchant" ? (
+          <>
+            <Sidebar items={merchantMenuItems} active={merchantPage} onSelect={setMerchantPage} title="加盟店管理" color="#4ADE80" />
+            <div className="flex-1 overflow-y-auto">{renderMerchant()}</div>
+          </>
+        ) : view === "agent" ? (
+          <>
+            <Sidebar items={agentMenuItems} active={agentPage} onSelect={setAgentPage} title="代理店管理" color="#FB923C" />
+            <div className="flex-1 overflow-y-auto">{renderAgent()}</div>
+          </>
+        ) : view === "payment" ? (
+          <div className="flex-1 overflow-y-auto"><PaymentPage /></div>
+        ) : (
+          <div className="flex-1 overflow-y-auto"><MerchantApplicationForm /></div>
+        )}
+      </div>
+    </div>
+  );
+}
