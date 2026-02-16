@@ -47,3 +47,22 @@
 - `docs/Screen_Specification_v1.0.md` - 画面仕様書（34画面）
 - `docs/DB_Design_Addendum_v1.1.md` - DB設計（50テーブル、36 ENUM）
 - `docs/AQUAGATES_Gap_Analysis.md` - ギャップ分析
+- `docs/AQUAGATES_Screen_Mapping.md` - 画面マッピング（分析中）
+- `docs/Requirements_Priority.md` - 要件優先度（分析中）
+- `docs/Analysis_Checklist.md` - 分析チェックリスト
+
+## AQUAGATES分析（進行中）
+現行システム（AQUAGATES）のスクリーンショットを分析し、要件を精査中。
+
+### スクリーンショット配置先
+```
+aquagates_screenshots/
+├── A_管理者画面/     # PSP運営側
+├── B_加盟店画面/     # 加盟店向け
+├── C_代理店画面/     # 代理店向け
+├── D_公開画面/       # 一般公開
+└── E_その他/
+```
+
+### 分析フロー
+1. スクショ収集 → 2. 画面マッピング → 3. 差分抽出 → 4. 優先度決定 → 5. 要件確定

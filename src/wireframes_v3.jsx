@@ -2,34 +2,43 @@ import { useState } from "react";
 
 // ─── 共通UIコンポーネント ───
 const Sidebar = ({ items, active, onSelect, title, color }) => (
-  <div className={`w-48 bg-gray-900 text-white flex flex-col h-full`}>
-    <div className={`px-4 py-3 border-b border-gray-700`}>
+  <div className="w-52 bg-gray-900 text-white flex flex-col shrink-0">
+    <div className="px-4 py-3.5 border-b border-gray-700">
       <p className="text-xs text-gray-400">{title}</p>
-      <p className={`text-sm font-bold`} style={{ color }}>{active}</p>
+      <p className="text-sm font-bold" style={{ color }}>{active}</p>
     </div>
-    <nav className="flex-1 py-2">
+    <nav className="flex-1 py-2 overflow-y-auto">
       {items.map(item => (
         <button
           key={item.id}
           onClick={() => onSelect(item.id)}
-          className={`w-full text-left px-4 py-2 text-xs flex items-center gap-2 transition-all ${
-            active === item.id ? "bg-gray-700 text-white" : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+          className={`w-full text-left px-4 py-2.5 text-xs flex items-center gap-2.5 transition-all ${
+            active === item.id ? "bg-gray-700 text-white border-l-2 border-l-white" : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
           }`}
         >
           <span>{item.icon}</span>
           <span>{item.label}</span>
-          {item.badge && <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{item.badge}</span>}
+          {item.badge && <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">{item.badge}</span>}
         </button>
       ))}
     </nav>
-    <div className="px-4 py-3 border-t border-gray-700 text-xs text-gray-500">v1.0 / AI Payment</div>
+    <div className="px-4 py-3 border-t border-gray-700 text-xs text-gray-500 shrink-0">v1.0 / AI Payment</div>
   </div>
 );
 
+const colorMap = {
+  blue: "text-blue-700",
+  green: "text-green-700",
+  red: "text-red-700",
+  purple: "text-purple-700",
+  yellow: "text-yellow-700",
+  gray: "text-gray-700",
+};
+
 const KPICard = ({ label, value, sub, trend, color = "blue" }) => (
-  <div className="bg-white rounded-lg border p-3 flex-1">
-    <p className="text-xs text-gray-400">{label}</p>
-    <p className={`text-lg font-bold text-${color}-700 mt-0.5`}>{value}</p>
+  <div className="bg-white rounded-lg border border-gray-200 p-3 flex-1 min-w-0 shadow-sm">
+    <p className="text-xs text-gray-500">{label}</p>
+    <p className={`text-lg font-bold ${colorMap[color] || "text-blue-700"} mt-0.5`}>{value}</p>
     <div className="flex items-center gap-1 mt-1">
       {trend && <span className={`text-xs ${trend > 0 ? "text-green-500" : "text-red-500"}`}>{trend > 0 ? "↑" : "↓"}{Math.abs(trend)}%</span>}
       {sub && <span className="text-xs text-gray-400">{sub}</span>}
@@ -38,14 +47,21 @@ const KPICard = ({ label, value, sub, trend, color = "blue" }) => (
 );
 
 const TableHeader = ({ cols }) => (
-  <div className="flex bg-gray-50 border-b text-xs font-semibold text-gray-500 px-3 py-2">
-    {cols.map((c, i) => <div key={i} className={`${c.w}`}>{c.label}</div>)}
+  <div className="flex bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 px-3 py-2.5">
+    {cols.map((c, i) => <div key={i} className={`${c.w} min-w-0`}>{c.label}</div>)}
   </div>
 );
 
 const Badge = ({ text, color }) => {
-  const colors = { green: "bg-green-100 text-green-700", red: "bg-red-100 text-red-700", yellow: "bg-yellow-100 text-yellow-700", blue: "bg-blue-100 text-blue-700", gray: "bg-gray-100 text-gray-600", purple: "bg-purple-100 text-purple-700" };
-  return <span className={`text-xs px-1.5 py-0.5 rounded ${colors[color]}`}>{text}</span>;
+  const colors = {
+    green: "bg-green-100 text-green-700 border-green-200",
+    red: "bg-red-100 text-red-700 border-red-200",
+    yellow: "bg-yellow-100 text-yellow-700 border-yellow-200",
+    blue: "bg-blue-100 text-blue-700 border-blue-200",
+    gray: "bg-gray-100 text-gray-600 border-gray-200",
+    purple: "bg-purple-100 text-purple-700 border-purple-200"
+  };
+  return <span className={`text-xs px-2 py-0.5 rounded border ${colors[color] || colors.gray}`}>{text}</span>;
 };
 
 const MiniChart = ({ data, color = "#3B82F6", h = 30, w = 100 }) => {
@@ -105,7 +121,7 @@ const MasterDashboard = () => {
 
     {/* Charts + Exception Queue Preview */}
     <div className="flex gap-3">
-      <div className="flex-1 bg-white rounded-lg border p-3">
+      <div className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-2">
             <p className="text-xs font-bold text-gray-600">取引推移</p>
@@ -143,7 +159,7 @@ const MasterDashboard = () => {
           </div>
         )}
       </div>
-      <div className="w-72 bg-white rounded-lg border p-3">
+      <div className="w-72 bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <div className="flex justify-between items-center mb-2">
           <p className="text-xs font-bold text-gray-600">例外キュー</p>
           <div className="flex items-center gap-2">
@@ -169,7 +185,7 @@ const MasterDashboard = () => {
     </div>
 
     {/* Processor Health — 🟢正常 🟡注意 🔴異常 🔵メンテナンス 🟠緊急 */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <p className="text-xs font-bold text-gray-600 mb-2">接続先ヘルス</p>
       <div className="flex gap-3">
         {[
@@ -228,7 +244,7 @@ const MasterExceptionQueue = () => {
     </div>
 
     {/* Detail card */}
-    <div className="bg-white rounded-lg border shadow-sm">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <div className="p-3 border-b bg-yellow-50">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -286,7 +302,7 @@ const MasterExceptionQueue = () => {
     </div>
 
     {/* Queue list */}
-    <div className="bg-white rounded-lg border">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <TableHeader cols={[{ label: "ID", w: "w-16" }, { label: "種別", w: "w-20" }, { label: "対象", w: "flex-1" }, { label: "AI推薦", w: "w-24" }, { label: "滞留時間", w: "w-24" }, { label: "操作", w: "w-32" }]} />
       {[
         { id: "#5521", type: "不正検知", target: "¥89,000 / カード決済 / 山本商店", ai: "ブロック推薦", aiColor: "red", time: "30分", timeColor: "gray", locked: false },
@@ -364,9 +380,9 @@ const PROC_STATUS = {
 };
 
 const SortableHeader = ({ cols, sortKey, sortDir, onSort }) => (
-  <div className="flex bg-gray-50 border-b text-xs font-semibold text-gray-500 px-3 py-2">
+  <div className="flex bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 px-3 py-2.5">
     {cols.map((c, i) => (
-      <div key={i} className={`${c.w} ${c.sortKey ? "cursor-pointer hover:text-blue-600 select-none" : ""} flex items-center gap-1`}
+      <div key={i} className={`${c.w} min-w-0 ${c.sortKey ? "cursor-pointer hover:text-blue-600 select-none" : ""} flex items-center gap-1`}
         onClick={() => c.sortKey && onSort(c.sortKey)}
       >
         {c.label}
@@ -379,7 +395,7 @@ const SortableHeader = ({ cols, sortKey, sortDir, onSort }) => (
       </div>
     ))}
   </div>
-  );
+);
 
 // ─── M03: 加盟店管理 ───
 const MasterMerchants = () => {
@@ -450,7 +466,7 @@ const MasterMerchants = () => {
         <span className="ml-auto text-gray-300">💡 行クリックで接続先審査状況を表示</span>
       </div>
 
-      <div className="bg-white rounded-lg border">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
         <SortableHeader
           sortKey={sortKey} sortDir={sortDir} onSort={handleSort}
           cols={[
@@ -812,7 +828,7 @@ const MasterAIMonitor = () => {
         { name: "AIチャットサポート", version: "v1.5", lastTrain: "-", trainData: "-", enabled: true, trend: "AI完結率", trendData: [78, 80, 79, 82, 81, 83, 82], metrics: [{ l: "今月の対話数", v: "342" }, { l: "AI完結", v: "281 (82.2%)" }, { l: "エスカレーション", v: "61 (17.8%)" }, { l: "平均応答時間", v: "2.1秒" }, { l: "CSAT", v: "4.2 / 5.0" }] },
         { name: "レポートAI", version: "v1.2", lastTrain: "-", trainData: "-", enabled: true, trend: "生成成功率", trendData: [98, 99, 99, 100, 98, 99, 99], metrics: [{ l: "今月の生成数", v: "156" }, { l: "日次サマリー", v: "82" }, { l: "月次レポート", v: "24" }, { l: "カスタム分析", v: "50" }, { l: "平均生成時間", v: "8.3秒" }] },
       ].map((ai, i) => (
-        <div key={i} className="bg-white rounded-lg border p-3">
+        <div key={i} className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
           <div className="flex justify-between items-center mb-2">
             <p className="text-xs font-bold text-gray-700">🤖 {ai.name}</p>
             <div className="flex items-center gap-2">
@@ -847,7 +863,7 @@ const MasterAIMonitor = () => {
     </div>
 
     {/* AI vs Human Consistency Analysis */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-gray-700">📊 AI判定 vs 人間判定 一致率分析</p>
         <div className="flex bg-gray-100 rounded p-0.5">
@@ -880,7 +896,7 @@ const MasterAIMonitor = () => {
     </div>
 
     {/* Claude API Usage & Cost */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <p className="text-xs font-bold text-gray-700 mb-2">💰 Claude API 使用量・コスト（今月）</p>
       <div className="flex gap-3 mb-2">
         <div className="flex-1 bg-gray-50 rounded p-2 text-center">
@@ -961,13 +977,13 @@ const MerchantDashboard = () => (
     </div>
 
     <div className="flex gap-3">
-      <div className="flex-1 bg-white rounded-lg border p-3">
+      <div className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <p className="text-xs font-bold text-gray-600 mb-2">売上推移（直近30日）</p>
         <div className="flex items-center justify-center h-20">
           <MiniChart data={[280,310,295,340,380,350,420,390,410,380,420,450,412,440,470,430,460,480,450,490,510,480,520,540,510,550,530,560,580,550]} w={400} h={70} />
         </div>
       </div>
-      <div className="w-56 bg-white rounded-lg border p-3">
+      <div className="w-56 bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <p className="text-xs font-bold text-gray-600 mb-2">決済手段分布</p>
         <div className="space-y-2">
           {[{ name: "クレジットカード", pct: 78, color: "bg-blue-500" }, { name: "銀行振込", pct: 12, color: "bg-green-500" }, { name: "QR決済", pct: 7, color: "bg-purple-500" }, { name: "コンビニ", pct: 3, color: "bg-orange-500" }].map((m, i) => (
@@ -980,7 +996,7 @@ const MerchantDashboard = () => (
       </div>
     </div>
 
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <p className="text-xs font-bold text-gray-600 mb-2">💡 AIからの改善提案</p>
       <div className="grid grid-cols-2 gap-2">
         <div className="bg-blue-50 rounded p-2 text-xs text-blue-700">📊 19-21時台の売上が全体の35%を占めています。この時間帯のサーバー応答速度を最適化すると成功率が向上する可能性があります。</div>
@@ -1002,7 +1018,7 @@ const MerchantTransactions = () => (
         <button className="text-xs bg-gray-100 px-2 py-1 rounded border" title="出力項目: 決済ID/日時/金額/ステータス/決済手段/注文番号（カード番号等の機密情報は含みません）">📥 CSV出力</button>
       </div>
     </div>
-    <div className="bg-white rounded-lg border">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <TableHeader cols={[{ label: "決済ID", w: "w-28" }, { label: "日時", w: "w-32" }, { label: "金額", w: "w-20" }, { label: "ステータス", w: "w-20" }, { label: "決済手段", w: "w-24" }, { label: "カード", w: "w-20" }, { label: "注文番号", w: "flex-1" }, { label: "操作", w: "w-16" }]} />
       {[
         { id: "pay_8f3a2b1c", time: "2026-02-11 14:23", amount: "¥12,800", status: "成功", sColor: "green", method: "VISA", card: "****4242", order: "ORD-20260211-001" },
@@ -1031,14 +1047,14 @@ const MerchantAPISettings = () => (
   <div className="p-4 space-y-3">
     <h2 className="text-sm font-bold text-gray-800">API設定</h2>
     <div className="grid grid-cols-2 gap-4">
-      <div className="bg-white rounded-lg border p-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <div className="flex items-center gap-2 mb-2"><Badge text="本番環境" color="green" /></div>
         <div className="space-y-2">
           <div><p className="text-xs text-gray-400">API公開キー</p><p className="text-xs font-mono bg-gray-50 rounded p-1.5">pk_live_a1b2c3d4e5f6g7h8i9j0...</p></div>
           <div><p className="text-xs text-gray-400">APIシークレットキー</p><p className="text-xs font-mono bg-gray-50 rounded p-1.5">sk_live_••••••••••••••••••••</p><button className="text-xs text-blue-600 mt-1">表示</button></div>
         </div>
       </div>
-      <div className="bg-white rounded-lg border p-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <div className="flex items-center gap-2 mb-2"><Badge text="テスト環境" color="yellow" /></div>
         <div className="space-y-2">
           <div><p className="text-xs text-gray-400">API公開キー</p><p className="text-xs font-mono bg-gray-50 rounded p-1.5">pk_test_z9y8x7w6v5u4t3s2r1q0...</p></div>
@@ -1046,7 +1062,7 @@ const MerchantAPISettings = () => (
         </div>
       </div>
     </div>
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <p className="text-xs font-bold text-gray-700 mb-2">Webhook設定</p>
       <div className="space-y-2">
         <div className="flex items-center gap-2 bg-gray-50 rounded p-2">
@@ -1158,7 +1174,7 @@ const MasterUserManagement = () => {
         { role: "管理者", count: 2, color: "blue", icon: "🔑" },
         { role: "レビュアー", count: 4, color: "purple", icon: "📋" },
       ].map((r, i) => (
-        <div key={i} className="flex-1 bg-white rounded-lg border p-3">
+        <div key={i} className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm p-3">
           <div className="flex items-center gap-2 mb-1">
             <span>{r.icon}</span>
             <span className="text-xs font-bold text-gray-600">{r.role}</span>
@@ -1188,7 +1204,7 @@ const MasterUserManagement = () => {
     </div>
 
     {/* User List */}
-    <div className="bg-white rounded-lg border">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <TableHeader cols={[{ label: "名前", w: "w-36" }, { label: "メール", w: "flex-1" }, { label: "ロール", w: "w-24" }, { label: "担当カテゴリ", w: "w-44" }, { label: "MFA", w: "w-16" }, { label: "最終ログイン", w: "w-32" }, { label: "操作", w: "w-28" }]} />
       {[
         { name: "田中 太郎", email: "tanaka@company.jp", roleLabel: "スーパー管理者", categories: ["全カテゴリ"], catColors: ["red"], mfa: true, lastLogin: "2026-02-11 14:30", rColor: "red" },
@@ -1437,7 +1453,7 @@ const MasterMerchantApplications = () => {
       )}
 
       {/* Application Detail */}
-      <div className="bg-white rounded-lg border shadow-sm">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
         <div className={`p-3 border-b ${
           selectedAppData?.status === "自社承認済み" ? "bg-green-50" :
           selectedAppData?.status === "人間判定待ち" ? "bg-yellow-50" :
@@ -1602,7 +1618,7 @@ const MasterMerchantApplications = () => {
       </div>
 
       {/* Applications List */}
-      <div className="bg-white rounded-lg border">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
         <TableHeader cols={[{ label: "申込ID", w: "w-36" }, { label: "法人名", w: "flex-1" }, { label: "業種", w: "w-24" }, { label: "自社審査", w: "w-24" }, { label: "AI判定", w: "w-24" }, { label: "接続先審査", w: "w-28" }, { label: "申込日", w: "w-24" }, { label: "操作", w: "w-20" }]} />
         {appList.map((a, i) => (
           <div key={i} className={`flex items-center px-3 py-2 text-xs border-b cursor-pointer transition-colors ${selectedApp === a.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-gray-50 hover:bg-blue-50" : "hover:bg-blue-50"}`}
@@ -1644,7 +1660,7 @@ const MasterSettlement = () => (
     </div>
 
     {/* Settlement Batch Status */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <p className="text-xs font-bold text-gray-600 mb-2">精算バッチ状況（直近5回）</p>
       <div className="space-y-2">
         {[
@@ -1667,7 +1683,7 @@ const MasterSettlement = () => (
     </div>
 
     {/* Payout Error Details */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <div className="flex items-center gap-2 mb-2">
         <p className="text-xs font-bold text-red-600">⚠ 入金エラー（要対応）</p>
         <Badge text="2件" color="red" />
@@ -1740,12 +1756,12 @@ const MasterSettlement = () => (
     </div>
 
     {/* Merchant Breakdown */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-gray-600">加盟店別 精算内訳</p>
         <button className="text-xs text-blue-600 hover:underline">全加盟店を表示 →</button>
       </div>
-      <div className="bg-white rounded-lg border">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
         <TableHeader cols={[{ label: "加盟店", w: "flex-1" }, { label: "売上総額", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "CB差引", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-28" }]} />
         {[
           { merchant: "M-001 ABCマート", sales: "¥4,200,000", fee: "¥127,500", cb: "¥0", hold: "¥420,000", release: "¥280,000", payout: "¥3,932,500" },
@@ -1766,7 +1782,7 @@ const MasterSettlement = () => (
     </div>
 
     {/* Payout List */}
-    <div className="bg-white rounded-lg border">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <TableHeader cols={[{ label: "入金ID", w: "w-28" }, { label: "加盟店", w: "flex-1" }, { label: "精算期間", w: "w-36" }, { label: "入金額", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "ステータス", w: "w-24" }, { label: "入金日", w: "w-24" }]} />
       {[
         { id: "PAY-0211-001", merchant: "M-001 ABCマート", period: "02/04 〜 02/10", amount: "¥3,825,000", fee: "¥127,500", status: "入金完了", sColor: "green", date: "02/12" },
@@ -1802,7 +1818,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Payment Methods */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <p className="text-xs font-bold text-gray-600 mb-3">有効な決済手段</p>
       <div className="space-y-2">
         {[
@@ -1827,7 +1843,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Notification Settings */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <p className="text-xs font-bold text-gray-600 mb-3">通知設定</p>
       <div className="grid grid-cols-2 gap-3">
         {[
@@ -1856,7 +1872,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Maintenance Mode */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-gray-700">🔧 メンテナンスモード</p>
         <div className="flex items-center gap-2">
@@ -1870,7 +1886,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Backup Settings */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-gray-700">💾 バックアップ設定</p>
         <button className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">手動バックアップ実行</button>
@@ -1892,7 +1908,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Audit Log */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-gray-700">📝 設定変更 監査ログ（直近）</p>
         <button className="text-xs text-blue-600 hover:underline">全ログ検索 →</button>
@@ -1943,7 +1959,7 @@ const MerchantUserManagement = () => {
       </div>
     )}
 
-    <div className="bg-white rounded-lg border">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <TableHeader cols={[{ label: "名前", w: "w-36" }, { label: "メール", w: "flex-1" }, { label: "権限", w: "w-28" }, { label: "MFA", w: "w-14" }, { label: "最終ログイン", w: "w-32" }, { label: "操作", w: "w-28" }]} />
       {[
         { name: "佐々木 健一", email: "sasaki@techshop.jp", role: "オーナー", rColor: "purple", mfa: true, last: "2026-02-11 14:30" },
@@ -1969,7 +1985,7 @@ const MerchantUserManagement = () => {
     </div>
 
     {/* Permission Matrix */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <p className="text-xs font-bold text-gray-600 mb-2">権限マトリクス</p>
       <div className="text-xs">
         <div className="flex bg-gray-50 py-1.5 px-2 font-semibold text-gray-500 border-b">
@@ -2053,7 +2069,7 @@ const MerchantPayouts = () => {
     </div>
 
     {/* Payout History */}
-    <div className="bg-white rounded-lg border">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <TableHeader cols={[{ label: "入金日", w: "w-20" }, { label: "精算期間", w: "w-32" }, { label: "総売上", w: "w-24" }, { label: "手数料", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-24" }, { label: "ステータス", w: "w-20" }, { label: "明細", w: "w-14" }]} />
       {[
         { date: "02/07", period: "01/28〜02/03", sales: "¥1,450,000", fee: "-¥46,400", hold: "-¥145,000", release: "+¥92,000", payout: "¥1,350,600", status: "入金済み", sColor: "green" },
@@ -2096,7 +2112,7 @@ const MerchantPayouts = () => {
       </div>
 
       {/* Reserve Conditions */}
-      <div className="bg-white rounded-lg border p-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <p className="text-xs font-bold text-gray-700 mb-2">適用中のリザーブ条件</p>
         <div className="space-y-1">
           {[
@@ -2123,7 +2139,7 @@ const MerchantPayouts = () => {
       </div>
 
       {/* Reserve Transaction History */}
-      <div className="bg-white rounded-lg border">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
         <TableHeader cols={[{ label: "日付", w: "w-24" }, { label: "種別", w: "w-16" }, { label: "接続先", w: "w-32" }, { label: "対象精算", w: "w-32" }, { label: "金額", w: "w-24" }, { label: "残高", w: "w-24" }]} />
         {[
           { date: "2026-02-07", type: "留保", tColor: "purple", proc: "GMO-PG", target: "01/28〜02/03精算分", amount: "-¥145,000", balance: "¥620,000" },
@@ -2214,7 +2230,7 @@ const MerchantApplicationForm = () => {
 
         {/* ═══ Step 1: 企業情報 ═══ */}
         {step === 0 && (
-          <div className="bg-white rounded-lg border shadow-sm p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 space-y-3">
             <p className="text-xs font-bold text-gray-700 border-b pb-2">Step 1: 企業情報</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -2276,7 +2292,7 @@ const MerchantApplicationForm = () => {
 
         {/* ═══ Step 2: 事業内容 ═══ */}
         {step === 1 && (
-          <div className="bg-white rounded-lg border shadow-sm p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 space-y-3">
             <p className="text-xs font-bold text-gray-700 border-b pb-2">Step 2: 事業内容</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -2346,7 +2362,7 @@ const MerchantApplicationForm = () => {
 
         {/* ═══ Step 3: 決済設定 ═══ */}
         {step === 2 && (
-          <div className="bg-white rounded-lg border shadow-sm p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 space-y-3">
             <p className="text-xs font-bold text-gray-700 border-b pb-2">Step 3: 決済設定</p>
 
             <div>
@@ -2419,7 +2435,7 @@ const MerchantApplicationForm = () => {
 
         {/* ═══ Step 4: 書類提出 ═══ */}
         {step === 3 && (
-          <div className="bg-white rounded-lg border shadow-sm p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 space-y-3">
             <p className="text-xs font-bold text-gray-700 border-b pb-2">Step 4: 書類提出</p>
 
             <div className="space-y-3">
@@ -2472,7 +2488,7 @@ const MerchantApplicationForm = () => {
 
         {/* ═══ Step 5: 確認・申込 ═══ */}
         {step === 4 && (
-          <div className="bg-white rounded-lg border shadow-sm p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 space-y-3">
             <p className="text-xs font-bold text-gray-700 border-b pb-2">Step 5: 確認・申込</p>
 
             {/* Summary Cards */}
@@ -2630,7 +2646,7 @@ const MasterRouting = () => {
 
       {/* Selected Merchant's Available Processors */}
       {currentMerchant && (
-        <div className="bg-white rounded-lg border p-3">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-bold text-gray-700">🔌 {currentMerchant.name} — 利用可能な接続先</p>
             <div className="flex gap-1">
@@ -2666,7 +2682,7 @@ const MasterRouting = () => {
       )}
 
       {/* Routing Rules */}
-      <div className="bg-white rounded-lg border p-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs font-bold text-gray-700">📋 ルーティングルール（優先順位順）</p>
           <button onClick={() => setShowAddRouteRule(true)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">+ ルール追加</button>
@@ -2704,7 +2720,7 @@ const MasterRouting = () => {
       </div>
 
       {/* Routing Flow Diagram */}
-      <div className="bg-white rounded-lg border p-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <p className="text-xs font-bold text-gray-700 mb-2">🔀 ルーティング判定フロー</p>
         <div className="bg-gray-50 rounded p-3">
           <div className="flex items-center justify-center gap-1 text-xs flex-wrap">
@@ -2735,7 +2751,7 @@ const MasterRouting = () => {
       </div>
 
       {/* Routing Performance */}
-      <div className="bg-white rounded-lg border p-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <p className="text-xs font-bold text-gray-700 mb-2">📊 ルーティング実績（直近7日）</p>
         <div className="flex gap-3 mb-3">
           <KPICard label="総決済件数" value="8,729件" sub="前週比" trend={6} />
@@ -2786,7 +2802,7 @@ const MasterRouting = () => {
       </div>
 
       {/* Cascade / Failover Config */}
-      <div className="bg-white rounded-lg border p-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <p className="text-xs font-bold text-gray-700 mb-2">⚡ フェイルオーバー / カスケード設定</p>
         <div className="space-y-2">
           {[
@@ -2824,7 +2840,7 @@ const MasterRouting = () => {
       </div>
 
       {/* Maintenance Mode */}
-      <div className="bg-white rounded-lg border p-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <div className="flex justify-between items-center mb-2">
           <p className="text-xs font-bold text-gray-700">🔧 接続先メンテナンスモード</p>
           <span className="text-xs text-gray-400">メンテ中の接続先はルーティング対象から自動除外されます</span>
@@ -2849,7 +2865,7 @@ const MasterRouting = () => {
       </div>
 
       {/* Routing Log */}
-      <div className="bg-white rounded-lg border p-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <div className="flex justify-between items-center mb-2">
           <p className="text-xs font-bold text-gray-700">📊 ルーティングログ（直近）</p>
           <button className="text-xs text-blue-600 hover:underline">全ログ検索 →</button>
@@ -3021,7 +3037,7 @@ const MasterProcessors = () => {
             <KPICard label="平均審査日数" value="12日" sub="全接続先平均" />
           </div>
 
-          <div className="bg-white rounded-lg border">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             <TableHeader cols={[{ label: "接続先ID", w: "w-24" }, { label: "接続先名", w: "w-36" }, { label: "種別", w: "w-36" }, { label: "対応ブランド", w: "w-32" }, { label: "稼働率", w: "w-20" }, { label: "承認済加盟店", w: "w-24" }, { label: "審査中", w: "w-16" }, { label: "状態", w: "w-20" }, { label: "操作", w: "w-16" }]} />
             {processorList.map((p, i) => (
               <div key={p.id} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""} hover:bg-blue-50 cursor-pointer`} onClick={() => setSelectedProc(selectedProc === p.id ? null : p.id)}>
@@ -3271,7 +3287,7 @@ const MasterProcessors = () => {
           )}
 
           {reviewFlowData.map((review, ri) => (
-            <div key={ri} className="bg-white rounded-lg border shadow-sm">
+            <div key={ri} className="bg-white rounded-lg border border-gray-200 shadow-sm">
               {/* Header */}
               <div className={`p-3 border-b ${review.status === "additional_docs" ? "bg-yellow-50" : "bg-blue-50"}`}>
                 <div className="flex justify-between items-center">
@@ -3507,7 +3523,7 @@ const MasterProcessors = () => {
           ))}
 
           {/* 審査フロー操作ログ */}
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <p className="text-xs font-bold text-gray-700 mb-2">📝 操作ログ（直近の審査フロー操作）</p>
             <div className="space-y-1">
               {[
@@ -3540,7 +3556,7 @@ const MasterProcessors = () => {
             <KPICard label="最短審査" value="4日" sub="PayPay" color="green" />
           </div>
 
-          <div className="bg-white rounded-lg border">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "接続先", w: "w-32" }, { label: "承認日", w: "w-28" }, { label: "審査日数", w: "w-20" }, { label: "提出書類", w: "w-20" }, { label: "結果", w: "w-20" }, { label: "書類", w: "w-20" }]} />
             {approvedHistory.map((h, i) => (
               <div key={i} className={`flex items-center px-3 py-2 text-xs border-b ${i % 2 ? "bg-gray-50" : ""}`}>
@@ -3589,7 +3605,7 @@ const MasterProcessors = () => {
           </div>
 
           {/* Document type templates */}
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <div className="flex justify-between items-center mb-2">
               <p className="text-xs font-bold text-gray-700">📋 審査書類テンプレート（接続先への送付パッケージ）</p>
               <button className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded border border-blue-200">テンプレート編集</button>
@@ -3616,7 +3632,7 @@ const MasterProcessors = () => {
           </div>
 
           {/* Data model reference */}
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <p className="text-xs font-bold text-gray-700 mb-2">🗄️ review_documents テーブル定義</p>
             <div className="bg-gray-50 rounded border">
               <div className="flex bg-gray-100 border-b text-xs font-semibold text-gray-500 px-3 py-1">
@@ -3648,7 +3664,7 @@ const MasterProcessors = () => {
           </div>
 
           {/* additional_requests table */}
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <p className="text-xs font-bold text-gray-700 mb-2">🗄️ additional_requests テーブル定義</p>
             <div className="bg-gray-50 rounded border">
               <div className="flex bg-gray-100 border-b text-xs font-semibold text-gray-500 px-3 py-1">
@@ -3796,7 +3812,7 @@ const MasterTransactionMonitor = () => {
           )}
 
           {/* Transaction Feed */}
-          <div className="bg-white rounded-lg border">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "接続先", w: "w-28" }, { label: "ルーティング", w: "w-28" }, { label: "応答", w: "w-16" }, { label: "3DS", w: "w-10" }, { label: "状態", w: "w-20" }, { label: "時刻", w: "w-20" }]} />
             {filtered.map((t, i) => (
               <div key={t.id} className={`flex items-center px-3 py-2 text-xs border-b cursor-pointer transition-colors ${selectedTxn === t.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-gray-50 hover:bg-blue-50" : "hover:bg-blue-50"} ${t.status === "失敗" || t.status === "不正検知" ? "bg-red-50" : ""}`}
@@ -3870,7 +3886,7 @@ const MasterTransactionMonitor = () => {
 
           {/* Stats Row */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold text-gray-600 mb-2">接続先別 レスポンスタイム</p>
               <div className="space-y-1.5">
                 {[
@@ -3887,7 +3903,7 @@ const MasterTransactionMonitor = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold text-gray-600 mb-2">ブランド別 決済件数</p>
               <div className="space-y-1.5">
                 {[
@@ -3905,7 +3921,7 @@ const MasterTransactionMonitor = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold text-gray-600 mb-2">時間帯別 決済推移</p>
               <div className="flex items-end gap-1 h-20">
                 {[20, 15, 8, 5, 3, 4, 12, 45, 78, 95, 110, 125, 130, 118, 105].map((v, i) => (
@@ -3924,7 +3940,7 @@ const MasterTransactionMonitor = () => {
       {activeTab === "search" && (
         <div className="space-y-3">
           {/* Search Form */}
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <p className="text-xs font-bold text-gray-600 mb-2">🔍 検索条件</p>
             <div className="grid grid-cols-4 gap-2">
               <div><label className="text-xs text-gray-400">取引ID</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="TXN-..." /></div>
@@ -3951,7 +3967,7 @@ const MasterTransactionMonitor = () => {
           </div>
 
           {/* Search Results */}
-          <div className="bg-white rounded-lg border">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             <div className="flex justify-between items-center px-3 py-2 border-b">
               <span className="text-xs text-gray-500">検索結果: 5件（1/1ページ）</span>
               <div className="flex gap-1 text-xs">
@@ -4122,7 +4138,7 @@ const MasterFraudSettings = () => {
             <span>🔒</span>
             <span className="text-blue-700">ルール変更は <strong>admin → super_admin の2段階承認</strong>が必要です。super_adminは直接変更可能。</span>
           </div>
-          <div className="bg-white rounded-lg border">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             <TableHeader cols={[{ label: "ID", w: "w-20" }, { label: "ルール名", w: "w-36" }, { label: "種別", w: "w-24" }, { label: "条件", w: "flex-1" }, { label: "アクション", w: "w-36" }, { label: "優先度", w: "w-14" }, { label: "30日検知", w: "w-20" }, { label: "有効", w: "w-14" }, { label: "操作", w: "w-28" }]} />
             {fraudRules.map((r, i) => (
               <div key={r.id} className={`flex items-center px-3 py-2 text-xs border-b ${!r.enabled ? "opacity-50" : ""} ${i % 2 ? "bg-gray-50" : ""}`}>
@@ -4163,7 +4179,7 @@ const MasterFraudSettings = () => {
       {/* Tab: AIモデル設定 */}
       {ruleTab === "ai" && (
         <div className="space-y-3">
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <div className="flex justify-between items-center mb-3">
               <p className="text-xs font-bold text-gray-700">🤖 不正検知AIモデル</p>
               <Badge text="v2.1 稼働中" color="green" />
@@ -4221,7 +4237,7 @@ const MasterFraudSettings = () => {
             <p className="text-xs text-yellow-700 mb-2">シャドーモード: 判定するが実際の取引には影響しません。新ルールやモデルの影響を安全にテストできます。</p>
           </div>
           {/* Auto Retrain Schedule */}
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <div className="flex justify-between items-center mb-2">
               <p className="text-xs font-bold text-gray-700">🔄 自動再学習スケジュール</p>
               <Badge text="毎週日曜 AM3:00" color="blue" />
@@ -4261,7 +4277,7 @@ const MasterFraudSettings = () => {
       {/* Tab: ブロック/ホワイトリスト */}
       {ruleTab === "lists" && (
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <div className="flex justify-between items-center mb-2">
               <p className="text-xs font-bold text-red-600">🚫 ブロックリスト</p>
               <button onClick={() => setShowAddBlock("block")} className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded border border-red-200">+ 追加</button>
@@ -4282,7 +4298,7 @@ const MasterFraudSettings = () => {
               ))}
             </div>
           </div>
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <div className="flex justify-between items-center mb-2">
               <p className="text-xs font-bold text-green-600">✅ ホワイトリスト</p>
               <button onClick={() => setShowAddBlock("white")} className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded border border-green-200">+ 追加</button>
@@ -4307,7 +4323,7 @@ const MasterFraudSettings = () => {
 
       {/* Tab: 検知ログ */}
       {ruleTab === "log" && (
-        <div className="bg-white rounded-lg border">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <TableHeader cols={[{ label: "日時", w: "w-32" }, { label: "取引ID", w: "w-36" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "検知ルール", w: "w-36" }, { label: "AIスコア", w: "w-20" }, { label: "アクション", w: "w-28" }, { label: "結果", w: "w-20" }]} />
           {[
             { time: "02/11 14:50", txn: "TXN-14516", merchant: "トラベルプラス", amount: "¥158,000", rule: "AIスコア閾値", score: "0.92", action: "自動ブロック", result: "正検知", rColor: "green" },
@@ -4335,7 +4351,7 @@ const MasterFraudSettings = () => {
           <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">
             💡 加盟店ごとにグローバルルールの閾値をオーバーライドできます。業態に合わせた柔軟な設定で<strong>健全な決済を止めない</strong>ことが目的です。
           </div>
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <div className="flex items-center gap-3 mb-3">
               <label className="text-xs font-bold text-gray-600">加盟店選択:</label>
               <div className="relative">
@@ -4547,7 +4563,7 @@ const MasterReport = () => {
     </div>
 
     {/* Report Templates */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <p className="text-xs font-bold text-gray-700 mb-2">📄 レポートテンプレート</p>
       <div className="grid grid-cols-3 gap-2">
         {[
@@ -4580,7 +4596,7 @@ const MasterReport = () => {
     </div>
 
     {/* Recent Reports */}
-    <div className="bg-white rounded-lg border">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <div className="flex justify-between items-center p-3 border-b">
         <p className="text-xs font-bold text-gray-700">📂 生成済みレポート（直近）</p>
         <button className="text-xs text-blue-600">すべて表示 →</button>
@@ -4609,7 +4625,7 @@ const MasterReport = () => {
     </div>
 
     {/* Scheduled Reports */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-gray-700">⏰ 定期配信スケジュール</p>
         <button onClick={() => setShowReportModal("schedule")} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded border border-blue-200">+ スケジュール追加</button>
@@ -4645,7 +4661,7 @@ const MasterReport = () => {
     </div>
 
     {/* Custom Report Builder */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-gray-700">🛠️ カスタムレポート作成</p>
         <button onClick={() => setShowReportModal("custom")} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ 新規レポート作成</button>
@@ -4725,7 +4741,7 @@ const MerchantSalesReport = () => (
     </div>
 
     {/* Daily Chart */}
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <p className="text-xs font-bold text-gray-700 mb-2">📊 日別売上推移（2026年2月）</p>
       <div className="flex items-end gap-1 h-32">
         {[320, 410, 380, 520, 480, 120, 90, 450, 510, 490, 560].map((v, i) => (
@@ -4740,7 +4756,7 @@ const MerchantSalesReport = () => (
 
     {/* Brand breakdown + Payout schedule */}
     <div className="grid grid-cols-2 gap-3">
-      <div className="bg-white rounded-lg border p-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <p className="text-xs font-bold text-gray-700 mb-2">💳 ブランド別内訳</p>
         <div className="space-y-2">
           {[
@@ -4759,7 +4775,7 @@ const MerchantSalesReport = () => (
           ))}
         </div>
       </div>
-      <div className="bg-white rounded-lg border p-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <p className="text-xs font-bold text-gray-700 mb-2">💰 入金予定</p>
         <div className="space-y-2">
           <div className="bg-green-50 rounded border border-green-200 p-2">
@@ -4788,7 +4804,7 @@ const MerchantSalesReport = () => (
     </div>
 
     {/* Transaction List (masked) */}
-    <div className="bg-white rounded-lg border">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <div className="flex justify-between items-center p-3 border-b">
         <p className="text-xs font-bold text-gray-700">取引明細</p>
         <div className="flex gap-2">
@@ -4977,7 +4993,7 @@ const MerchantAccountSettings = () => {
           <div className="flex justify-end">
             <button onClick={() => setShowInviteS08(true)} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ メンバー招待</button>
           </div>
-          <div className="bg-white rounded-lg border">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             <TableHeader cols={[{ label: "名前", w: "flex-1" }, { label: "メール", w: "w-48" }, { label: "権限", w: "w-20" }, { label: "MFA", w: "w-14" }, { label: "最終ログイン", w: "w-28" }, { label: "操作", w: "w-20" }]} />
             {[
               { name: "山田 太郎", email: "yamada@abcmart-ec.jp", role: "管理者", mfa: true, last: "02/11 09:15" },
@@ -5135,7 +5151,7 @@ const MerchantPaymentLinks = () => {
         </div>
       )}
       {tab === "list" && (
-        <div className="bg-white rounded-lg border">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="p-3 border-b flex gap-2">
             <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="商品名 / リンクIDで検索" />
             <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>有効</option><option>無効</option><option>期限切れ</option></select>
@@ -5170,7 +5186,7 @@ const MerchantPaymentLinks = () => {
             <KPICard label="総利用回数" value="1,247" color="green" />
             <KPICard label="総売上額" value="¥4,823,600" color="green" />
           </div>
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <p className="text-xs font-bold mb-2">リンク別実績</p>
             <TableHeader cols={[{ label: "商品名", w: "flex-1" }, { label: "利用回数", w: "w-20" }, { label: "売上額", w: "w-24" }, { label: "成功率", w: "w-16" }, { label: "最終利用日", w: "w-24" }]} />
             {[["プレミアムプラン", "842", "¥8,251,600", "98.2%", "2026-02-13"], ["寄付金", "245", "¥1,230,000", "96.7%", "2026-02-12"], ["コース選択", "160", "¥960,000", "97.5%", "2026-02-11"]].map((r, i) => (
@@ -5252,7 +5268,7 @@ const MerchantSubscriptions = () => {
       {tab === "plans" && (
         <div className="space-y-3">
           <button onClick={() => setShowCreatePlan(!showCreatePlan)} className="px-3 py-1.5 bg-green-600 text-white rounded text-xs font-bold">+ プラン作成</button>
-          <div className="bg-white rounded-lg border">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             <TableHeader cols={[{ label: "プラン名", w: "flex-1" }, { label: "タイプ", w: "w-16" }, { label: "金額", w: "w-24" }, { label: "サイクル", w: "w-20" }, { label: "ユーザー数", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]} />
             {[{ name: "月額スタンダード", type: "継続", amt: "¥2,980/月", cycle: "毎月1日", users: "342", st: "active" },
               { name: "年間プレミアム", type: "継続", amt: "¥29,800/年", cycle: "365日", users: "89", st: "active" },
@@ -5278,7 +5294,7 @@ const MerchantSubscriptions = () => {
             <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="ユーザーID / メールで検索" />
             <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>🟢 課金中</option><option>🔴 自動停止</option><option>🔵 完了</option></select>
           </div>
-          <div className="bg-white rounded-lg border">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             <TableHeader cols={[{ label: "ユーザーID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "プラン", w: "w-28" }, { label: "カード", w: "w-16" }, { label: "次回決済", w: "w-20" }, { label: "失敗", w: "w-10" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-28" }]} />
             {[{ uid: "USR-001", email: "user1@example.com", plan: "月額スタンダード", card: "*4242", next: "03/01", fails: "0", st: "課金中", stc: "green" },
               { uid: "USR-002", email: "user2@example.com", plan: "3回分割払い", card: "*1234", next: "03/15", fails: "0", st: "課金中", stc: "green" },
@@ -5307,7 +5323,7 @@ const MerchantSubscriptions = () => {
             <KPICard label="今月 失敗" value="12件" color="red" />
             <KPICard label="リトライ中" value="3件" color="yellow" />
           </div>
-          <div className="bg-white rounded-lg border">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             <TableHeader cols={[{ label: "実行日", w: "w-24" }, { label: "ユーザーID", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "金額", w: "w-20" }, { label: "結果", w: "w-14" }, { label: "リトライ", w: "w-14" }, { label: "エラー", w: "w-20" }]} />
             {[["02/13 02:00", "USR-001", "月額スタンダード", "¥2,980", "成功", "—", "—"], ["02/13 02:00", "USR-003", "月額スタンダード", "¥2,980", "失敗", "2回目", "E-Card01"], ["02/13 02:00", "USR-004", "月額スタンダード", "¥2,980", "失敗", "3回目", "E-Card01"]].map((r, i) => (
               <div key={i} className="flex px-3 py-2 text-xs border-b">
@@ -5381,7 +5397,7 @@ const MasterRecurring = () => {
             <div className="text-xs"><span className="font-bold text-red-700">自動停止急増アラート：</span><span className="text-red-600">直近24hの自動停止が前日比250%（5件 → 12件）。接続先の障害の可能性があります</span></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-2">本日の実行予定</p>
               <TableHeader cols={[{ label: "時刻", w: "w-14" }, { label: "加盟店", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "対象数", w: "w-14" }, { label: "状態", w: "w-14" }]} />
               {[["02:00", "ABC商事", "月額スタンダード", "342", "完了"], ["02:00", "XYZ物産", "年間プレミアム", "89", "完了"], ["14:00", "DEF Inc", "月額ライト", "56", "待機中"]].map((r, i) => (
@@ -5390,7 +5406,7 @@ const MasterRecurring = () => {
                 </div>
               ))}
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-2">直近バッチ実行結果</p>
               <TableHeader cols={[{ label: "実行日時", w: "w-28" }, { label: "処理", w: "w-12" }, { label: "成功", w: "w-12" }, { label: "失敗", w: "w-12" }, { label: "状態", w: "w-14" }]} />
               {[["2026-02-13 02:00", "423", "411", "12", "完了"], ["2026-02-12 02:00", "398", "391", "7", "完了"], ["2026-02-11 02:00", "412", "406", "6", "完了"]].map((r, i) => (
@@ -5403,7 +5419,7 @@ const MasterRecurring = () => {
         </div>
       )}
       {tab === "plans" && (
-        <div className="bg-white rounded-lg border">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="p-3 border-b flex gap-2">
             <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="加盟店名 / プラン名で検索" />
             <select className="border rounded px-2 py-1 text-xs"><option>全タイプ</option><option>継続</option><option>分割</option></select>
@@ -5422,7 +5438,7 @@ const MasterRecurring = () => {
         </div>
       )}
       {tab === "users" && (
-        <div className="bg-white rounded-lg border">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="p-3 border-b flex gap-2">
             <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="メール / ユーザーIDで検索" />
             <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>課金中</option><option>一時停止</option><option>自動停止</option></select>
@@ -5441,7 +5457,7 @@ const MasterRecurring = () => {
         </div>
       )}
       {tab === "logs" && (
-        <div className="bg-white rounded-lg border">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <TableHeader cols={[{ label: "実行日時", w: "w-32" }, { label: "バッチID", w: "w-20" }, { label: "処理件数", w: "w-16" }, { label: "成功", w: "w-14" }, { label: "失敗", w: "w-14" }, { label: "リトライ", w: "w-14" }, { label: "処理時間", w: "w-14" }, { label: "状態", w: "w-16" }, { label: "", w: "w-10" }]} />
           {[["2026-02-13 02:00:05", "B-4521", "423", "411", "12", "8", "4.2s", "完了"],
             ["2026-02-12 02:00:03", "B-4520", "398", "391", "7", "5", "3.8s", "完了"],
@@ -5472,7 +5488,7 @@ const MasterAgents = () => {
         <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-blue-500 text-blue-700 bg-blue-50 font-bold" : "border-transparent text-gray-400"}`}>{t.label}</button>
       ))}</div>
       {tab === "list" && (
-        <div className="bg-white rounded-lg border">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="p-3 border-b"><input className="border rounded px-2 py-1 text-xs w-full" placeholder="代理店名 / コードで検索" /></div>
           <TableHeader cols={[{ label: "コード", w: "w-20" }, { label: "代理店名", w: "flex-1" }, { label: "代表者", w: "w-20" }, { label: "紹介加盟店数", w: "w-20" }, { label: "紹介料率", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]} />
           {[{ code: "AG-001", name: "デジタルパートナーズ", rep: "田中太郎", merchants: "23", rate: "5.0%", st: "active" },
@@ -5508,7 +5524,7 @@ const MasterAgents = () => {
             <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs">今月の報酬を計算</button>
             <button className="px-3 py-1 bg-gray-100 text-gray-600 rounded text-xs border">📥 CSV出力</button>
           </div>
-          <div className="bg-white rounded-lg border">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             <TableHeader cols={[{ label: "代理店", w: "flex-1" }, { label: "対象加盟店", w: "w-16" }, { label: "取引総額", w: "w-24" }, { label: "料率", w: "w-14" }, { label: "報酬額", w: "w-24" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]} />
             {[["デジタルパートナーズ", "23", "¥45,200,000", "5.0%", "¥2,260,000", "pending"], ["ウェブコンサル合同会社", "12", "¥18,500,000", "4.5%", "¥832,500", "confirmed"], ["ITソリューションズ", "8", "¥8,300,000", "5.0%", "¥415,000", "paid"]].map((r, i) => (
               <div key={i} className="flex px-3 py-2 text-xs border-b items-center">
@@ -5578,7 +5594,7 @@ const AgentDashboard = () => (
       <KPICard label="先月の報酬確定額" value="¥2,105,000" sub="支払済" color="blue" />
     </div>
     <div className="grid grid-cols-2 gap-3">
-      <div className="bg-white rounded-lg border p-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <p className="text-xs font-bold mb-2">加盟店ステータス</p>
         <div className="flex items-center gap-4 py-4 justify-center">
           <div className="text-center"><div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold">23</div><p className="text-xs text-gray-500 mt-1">稼働中</p></div>
@@ -5586,7 +5602,7 @@ const AgentDashboard = () => (
           <div className="text-center"><div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold">1</div><p className="text-xs text-gray-500 mt-1">停止中</p></div>
         </div>
       </div>
-      <div className="bg-white rounded-lg border p-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
         <p className="text-xs font-bold mb-2">月別報酬推移（直近6ヶ月）</p>
         <div className="flex items-end gap-2 h-24 px-2">
           {[60, 72, 68, 85, 90, 95].map((h, i) => (
@@ -5598,7 +5614,7 @@ const AgentDashboard = () => (
         </div>
       </div>
     </div>
-    <div className="bg-white rounded-lg border p-3">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <p className="text-xs font-bold mb-2">最新の紹介加盟店</p>
       {[["ネットショップ太郎", "2026-02-10", "審査中", "yellow"], ["ファッションEC123", "2026-01-25", "稼働中", "green"], ["フード通販ABC", "2026-01-15", "稼働中", "green"]].map((r, i) => (
         <div key={i} className="flex items-center py-2 border-b text-xs last:border-0">
@@ -5618,7 +5634,7 @@ const AgentMerchants = () => (
       <h2 className="text-sm font-bold text-gray-800">加盟店一覧（自分の紹介のみ）</h2>
     </div>
     <div className="flex gap-2"><input className="border rounded px-2 py-1 text-xs flex-1" placeholder="加盟店名で検索" /><select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option></select></div>
-    <div className="bg-white rounded-lg border">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "法人名", w: "w-28" }, { label: "ステータス", w: "w-16" }, { label: "月間取引額", w: "w-24" }, { label: "紹介日", w: "w-20" }, { label: "適用料率", w: "w-16" }]} />
       {[["ECサイトA", "ABC商事", "稼働中", "green", "¥5,200,000", "2025-06-01", "5.0%"],
         ["オンラインストアB", "XYZ物産", "稼働中", "green", "¥3,100,000", "2025-08-15", "5.0%"],
@@ -5643,7 +5659,7 @@ const AgentReports = () => (
     <div className="flex items-center justify-between">
       <h2 className="text-sm font-bold text-gray-800">報告書</h2>
     </div>
-    <div className="bg-white rounded-lg border">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <TableHeader cols={[{ label: "対象月", w: "w-20" }, { label: "対象加盟店", w: "w-16" }, { label: "取引総額", w: "w-24" }, { label: "報酬額", w: "w-24" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-32" }]} />
       {[["2026年2月", "23社", "¥45,200,000", "¥2,260,000", "pending", "未確認"],
         ["2026年1月", "22社", "¥42,100,000", "¥2,105,000", "paid", "支払済"],
@@ -5680,7 +5696,7 @@ const AgentReferral = () => (
       </div>
       <div className="space-y-3">
         <p className="text-xs font-bold">申請履歴</p>
-        <div className="bg-white rounded-lg border">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           {[["太郎合同会社", "2026-02-10", "審査中", "yellow"], ["DEFサービス", "2026-01-20", "承認済", "green"], ["GHIマーケット", "2025-12-05", "否認", "red"]].map((r, i) => (
             <div key={i} className="flex items-center px-3 py-2 text-xs border-b">
               <div className="flex-1 font-bold">{r[0]}</div>
@@ -5782,7 +5798,7 @@ const MasterCustomers = () => {
 
       {tab === "search" && !selectedCustomer && (
         <div className="space-y-3">
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <p className="text-xs font-bold mb-2">検索条件</p>
             <div className="grid grid-cols-4 gap-2">
               <div><label className="text-xs text-gray-400">メール / 名前</label><input className="w-full border rounded px-2 py-1 text-xs mt-0.5" placeholder="検索..." /></div>
@@ -5797,7 +5813,7 @@ const MasterCustomers = () => {
               <div className="flex items-end"><button className="w-full py-1 bg-blue-600 text-white rounded text-xs font-bold">🔍 検索</button></div>
             </div>
           </div>
-          <div className="bg-white rounded-lg border">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "最終取引", w: "w-24" }, { label: "サブスク", w: "w-14" }, { label: "セグメント", w: "w-16" }, { label: "リスク", w: "w-12" }]} />
             {customers.map((c, i) => (
               <div key={i} onClick={() => setSelectedCustomer(c)} className="flex px-3 py-2 text-xs border-b hover:bg-blue-50 cursor-pointer items-center">
@@ -5821,7 +5837,7 @@ const MasterCustomers = () => {
       {tab === "search" && selectedCustomer && (
         <div className="grid grid-cols-5 gap-3">
           <div className="col-span-2 space-y-3">
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-bold">プロファイル</p>
                 <button onClick={() => setSelectedCustomer(null)} className="text-xs text-blue-600">← 一覧に戻る</button>
@@ -5832,7 +5848,7 @@ const MasterCustomers = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-2">リスク & セグメント</p>
               <div className="flex gap-2 mb-2">
                 <Badge text={`リスク: ${selectedCustomer.risk === "low" ? "低" : "中"}`} color={riskColors[selectedCustomer.risk]} />
@@ -5842,7 +5858,7 @@ const MasterCustomers = () => {
               <div className="flex text-xs"><span className="w-20 text-gray-400">AIスコア</span><span className="font-bold">23/100（低リスク）</span></div>
               <div className="flex text-xs mt-1"><span className="w-20 text-gray-400">CB件数</span><span>0件</span></div>
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-2">タグ</p>
               <div className="flex gap-1 flex-wrap">
                 {selectedCustomer.segment === "ロイヤル" && <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">VIP</span>}
@@ -5850,7 +5866,7 @@ const MasterCustomers = () => {
                 <button className="text-xs px-2 py-0.5 bg-gray-100 text-gray-400 rounded-full border border-dashed">+ タグ追加</button>
               </div>
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-2">メモ</p>
               <div className="space-y-1.5">
                 <div className="bg-gray-50 rounded p-2 text-xs"><p className="text-gray-400">2026-02-10 — admin田中</p><p>問い合わせあり。返金対応完了。</p></div>
@@ -5864,7 +5880,7 @@ const MasterCustomers = () => {
             </div>
           </div>
           <div className="col-span-3 space-y-3">
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-bold">取引統計</p>
                 <div className="flex gap-2 text-xs">
@@ -5883,7 +5899,7 @@ const MasterCustomers = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-bold">取引タイムライン</p>
                 <div className="flex gap-1">
@@ -5910,7 +5926,7 @@ const MasterCustomers = () => {
               ))}
               <div className="text-center mt-2"><button className="text-xs text-blue-600">さらに表示 →</button></div>
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-2">カード情報</p>
               <div className="flex gap-3">
                 {[{ brand: "VISA", last4: "4242", exp: "12/27", lastUsed: "02/13", active: true }, { brand: "VISA", last4: "8888", exp: "03/25", lastUsed: "2024-12", active: false }].map((c, i) => (
@@ -5935,7 +5951,7 @@ const MasterCustomers = () => {
             <KPICard label="今月新規" value="623" trend={-2.1} color="blue" />
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-3">セグメント分布</p>
               <div className="space-y-2">
                 {[{ seg: "ロイヤル（11回以上）", pct: 8, cnt: "1,028", color: "bg-purple-400" }, { seg: "リピーター（2-10回）", pct: 27, cnt: "3,469", color: "bg-blue-400" }, { seg: "初回（1回のみ）", pct: 45, cnt: "5,781", color: "bg-gray-300" }, { seg: "休眠（90日+）", pct: 15, cnt: "1,927", color: "bg-yellow-300" }, { seg: "離脱（180日+）", pct: 5, cnt: "642", color: "bg-red-300" }].map((s, i) => (
@@ -5946,7 +5962,7 @@ const MasterCustomers = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-3">月別 新規 vs リピーター</p>
               <div className="flex items-end gap-1 h-32 px-1">
                 {[{ n: 580, r: 320 }, { n: 610, r: 340 }, { n: 550, r: 360 }, { n: 640, r: 380 }, { n: 670, r: 410 }, { n: 623, r: 395 }].map((d, i) => (
@@ -5961,7 +5977,7 @@ const MasterCustomers = () => {
               </div>
               <div className="flex justify-center gap-4 mt-2 text-xs"><span className="flex items-center gap-1"><span className="w-3 h-2 bg-gray-300 rounded" />新規</span><span className="flex items-center gap-1"><span className="w-3 h-2 bg-blue-300 rounded" />リピーター</span></div>
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-3">LTV分布</p>
               <div className="flex items-end gap-1 h-32 px-1">
                 {[{ range: "〜¥1万", h: 85 }, { range: "¥1-5万", h: 60 }, { range: "¥5-10万", h: 35 }, { range: "¥10-50万", h: 20 }, { range: "¥50万〜", h: 8 }].map((d, i) => (
@@ -5973,7 +5989,7 @@ const MasterCustomers = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <p className="text-xs font-bold mb-2">加盟店別 顧客数（TOP10）</p>
             {[["ABC商事", 3420, 34], ["XYZ物産", 2150, 22], ["DEFサービス", 1890, 19], ["GHIオンライン", 1240, 12], ["JKLマーケット", 980, 10]].map((r, i) => (
               <div key={i} className="flex items-center text-xs py-1">
@@ -6016,7 +6032,7 @@ const MerchantCustomers = () => {
 
       {tab === "list" && !detail && (
         <div className="space-y-3">
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <div className="flex gap-2">
               <input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="🔍 メール / 名前 / 顧客IDで検索" />
               <input className="w-24 border rounded px-2 py-1 text-xs" placeholder="カード下4桁" />
@@ -6025,7 +6041,7 @@ const MerchantCustomers = () => {
               <button className="px-3 py-1 bg-green-600 text-white rounded text-xs">検索</button>
             </div>
           </div>
-          <div className="bg-white rounded-lg border">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "リピート", w: "w-16" }, { label: "サブスク", w: "w-14" }, { label: "最終取引", w: "w-24" }, { label: "タグ", w: "w-20" }]} />
             {customers.map((c, i) => (
               <div key={i} onClick={() => setDetail(c)} className="flex px-3 py-2 text-xs border-b hover:bg-green-50 cursor-pointer items-center">
@@ -6047,7 +6063,7 @@ const MerchantCustomers = () => {
       {tab === "list" && detail && (
         <div className="grid grid-cols-5 gap-3">
           <div className="col-span-2 space-y-3">
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-bold">顧客プロファイル</p>
                 <button onClick={() => setDetail(null)} className="text-xs text-green-600">← 一覧に戻る</button>
@@ -6056,7 +6072,7 @@ const MerchantCustomers = () => {
                 <div key={i} className="flex text-xs py-0.5"><span className="w-20 text-gray-400">{l}</span><span className="font-bold">{v}</span></div>
               ))}
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-1">セグメント & サブスク</p>
               <div className="flex gap-2 mt-1">
                 <Badge text={detail.repeat} color={repeatColors[detail.repeat]} />
@@ -6064,14 +6080,14 @@ const MerchantCustomers = () => {
               </div>
               {detail.sub === "課金中" && <div className="mt-2 text-xs text-gray-500 bg-green-50 rounded p-1.5">月額スタンダード ¥2,980/月<br/>次回: 2026-03-01 → <button className="text-green-600 underline">S10で開く</button></div>}
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-1">タグ</p>
               <div className="flex gap-1 flex-wrap mt-1">
                 {detail.tags.map((t, i) => <span key={i} className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">{t}</span>)}
                 <button className="text-xs px-2 py-0.5 bg-gray-100 text-gray-400 rounded-full border border-dashed">+ タグ追加</button>
               </div>
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-1">メモ</p>
               <div className="bg-gray-50 rounded p-2 text-xs"><p className="text-gray-400">2026-02-10 — admin山田</p><p>電話で問い合わせあり。サブスク解約方法をご案内。</p></div>
               <div className="flex gap-1 mt-2"><input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="メモを追加..." /><button className="px-2 py-1 bg-green-600 text-white rounded text-xs">追加</button></div>
@@ -6082,7 +6098,7 @@ const MerchantCustomers = () => {
             </div>
           </div>
           <div className="col-span-3 space-y-3">
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-2">月別利用推移</p>
               <div className="flex items-end gap-1 h-16 px-1">
                 {[35, 42, 38, 55, 48, 62].map((h, i) => (
@@ -6098,7 +6114,7 @@ const MerchantCustomers = () => {
                 <span>CB: <b>0件</b></span>
               </div>
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-bold">取引履歴</p>
                 <select className="border rounded px-1.5 py-0.5 text-xs"><option>全て</option><option>成功のみ</option><option>返金/CB</option></select>
@@ -6134,7 +6150,7 @@ const MerchantCustomers = () => {
             <KPICard label="今月新規" value="187" color="green" />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-3">セグメント分布</p>
               <div className="flex items-center justify-center gap-6 py-3">
                 {[{ seg: "ロイヤル", cnt: 274, pct: "8%", color: "bg-purple-500" }, { seg: "リピーター", cnt: 1044, pct: "30.5%", color: "bg-blue-500" }, { seg: "初回", cnt: 1540, pct: "45%", color: "bg-gray-400" }, { seg: "休眠", cnt: 432, pct: "12.6%", color: "bg-yellow-400" }, { seg: "離脱", cnt: 130, pct: "3.8%", color: "bg-red-400" }].map((s, i) => (
@@ -6146,7 +6162,7 @@ const MerchantCustomers = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-lg border p-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-3">リピート率推移（12ヶ月）</p>
               <div className="flex items-end gap-0.5 h-24 px-1">
                 {[30, 31, 32, 33, 34, 33, 34, 35, 36, 37, 38, 38.5].map((v, i) => (
@@ -6158,7 +6174,7 @@ const MerchantCustomers = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <p className="text-xs font-bold mb-2">取引頻度分布</p>
             <div className="grid grid-cols-4 gap-3">
               {[{ label: "1回のみ", cnt: 1540, pct: 45 }, { label: "2-5回", cnt: 820, pct: 24 }, { label: "6-10回", cnt: 524, pct: 15 }, { label: "11回以上", cnt: 536, pct: 16 }].map((d, i) => (
@@ -6417,9 +6433,9 @@ export default function Wireframes() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100 font-sans">
+    <div className="h-screen flex flex-col bg-gray-100 font-sans overflow-hidden">
       {/* Top toggle */}
-      <div className="bg-gray-900 px-4 py-2 flex items-center gap-4">
+      <div className="bg-gray-900 px-4 py-2.5 flex items-center gap-4 shrink-0">
         <span className="text-xs text-gray-400">画面切替:</span>
         <button onClick={() => setView("master")} className={`text-xs px-3 py-1 rounded ${view === "master" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"}`}>
           マスター管理画面
@@ -6440,21 +6456,21 @@ export default function Wireframes() {
       </div>
 
       {/* Main content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0">
         {view === "master" ? (
           <>
             <Sidebar items={masterMenuItems} active={masterPage} onSelect={setMasterPage} title="マスター管理" color="#60A5FA" />
-            <div className="flex-1 overflow-y-auto">{renderMaster()}</div>
+            <div className="flex-1 overflow-y-auto bg-gray-100">{renderMaster()}</div>
           </>
         ) : view === "merchant" ? (
           <>
             <Sidebar items={merchantMenuItems} active={merchantPage} onSelect={setMerchantPage} title="加盟店管理" color="#4ADE80" />
-            <div className="flex-1 overflow-y-auto">{renderMerchant()}</div>
+            <div className="flex-1 overflow-y-auto bg-gray-100">{renderMerchant()}</div>
           </>
         ) : view === "agent" ? (
           <>
             <Sidebar items={agentMenuItems} active={agentPage} onSelect={setAgentPage} title="代理店管理" color="#FB923C" />
-            <div className="flex-1 overflow-y-auto">{renderAgent()}</div>
+            <div className="flex-1 overflow-y-auto bg-gray-100">{renderAgent()}</div>
           </>
         ) : view === "payment" ? (
           <div className="flex-1 overflow-y-auto"><PaymentPage /></div>
