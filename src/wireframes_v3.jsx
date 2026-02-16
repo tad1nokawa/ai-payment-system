@@ -321,7 +321,7 @@ const MasterExceptionQueue = () => {
         { id: "#5521", type: "不正検知", target: "¥89,000 / カード決済 / 山本商店", ai: "ブロック推薦", aiColor: "red", time: "30分", timeColor: "gray", locked: false },
         { id: "#1025", type: "審査保留", target: "合同会社テストショップ / 雑貨EC", ai: "承認推薦", aiColor: "green", time: "15分", timeColor: "gray", locked: true, lockedBy: "田中" },
       ].map((item, i) => (
-        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${item.locked ? "bg-orange-50" : i % 2 ? "bg-slate-50" : ""}`}>
+        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${item.locked ? "bg-orange-50" : i % 2 ? "bg-slate-50" : ""}`}>
           <div className="w-16 font-mono text-slate-600 flex items-center gap-1">{item.locked && <span title={`${item.lockedBy}さんが対応中`}>🔒</span>}{item.id}</div>
           <div className="w-20"><Badge text={item.type} color="yellow" /></div>
           <div className="flex-1 text-slate-700">{item.target}</div>
@@ -502,7 +502,7 @@ const MasterMerchants = () => {
           return (
             <div key={m.id}>
               <div
-                className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap cursor-pointer transition-colors ${isExpanded ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"}`}
+                className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap cursor-pointer transition-colors ${isExpanded ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"}`}
                 onClick={() => setExpandedId(isExpanded ? null : m.id)}
               >
                 <div className="w-24 font-mono text-slate-500">{m.id}</div>
@@ -556,7 +556,7 @@ const MasterMerchants = () => {
 
                   {/* Processor Detail Table */}
                   <div className="bg-white rounded-lg border border-slate-200">
-                    <div className="flex bg-slate-50 border-b text-xs font-semibold text-slate-500 px-3 py-1.5">
+                    <div className="flex bg-slate-50 border-b text-xs font-semibold text-slate-500 px-4 py-1.5">
                       <div className="w-36">接続先</div>
                       <div className="w-28">対応ブランド</div>
                       <div className="w-24">審査状況</div>
@@ -568,7 +568,7 @@ const MasterMerchants = () => {
                     {m.processors.map((proc, pi) => {
                       const st = PROC_STATUS[proc.status] || { label: proc.status, color: "gray" };
                       return (
-                        <div key={pi} className="flex items-center px-3 py-1.5 text-xs border-b whitespace-nowrap last:border-0">
+                        <div key={pi} className="flex items-center px-4 py-1.5 text-xs border-b whitespace-nowrap last:border-0">
                           <div className="w-36 font-semibold text-slate-700">{proc.name}</div>
                           <div className="w-28 text-slate-500">{proc.brands}</div>
                           <div className="w-24"><Badge text={st.label} color={st.color} /></div>
@@ -1040,7 +1040,7 @@ const MerchantTransactions = () => (
         { id: "pay_5c4a6f8e", time: "2026-02-11 13:55", amount: "¥3,200", status: "返金済", sColor: "yellow", method: "JCB", card: "****5678", order: "ORD-20260210-045" },
         { id: "pay_4b3d7g2h", time: "2026-02-11 13:42", amount: "¥15,600", status: "成功", sColor: "green", method: "PayPay", card: "-", order: "ORD-20260211-004" },
       ].map((tx, i) => (
-        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
+        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
           <div className="w-28 font-mono text-blue-600">{tx.id}</div>
           <div className="w-32 text-slate-500">{tx.time}</div>
           <div className="w-20 font-semibold text-right">{tx.amount}</div>
@@ -1227,7 +1227,7 @@ const MasterUserManagement = () => {
         { name: "高橋 健太", email: "takahashi@company.jp", roleLabel: "レビュアー", categories: ["URL巡回"], catColors: ["green"], mfa: false, lastLogin: "2026-02-10 18:00", rColor: "purple" },
         { name: "伊藤 翔", email: "ito@company.jp", roleLabel: "レビュアー", categories: ["審査", "精算"], catColors: ["purple", "blue"], mfa: true, lastLogin: "2026-02-11 09:30", rColor: "purple" },
       ].map((u, i) => (
-        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
+        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
           <div className="w-36 font-semibold text-slate-700 flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs">👤</div>
             {u.name}
@@ -1634,7 +1634,7 @@ const MasterMerchantApplications = () => {
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
         <TableHeader cols={[{ label: "申込ID", w: "w-36" }, { label: "法人名", w: "flex-1" }, { label: "業種", w: "w-24" }, { label: "自社審査", w: "w-24" }, { label: "AI判定", w: "w-24" }, { label: "接続先審査", w: "w-28" }, { label: "申込日", w: "w-24" }, { label: "操作", w: "w-20" }]} />
         {appList.map((a, i) => (
-          <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap cursor-pointer transition-colors ${selectedApp === a.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"}`}
+          <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap cursor-pointer transition-colors ${selectedApp === a.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"}`}
                onClick={() => setSelectedApp(a.id)}>
             <div className="w-36 font-mono text-slate-500">{a.id}</div>
             <div className="flex-1 font-semibold text-slate-700">{a.name}</div>
@@ -1755,7 +1755,7 @@ const MasterSettlement = () => (
           { m: "XYZショップ", proc: "GMO-PG", rate: "10%", period: "180日", bal: "¥185,000", next: "¥92,000", date: "2026-03-14" },
           { m: "トラベルプラス", proc: "GMO-PG", rate: "15%", period: "180日", bal: "¥510,000", next: "¥340,000", date: "2026-03-07" },
         ].map((r, i) => (
-          <div key={i} className={`flex items-center px-3 py-1.5 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
+          <div key={i} className={`flex items-center px-4 py-1.5 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
             <div className="flex-1 font-semibold text-slate-700">{r.m}</div>
             <div className="w-28 text-slate-600">{r.proc}</div>
             <div className="w-20 text-center"><Badge text={r.rate} color="purple" /></div>
@@ -1781,7 +1781,7 @@ const MasterSettlement = () => (
           { merchant: "M-002 XYZショップ", sales: "¥1,850,000", fee: "¥58,870", cb: "¥12,000", hold: "¥185,000", release: "¥92,000", payout: "¥1,686,130" },
           { merchant: "M-003 トラベルプラス", sales: "¥5,100,000", fee: "¥183,600", cb: "¥245,000", hold: "¥510,000", release: "¥340,000", payout: "¥4,501,400" },
         ].map((m, i) => (
-          <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
+          <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
             <div className="flex-1 font-semibold text-slate-700">{m.merchant}</div>
             <div className="w-28 text-right text-slate-600">{m.sales}</div>
             <div className="w-24 text-right text-rose-500">-{m.fee}</div>
@@ -1802,7 +1802,7 @@ const MasterSettlement = () => (
         { id: "PAY-0211-002", merchant: "M-002 XYZショップ", period: "02/04 〜 02/10", amount: "¥1,682,000", fee: "¥58,870", status: "入金完了", sColor: "green", date: "02/12" },
         { id: "PAY-0211-003", merchant: "M-004 テスト商事", period: "02/04 〜 02/10", amount: "¥612,000", fee: "¥23,256", status: "保留", sColor: "yellow", date: "-" },
       ].map((p, i) => (
-        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
+        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
           <div className="w-28 font-mono text-slate-500">{p.id}</div>
           <div className="flex-1 font-semibold text-slate-700">{p.merchant}</div>
           <div className="w-36 text-slate-500">{p.period}</div>
@@ -1980,7 +1980,7 @@ const MerchantUserManagement = () => {
         { name: "小林 大輔", email: "kobayashi@techshop.jp", role: "スタッフ", rColor: "green", mfa: true, last: "2026-02-10 18:20" },
         { name: "渡辺 さくら", email: "watanabe@techshop.jp", role: "閲覧のみ", rColor: "gray", mfa: false, last: "2026-02-08 10:00" },
       ].map((u, i) => (
-        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
+        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
           <div className="w-36 font-semibold text-slate-700 flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-xs">👤</div>
             {u.name}
@@ -2089,7 +2089,7 @@ const MerchantPayouts = () => {
         { date: "01/31", period: "01/21〜01/27", sales: "¥1,180,000", fee: "-¥37,760", hold: "-¥118,000", release: "+¥88,000", payout: "¥1,112,240", status: "入金済み", sColor: "green" },
         { date: "01/24", period: "01/14〜01/20", sales: "¥980,000", fee: "-¥31,360", hold: "-¥98,000", release: "+¥0", payout: "¥850,640", status: "入金済み", sColor: "green" },
       ].map((p, i) => (
-        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
+        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
           <div className="w-20 text-slate-600">{p.date}</div>
           <div className="w-32 text-slate-500">{p.period}</div>
           <div className="w-24 text-right text-slate-600">{p.sales}</div>
@@ -2161,7 +2161,7 @@ const MerchantPayouts = () => {
           { date: "2026-01-31", type: "留保", tColor: "purple", proc: "三井住友カード", target: "01/21〜01/27精算分", amount: "-¥59,000", balance: "¥653,000" },
           { date: "2026-01-24", type: "解放", tColor: "green", proc: "GMO-PG", target: "2025年7月留保分", amount: "+¥92,000", balance: "¥712,000" },
         ].map((r, i) => (
-          <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
+          <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
             <div className="w-24 text-slate-500">{r.date}</div>
             <div className="w-16"><Badge text={r.type} color={r.tColor} /></div>
             <div className="w-32 text-slate-600">{r.proc}</div>
@@ -2890,7 +2890,7 @@ const MasterRouting = () => {
           { time: "14:51:22", txn: "TXN-14519", merchant: "スタイルプラス", brand: "VISA", ai: "GMO(85) > 三井住友(72)", selected: "GMO-PG", result: "成功", fo: "—" },
           { time: "14:50:58", txn: "TXN-14518", merchant: "ABCマート", brand: "QR", ai: "PayPay(固定)", selected: "PayPay", result: "成功", fo: "—" },
         ].map((l, i) => (
-          <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
+          <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
             <div className="w-28 text-slate-400 font-mono">{l.time}</div>
             <div className="w-36 font-mono text-slate-500">{l.txn}</div>
             <div className="w-32 text-slate-700">{l.merchant}</div>
@@ -3053,7 +3053,7 @@ const MasterProcessors = () => {
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "接続先ID", w: "w-24" }, { label: "接続先名", w: "w-36" }, { label: "種別", w: "w-36" }, { label: "対応ブランド", w: "w-32" }, { label: "稼働率", w: "w-20" }, { label: "承認済加盟店", w: "w-24" }, { label: "審査中", w: "w-16" }, { label: "状態", w: "w-20" }, { label: "操作", w: "w-16" }]} />
             {processorList.map((p, i) => (
-              <div key={p.id} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50 cursor-pointer`} onClick={() => setSelectedProc(selectedProc === p.id ? null : p.id)}>
+              <div key={p.id} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50 cursor-pointer`} onClick={() => setSelectedProc(selectedProc === p.id ? null : p.id)}>
                 <div className="w-24 font-mono text-slate-500">{p.id}</div>
                 <div className="w-36 font-semibold text-slate-700">{p.name}</div>
                 <div className="w-36 text-slate-500">{p.type}</div>
@@ -3085,7 +3085,7 @@ const MasterProcessors = () => {
                     const mp = m.processors.find(x => x.name === p.name);
                     const st = PROC_STATUS[mp.status];
                     return (
-                      <div key={m.id} className="flex items-center px-3 py-1.5 text-xs border-b whitespace-nowrap last:border-0">
+                      <div key={m.id} className="flex items-center px-4 py-1.5 text-xs border-b whitespace-nowrap last:border-0">
                         <div className="w-24 font-mono text-slate-500">{m.id}</div>
                         <div className="flex-1 text-slate-700">{m.name}</div>
                         <div className="w-24"><Badge text={st.label} color={st.color} /></div>
@@ -3572,7 +3572,7 @@ const MasterProcessors = () => {
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "接続先", w: "w-32" }, { label: "承認日", w: "w-28" }, { label: "審査日数", w: "w-20" }, { label: "提出書類", w: "w-20" }, { label: "結果", w: "w-20" }, { label: "書類", w: "w-20" }]} />
             {approvedHistory.map((h, i) => (
-              <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
+              <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
                 <div className="flex-1 font-semibold text-slate-700">{h.merchantName}</div>
                 <div className="w-32 text-slate-600">{h.processorName}</div>
                 <div className="w-28 text-slate-500">{h.approvedAt}</div>
@@ -3828,7 +3828,7 @@ const MasterTransactionMonitor = () => {
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "接続先", w: "w-28" }, { label: "ルーティング", w: "w-28" }, { label: "応答", w: "w-16" }, { label: "3DS", w: "w-10" }, { label: "状態", w: "w-20" }, { label: "時刻", w: "w-20" }]} />
             {filtered.map((t, i) => (
-              <div key={t.id} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap cursor-pointer transition-colors ${selectedTxn === t.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"} ${t.status === "失敗" || t.status === "不正検知" ? "bg-rose-50" : ""}`}
+              <div key={t.id} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap cursor-pointer transition-colors ${selectedTxn === t.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"} ${t.status === "失敗" || t.status === "不正検知" ? "bg-rose-50" : ""}`}
                    onClick={() => setSelectedTxn(selectedTxn === t.id ? null : t.id)}>
                 <div className="w-40 font-mono text-slate-500">{t.id}</div>
                 <div className="flex-1 text-slate-700">{t.merchant}</div>
@@ -3990,7 +3990,7 @@ const MasterTransactionMonitor = () => {
             </div>
             <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "ステータス", w: "w-20" }, { label: "日時", w: "w-36" }, { label: "操作", w: "w-36" }]} />
             {searchResults.map((t, i) => (
-              <div key={t.id} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50 cursor-pointer`}
+              <div key={t.id} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50 cursor-pointer`}
                    onClick={() => setSearchSlide(t)}>
                 <div className="w-40 font-mono text-slate-500">{t.id}</div>
                 <div className="flex-1 text-slate-700">{t.merchant}</div>
@@ -4154,7 +4154,7 @@ const MasterFraudSettings = () => {
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "ID", w: "w-20" }, { label: "ルール名", w: "w-36" }, { label: "種別", w: "w-24" }, { label: "条件", w: "flex-1" }, { label: "アクション", w: "w-36" }, { label: "優先度", w: "w-14" }, { label: "30日検知", w: "w-20" }, { label: "有効", w: "w-14" }, { label: "操作", w: "w-28" }]} />
             {fraudRules.map((r, i) => (
-              <div key={r.id} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${!r.enabled ? "opacity-50" : ""} ${i % 2 ? "bg-slate-50" : ""}`}>
+              <div key={r.id} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${!r.enabled ? "opacity-50" : ""} ${i % 2 ? "bg-slate-50" : ""}`}>
                 <div className="w-20 font-mono text-slate-400">{r.id}</div>
                 <div className="w-36 font-semibold text-slate-700">{r.name}</div>
                 <div className="w-24"><Badge text={r.type} color={r.type === "AI判定" ? "purple" : r.type === "速度チェック" ? "blue" : "gray"} /></div>
@@ -4344,7 +4344,7 @@ const MasterFraudSettings = () => {
             { time: "02/11 09:30", txn: "TXN-09288", merchant: "XYZショップ", amount: "¥8,500", rule: "短時間連続取引", score: "0.72", action: "例外キュー", result: "正検知", rColor: "green" },
             { time: "02/10 22:10", txn: "TXN-22041", merchant: "スタイルプラス", amount: "¥250,000", rule: "深夜帯高額", score: "0.55", action: "例外キュー", result: "正常取引", rColor: "yellow" },
           ].map((l, i) => (
-            <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
+            <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
               <div className="w-32 text-slate-400 font-mono">{l.time}</div>
               <div className="w-36 font-mono text-slate-500">{l.txn}</div>
               <div className="flex-1 text-slate-700">{l.merchant}</div>
@@ -4622,7 +4622,7 @@ const MasterReport = () => {
         { date: "02/03 09:00", name: "接続先別パフォーマンス", period: "2026-W05", format: "PDF", ai: true, by: "自動（定期）" },
         { date: "02/01 09:00", name: "月次サマリーレポート", period: "2026年1月", format: "PDF", ai: true, by: "自動（定期）" },
       ].map((r, i) => (
-        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
+        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
           <div className="w-28 text-slate-400">{r.date}</div>
           <div className="flex-1 font-semibold text-slate-700">{r.name}</div>
           <div className="w-32 text-slate-500">{r.period}</div>
@@ -4832,7 +4832,7 @@ const MerchantSalesReport = () => (
         { id: "TXN-14518", time: "02/11 14:50", card: "—", brand: "QR", amount: "¥1,500", status: "成功", sColor: "green" },
         { id: "TXN-13801", time: "02/11 11:20", card: "**** 9012", brand: "MC", amount: "¥3,200", status: "返金済", sColor: "yellow" },
       ].map((t, i) => (
-        <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
+        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
           <div className="w-36 font-mono text-slate-500">{t.id}</div>
           <div className="w-32 text-slate-400">{t.time}</div>
           <div className="w-28 font-mono text-slate-500">{t.card}</div>
@@ -5013,7 +5013,7 @@ const MerchantAccountSettings = () => {
               { name: "鈴木 花子", email: "suzuki@abcmart-ec.jp", role: "一般", mfa: true, last: "02/10 14:20" },
               { name: "佐藤 次郎", email: "sato@abcmart-ec.jp", role: "一般", mfa: false, last: "02/08 11:30" },
             ].map((m, i) => (
-              <div key={i} className={`flex items-center px-3 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
+              <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
                 <div className="flex-1 font-semibold text-slate-700">{m.name}</div>
                 <div className="w-48 text-slate-500">{m.email}</div>
                 <div className="w-20"><Badge text={m.role} color={m.role === "管理者" ? "blue" : "gray"} /></div>
@@ -5175,7 +5175,7 @@ const MerchantPaymentLinks = () => {
             { id: "LNK-003", name: "コース選択", type: "選択", amt: "選択式", uses: "3/10", st: "有効", stc: "green" },
             { id: "LNK-004", name: "キャンペーン", type: "固定", amt: "¥1,980", uses: "100/100", st: "上限到達", stc: "yellow" }
           ].map((r, i) => (
-            <div key={i} className="flex px-3 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
+            <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
               <div className="w-24 text-blue-600 font-mono">{r.id}</div>
               <div className="flex-1">{r.name}</div>
               <div className="w-16"><Badge text={r.type} color="blue" /></div>
@@ -5203,7 +5203,7 @@ const MerchantPaymentLinks = () => {
             <p className="text-xs font-bold mb-2">リンク別実績</p>
             <TableHeader cols={[{ label: "商品名", w: "flex-1" }, { label: "利用回数", w: "w-20" }, { label: "売上額", w: "w-24" }, { label: "成功率", w: "w-16" }, { label: "最終利用日", w: "w-24" }]} />
             {[["プレミアムプラン", "842", "¥8,251,600", "98.2%", "2026-02-13"], ["寄付金", "245", "¥1,230,000", "96.7%", "2026-02-12"], ["コース選択", "160", "¥960,000", "97.5%", "2026-02-11"]].map((r, i) => (
-              <div key={i} className="flex px-3 py-2 text-xs border-b whitespace-nowrap">
+              <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap">
                 <div className="flex-1">{r[0]}</div><div className="w-20">{r[1]}</div><div className="w-24 font-bold">{r[2]}</div><div className="w-16 text-emerald-600">{r[3]}</div><div className="w-24 text-slate-400">{r[4]}</div>
               </div>
             ))}
@@ -5288,7 +5288,7 @@ const MerchantSubscriptions = () => {
               { name: "3回分割払い", type: "分割", amt: "¥15,000(3回)", cycle: "毎月15日", users: "56", st: "active" },
               { name: "旧プラン", type: "継続", amt: "¥1,980/月", cycle: "毎月1日", users: "12", st: "archived" }
             ].map((r, i) => (
-              <div key={i} className="flex px-3 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
+              <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
                 <div className="flex-1 font-bold">{r.name}</div>
                 <div className="w-16"><Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} /></div>
                 <div className="w-24">{r.amt}</div>
@@ -5314,7 +5314,7 @@ const MerchantSubscriptions = () => {
               { uid: "USR-003", email: "user3@example.com", plan: "月額スタンダード", card: "*5678", next: "02/23", fails: "2", st: "リトライ中", stc: "yellow" },
               { uid: "USR-004", email: "user4@example.com", plan: "月額スタンダード", card: "*9999", next: "—", fails: "3", st: "自動停止", stc: "red" }
             ].map((r, i) => (
-              <div key={i} className="flex px-3 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
+              <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
                 <div className="w-24 font-mono text-blue-600">{r.uid}</div>
                 <div className="flex-1">{r.email}</div>
                 <div className="w-28">{r.plan}</div>
@@ -5339,7 +5339,7 @@ const MerchantSubscriptions = () => {
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "実行日", w: "w-24" }, { label: "ユーザーID", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "金額", w: "w-20" }, { label: "結果", w: "w-14" }, { label: "リトライ", w: "w-14" }, { label: "エラー", w: "w-20" }]} />
             {[["02/13 02:00", "USR-001", "月額スタンダード", "¥2,980", "成功", "—", "—"], ["02/13 02:00", "USR-003", "月額スタンダード", "¥2,980", "失敗", "2回目", "E-Card01"], ["02/13 02:00", "USR-004", "月額スタンダード", "¥2,980", "失敗", "3回目", "E-Card01"]].map((r, i) => (
-              <div key={i} className="flex px-3 py-2 text-xs border-b whitespace-nowrap">
+              <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap">
                 <div className="w-24 text-slate-400">{r[0]}</div><div className="w-24 font-mono text-blue-600">{r[1]}</div><div className="flex-1">{r[2]}</div><div className="w-20">{r[3]}</div>
                 <div className="w-14"><Badge text={r[4]} color={r[4] === "成功" ? "green" : "red"} /></div><div className="w-14 text-slate-500">{r[5]}</div><div className="w-20 text-rose-500 font-mono">{r[6]}</div>
               </div>
@@ -5414,7 +5414,7 @@ const MasterRecurring = () => {
               <p className="text-xs font-bold mb-2">本日の実行予定</p>
               <TableHeader cols={[{ label: "時刻", w: "w-14" }, { label: "加盟店", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "対象数", w: "w-14" }, { label: "状態", w: "w-14" }]} />
               {[["02:00", "ABC商事", "月額スタンダード", "342", "完了"], ["02:00", "XYZ物産", "年間プレミアム", "89", "完了"], ["14:00", "DEF Inc", "月額ライト", "56", "待機中"]].map((r, i) => (
-                <div key={i} className="flex px-3 py-1.5 text-xs border-b whitespace-nowrap">
+                <div key={i} className="flex px-4 py-1.5 text-xs border-b whitespace-nowrap">
                   <div className="w-14 text-slate-400">{r[0]}</div><div className="w-24">{r[1]}</div><div className="flex-1">{r[2]}</div><div className="w-14 text-center">{r[3]}</div><div className="w-14"><Badge text={r[4]} color={r[4] === "完了" ? "green" : "yellow"} /></div>
                 </div>
               ))}
@@ -5423,7 +5423,7 @@ const MasterRecurring = () => {
               <p className="text-xs font-bold mb-2">直近バッチ実行結果</p>
               <TableHeader cols={[{ label: "実行日時", w: "w-28" }, { label: "処理", w: "w-12" }, { label: "成功", w: "w-12" }, { label: "失敗", w: "w-12" }, { label: "状態", w: "w-14" }]} />
               {[["2026-02-13 02:00", "423", "411", "12", "完了"], ["2026-02-12 02:00", "398", "391", "7", "完了"], ["2026-02-11 02:00", "412", "406", "6", "完了"]].map((r, i) => (
-                <div key={i} className="flex px-3 py-1.5 text-xs border-b whitespace-nowrap">
+                <div key={i} className="flex px-4 py-1.5 text-xs border-b whitespace-nowrap">
                   <div className="w-28 text-slate-400">{r[0]}</div><div className="w-12">{r[1]}</div><div className="w-12 text-emerald-600">{r[2]}</div><div className="w-12 text-rose-600">{r[3]}</div><div className="w-14"><Badge text={r[4]} color="green" /></div>
                 </div>
               ))}
@@ -5444,7 +5444,7 @@ const MasterRecurring = () => {
             { id: "PLN-002", m: "XYZ物産", s: "ストア", name: "年間プレミアム", type: "継続", amt: "¥29,800/年", users: "89/120", st: "有効" },
             { id: "PLN-003", m: "ABC商事", s: "ECサイトA", name: "3回分割払い", type: "分割", amt: "¥15,000(3回)", users: "56/—", st: "有効" }
           ].map((r, i) => (
-            <div key={i} className="flex px-3 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
+            <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
               <div className="w-24 font-mono text-blue-600">{r.id}</div><div className="w-24">{r.m}</div><div className="w-20 text-slate-500">{r.s}</div><div className="flex-1 font-bold">{r.name}</div><div className="w-14"><Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} /></div><div className="w-24 text-xs">{r.amt}</div><div className="w-16">{r.users}</div><div className="w-14"><Badge text={r.st} color="green" /></div>
             </div>
           ))}
@@ -5462,7 +5462,7 @@ const MasterRecurring = () => {
             { id: "U-3302", email: "s***@yahoo.co.jp", m: "XYZ物産", plan: "年間プレミアム", st: "リトライ中", stc: "yellow", next: "2026-02-23", fail: "1" },
             { id: "U-1108", email: "k***@icloud.com", m: "ABC商事", plan: "月額スタンダード", st: "自動停止", stc: "red", next: "—", fail: "3" }
           ].map((r, i) => (
-            <div key={i} className="flex px-3 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
+            <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
               <div className="w-20 font-mono">{r.id}</div><div className="w-32 text-slate-500">{r.email}</div><div className="w-24">{r.m}</div><div className="flex-1">{r.plan}</div><div className="w-16"><Badge text={r.st} color={r.stc} /></div><div className="w-20 text-slate-400">{r.next}</div><div className="w-10 text-center">{r.fail !== "0" ? <span className="text-rose-600 font-bold">{r.fail}</span> : "0"}</div>
               <div className="w-20 flex gap-1"><button className="text-blue-600 text-xs">詳細</button><button className="text-rose-500 text-xs">強制停止</button></div>
             </div>
@@ -5477,7 +5477,7 @@ const MasterRecurring = () => {
             ["2026-02-11 02:00:04", "B-4519", "412", "406", "6", "4", "3.9s", "完了"],
             ["2026-02-10 02:00:02", "B-4518", "389", "385", "4", "3", "3.5s", "完了"]
           ].map((r, i) => (
-            <div key={i} className="flex px-3 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
+            <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
               <div className="w-32 text-slate-400">{r[0]}</div><div className="w-20 font-mono">{r[1]}</div><div className="w-16">{r[2]}</div><div className="w-14 text-emerald-600">{r[3]}</div><div className="w-14 text-rose-600">{r[4]}</div><div className="w-14 text-amber-600">{r[5]}</div><div className="w-14">{r[6]}</div><div className="w-16"><Badge text={r[7]} color="green" /></div><div className="w-10"><button className="text-blue-600 text-xs">詳細</button></div>
             </div>
           ))}
@@ -5508,7 +5508,7 @@ const MasterAgents = () => {
             { code: "AG-002", name: "ウェブコンサル合同会社", rep: "佐藤花子", merchants: "12", rate: "4.5%", st: "active" },
             { code: "AG-003", name: "ITソリューションズ", rep: "鈴木一郎", merchants: "8", rate: "5.0%", st: "active" }
           ].map((r, i) => (
-            <div key={i} className="flex px-3 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
+            <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
               <div className="w-20 font-mono">{r.code}</div>
               <div className="flex-1 font-bold">{r.name}</div>
               <div className="w-20">{r.rep}</div>
@@ -5540,7 +5540,7 @@ const MasterAgents = () => {
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "代理店", w: "flex-1" }, { label: "対象加盟店", w: "w-16" }, { label: "取引総額", w: "w-24" }, { label: "料率", w: "w-14" }, { label: "報酬額", w: "w-24" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]} />
             {[["デジタルパートナーズ", "23", "¥45,200,000", "5.0%", "¥2,260,000", "pending"], ["ウェブコンサル合同会社", "12", "¥18,500,000", "4.5%", "¥832,500", "confirmed"], ["ITソリューションズ", "8", "¥8,300,000", "5.0%", "¥415,000", "paid"]].map((r, i) => (
-              <div key={i} className="flex px-3 py-2 text-xs border-b whitespace-nowrap items-center">
+              <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap items-center">
                 <div className="flex-1 font-bold">{r[0]}</div><div className="w-16 text-center">{r[1]}社</div><div className="w-24">{r[2]}</div><div className="w-14">{r[3]}</div><div className="w-24 font-bold text-emerald-700">{r[4]}</div>
                 <div className="w-16"><Badge text={r[5] === "pending" ? "未確認" : r[5] === "confirmed" ? "確認済" : "支払済"} color={r[5] === "pending" ? "yellow" : r[5] === "confirmed" ? "blue" : "green"} /></div>
                 <div className="w-16">{r[5] === "pending" && <button className="text-blue-600 text-xs">承認</button>}{r[5] === "confirmed" && <button className="text-emerald-600 text-xs">支払</button>}</div>
@@ -5554,7 +5554,7 @@ const MasterAgents = () => {
           <p className="text-xs font-bold mb-3">代理店別 条件設定</p>
           <TableHeader cols={[{ label: "代理店", w: "flex-1" }, { label: "基本料率", w: "w-20" }, { label: "契約開始", w: "w-24" }, { label: "操作", w: "w-14" }]} />
           {[["デジタルパートナーズ", "5.0%", "2025-04-01"], ["ウェブコンサル合同会社", "4.5%", "2025-07-15"], ["ITソリューションズ", "5.0%", "2025-10-01"]].map((r, i) => (
-            <div key={i} className="flex px-3 py-2 text-xs border-b whitespace-nowrap items-center"><div className="flex-1">{r[0]}</div><div className="w-20">{r[1]}</div><div className="w-24 text-slate-400">{r[2]}</div><div className="w-14"><button className="text-blue-600">編集</button></div></div>
+            <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap items-center"><div className="flex-1">{r[0]}</div><div className="w-20">{r[1]}</div><div className="w-24 text-slate-400">{r[2]}</div><div className="w-14"><button className="text-blue-600">編集</button></div></div>
           ))}
         </div>
       )}
@@ -5653,7 +5653,7 @@ const AgentMerchants = () => (
         ["オンラインストアB", "XYZ物産", "稼働中", "green", "¥3,100,000", "2025-08-15", "5.0%"],
         ["ネットショップ太郎", "太郎合同会社", "審査中", "yellow", "—", "2026-02-10", "5.0%"]
       ].map((r, i) => (
-        <div key={i} className="flex px-3 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
+        <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
           <div className="flex-1 font-bold">{r[0]}</div>
           <div className="w-28 text-slate-500">{r[1]}</div>
           <div className="w-16"><Badge text={r[2]} color={r[3]} /></div>
@@ -5678,7 +5678,7 @@ const AgentReports = () => (
         ["2026年1月", "22社", "¥42,100,000", "¥2,105,000", "paid", "支払済"],
         ["2025年12月", "21社", "¥38,500,000", "¥1,925,000", "paid", "支払済"]
       ].map((r, i) => (
-        <div key={i} className="flex px-3 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
+        <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
           <div className="w-20 font-bold">{r[0]}</div>
           <div className="w-16 text-center">{r[1]}</div>
           <div className="w-24">{r[2]}</div>
@@ -5711,7 +5711,7 @@ const AgentReferral = () => (
         <p className="text-xs font-bold">申請履歴</p>
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
           {[["太郎合同会社", "2026-02-10", "審査中", "yellow"], ["DEFサービス", "2026-01-20", "承認済", "green"], ["GHIマーケット", "2025-12-05", "否認", "red"]].map((r, i) => (
-            <div key={i} className="flex items-center px-3 py-2 text-xs border-b whitespace-nowrap">
+            <div key={i} className="flex items-center px-4 py-2 text-xs border-b whitespace-nowrap">
               <div className="flex-1 font-bold">{r[0]}</div>
               <div className="w-20 text-slate-400">{r[1]}</div>
               <Badge text={r[2]} color={r[3]} />
@@ -5829,7 +5829,7 @@ const MasterCustomers = () => {
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "最終取引", w: "w-24" }, { label: "サブスク", w: "w-14" }, { label: "セグメント", w: "w-16" }, { label: "リスク", w: "w-12" }]} />
             {customers.map((c, i) => (
-              <div key={i} onClick={() => setSelectedCustomer(c)} className="flex px-3 py-2 text-xs border-b whitespace-nowrap hover:bg-blue-50 cursor-pointer items-center">
+              <div key={i} onClick={() => setSelectedCustomer(c)} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-blue-50 cursor-pointer items-center">
                 <div className="w-24 font-mono text-blue-600">{c.id}</div>
                 <div className="flex-1">{c.email}</div>
                 <div className="w-24 font-mono text-xs">{c.card}</div>
@@ -6057,7 +6057,7 @@ const MerchantCustomers = () => {
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "リピート", w: "w-16" }, { label: "サブスク", w: "w-14" }, { label: "最終取引", w: "w-24" }, { label: "タグ", w: "w-20" }]} />
             {customers.map((c, i) => (
-              <div key={i} onClick={() => setDetail(c)} className="flex px-3 py-2 text-xs border-b whitespace-nowrap hover:bg-emerald-50 cursor-pointer items-center">
+              <div key={i} onClick={() => setDetail(c)} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-emerald-50 cursor-pointer items-center">
                 <div className="w-24 font-mono text-emerald-700">{c.id}</div>
                 <div className="flex-1">{c.email}</div>
                 <div className="w-24 font-mono">{c.card}</div>
