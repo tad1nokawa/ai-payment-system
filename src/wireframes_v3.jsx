@@ -172,11 +172,11 @@ const MasterDashboard = () => {
             <div className="flex justify-between"><span className="text-xs font-semibold text-gray-700">審査保留 #1024</span><Badge text="⚠️ 2h超過" color="red" /></div>
             <p className="text-xs text-gray-500 mt-1">中リスク加盟店 / AI推薦: 承認</p>
           </div>
-          <div className="bg-gray-50 rounded p-2 border">
+          <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-200">
             <div className="flex justify-between"><span className="text-xs font-semibold text-gray-700">不正検知保留 #5521</span><Badge text="30分前" color="yellow" /></div>
             <p className="text-xs text-gray-500 mt-1">¥89,000 / リスクスコア: 72</p>
           </div>
-          <div className="bg-gray-50 rounded p-2 border">
+          <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-200">
             <div className="flex justify-between"><span className="text-xs font-semibold text-gray-700">審査保留 #1025</span><Badge text="15分前" color="gray" /></div>
             <p className="text-xs text-gray-500 mt-1">中リスク / AI推薦: 承認</p>
           </div>
@@ -372,11 +372,11 @@ const merchantData = [
 ];
 
 const PROC_STATUS = {
-  approved: { label: "✅ 承認済", color: "green" },
-  reviewing: { label: "🔄 審査中", color: "blue" },
-  pending: { label: "⏳ 申請準備中", color: "gray" },
-  suspended: { label: "⛔ 停止", color: "red" },
-  rejected: { label: "❌ 却下", color: "red" },
+  approved: { label: "✅ 承認済", color: "green", textClass: "text-green-600" },
+  reviewing: { label: "🔄 審査中", color: "blue", textClass: "text-blue-600" },
+  pending: { label: "⏳ 申請準備中", color: "gray", textClass: "text-gray-600" },
+  suspended: { label: "⛔ 停止", color: "red", textClass: "text-red-600" },
+  rejected: { label: "❌ 却下", color: "red", textClass: "text-red-600" },
 };
 
 const SortableHeader = ({ cols, sortKey, sortDir, onSort }) => (
@@ -517,7 +517,7 @@ const MasterMerchants = () => {
                   </div>
 
                   {/* Processor Stage Diagram */}
-                  <div className="bg-white rounded border p-3 mb-2">
+                  <div className="bg-white rounded-lg border border-gray-200 p-3 mb-2">
                     <p className="text-xs text-gray-400 mb-2">接続先拡大フロー（段階的に審査追加）</p>
                     <div className="flex items-center gap-1">
                       {m.processors.map((proc, pi) => {
@@ -532,7 +532,7 @@ const MasterMerchants = () => {
                             }`}>
                               <div className="font-semibold text-gray-700">{proc.name}</div>
                               <div className="text-gray-400">{proc.brands}</div>
-                              <div className={`text-${st.color}-600 font-semibold mt-0.5`}>{st.label}</div>
+                              <div className={`${st.textClass || "text-gray-600"} font-semibold mt-0.5`}>{st.label}</div>
                             </div>
                             {pi < m.processors.length - 1 && <span className="text-gray-300 text-xs">→</span>}
                           </div>
@@ -542,7 +542,7 @@ const MasterMerchants = () => {
                   </div>
 
                   {/* Processor Detail Table */}
-                  <div className="bg-white rounded border">
+                  <div className="bg-white rounded-lg border border-gray-200">
                     <div className="flex bg-gray-50 border-b text-xs font-semibold text-gray-500 px-3 py-1.5">
                       <div className="w-36">接続先</div>
                       <div className="w-28">対応ブランド</div>
@@ -637,10 +637,10 @@ const MasterMerchants = () => {
               <div className="border-t pt-3">
                 <p className="text-xs font-bold text-gray-600 mb-2">取引統計</p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="bg-gray-50 rounded p-2"><span className="text-gray-400">月間売上</span><p className="font-bold">{slidePanel.sales}</p></div>
-                  <div className="bg-gray-50 rounded p-2"><span className="text-gray-400">成功率</span><p className="font-bold">{slidePanel.success}</p></div>
-                  <div className="bg-gray-50 rounded p-2"><span className="text-gray-400">CB率</span><p className="font-bold">{slidePanel.cb}</p></div>
-                  <div className="bg-gray-50 rounded p-2"><span className="text-gray-400">手数料</span><p className="font-bold">{slidePanel.fee}</p></div>
+                  <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-200"><span className="text-gray-400">月間売上</span><p className="font-bold">{slidePanel.sales}</p></div>
+                  <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-200"><span className="text-gray-400">成功率</span><p className="font-bold">{slidePanel.success}</p></div>
+                  <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-200"><span className="text-gray-400">CB率</span><p className="font-bold">{slidePanel.cb}</p></div>
+                  <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-200"><span className="text-gray-400">手数料</span><p className="font-bold">{slidePanel.fee}</p></div>
                 </div>
               </div>
               {/* 接続先状況 */}
@@ -879,7 +879,7 @@ const MasterAIMonitor = () => {
           { cat: "不正検知AI", rate: "92%", ok: true, agree: 120, aiYesHumanNo: 2, aiNoHumanYes: 8, disagree: 15 },
           { cat: "URL巡回AI", rate: "95%", ok: true, agree: 38, aiYesHumanNo: 1, aiNoHumanYes: 1, disagree: 2 },
         ].map((c, i) => (
-          <div key={i} className="bg-gray-50 rounded p-2">
+          <div key={i} className="bg-gray-50 rounded-lg p-2.5 border border-gray-200">
             <div className="flex justify-between items-center mb-1">
               <span className="text-xs font-bold text-gray-700">{c.cat}</span>
               <span className={`text-xs font-bold ${c.ok ? "text-green-600" : "text-red-600"}`}>{c.rate}</span>
@@ -1015,7 +1015,7 @@ const MerchantTransactions = () => (
         <input className="text-xs border rounded px-2 py-1 w-40" placeholder="注文番号 / 金額で検索" />
         <select className="text-xs border rounded px-2 py-1"><option>全ステータス</option></select>
         <input type="date" className="text-xs border rounded px-2 py-1" />
-        <button className="text-xs bg-gray-100 px-2 py-1 rounded border" title="出力項目: 決済ID/日時/金額/ステータス/決済手段/注文番号（カード番号等の機密情報は含みません）">📥 CSV出力</button>
+        <button className="text-xs bg-gray-100 px-2 py-1 rounded border border-gray-200" title="出力項目: 決済ID/日時/金額/ステータス/決済手段/注文番号（カード番号等の機密情報は含みません）">📥 CSV出力</button>
       </div>
     </div>
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
@@ -1065,7 +1065,7 @@ const MerchantAPISettings = () => (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
       <p className="text-xs font-bold text-gray-700 mb-2">Webhook設定</p>
       <div className="space-y-2">
-        <div className="flex items-center gap-2 bg-gray-50 rounded p-2">
+        <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2.5 border border-gray-200">
           <Badge text="本番" color="green" />
           <span className="text-xs font-mono flex-1">https://api.abc-mart.co.jp/webhooks/payment</span>
           <Badge text="稼働中" color="green" />
@@ -1170,16 +1170,16 @@ const MasterUserManagement = () => {
     {/* Role Summary */}
     <div className="flex gap-3">
       {[
-        { role: "スーパー管理者", count: 1, color: "red", icon: "👑" },
-        { role: "管理者", count: 2, color: "blue", icon: "🔑" },
-        { role: "レビュアー", count: 4, color: "purple", icon: "📋" },
+        { role: "スーパー管理者", count: 1, textClass: "text-red-600", icon: "👑" },
+        { role: "管理者", count: 2, textClass: "text-blue-600", icon: "🔑" },
+        { role: "レビュアー", count: 4, textClass: "text-purple-600", icon: "📋" },
       ].map((r, i) => (
         <div key={i} className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm p-3">
           <div className="flex items-center gap-2 mb-1">
             <span>{r.icon}</span>
             <span className="text-xs font-bold text-gray-600">{r.role}</span>
           </div>
-          <span className={`text-lg font-bold text-${r.color}-600`}>{r.count}名</span>
+          <span className={`text-lg font-bold ${r.textClass}`}>{r.count}名</span>
         </div>
       ))}
     </div>
@@ -1395,7 +1395,7 @@ const MasterMerchantApplications = () => {
             </div>
             <div className="p-5 space-y-4">
               <p className="text-xs text-gray-600">{appConfirmDialog.description}</p>
-              <div className="bg-gray-50 rounded border p-3 space-y-1">
+              <div className="bg-gray-50 rounded-lg border border-gray-200 p-3 space-y-1">
                 <div className="flex text-xs"><span className="w-24 text-gray-400">申込ID:</span><span className="font-mono text-gray-700">{appConfirmDialog.appId}</span></div>
                 <div className="flex text-xs"><span className="w-24 text-gray-400">法人名:</span><span className="font-semibold text-gray-700">{appConfirmDialog.merchantName}</span></div>
                 {appConfirmDialog.processorName && (
@@ -1564,7 +1564,7 @@ const MasterMerchantApplications = () => {
 
           {/* Info Grid */}
           <div className="grid grid-cols-3 gap-4 mb-3">
-            <div className="bg-gray-50 rounded p-2">
+            <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-200">
               <p className="text-xs font-bold text-gray-600 mb-1">申込企業情報</p>
               <div className="text-xs space-y-1 text-gray-600">
                 <div>法人名: 株式会社テックショップ</div>
@@ -1574,7 +1574,7 @@ const MasterMerchantApplications = () => {
                 <div>業種: 家電・ガジェットEC</div>
               </div>
             </div>
-            <div className="bg-gray-50 rounded p-2">
+            <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-200">
               <p className="text-xs font-bold text-gray-600 mb-1">申込内容</p>
               <div className="text-xs space-y-1 text-gray-600">
                 <div>希望決済: VISA / MC / JCB</div>
@@ -1584,7 +1584,7 @@ const MasterMerchantApplications = () => {
                 <div>提出書類: 5/5 完了 ✅</div>
               </div>
             </div>
-            <div className="bg-gray-50 rounded p-2">
+            <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-200">
               <p className="text-xs font-bold text-gray-600 mb-1">AI審査進捗（自社審査）</p>
               <div className="text-xs space-y-1.5">
                 <div className="flex items-center gap-2"><span className="text-green-500">✅</span> 反社チェック: クリア</div>
@@ -1717,7 +1717,7 @@ const MasterSettlement = () => (
           { label: "来月解放予定", value: "¥1,640,000", color: "text-blue-600" },
           { label: "新規留保（今月）", value: "¥2,130,000", color: "text-gray-700" },
         ].map((r, i) => (
-          <div key={i} className="bg-white rounded border p-2 text-center">
+          <div key={i} className="bg-white rounded-lg border border-gray-200 p-2.5 text-center">
             <p className="text-xs text-gray-400">{r.label}</p>
             <p className={`text-sm font-bold ${r.color}`}>{r.value}</p>
           </div>
@@ -1896,7 +1896,7 @@ const MasterSystemSettings = () => {
           { target: "DB（PostgreSQL）", schedule: "毎日 AM4:00", lastRun: "2026-02-12 04:00", status: "成功", retention: "30日" },
           { target: "S3（ファイルストレージ）", schedule: "毎日 AM5:00", lastRun: "2026-02-12 05:00", status: "成功", retention: "90日" },
         ].map((b, i) => (
-          <div key={i} className="flex items-center gap-3 p-2 rounded border">
+          <div key={i} className="flex items-center gap-3 p-2 rounded border border-gray-200">
             <span className="w-40 font-semibold text-gray-700">{b.target}</span>
             <span className="text-gray-500">{b.schedule}</span>
             <span className="text-gray-400">前回: {b.lastRun}</span>
@@ -1919,7 +1919,7 @@ const MasterSystemSettings = () => {
           { time: "02/11 16:30", user: "佐藤花子", action: "決済手段変更", detail: "Apple Pay: OFF→ON", role: "admin" },
           { time: "02/11 09:00", user: "田中太郎", action: "セキュリティ設定", detail: "IP制限追加 → 承認待ち", role: "admin" },
         ].map((l, i) => (
-          <div key={i} className="flex items-center gap-2 p-1.5 rounded border">
+          <div key={i} className="flex items-center gap-2 p-1.5 rounded border border-gray-200">
             <span className="w-24 text-gray-400">{l.time}</span>
             <span className="w-20 text-gray-600">{l.user}</span>
             <Badge text={l.role} color="blue" />
@@ -2065,7 +2065,7 @@ const MerchantPayouts = () => {
       <span className="text-xs text-gray-400">〜</span>
       <input type="date" className="text-xs border rounded px-2 py-1" />
       <button className="text-xs bg-green-600 text-white px-3 py-1 rounded">検索</button>
-      <button className="text-xs bg-gray-100 px-2 py-1 rounded border" title="CSV出力">📥 CSV</button>
+      <button className="text-xs bg-gray-100 px-2 py-1 rounded border border-gray-200" title="CSV出力">📥 CSV</button>
     </div>
 
     {/* Payout History */}
@@ -2103,7 +2103,7 @@ const MerchantPayouts = () => {
             { label: "来月解放予定", value: "¥210,000", color: "text-blue-600" },
             { label: "今月新規留保", value: "¥263,000", color: "text-gray-700" },
           ].map((r, i) => (
-            <div key={i} className="bg-white rounded border p-2 text-center">
+            <div key={i} className="bg-white rounded-lg border border-gray-200 p-2.5 text-center">
               <p className="text-xs text-gray-400">{r.label}</p>
               <p className={`text-sm font-bold ${r.color}`}>{r.value}</p>
             </div>
@@ -2831,7 +2831,7 @@ const MasterRouting = () => {
           <button className="text-xs bg-yellow-600 text-white px-3 py-1 rounded font-semibold">過去30日データで実行</button>
         </div>
         <p className="text-xs text-yellow-700 mb-2">ルール変更前に、過去取引データでの影響を確認できます。</p>
-        <div className="bg-white rounded border p-2 grid grid-cols-4 gap-2 text-xs">
+        <div className="bg-white rounded-lg border border-gray-200 p-2.5 grid grid-cols-4 gap-2 text-xs">
           <div className="text-center"><span className="text-gray-400">接続先振り分け変更</span><p className="font-bold text-blue-700">GMO-PG +12% / 三井住友 -12%</p></div>
           <div className="text-center"><span className="text-gray-400">コスト差分</span><p className="font-bold text-green-700">-¥23,400/月</p></div>
           <div className="text-center"><span className="text-gray-400">成功率変化</span><p className="font-bold text-green-700">98.2% → 98.5%</p></div>
@@ -2905,7 +2905,7 @@ const MasterRouting = () => {
                 <div><label className="text-xs font-semibold text-gray-600">条件タイプ <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>金額範囲</option><option>ブランド</option><option>加盟店</option><option>時間帯</option><option>地域</option></select></div>
                 <div><label className="text-xs font-semibold text-gray-600">優先接続先 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>GMO-PG</option><option>三井住友カード</option><option>JCB直接</option><option>PayPay</option></select></div>
               </div>
-              <div className="bg-gray-50 rounded border p-3 space-y-2">
+              <div className="bg-gray-50 rounded-lg border border-gray-200 p-3 space-y-2">
                 <p className="text-xs font-bold text-gray-600">条件詳細</p>
                 <div className="grid grid-cols-3 gap-2">
                   <div><label className="text-xs text-gray-500">フィールド</label><select className="w-full text-xs border rounded px-2 py-1"><option>金額</option><option>ブランド</option><option>BIN</option></select></div>
@@ -3064,7 +3064,7 @@ const MasterProcessors = () => {
                   <p className="text-xs font-bold text-gray-700">🔌 {p.name} — 加盟店接続状況</p>
                   <button onClick={() => setSelectedProc(null)} className="text-xs text-gray-400 hover:text-gray-600">✕ 閉じる</button>
                 </div>
-                <div className="bg-white rounded border">
+                <div className="bg-white rounded-lg border border-gray-200">
                   <div className="flex bg-gray-50 border-b text-xs font-semibold text-gray-500 px-3 py-1.5">
                     <div className="w-24">加盟店ID</div><div className="flex-1">加盟店名</div><div className="w-24">審査状況</div><div className="w-24">承認日</div><div className="w-24">累計取引</div><div className="w-20">書類</div>
                   </div>
@@ -3136,7 +3136,7 @@ const MasterProcessors = () => {
                   <p className="text-xs text-gray-600">{confirmDialog.description}</p>
 
                   {/* 対象情報 */}
-                  <div className="bg-gray-50 rounded border p-3 space-y-1">
+                  <div className="bg-gray-50 rounded-lg border border-gray-200 p-3 space-y-1">
                     <div className="flex text-xs"><span className="w-24 text-gray-400">加盟店:</span><span className="font-semibold text-gray-700">{confirmDialog.merchantName}</span></div>
                     <div className="flex text-xs"><span className="w-24 text-gray-400">接続先:</span><span className="font-semibold text-gray-700">{confirmDialog.processorName}</span></div>
                     <div className="flex text-xs"><span className="w-24 text-gray-400">現在ステップ:</span><span className="text-blue-600">{confirmDialog.currentStep}</span></div>
@@ -3171,7 +3171,7 @@ const MasterProcessors = () => {
                   {confirmDialog.type === "conditions" && (
                     <div className="space-y-2">
                       <p className="text-xs font-semibold text-gray-600">接続先から提示された条件:</p>
-                      <div className="bg-gray-50 rounded border p-3 space-y-2">
+                      <div className="bg-gray-50 rounded-lg border border-gray-200 p-3 space-y-2">
                         <div className="grid grid-cols-2 gap-2">
                           <div>
                             <label className="text-xs text-gray-500 block mb-0.5">VISA 手数料率 (%)</label>
@@ -3489,7 +3489,7 @@ const MasterProcessors = () => {
 
                 {/* Documents */}
                 <p className="text-xs font-bold text-gray-600 mb-1">📄 審査資料一覧</p>
-                <div className="bg-gray-50 rounded border">
+                <div className="bg-gray-50 rounded-lg border border-gray-200">
                   <div className="flex bg-gray-100 border-b text-xs font-semibold text-gray-500 px-3 py-1">
                     <div className="w-48">書類名</div><div className="w-24">種別</div><div className="w-16">形式</div><div className="w-16">サイズ</div><div className="w-20">送付日</div><div className="w-20">状態</div><div className="flex-1">操作</div>
                   </div>
@@ -3590,13 +3590,13 @@ const MasterProcessors = () => {
           <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg border p-3">
             <p className="text-xs font-bold text-gray-700 mb-2">📁 審査資料ストレージ構成</p>
             <div className="flex gap-4 text-xs">
-              <div className="flex-1 bg-white rounded border p-2">
+              <div className="flex-1 bg-white rounded-lg border border-gray-200 p-2.5">
                 <p className="font-semibold text-blue-600 mb-1">☁️ S3（ファイル本体）</p>
                 <p className="text-gray-500">s3://aipayment-documents-prod/</p>
                 <p className="text-gray-400 mt-1">AES-256暗号化 / バージョニング有効 / ライフサイクル: 7年保管</p>
               </div>
               <div className="text-gray-300 flex items-center">⟷</div>
-              <div className="flex-1 bg-white rounded border p-2">
+              <div className="flex-1 bg-white rounded-lg border border-gray-200 p-2.5">
                 <p className="font-semibold text-green-600 mb-1">🗄️ RDS（メタデータ）</p>
                 <p className="text-gray-500">review_documents テーブル</p>
                 <p className="text-gray-400 mt-1">ファイルパス / ステータス / アップロード日時 / 送付日時 / 種別</p>
@@ -3634,7 +3634,7 @@ const MasterProcessors = () => {
           {/* Data model reference */}
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <p className="text-xs font-bold text-gray-700 mb-2">🗄️ review_documents テーブル定義</p>
-            <div className="bg-gray-50 rounded border">
+            <div className="bg-gray-50 rounded-lg border border-gray-200">
               <div className="flex bg-gray-100 border-b text-xs font-semibold text-gray-500 px-3 py-1">
                 <div className="w-36">カラム</div><div className="w-28">型</div><div className="w-12">必須</div><div className="flex-1">説明</div>
               </div>
@@ -3666,7 +3666,7 @@ const MasterProcessors = () => {
           {/* additional_requests table */}
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
             <p className="text-xs font-bold text-gray-700 mb-2">🗄️ additional_requests テーブル定義</p>
-            <div className="bg-gray-50 rounded border">
+            <div className="bg-gray-50 rounded-lg border border-gray-200">
               <div className="flex bg-gray-100 border-b text-xs font-semibold text-gray-500 px-3 py-1">
                 <div className="w-36">カラム</div><div className="w-28">型</div><div className="w-12">必須</div><div className="flex-1">説明</div>
               </div>
@@ -3844,7 +3844,7 @@ const MasterTransactionMonitor = () => {
                   </div>
                 </div>
                 <div className="grid grid-cols-4 gap-3 text-xs">
-                  <div className="bg-white rounded border p-2">
+                  <div className="bg-white rounded-lg border border-gray-200 p-2.5">
                     <p className="font-semibold text-gray-600 mb-1">基本情報</p>
                     <div className="space-y-0.5 text-gray-500">
                       <div>加盟店: {t.merchant}</div>
@@ -3853,7 +3853,7 @@ const MasterTransactionMonitor = () => {
                       <div>カード番号: **** **** **** 1234</div>
                     </div>
                   </div>
-                  <div className="bg-white rounded border p-2">
+                  <div className="bg-white rounded-lg border border-gray-200 p-2.5">
                     <p className="font-semibold text-gray-600 mb-1">ルーティング判定</p>
                     <div className="space-y-0.5 text-gray-500">
                       <div>判定理由: {t.routing}</div>
@@ -3862,7 +3862,7 @@ const MasterTransactionMonitor = () => {
                       <div>判定時間: 3ms</div>
                     </div>
                   </div>
-                  <div className="bg-white rounded border p-2">
+                  <div className="bg-white rounded-lg border border-gray-200 p-2.5">
                     <p className="font-semibold text-gray-600 mb-1">3Dセキュア</p>
                     <div className="space-y-0.5 text-gray-500">
                       <div>3DS: {t.is3ds ? "適用済み（v2.0）" : "未適用"}</div>
@@ -3870,7 +3870,7 @@ const MasterTransactionMonitor = () => {
                       <div>ECI: {t.is3ds ? "05" : "—"}</div>
                     </div>
                   </div>
-                  <div className="bg-white rounded border p-2">
+                  <div className="bg-white rounded-lg border border-gray-200 p-2.5">
                     <p className="font-semibold text-gray-600 mb-1">接続先レスポンス</p>
                     <div className="space-y-0.5 text-gray-500">
                       <div>レスポンスタイム: {t.responseMs ? t.responseMs + "ms" : "—"}</div>
@@ -4000,7 +4000,7 @@ const MasterTransactionMonitor = () => {
           </div>
 
           {/* Role Permission Notice */}
-          <div className="bg-gray-50 rounded border p-2 flex items-center gap-2 text-xs text-gray-400">
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-2.5 flex items-center gap-2 text-xs text-gray-400">
             <span>🔒</span>
             <span>返金・キャンセル操作は super_admin / admin のみ。reviewer は閲覧のみです。</span>
           </div>
@@ -4015,7 +4015,7 @@ const MasterTransactionMonitor = () => {
               <h3 className="text-sm font-bold text-gray-800">{refundDialog.type === "cancel" ? "🚫 取引キャンセル" : "💜 返金処理"}</h3>
             </div>
             <div className="p-5 space-y-4">
-              <div className="bg-gray-50 rounded border p-2 space-y-1 text-xs">
+              <div className="bg-gray-50 rounded-lg border border-gray-200 p-2.5 space-y-1 text-xs">
                 <div className="flex"><span className="w-20 text-gray-400">取引ID:</span><span className="font-mono">{refundDialog.id}</span></div>
                 <div className="flex"><span className="w-20 text-gray-400">加盟店:</span><span className="font-semibold">{refundDialog.merchant}</span></div>
                 <div className="flex"><span className="w-20 text-gray-400">金額:</span><span className="font-bold">¥{refundDialog.amount.toLocaleString()}</span></div>
@@ -4164,7 +4164,7 @@ const MasterFraudSettings = () => {
               <button className="text-xs bg-yellow-600 text-white px-3 py-1 rounded font-semibold">過去30日データで実行</button>
             </div>
             <p className="text-xs text-yellow-700 mb-2">ルール変更前に、過去30日の取引データに対して変更後のルールを適用し、影響を確認できます。</p>
-            <div className="bg-white rounded border p-2">
+            <div className="bg-white rounded-lg border border-gray-200 p-2.5">
               <p className="text-xs text-gray-500 mb-1">シミュレーション結果（例）:</p>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="bg-green-50 rounded p-1.5 text-center"><span className="text-gray-400">ブロック増加</span><p className="font-bold text-green-700">+8件</p></div>
@@ -4185,7 +4185,7 @@ const MasterFraudSettings = () => {
               <Badge text="v2.1 稼働中" color="green" />
             </div>
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-gray-50 rounded border p-2">
+              <div className="bg-gray-50 rounded-lg border border-gray-200 p-2.5">
                 <p className="text-xs font-semibold text-gray-600 mb-2">閾値設定</p>
                 <div className="space-y-2">
                   <div>
@@ -4200,7 +4200,7 @@ const MasterFraudSettings = () => {
                   <p className="text-xs text-gray-400">閾値を上げると検知率↓ 誤検知率↓</p>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded border p-2">
+              <div className="bg-gray-50 rounded-lg border border-gray-200 p-2.5">
                 <p className="text-xs font-semibold text-gray-600 mb-2">モデル性能</p>
                 <div className="space-y-1.5 text-xs text-gray-600">
                   <div className="flex justify-between"><span>精度（Accuracy）</span><span className="text-green-600 font-semibold">96.8%</span></div>
@@ -4212,7 +4212,7 @@ const MasterFraudSettings = () => {
                   <div className="flex justify-between"><span>最終学習</span><span className="text-gray-500">2026-02-01</span></div>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded border p-2">
+              <div className="bg-gray-50 rounded-lg border border-gray-200 p-2.5">
                 <p className="text-xs font-semibold text-gray-600 mb-2">特徴量の重要度（Top 5）</p>
                 <div className="space-y-1.5">
                   {[
@@ -4414,7 +4414,7 @@ const MasterFraudSettings = () => {
               <div><label className="text-xs font-semibold text-gray-600">値 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 411111 / 192.168.1.1" /></div>
               <div><label className="text-xs font-semibold text-gray-600">理由 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="追加理由を入力" /></div>
               <div><label className="text-xs font-semibold text-gray-600">有効期限</label><div className="flex gap-2 mt-0.5"><select className="text-xs border rounded px-2 py-1.5"><option>永久</option><option>日時指定</option></select><input type="date" className="text-xs border rounded px-2 py-1.5" /></div></div>
-              <div className="bg-gray-50 rounded border p-2 text-xs text-gray-500">💡 CSVで一括追加する場合は「ブロック/ホワイトリスト」タブのCSVアップロード機能をご利用ください</div>
+              <div className="bg-gray-50 rounded-lg border border-gray-200 p-2.5 text-xs text-gray-500">💡 CSVで一括追加する場合は「ブロック/ホワイトリスト」タブのCSVアップロード機能をご利用ください</div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowAddBlock(null)} className="px-4 py-2 text-xs text-gray-500 border rounded hover:bg-gray-50">キャンセル</button>
@@ -4454,7 +4454,7 @@ const MasterFraudSettings = () => {
                 <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 高額取引チェック" />
               </div>
               {/* 条件設定 */}
-              <div className="bg-gray-50 rounded border p-3 space-y-3">
+              <div className="bg-gray-50 rounded-lg border border-gray-200 p-3 space-y-3">
                 <p className="text-xs font-bold text-gray-600">条件設定</p>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
@@ -4726,7 +4726,7 @@ const MerchantSalesReport = () => (
       <h2 className="text-sm font-bold text-gray-800">売上レポート</h2>
       <div className="flex gap-2">
         <select className="text-xs border rounded px-2 py-1"><option>今月（2026年2月）</option><option>先月（2026年1月）</option><option>カスタム</option></select>
-        <button className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border">📥 CSV</button>
+        <button className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200">📥 CSV</button>
         <button className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">📄 PDF出力</button>
       </div>
     </div>
@@ -4788,7 +4788,7 @@ const MerchantSalesReport = () => (
               <span>1月分精算</span>
             </div>
           </div>
-          <div className="bg-gray-50 rounded border p-2">
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-2.5">
             <div className="flex justify-between text-xs mb-0.5">
               <span className="text-gray-600">翌々回入金</span>
               <span className="text-gray-700 font-semibold">¥4,800,000（見込）</span>
@@ -5058,7 +5058,7 @@ const MerchantAccountSettings = () => {
                 </div>
               ))}
             </div>
-            <div className="mt-3 p-2 bg-gray-50 rounded border">
+            <div className="mt-3 p-2 bg-gray-50 rounded-lg border border-gray-200">
               <p className="text-xs text-gray-400">💡 手数料率・入金サイクル等の契約条件の詳細は、契約書PDFをご確認ください。条件変更をご希望の場合はお問い合わせください。</p>
             </div>
             <button className="mt-2 px-3 py-1 bg-gray-100 text-gray-600 rounded text-xs border">📄 契約書PDFをダウンロード</button>
@@ -5236,7 +5236,7 @@ const MerchantPaymentLinks = () => {
               <button onClick={() => setShowGenerated(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
             </div>
             <div className="p-5 space-y-4">
-              <div className="bg-gray-50 rounded border p-3"><p className="text-xs text-gray-400 mb-1">決済リンクURL</p><p className="text-xs font-mono text-blue-600 break-all">https://pay.aquagates.com/link/PL-20260216-001</p></div>
+              <div className="bg-gray-50 rounded-lg border border-gray-200 p-3"><p className="text-xs text-gray-400 mb-1">決済リンクURL</p><p className="text-xs font-mono text-blue-600 break-all">https://pay.aquagates.com/link/PL-20260216-001</p></div>
               <div className="flex gap-2">
                 <button className="flex-1 py-2 bg-green-600 text-white rounded text-xs font-bold">📋 コピー</button>
                 <button className="flex-1 py-2 bg-gray-100 text-gray-600 rounded text-xs border">📧 メール送信</button>
@@ -6230,7 +6230,7 @@ const PaymentPage = () => {
               </div>
               <div className="flex justify-center gap-2 pt-1">
                 {["VISA", "MC", "JCB", "AMEX"].map(b => (
-                  <span key={b} className="text-xs px-1.5 py-0.5 bg-gray-100 rounded border">{b}</span>
+                  <span key={b} className="text-xs px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200">{b}</span>
                 ))}
               </div>
             </div>
