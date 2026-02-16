@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 // ─── 共通UIコンポーネント ───
 const Sidebar = ({ items, active, onSelect, title, color }) => (
@@ -47,10 +47,15 @@ const KPICard = ({ label, value, sub, trend, color = "blue" }) => (
   </div>
 );
 
-const TableHeader = ({ cols }) => (
-  <div className="flex bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider px-4 py-3 whitespace-nowrap">
-    {cols.map((c, i) => <div key={i} className={`${c.w} min-w-0 truncate`}>{c.label}</div>)}
-  </div>
+const TableHeader = ({ cols, children }) => (
+  <table className="w-full text-left text-xs">
+    <thead>
+      <tr className="bg-slate-50/80 border-b border-slate-200 font-semibold text-slate-500 uppercase tracking-wider">
+        {cols.map((c, i) => <th key={i} className={`px-4 py-3 whitespace-nowrap font-semibold ${c.w === "flex-1" ? "" : c.w}`}>{c.label}</th>)}
+      </tr>
+    </thead>
+    <tbody>{children}</tbody>
+  </table>
 );
 
 const Badge = ({ text, color }) => {
@@ -316,24 +321,25 @@ const MasterExceptionQueue = () => {
 
     {/* Queue list */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-      <TableHeader cols={[{ label: "ID", w: "w-16" }, { label: "種別", w: "w-20" }, { label: "対象", w: "flex-1" }, { label: "AI推薦", w: "w-24" }, { label: "滞留時間", w: "w-24" }, { label: "操作", w: "w-32" }]} />
+      <TableHeader cols={[{ label: "ID", w: "w-16" }, { label: "種別", w: "w-20" }, { label: "対象", w: "flex-1" }, { label: "AI推薦", w: "w-24" }, { label: "滞留時間", w: "w-24" }, { label: "操作", w: "w-32" }]}>
       {[
         { id: "#5521", type: "不正検知", target: "¥89,000 / カード決済 / 山本商店", ai: "ブロック推薦", aiColor: "red", time: "30分", timeColor: "gray", locked: false },
         { id: "#1025", type: "審査保留", target: "合同会社テストショップ / 雑貨EC", ai: "承認推薦", aiColor: "green", time: "15分", timeColor: "gray", locked: true, lockedBy: "田中" },
       ].map((item, i) => (
-        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${item.locked ? "bg-orange-50" : i % 2 ? "bg-slate-50" : ""}`}>
-          <div className="w-16 font-mono text-slate-600 flex items-center gap-1">{item.locked && <span title={`${item.lockedBy}さんが対応中`}>🔒</span>}{item.id}</div>
-          <div className="w-20"><Badge text={item.type} color="yellow" /></div>
-          <div className="flex-1 text-slate-700">{item.target}</div>
-          <div className="w-24"><Badge text={item.ai} color={item.aiColor} /></div>
-          <div className="w-24"><Badge text={item.time} color={item.timeColor} /></div>
-          <div className="w-32 flex gap-1">
+        <tr key={i} className={`border-b ${item.locked ? "bg-orange-50" : i % 2 ? "bg-slate-50" : ""}`}>
+          <td className="px-4 py-2 whitespace-nowrap w-16 font-mono text-slate-600"><div className="flex items-center gap-1">{item.locked && <span title={`${item.lockedBy}さんが対応中`}>🔒</span>}{item.id}</div></td>
+          <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={item.type} color="yellow" /></td>
+          <td className="px-4 py-2 whitespace-nowrap text-slate-700">{item.target}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={item.ai} color={item.aiColor} /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={item.time} color={item.timeColor} /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-32"><div className="flex gap-1">
             <button className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs">承認</button>
             <button className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs">拒否</button>
             <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">詳細</button>
-          </div>
-        </div>
+          </div></td>
+        </tr>
       ))}
+      </TableHeader>
     </div>
   </div>
   );
@@ -392,22 +398,29 @@ const PROC_STATUS = {
   rejected: { label: "❌ 却下", color: "red", textClass: "text-rose-600" },
 };
 
-const SortableHeader = ({ cols, sortKey, sortDir, onSort }) => (
-  <div className="flex bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider px-4 py-3 whitespace-nowrap">
-    {cols.map((c, i) => (
-      <div key={i} className={`${c.w} min-w-0 truncate ${c.sortKey ? "cursor-pointer hover:text-blue-600 select-none" : ""} flex items-center gap-1`}
-        onClick={() => c.sortKey && onSort(c.sortKey)}
-      >
-        {c.label}
-        {c.sortKey && sortKey === c.sortKey && (
-          <span className="text-blue-600 text-xs">{sortDir === "asc" ? "▲" : "▼"}</span>
-        )}
-        {c.sortKey && sortKey !== c.sortKey && (
-          <span className="text-slate-300 text-xs">⇅</span>
-        )}
-      </div>
-    ))}
-  </div>
+const SortableHeader = ({ cols, sortKey, sortDir, onSort, children }) => (
+  <table className="w-full text-left text-xs">
+    <thead>
+      <tr className="bg-slate-50/80 border-b border-slate-200 font-semibold text-slate-500 uppercase tracking-wider">
+        {cols.map((c, i) => (
+          <th key={i} className={`px-4 py-3 whitespace-nowrap font-semibold ${c.w === "flex-1" ? "" : c.w} ${c.sortKey ? "cursor-pointer hover:text-blue-600 select-none" : ""}`}
+            onClick={() => c.sortKey && onSort(c.sortKey)}
+          >
+            <span className="inline-flex items-center gap-1">
+              {c.label}
+              {c.sortKey && sortKey === c.sortKey && (
+                <span className="text-blue-600 text-xs">{sortDir === "asc" ? "▲" : "▼"}</span>
+              )}
+              {c.sortKey && sortKey !== c.sortKey && (
+                <span className="text-slate-300 text-xs">⇅</span>
+              )}
+            </span>
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>{children}</tbody>
+  </table>
 );
 
 // ─── M03: 加盟店管理 ───
@@ -494,36 +507,36 @@ const MasterMerchants = () => {
             { label: "手数料", w: "w-16", sortKey: "feeNum" },
             { label: "操作", w: "w-14" },
           ]}
-        />
+        >
         {filtered.map((m, i) => {
           const approvedCount = m.processors.filter(p => p.status === "approved").length;
           const totalCount = m.processors.length;
           const isExpanded = expandedId === m.id;
           return (
-            <div key={m.id}>
-              <div
-                className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap cursor-pointer transition-colors ${isExpanded ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"}`}
+            <React.Fragment key={m.id}>
+              <tr
+                className={`border-b cursor-pointer transition-colors ${isExpanded ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"}`}
                 onClick={() => setExpandedId(isExpanded ? null : m.id)}
               >
-                <div className="w-24 font-mono text-slate-500">{m.id}</div>
-                <div className="flex-1 font-semibold text-slate-700">{m.name}</div>
-                <div className="w-20"><Badge text={m.status} color={m.sColor} /></div>
-                <div className="w-16"><Badge text={m.risk} color={m.rColor} /></div>
-                <div className="w-16">
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-slate-500">{m.id}</td>
+                <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{m.name}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={m.status} color={m.sColor} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={m.risk} color={m.rColor} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-16">
                   <span className={`text-xs font-semibold ${approvedCount === 0 ? "text-slate-400" : approvedCount >= 3 ? "text-emerald-600" : "text-blue-600"}`}>
                     {approvedCount}/{totalCount}
                   </span>
-                </div>
-                <div className="w-24 text-right text-slate-600">{m.sales}</div>
-                <div className="w-16 text-right text-slate-600">{m.cb}</div>
-                <div className="w-16 text-right text-slate-600">{m.success}</div>
-                <div className="w-16 text-right text-slate-600">{m.fee}</div>
-                <div className="w-14"><button onClick={(e) => { e.stopPropagation(); setSlidePanel(m); }} className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">詳細</button></div>
-              </div>
+                </td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-slate-600">{m.sales}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16 text-right text-slate-600">{m.cb}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16 text-right text-slate-600">{m.success}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16 text-right text-slate-600">{m.fee}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-14"><button onClick={(e) => { e.stopPropagation(); setSlidePanel(m); }} className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">詳細</button></td>
+              </tr>
 
               {/* ── Expanded: 接続先審査状況パネル ── */}
               {isExpanded && (
-                <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                <tr><td colSpan={10} className="p-0"><div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
                   <div className="flex justify-between items-center mb-2">
                     <p className="text-xs font-bold text-slate-700">🔌 接続先審査状況 — {m.name}</p>
                     <button onClick={() => setShowProcApply(true)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">+ 接続先審査を追加申請</button>
@@ -600,14 +613,15 @@ const MasterMerchants = () => {
                       <p className="text-xs text-emerald-700">✅ <span className="font-semibold">ルーティング最適化:</span> 3接続先以上が有効です。AIルーティングによるコスト最適化・フェイルオーバーが完全に機能しています。</p>
                     </div>
                   )}
-                </div>
+                </div></td></tr>
               )}
-            </div>
+            </React.Fragment>
           );
         })}
         {filtered.length === 0 && (
-          <div className="p-6 text-center text-xs text-slate-400">該当する加盟店がありません</div>
+          <tr><td colSpan={10} className="p-6 text-center text-xs text-slate-400">該当する加盟店がありません</td></tr>
         )}
+        </SortableHeader>
       </div>
 
       {/* ── Slide Panel: 加盟店詳細 ── */}
@@ -1032,7 +1046,7 @@ const MerchantTransactions = () => (
       </div>
     </div>
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-      <TableHeader cols={[{ label: "決済ID", w: "w-28" }, { label: "日時", w: "w-32" }, { label: "金額", w: "w-20" }, { label: "ステータス", w: "w-20" }, { label: "決済手段", w: "w-24" }, { label: "カード", w: "w-20" }, { label: "注文番号", w: "flex-1" }, { label: "操作", w: "w-16" }]} />
+      <TableHeader cols={[{ label: "決済ID", w: "w-28" }, { label: "日時", w: "w-32" }, { label: "金額", w: "w-20" }, { label: "ステータス", w: "w-20" }, { label: "決済手段", w: "w-24" }, { label: "カード", w: "w-20" }, { label: "注文番号", w: "flex-1" }, { label: "操作", w: "w-16" }]}>
       {[
         { id: "pay_8f3a2b1c", time: "2026-02-11 14:23", amount: "¥12,800", status: "成功", sColor: "green", method: "VISA", card: "****4242", order: "ORD-20260211-001" },
         { id: "pay_7e2c3d4a", time: "2026-02-11 14:18", amount: "¥5,500", status: "成功", sColor: "green", method: "Mastercard", card: "****8888", order: "ORD-20260211-002" },
@@ -1040,17 +1054,18 @@ const MerchantTransactions = () => (
         { id: "pay_5c4a6f8e", time: "2026-02-11 13:55", amount: "¥3,200", status: "返金済", sColor: "yellow", method: "JCB", card: "****5678", order: "ORD-20260210-045" },
         { id: "pay_4b3d7g2h", time: "2026-02-11 13:42", amount: "¥15,600", status: "成功", sColor: "green", method: "PayPay", card: "-", order: "ORD-20260211-004" },
       ].map((tx, i) => (
-        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
-          <div className="w-28 font-mono text-blue-600">{tx.id}</div>
-          <div className="w-32 text-slate-500">{tx.time}</div>
-          <div className="w-20 font-semibold text-right">{tx.amount}</div>
-          <div className="w-20"><Badge text={tx.status} color={tx.sColor} /></div>
-          <div className="w-24 text-slate-600">{tx.method}</div>
-          <div className="w-20 font-mono text-slate-500">{tx.card}</div>
-          <div className="flex-1 text-slate-500">{tx.order}</div>
-          <div className="w-16"><button className="text-xs text-blue-600 hover:underline">詳細</button></div>
-        </div>
+        <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+          <td className="px-4 py-2 whitespace-nowrap w-28 font-mono text-blue-600">{tx.id}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{tx.time}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-20 font-semibold text-right">{tx.amount}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={tx.status} color={tx.sColor} /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-600">{tx.method}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-20 font-mono text-slate-500">{tx.card}</td>
+          <td className="px-4 py-2 whitespace-nowrap text-slate-500">{tx.order}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-16"><button className="text-xs text-blue-600 hover:underline">詳細</button></td>
+        </tr>
       ))}
+      </TableHeader>
     </div>
   </div>
 );
@@ -1218,7 +1233,7 @@ const MasterUserManagement = () => {
 
     {/* User List */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-      <TableHeader cols={[{ label: "名前", w: "w-36" }, { label: "メール", w: "flex-1" }, { label: "ロール", w: "w-24" }, { label: "担当カテゴリ", w: "w-44" }, { label: "MFA", w: "w-16" }, { label: "最終ログイン", w: "w-32" }, { label: "操作", w: "w-28" }]} />
+      <TableHeader cols={[{ label: "名前", w: "w-36" }, { label: "メール", w: "flex-1" }, { label: "ロール", w: "w-24" }, { label: "担当カテゴリ", w: "w-44" }, { label: "MFA", w: "w-16" }, { label: "最終ログイン", w: "w-32" }, { label: "操作", w: "w-28" }]}>
       {[
         { name: "田中 太郎", email: "tanaka@company.jp", roleLabel: "スーパー管理者", categories: ["全カテゴリ"], catColors: ["red"], mfa: true, lastLogin: "2026-02-11 14:30", rColor: "red" },
         { name: "佐藤 花子", email: "sato@company.jp", roleLabel: "管理者", categories: ["全カテゴリ"], catColors: ["blue"], mfa: true, lastLogin: "2026-02-11 13:45", rColor: "blue" },
@@ -1227,26 +1242,27 @@ const MasterUserManagement = () => {
         { name: "高橋 健太", email: "takahashi@company.jp", roleLabel: "レビュアー", categories: ["URL巡回"], catColors: ["green"], mfa: false, lastLogin: "2026-02-10 18:00", rColor: "purple" },
         { name: "伊藤 翔", email: "ito@company.jp", roleLabel: "レビュアー", categories: ["審査", "精算"], catColors: ["purple", "blue"], mfa: true, lastLogin: "2026-02-11 09:30", rColor: "purple" },
       ].map((u, i) => (
-        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
-          <div className="w-36 font-semibold text-slate-700 flex items-center gap-2">
+        <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+          <td className="px-4 py-2 whitespace-nowrap w-36 font-semibold text-slate-700"><div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs">👤</div>
             {u.name}
-          </div>
-          <div className="flex-1 text-slate-500">{u.email}</div>
-          <div className="w-24"><Badge text={u.roleLabel} color={u.rColor} /></div>
-          <div className="w-44 flex gap-1 flex-wrap">
+          </div></td>
+          <td className="px-4 py-2 whitespace-nowrap text-slate-500">{u.email}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={u.roleLabel} color={u.rColor} /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-44"><div className="flex gap-1 flex-wrap">
             {u.categories.map((cat, ci) => (
               <Badge key={ci} text={cat} color={u.catColors[ci] || "gray"} />
             ))}
-          </div>
-          <div className="w-16">{u.mfa ? <span className="text-emerald-600">✅</span> : <span className="text-rose-500">❌</span>}</div>
-          <div className="w-32 text-slate-400">{u.lastLogin}</div>
-          <div className="w-28 flex gap-1">
+          </div></td>
+          <td className="px-4 py-2 whitespace-nowrap w-16">{u.mfa ? <span className="text-emerald-600">✅</span> : <span className="text-rose-500">❌</span>}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{u.lastLogin}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1">
             <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">編集</button>
             <button className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs">無効化</button>
-          </div>
-        </div>
+          </div></td>
+        </tr>
       ))}
+      </TableHeader>
     </div>
 
     {/* New Staff Registration Form (Modal Preview) */}
@@ -1632,22 +1648,23 @@ const MasterMerchantApplications = () => {
 
       {/* Applications List */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-        <TableHeader cols={[{ label: "申込ID", w: "w-36" }, { label: "法人名", w: "flex-1" }, { label: "業種", w: "w-24" }, { label: "自社審査", w: "w-24" }, { label: "AI判定", w: "w-24" }, { label: "接続先審査", w: "w-28" }, { label: "申込日", w: "w-24" }, { label: "操作", w: "w-20" }]} />
+        <TableHeader cols={[{ label: "申込ID", w: "w-36" }, { label: "法人名", w: "flex-1" }, { label: "業種", w: "w-24" }, { label: "自社審査", w: "w-24" }, { label: "AI判定", w: "w-24" }, { label: "接続先審査", w: "w-28" }, { label: "申込日", w: "w-24" }, { label: "操作", w: "w-20" }]}>
         {appList.map((a, i) => (
-          <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap cursor-pointer transition-colors ${selectedApp === a.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"}`}
+          <tr key={i} className={`border-b cursor-pointer transition-colors ${selectedApp === a.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"}`}
                onClick={() => setSelectedApp(a.id)}>
-            <div className="w-36 font-mono text-slate-500">{a.id}</div>
-            <div className="flex-1 font-semibold text-slate-700">{a.name}</div>
-            <div className="w-24 text-slate-500">{a.biz}</div>
-            <div className="w-24"><Badge text={a.status} color={a.sColor} /></div>
-            <div className="w-24"><Badge text={a.ai} color={a.aColor} /></div>
-            <div className="w-28">
+            <td className="px-4 py-2 whitespace-nowrap w-36 font-mono text-slate-500">{a.id}</td>
+            <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{a.name}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-500">{a.biz}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={a.status} color={a.sColor} /></td>
+            <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={a.ai} color={a.aColor} /></td>
+            <td className="px-4 py-2 whitespace-nowrap w-28">
               {a.procStatus ? <Badge text={a.procStatus} color={a.procStatus === "接続先審査中" ? "blue" : "yellow"} /> : <span className="text-slate-300">—</span>}
-            </div>
-            <div className="w-24 text-slate-400">{a.date}</div>
-            <div className="w-20"><button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">詳細</button></div>
-          </div>
+            </td>
+            <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{a.date}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-20"><button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">詳細</button></td>
+          </tr>
         ))}
+        </TableHeader>
       </div>
     </div>
   );
@@ -1748,23 +1765,24 @@ const MasterSettlement = () => (
       </div>
       {/* Reserve per Merchant */}
       <div className="bg-white rounded border mt-2">
-        <TableHeader cols={[{ label: "加盟店", w: "flex-1" }, { label: "接続先", w: "w-28" }, { label: "リザーブ率", w: "w-20" }, { label: "期間", w: "w-16" }, { label: "残高", w: "w-24" }, { label: "次回解放", w: "w-24" }, { label: "解放予定日", w: "w-24" }]} />
+        <TableHeader cols={[{ label: "加盟店", w: "flex-1" }, { label: "接続先", w: "w-28" }, { label: "リザーブ率", w: "w-20" }, { label: "期間", w: "w-16" }, { label: "残高", w: "w-24" }, { label: "次回解放", w: "w-24" }, { label: "解放予定日", w: "w-24" }]}>
         {[
           { m: "ABCマート", proc: "GMO-PG", rate: "10%", period: "180日", bal: "¥420,000", next: "¥120,000", date: "2026-03-07" },
           { m: "ABCマート", proc: "三井住友", rate: "5%", period: "90日", bal: "¥200,000", next: "¥60,000", date: "2026-03-07" },
           { m: "XYZショップ", proc: "GMO-PG", rate: "10%", period: "180日", bal: "¥185,000", next: "¥92,000", date: "2026-03-14" },
           { m: "トラベルプラス", proc: "GMO-PG", rate: "15%", period: "180日", bal: "¥510,000", next: "¥340,000", date: "2026-03-07" },
         ].map((r, i) => (
-          <div key={i} className={`flex items-center px-4 py-1.5 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
-            <div className="flex-1 font-semibold text-slate-700">{r.m}</div>
-            <div className="w-28 text-slate-600">{r.proc}</div>
-            <div className="w-20 text-center"><Badge text={r.rate} color="purple" /></div>
-            <div className="w-16 text-center text-slate-500">{r.period}</div>
-            <div className="w-24 text-right font-bold text-purple-700">{r.bal}</div>
-            <div className="w-24 text-right text-emerald-600">{r.next}</div>
-            <div className="w-24 text-right text-slate-400">{r.date}</div>
-          </div>
+          <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+            <td className="px-4 py-1.5 whitespace-nowrap font-semibold text-slate-700">{r.m}</td>
+            <td className="px-4 py-1.5 whitespace-nowrap w-28 text-slate-600">{r.proc}</td>
+            <td className="px-4 py-1.5 whitespace-nowrap w-20 text-center"><Badge text={r.rate} color="purple" /></td>
+            <td className="px-4 py-1.5 whitespace-nowrap w-16 text-center text-slate-500">{r.period}</td>
+            <td className="px-4 py-1.5 whitespace-nowrap w-24 text-right font-bold text-purple-700">{r.bal}</td>
+            <td className="px-4 py-1.5 whitespace-nowrap w-24 text-right text-emerald-600">{r.next}</td>
+            <td className="px-4 py-1.5 whitespace-nowrap w-24 text-right text-slate-400">{r.date}</td>
+          </tr>
         ))}
+        </TableHeader>
       </div>
     </div>
 
@@ -1775,43 +1793,45 @@ const MasterSettlement = () => (
         <button className="text-xs text-blue-600 hover:underline">全加盟店を表示 →</button>
       </div>
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-        <TableHeader cols={[{ label: "加盟店", w: "flex-1" }, { label: "売上総額", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "CB差引", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-28" }]} />
+        <TableHeader cols={[{ label: "加盟店", w: "flex-1" }, { label: "売上総額", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "CB差引", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-28" }]}>
         {[
           { merchant: "M-001 ABCマート", sales: "¥4,200,000", fee: "¥127,500", cb: "¥0", hold: "¥420,000", release: "¥280,000", payout: "¥3,932,500" },
           { merchant: "M-002 XYZショップ", sales: "¥1,850,000", fee: "¥58,870", cb: "¥12,000", hold: "¥185,000", release: "¥92,000", payout: "¥1,686,130" },
           { merchant: "M-003 トラベルプラス", sales: "¥5,100,000", fee: "¥183,600", cb: "¥245,000", hold: "¥510,000", release: "¥340,000", payout: "¥4,501,400" },
         ].map((m, i) => (
-          <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
-            <div className="flex-1 font-semibold text-slate-700">{m.merchant}</div>
-            <div className="w-28 text-right text-slate-600">{m.sales}</div>
-            <div className="w-24 text-right text-rose-500">-{m.fee}</div>
-            <div className="w-20 text-right text-rose-500">{m.cb !== "¥0" ? `-${m.cb}` : "—"}</div>
-            <div className="w-24 text-right text-purple-500">-{m.hold}</div>
-            <div className="w-24 text-right text-emerald-500">+{m.release}</div>
-            <div className="w-28 text-right font-bold text-slate-800">{m.payout}</div>
-          </div>
+          <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+            <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{m.merchant}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-28 text-right text-slate-600">{m.sales}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-rose-500">-{m.fee}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-20 text-right text-rose-500">{m.cb !== "¥0" ? `-${m.cb}` : "—"}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-purple-500">-{m.hold}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-emerald-500">+{m.release}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-28 text-right font-bold text-slate-800">{m.payout}</td>
+          </tr>
         ))}
+        </TableHeader>
       </div>
     </div>
 
     {/* Payout List */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-      <TableHeader cols={[{ label: "入金ID", w: "w-28" }, { label: "加盟店", w: "flex-1" }, { label: "精算期間", w: "w-36" }, { label: "入金額", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "ステータス", w: "w-24" }, { label: "入金日", w: "w-24" }]} />
+      <TableHeader cols={[{ label: "入金ID", w: "w-28" }, { label: "加盟店", w: "flex-1" }, { label: "精算期間", w: "w-36" }, { label: "入金額", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "ステータス", w: "w-24" }, { label: "入金日", w: "w-24" }]}>
       {[
         { id: "PAY-0211-001", merchant: "M-001 ABCマート", period: "02/04 〜 02/10", amount: "¥3,825,000", fee: "¥127,500", status: "入金完了", sColor: "green", date: "02/12" },
         { id: "PAY-0211-002", merchant: "M-002 XYZショップ", period: "02/04 〜 02/10", amount: "¥1,682,000", fee: "¥58,870", status: "入金完了", sColor: "green", date: "02/12" },
         { id: "PAY-0211-003", merchant: "M-004 テスト商事", period: "02/04 〜 02/10", amount: "¥612,000", fee: "¥23,256", status: "保留", sColor: "yellow", date: "-" },
       ].map((p, i) => (
-        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
-          <div className="w-28 font-mono text-slate-500">{p.id}</div>
-          <div className="flex-1 font-semibold text-slate-700">{p.merchant}</div>
-          <div className="w-36 text-slate-500">{p.period}</div>
-          <div className="w-28 text-right font-semibold text-slate-700">{p.amount}</div>
-          <div className="w-24 text-right text-slate-500">{p.fee}</div>
-          <div className="w-24"><Badge text={p.status} color={p.sColor} /></div>
-          <div className="w-24 text-slate-400">{p.date}</div>
-        </div>
+        <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+          <td className="px-4 py-2 whitespace-nowrap w-28 font-mono text-slate-500">{p.id}</td>
+          <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{p.merchant}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-36 text-slate-500">{p.period}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-28 text-right font-semibold text-slate-700">{p.amount}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-slate-500">{p.fee}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={p.status} color={p.sColor} /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{p.date}</td>
+        </tr>
       ))}
+      </TableHeader>
     </div>
   </div>
 );
@@ -1973,28 +1993,29 @@ const MerchantUserManagement = () => {
     )}
 
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-      <TableHeader cols={[{ label: "名前", w: "w-36" }, { label: "メール", w: "flex-1" }, { label: "権限", w: "w-28" }, { label: "MFA", w: "w-14" }, { label: "最終ログイン", w: "w-32" }, { label: "操作", w: "w-28" }]} />
+      <TableHeader cols={[{ label: "名前", w: "w-36" }, { label: "メール", w: "flex-1" }, { label: "権限", w: "w-28" }, { label: "MFA", w: "w-14" }, { label: "最終ログイン", w: "w-32" }, { label: "操作", w: "w-28" }]}>
       {[
         { name: "佐々木 健一", email: "sasaki@techshop.jp", role: "オーナー", rColor: "purple", mfa: true, last: "2026-02-11 14:30" },
         { name: "中村 美月", email: "nakamura@techshop.jp", role: "管理者", rColor: "blue", mfa: true, last: "2026-02-11 12:00" },
         { name: "小林 大輔", email: "kobayashi@techshop.jp", role: "スタッフ", rColor: "green", mfa: true, last: "2026-02-10 18:20" },
         { name: "渡辺 さくら", email: "watanabe@techshop.jp", role: "閲覧のみ", rColor: "gray", mfa: false, last: "2026-02-08 10:00" },
       ].map((u, i) => (
-        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
-          <div className="w-36 font-semibold text-slate-700 flex items-center gap-2">
+        <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+          <td className="px-4 py-2 whitespace-nowrap w-36 font-semibold text-slate-700"><div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-xs">👤</div>
             {u.name}
-          </div>
-          <div className="flex-1 text-slate-500">{u.email}</div>
-          <div className="w-28"><Badge text={u.role} color={u.rColor} /></div>
-          <div className="w-14">{u.mfa ? "✅" : "❌"}</div>
-          <div className="w-32 text-slate-400">{u.last}</div>
-          <div className="w-28 flex gap-1">
+          </div></td>
+          <td className="px-4 py-2 whitespace-nowrap text-slate-500">{u.email}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-28"><Badge text={u.role} color={u.rColor} /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-14">{u.mfa ? "✅" : "❌"}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{u.last}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1">
             <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">編集</button>
             {u.role !== "オーナー" && <button className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs">削除</button>}
-          </div>
-        </div>
+          </div></td>
+        </tr>
       ))}
+      </TableHeader>
     </div>
 
     {/* Permission Matrix */}
@@ -2083,24 +2104,25 @@ const MerchantPayouts = () => {
 
     {/* Payout History */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-      <TableHeader cols={[{ label: "入金日", w: "w-20" }, { label: "精算期間", w: "w-32" }, { label: "総売上", w: "w-24" }, { label: "手数料", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-24" }, { label: "ステータス", w: "w-20" }, { label: "明細", w: "w-14" }]} />
+      <TableHeader cols={[{ label: "入金日", w: "w-20" }, { label: "精算期間", w: "w-32" }, { label: "総売上", w: "w-24" }, { label: "手数料", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-24" }, { label: "ステータス", w: "w-20" }, { label: "明細", w: "w-14" }]}>
       {[
         { date: "02/07", period: "01/28〜02/03", sales: "¥1,450,000", fee: "-¥46,400", hold: "-¥145,000", release: "+¥92,000", payout: "¥1,350,600", status: "入金済み", sColor: "green" },
         { date: "01/31", period: "01/21〜01/27", sales: "¥1,180,000", fee: "-¥37,760", hold: "-¥118,000", release: "+¥88,000", payout: "¥1,112,240", status: "入金済み", sColor: "green" },
         { date: "01/24", period: "01/14〜01/20", sales: "¥980,000", fee: "-¥31,360", hold: "-¥98,000", release: "+¥0", payout: "¥850,640", status: "入金済み", sColor: "green" },
       ].map((p, i) => (
-        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
-          <div className="w-20 text-slate-600">{p.date}</div>
-          <div className="w-32 text-slate-500">{p.period}</div>
-          <div className="w-24 text-right text-slate-600">{p.sales}</div>
-          <div className="w-20 text-right text-rose-500">{p.fee}</div>
-          <div className="w-24 text-right text-purple-500">{p.hold}</div>
-          <div className="w-24 text-right text-emerald-600">{p.release}</div>
-          <div className="w-24 text-right font-semibold text-slate-700">{p.payout}</div>
-          <div className="w-20"><Badge text={p.status} color={p.sColor} /></div>
-          <div className="w-14"><button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">📄</button></div>
-        </div>
+        <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+          <td className="px-4 py-2 whitespace-nowrap w-20 text-slate-600">{p.date}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{p.period}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-slate-600">{p.sales}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-20 text-right text-rose-500">{p.fee}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-purple-500">{p.hold}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-emerald-600">{p.release}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24 text-right font-semibold text-slate-700">{p.payout}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={p.status} color={p.sColor} /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-14"><button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">📄</button></td>
+        </tr>
       ))}
+      </TableHeader>
     </div>
     </>)}
 
@@ -2153,7 +2175,7 @@ const MerchantPayouts = () => {
 
       {/* Reserve Transaction History */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-        <TableHeader cols={[{ label: "日付", w: "w-24" }, { label: "種別", w: "w-16" }, { label: "接続先", w: "w-32" }, { label: "対象精算", w: "w-32" }, { label: "金額", w: "w-24" }, { label: "残高", w: "w-24" }]} />
+        <TableHeader cols={[{ label: "日付", w: "w-24" }, { label: "種別", w: "w-16" }, { label: "接続先", w: "w-32" }, { label: "対象精算", w: "w-32" }, { label: "金額", w: "w-24" }, { label: "残高", w: "w-24" }]}>
         {[
           { date: "2026-02-07", type: "留保", tColor: "purple", proc: "GMO-PG", target: "01/28〜02/03精算分", amount: "-¥145,000", balance: "¥620,000" },
           { date: "2026-02-07", type: "解放", tColor: "green", proc: "三井住友カード", target: "2025年8月留保分", amount: "+¥60,000", balance: "¥475,000" },
@@ -2161,15 +2183,16 @@ const MerchantPayouts = () => {
           { date: "2026-01-31", type: "留保", tColor: "purple", proc: "三井住友カード", target: "01/21〜01/27精算分", amount: "-¥59,000", balance: "¥653,000" },
           { date: "2026-01-24", type: "解放", tColor: "green", proc: "GMO-PG", target: "2025年7月留保分", amount: "+¥92,000", balance: "¥712,000" },
         ].map((r, i) => (
-          <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
-            <div className="w-24 text-slate-500">{r.date}</div>
-            <div className="w-16"><Badge text={r.type} color={r.tColor} /></div>
-            <div className="w-32 text-slate-600">{r.proc}</div>
-            <div className="w-32 text-slate-400">{r.target}</div>
-            <div className={`w-24 text-right font-semibold ${r.type === "解放" ? "text-emerald-600" : "text-purple-600"}`}>{r.amount}</div>
-            <div className="w-24 text-right text-slate-700">{r.balance}</div>
-          </div>
+          <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+            <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-500">{r.date}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.type} color={r.tColor} /></td>
+            <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-600">{r.proc}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{r.target}</td>
+            <td className={`px-4 py-2 whitespace-nowrap w-24 text-right font-semibold ${r.type === "解放" ? "text-emerald-600" : "text-purple-600"}`}>{r.amount}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-slate-700">{r.balance}</td>
+          </tr>
         ))}
+        </TableHeader>
       </div>
     </div>
     )}
@@ -2883,24 +2906,25 @@ const MasterRouting = () => {
           <p className="text-xs font-bold text-slate-700">📊 ルーティングログ（直近）</p>
           <button className="text-xs text-blue-600 hover:underline">全ログ検索 →</button>
         </div>
-        <TableHeader cols={[{ label: "日時", w: "w-28" }, { label: "取引ID", w: "w-36" }, { label: "加盟店", w: "w-32" }, { label: "ブランド", w: "w-16" }, { label: "AI判定", w: "flex-1" }, { label: "選択", w: "w-24" }, { label: "結果", w: "w-16" }, { label: "F/O", w: "w-12" }]} />
+        <TableHeader cols={[{ label: "日時", w: "w-28" }, { label: "取引ID", w: "w-36" }, { label: "加盟店", w: "w-32" }, { label: "ブランド", w: "w-16" }, { label: "AI判定", w: "flex-1" }, { label: "選択", w: "w-24" }, { label: "結果", w: "w-16" }, { label: "F/O", w: "w-12" }]}>
         {[
           { time: "14:52:31", txn: "TXN-14523", merchant: "ABCマート", brand: "VISA", ai: "GMO(92) > 三井住友(78) > JCB(65)", selected: "GMO-PG", result: "成功", fo: "—" },
           { time: "14:51:40", txn: "TXN-14520", merchant: "トラベルプラス", brand: "VISA", ai: "GMO(88)", selected: "GMO-PG", result: "失敗", fo: "→三井" },
           { time: "14:51:22", txn: "TXN-14519", merchant: "スタイルプラス", brand: "VISA", ai: "GMO(85) > 三井住友(72)", selected: "GMO-PG", result: "成功", fo: "—" },
           { time: "14:50:58", txn: "TXN-14518", merchant: "ABCマート", brand: "QR", ai: "PayPay(固定)", selected: "PayPay", result: "成功", fo: "—" },
         ].map((l, i) => (
-          <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
-            <div className="w-28 text-slate-400 font-mono">{l.time}</div>
-            <div className="w-36 font-mono text-slate-500">{l.txn}</div>
-            <div className="w-32 text-slate-700">{l.merchant}</div>
-            <div className="w-16"><Badge text={l.brand} color="blue" /></div>
-            <div className="flex-1 text-slate-500 font-mono">{l.ai}</div>
-            <div className="w-24 font-semibold text-slate-700">{l.selected}</div>
-            <div className="w-16"><Badge text={l.result} color={l.result === "成功" ? "green" : "red"} /></div>
-            <div className="w-12 text-center">{l.fo !== "—" ? <span className="text-amber-600 font-semibold">{l.fo}</span> : "—"}</div>
-          </div>
+          <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+            <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400 font-mono">{l.time}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-36 font-mono text-slate-500">{l.txn}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-700">{l.merchant}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={l.brand} color="blue" /></td>
+            <td className="px-4 py-2 whitespace-nowrap text-slate-500 font-mono">{l.ai}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-24 font-semibold text-slate-700">{l.selected}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={l.result} color={l.result === "成功" ? "green" : "red"} /></td>
+            <td className="px-4 py-2 whitespace-nowrap w-12 text-center">{l.fo !== "—" ? <span className="text-amber-600 font-semibold">{l.fo}</span> : "—"}</td>
+          </tr>
         ))}
+        </TableHeader>
       </div>
 
       {/* ── Modal: ルーティングルール追加 ── */}
@@ -3051,20 +3075,21 @@ const MasterProcessors = () => {
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "接続先ID", w: "w-24" }, { label: "接続先名", w: "w-36" }, { label: "種別", w: "w-36" }, { label: "対応ブランド", w: "w-32" }, { label: "稼働率", w: "w-20" }, { label: "承認済加盟店", w: "w-24" }, { label: "審査中", w: "w-16" }, { label: "状態", w: "w-20" }, { label: "操作", w: "w-16" }]} />
+            <TableHeader cols={[{ label: "接続先ID", w: "w-24" }, { label: "接続先名", w: "w-36" }, { label: "種別", w: "w-36" }, { label: "対応ブランド", w: "w-32" }, { label: "稼働率", w: "w-20" }, { label: "承認済加盟店", w: "w-24" }, { label: "審査中", w: "w-16" }, { label: "状態", w: "w-20" }, { label: "操作", w: "w-16" }]}>
             {processorList.map((p, i) => (
-              <div key={p.id} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50 cursor-pointer`} onClick={() => setSelectedProc(selectedProc === p.id ? null : p.id)}>
-                <div className="w-24 font-mono text-slate-500">{p.id}</div>
-                <div className="w-36 font-semibold text-slate-700">{p.name}</div>
-                <div className="w-36 text-slate-500">{p.type}</div>
-                <div className="w-32 flex gap-1 flex-wrap">{p.brands.map(b => <Badge key={b} text={b} color="blue" />)}</div>
-                <div className="w-20 text-emerald-600 font-semibold">{p.uptime}</div>
-                <div className="w-24 text-center text-slate-700 font-semibold">{p.merchants}社</div>
-                <div className="w-16 text-center">{p.reviewing > 0 ? <Badge text={`${p.reviewing}件`} color="yellow" /> : <span className="text-slate-300">—</span>}</div>
-                <div className="w-20"><Badge text={p.status} color={p.sColor} /></div>
-                <div className="w-16"><button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">設定</button></div>
-              </div>
+              <tr key={p.id} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50 cursor-pointer`} onClick={() => setSelectedProc(selectedProc === p.id ? null : p.id)}>
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-slate-500">{p.id}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-36 font-semibold text-slate-700">{p.name}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-36 text-slate-500">{p.type}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-32"><div className="flex gap-1 flex-wrap">{p.brands.map(b => <Badge key={b} text={b} color="blue" />)}</div></td>
+                <td className="px-4 py-2 whitespace-nowrap w-20 text-emerald-600 font-semibold">{p.uptime}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 text-center text-slate-700 font-semibold">{p.merchants}社</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{p.reviewing > 0 ? <Badge text={`${p.reviewing}件`} color="yellow" /> : <span className="text-slate-300">—</span>}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={p.status} color={p.sColor} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-16"><button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">設定</button></td>
+              </tr>
             ))}
+            </TableHeader>
           </div>
 
           {/* Processor Detail Expand */}
@@ -3570,18 +3595,19 @@ const MasterProcessors = () => {
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "接続先", w: "w-32" }, { label: "承認日", w: "w-28" }, { label: "審査日数", w: "w-20" }, { label: "提出書類", w: "w-20" }, { label: "結果", w: "w-20" }, { label: "書類", w: "w-20" }]} />
+            <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "接続先", w: "w-32" }, { label: "承認日", w: "w-28" }, { label: "審査日数", w: "w-20" }, { label: "提出書類", w: "w-20" }, { label: "結果", w: "w-20" }, { label: "書類", w: "w-20" }]}>
             {approvedHistory.map((h, i) => (
-              <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
-                <div className="flex-1 font-semibold text-slate-700">{h.merchantName}</div>
-                <div className="w-32 text-slate-600">{h.processorName}</div>
-                <div className="w-28 text-slate-500">{h.approvedAt}</div>
-                <div className="w-20 text-center"><Badge text={`${h.reviewDays}日`} color={h.reviewDays <= 7 ? "green" : h.reviewDays <= 14 ? "blue" : "yellow"} /></div>
-                <div className="w-20 text-center text-slate-500">{h.docs}件</div>
-                <div className="w-20"><Badge text="✅ 承認" color="green" /></div>
-                <div className="w-20"><button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">📄 DL</button></div>
-              </div>
+              <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+                <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{h.merchantName}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-600">{h.processorName}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-500">{h.approvedAt}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20 text-center"><Badge text={`${h.reviewDays}日`} color={h.reviewDays <= 7 ? "green" : h.reviewDays <= 14 ? "blue" : "yellow"} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-20 text-center text-slate-500">{h.docs}件</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text="✅ 承認" color="green" /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-20"><button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">📄 DL</button></td>
+              </tr>
             ))}
+            </TableHeader>
           </div>
 
           {/* AI insight */}
@@ -3826,22 +3852,23 @@ const MasterTransactionMonitor = () => {
 
           {/* Transaction Feed */}
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "接続先", w: "w-28" }, { label: "ルーティング", w: "w-28" }, { label: "応答", w: "w-16" }, { label: "3DS", w: "w-10" }, { label: "状態", w: "w-20" }, { label: "時刻", w: "w-20" }]} />
+            <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "接続先", w: "w-28" }, { label: "ルーティング", w: "w-28" }, { label: "応答", w: "w-16" }, { label: "3DS", w: "w-10" }, { label: "状態", w: "w-20" }, { label: "時刻", w: "w-20" }]}>
             {filtered.map((t, i) => (
-              <div key={t.id} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap cursor-pointer transition-colors ${selectedTxn === t.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"} ${t.status === "失敗" || t.status === "不正検知" ? "bg-rose-50" : ""}`}
+              <tr key={t.id} className={`border-b cursor-pointer transition-colors ${selectedTxn === t.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"} ${t.status === "失敗" || t.status === "不正検知" ? "bg-rose-50" : ""}`}
                    onClick={() => setSelectedTxn(selectedTxn === t.id ? null : t.id)}>
-                <div className="w-40 font-mono text-slate-500">{t.id}</div>
-                <div className="flex-1 text-slate-700">{t.merchant}</div>
-                <div className="w-24 text-right font-semibold text-slate-800">¥{t.amount.toLocaleString()}</div>
-                <div className="w-16"><Badge text={t.brand} color="blue" /></div>
-                <div className="w-28 text-slate-500">{t.processor}</div>
-                <div className="w-28"><Badge text={t.routing} color={t.routing.includes("AI") ? "purple" : "gray"} /></div>
-                <div className="w-16 text-slate-400">{t.responseMs ? t.responseMs + "ms" : "—"}</div>
-                <div className="w-10 text-center">{t.is3ds ? "🔒" : "—"}</div>
-                <div className="w-20"><Badge text={t.status} color={t.sColor} /></div>
-                <div className="w-20 text-slate-400 font-mono">{t.time}</div>
-              </div>
+                <td className="px-4 py-2 whitespace-nowrap w-40 font-mono text-slate-500">{t.id}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-slate-700">{t.merchant}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 text-right font-semibold text-slate-800">¥{t.amount.toLocaleString()}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={t.brand} color="blue" /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-500">{t.processor}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-28"><Badge text={t.routing} color={t.routing.includes("AI") ? "purple" : "gray"} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-16 text-slate-400">{t.responseMs ? t.responseMs + "ms" : "—"}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-10 text-center">{t.is3ds ? "🔒" : "—"}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={t.status} color={t.sColor} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-20 text-slate-400 font-mono">{t.time}</td>
+              </tr>
             ))}
+            </TableHeader>
           </div>
 
           {/* Expanded Detail */}
@@ -3988,17 +4015,17 @@ const MasterTransactionMonitor = () => {
                 {["20","50","100"].map(n => <button key={n} className={`px-1.5 py-0.5 rounded ${n === "20" ? "bg-blue-100 text-blue-600" : "text-slate-400"}`}>{n}件</button>)}
               </div>
             </div>
-            <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "ステータス", w: "w-20" }, { label: "日時", w: "w-36" }, { label: "操作", w: "w-36" }]} />
+            <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "ステータス", w: "w-20" }, { label: "日時", w: "w-36" }, { label: "操作", w: "w-36" }]}>
             {searchResults.map((t, i) => (
-              <div key={t.id} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50 cursor-pointer`}
+              <tr key={t.id} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50 cursor-pointer`}
                    onClick={() => setSearchSlide(t)}>
-                <div className="w-40 font-mono text-slate-500">{t.id}</div>
-                <div className="flex-1 text-slate-700">{t.merchant}</div>
-                <div className="w-24 text-right font-semibold">¥{t.amount.toLocaleString()}</div>
-                <div className="w-16"><Badge text={t.brand} color="blue" /></div>
-                <div className="w-20"><Badge text={t.status} color={t.sColor} /></div>
-                <div className="w-36 text-slate-400 font-mono">{t.date}</div>
-                <div className="w-36 flex gap-1" onClick={e => e.stopPropagation()}>
+                <td className="px-4 py-2 whitespace-nowrap w-40 font-mono text-slate-500">{t.id}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-slate-700">{t.merchant}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 text-right font-semibold">¥{t.amount.toLocaleString()}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={t.brand} color="blue" /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={t.status} color={t.sColor} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-36 text-slate-400 font-mono">{t.date}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-36" onClick={e => e.stopPropagation()}><div className="flex gap-1">
                   {t.status === "成功" && (
                     <>
                       <button onClick={() => setRefundDialog({ ...t, type: "full" })} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs border border-purple-200">返金</button>
@@ -4007,9 +4034,10 @@ const MasterTransactionMonitor = () => {
                   )}
                   {t.status === "返金済" && <span className="text-xs text-purple-500">返金済 ¥{t.refundAmount?.toLocaleString()}</span>}
                   {t.status === "キャンセル" && <span className="text-xs text-slate-400">キャンセル済</span>}
-                </div>
-              </div>
+                </div></td>
+              </tr>
             ))}
+            </TableHeader>
           </div>
 
           {/* Role Permission Notice */}
@@ -4152,23 +4180,24 @@ const MasterFraudSettings = () => {
             <span className="text-blue-700">ルール変更は <strong>admin → super_admin の2段階承認</strong>が必要です。super_adminは直接変更可能。</span>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "ID", w: "w-20" }, { label: "ルール名", w: "w-36" }, { label: "種別", w: "w-24" }, { label: "条件", w: "flex-1" }, { label: "アクション", w: "w-36" }, { label: "優先度", w: "w-14" }, { label: "30日検知", w: "w-20" }, { label: "有効", w: "w-14" }, { label: "操作", w: "w-28" }]} />
+            <TableHeader cols={[{ label: "ID", w: "w-20" }, { label: "ルール名", w: "w-36" }, { label: "種別", w: "w-24" }, { label: "条件", w: "flex-1" }, { label: "アクション", w: "w-36" }, { label: "優先度", w: "w-14" }, { label: "30日検知", w: "w-20" }, { label: "有効", w: "w-14" }, { label: "操作", w: "w-28" }]}>
             {fraudRules.map((r, i) => (
-              <div key={r.id} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${!r.enabled ? "opacity-50" : ""} ${i % 2 ? "bg-slate-50" : ""}`}>
-                <div className="w-20 font-mono text-slate-400">{r.id}</div>
-                <div className="w-36 font-semibold text-slate-700">{r.name}</div>
-                <div className="w-24"><Badge text={r.type} color={r.type === "AI判定" ? "purple" : r.type === "速度チェック" ? "blue" : "gray"} /></div>
-                <div className="flex-1 text-slate-500 font-mono">{r.condition}</div>
-                <div className="w-36"><Badge text={r.action} color={r.action.includes("ブロック") ? "red" : "yellow"} /></div>
-                <div className="w-14 text-center text-slate-600">{r.priority}</div>
-                <div className="w-20 text-center text-slate-600">{r.hits30d}件</div>
-                <div className="w-14 text-center">{r.enabled ? <span className="text-emerald-500">●</span> : <span className="text-slate-300">○</span>}</div>
-                <div className="w-28 flex gap-1">
+              <tr key={r.id} className={`border-b ${!r.enabled ? "opacity-50" : ""} ${i % 2 ? "bg-slate-50" : ""}`}>
+                <td className="px-4 py-2 whitespace-nowrap w-20 font-mono text-slate-400">{r.id}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-36 font-semibold text-slate-700">{r.name}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={r.type} color={r.type === "AI判定" ? "purple" : r.type === "速度チェック" ? "blue" : "gray"} /></td>
+                <td className="px-4 py-2 whitespace-nowrap text-slate-500 font-mono">{r.condition}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-36"><Badge text={r.action} color={r.action.includes("ブロック") ? "red" : "yellow"} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-14 text-center text-slate-600">{r.priority}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20 text-center text-slate-600">{r.hits30d}件</td>
+                <td className="px-4 py-2 whitespace-nowrap w-14 text-center">{r.enabled ? <span className="text-emerald-500">●</span> : <span className="text-slate-300">○</span>}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1">
                   <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">編集</button>
                   <button className="px-1.5 py-1 bg-amber-100 text-amber-700 rounded text-xs">🧪</button>
-                </div>
-              </div>
+                </div></td>
+              </tr>
             ))}
+            </TableHeader>
           </div>
           {/* Simulation Panel */}
           <div className="bg-amber-50 rounded-lg border border-amber-300 p-3">
@@ -4337,24 +4366,25 @@ const MasterFraudSettings = () => {
       {/* Tab: 検知ログ */}
       {ruleTab === "log" && (
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-          <TableHeader cols={[{ label: "日時", w: "w-32" }, { label: "取引ID", w: "w-36" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "検知ルール", w: "w-36" }, { label: "AIスコア", w: "w-20" }, { label: "アクション", w: "w-28" }, { label: "結果", w: "w-20" }]} />
+          <TableHeader cols={[{ label: "日時", w: "w-32" }, { label: "取引ID", w: "w-36" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "検知ルール", w: "w-36" }, { label: "AIスコア", w: "w-20" }, { label: "アクション", w: "w-28" }, { label: "結果", w: "w-20" }]}>
           {[
             { time: "02/11 14:50", txn: "TXN-14516", merchant: "トラベルプラス", amount: "¥158,000", rule: "AIスコア閾値", score: "0.92", action: "自動ブロック", result: "正検知", rColor: "green" },
             { time: "02/11 12:15", txn: "TXN-12103", merchant: "ABCマート", amount: "¥520,000", rule: "高額取引チェック", score: "0.45", action: "例外キュー", result: "正常取引", rColor: "yellow" },
             { time: "02/11 09:30", txn: "TXN-09288", merchant: "XYZショップ", amount: "¥8,500", rule: "短時間連続取引", score: "0.72", action: "例外キュー", result: "正検知", rColor: "green" },
             { time: "02/10 22:10", txn: "TXN-22041", merchant: "スタイルプラス", amount: "¥250,000", rule: "深夜帯高額", score: "0.55", action: "例外キュー", result: "正常取引", rColor: "yellow" },
           ].map((l, i) => (
-            <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
-              <div className="w-32 text-slate-400 font-mono">{l.time}</div>
-              <div className="w-36 font-mono text-slate-500">{l.txn}</div>
-              <div className="flex-1 text-slate-700">{l.merchant}</div>
-              <div className="w-24 text-right font-semibold">{l.amount}</div>
-              <div className="w-36"><Badge text={l.rule} color="purple" /></div>
-              <div className="w-20 text-center font-mono">{l.score}</div>
-              <div className="w-28"><Badge text={l.action} color={l.action === "自動ブロック" ? "red" : "yellow"} /></div>
-              <div className="w-20"><Badge text={l.result} color={l.rColor} /></div>
-            </div>
+            <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+              <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400 font-mono">{l.time}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-36 font-mono text-slate-500">{l.txn}</td>
+              <td className="px-4 py-2 whitespace-nowrap text-slate-700">{l.merchant}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-24 text-right font-semibold">{l.amount}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-36"><Badge text={l.rule} color="purple" /></td>
+              <td className="px-4 py-2 whitespace-nowrap w-20 text-center font-mono">{l.score}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-28"><Badge text={l.action} color={l.action === "自動ブロック" ? "red" : "yellow"} /></td>
+              <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={l.result} color={l.rColor} /></td>
+            </tr>
           ))}
+          </TableHeader>
         </div>
       )}
 
@@ -4614,7 +4644,7 @@ const MasterReport = () => {
         <p className="text-xs font-bold text-slate-700">📂 生成済みレポート（直近）</p>
         <button className="text-xs text-blue-600">すべて表示 →</button>
       </div>
-      <TableHeader cols={[{ label: "生成日", w: "w-28" }, { label: "レポート名", w: "flex-1" }, { label: "期間", w: "w-32" }, { label: "形式", w: "w-16" }, { label: "AI要約", w: "w-16" }, { label: "生成者", w: "w-28" }, { label: "操作", w: "w-24" }]} />
+      <TableHeader cols={[{ label: "生成日", w: "w-28" }, { label: "レポート名", w: "flex-1" }, { label: "期間", w: "w-32" }, { label: "形式", w: "w-16" }, { label: "AI要約", w: "w-16" }, { label: "生成者", w: "w-28" }, { label: "操作", w: "w-24" }]}>
       {[
         { date: "02/11 09:00", name: "日次精算レポート", period: "2026-02-10", format: "PDF", ai: true, by: "自動（定期）" },
         { date: "02/10 09:00", name: "日次精算レポート", period: "2026-02-09", format: "PDF", ai: true, by: "自動（定期）" },
@@ -4622,19 +4652,20 @@ const MasterReport = () => {
         { date: "02/03 09:00", name: "接続先別パフォーマンス", period: "2026-W05", format: "PDF", ai: true, by: "自動（定期）" },
         { date: "02/01 09:00", name: "月次サマリーレポート", period: "2026年1月", format: "PDF", ai: true, by: "自動（定期）" },
       ].map((r, i) => (
-        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
-          <div className="w-28 text-slate-400">{r.date}</div>
-          <div className="flex-1 font-semibold text-slate-700">{r.name}</div>
-          <div className="w-32 text-slate-500">{r.period}</div>
-          <div className="w-16"><Badge text={r.format} color="blue" /></div>
-          <div className="w-16 text-center">{r.ai ? "🤖" : "—"}</div>
-          <div className="w-28 text-slate-400">{r.by}</div>
-          <div className="w-24 flex gap-1">
+        <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+          <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400">{r.date}</td>
+          <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{r.name}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{r.period}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.format} color="blue" /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r.ai ? "🤖" : "—"}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400">{r.by}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24"><div className="flex gap-1">
             <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">⬇ DL</button>
             <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">👁</button>
-          </div>
-        </div>
+          </div></td>
+        </tr>
       ))}
+      </TableHeader>
     </div>
 
     {/* Scheduled Reports */}
@@ -4825,23 +4856,24 @@ const MerchantSalesReport = () => (
           <select className="text-xs border rounded px-2 py-1"><option>全ステータス</option><option>成功</option><option>失敗</option><option>返金</option></select>
         </div>
       </div>
-      <TableHeader cols={[{ label: "取引ID", w: "w-36" }, { label: "日時", w: "w-32" }, { label: "カード", w: "w-28" }, { label: "ブランド", w: "w-16" }, { label: "金額", w: "w-24" }, { label: "状態", w: "w-16" }, { label: "操作", w: "w-16" }]} />
+      <TableHeader cols={[{ label: "取引ID", w: "w-36" }, { label: "日時", w: "w-32" }, { label: "カード", w: "w-28" }, { label: "ブランド", w: "w-16" }, { label: "金額", w: "w-24" }, { label: "状態", w: "w-16" }, { label: "操作", w: "w-16" }]}>
       {[
         { id: "TXN-14523", time: "02/11 14:52", card: "**** 1234", brand: "VISA", amount: "¥12,800", status: "成功", sColor: "green" },
         { id: "TXN-14521", time: "02/11 14:51", card: "**** 5678", brand: "JCB", amount: "¥89,000", status: "成功", sColor: "green" },
         { id: "TXN-14518", time: "02/11 14:50", card: "—", brand: "QR", amount: "¥1,500", status: "成功", sColor: "green" },
         { id: "TXN-13801", time: "02/11 11:20", card: "**** 9012", brand: "MC", amount: "¥3,200", status: "返金済", sColor: "yellow" },
       ].map((t, i) => (
-        <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
-          <div className="w-36 font-mono text-slate-500">{t.id}</div>
-          <div className="w-32 text-slate-400">{t.time}</div>
-          <div className="w-28 font-mono text-slate-500">{t.card}</div>
-          <div className="w-16"><Badge text={t.brand} color="blue" /></div>
-          <div className="w-24 text-right font-semibold text-slate-800">{t.amount}</div>
-          <div className="w-16"><Badge text={t.status} color={t.sColor} /></div>
-          <div className="w-16"><button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">詳細</button></div>
-        </div>
+        <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+          <td className="px-4 py-2 whitespace-nowrap w-36 font-mono text-slate-500">{t.id}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{t.time}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-28 font-mono text-slate-500">{t.card}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={t.brand} color="blue" /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-24 text-right font-semibold text-slate-800">{t.amount}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={t.status} color={t.sColor} /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-16"><button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">詳細</button></td>
+        </tr>
       ))}
+      </TableHeader>
     </div>
   </div>
 );
@@ -5007,21 +5039,22 @@ const MerchantAccountSettings = () => {
             <button onClick={() => setShowInviteS08(true)} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ メンバー招待</button>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "名前", w: "flex-1" }, { label: "メール", w: "w-48" }, { label: "権限", w: "w-20" }, { label: "MFA", w: "w-14" }, { label: "最終ログイン", w: "w-28" }, { label: "操作", w: "w-20" }]} />
+            <TableHeader cols={[{ label: "名前", w: "flex-1" }, { label: "メール", w: "w-48" }, { label: "権限", w: "w-20" }, { label: "MFA", w: "w-14" }, { label: "最終ログイン", w: "w-28" }, { label: "操作", w: "w-20" }]}>
             {[
               { name: "山田 太郎", email: "yamada@abcmart-ec.jp", role: "管理者", mfa: true, last: "02/11 09:15" },
               { name: "鈴木 花子", email: "suzuki@abcmart-ec.jp", role: "一般", mfa: true, last: "02/10 14:20" },
               { name: "佐藤 次郎", email: "sato@abcmart-ec.jp", role: "一般", mfa: false, last: "02/08 11:30" },
             ].map((m, i) => (
-              <div key={i} className={`flex items-center px-4 py-2 text-xs border-b whitespace-nowrap ${i % 2 ? "bg-slate-50" : ""}`}>
-                <div className="flex-1 font-semibold text-slate-700">{m.name}</div>
-                <div className="w-48 text-slate-500">{m.email}</div>
-                <div className="w-20"><Badge text={m.role} color={m.role === "管理者" ? "blue" : "gray"} /></div>
-                <div className="w-14 text-center">{m.mfa ? <span className="text-emerald-500">●</span> : <span className="text-rose-400">○</span>}</div>
-                <div className="w-28 text-slate-400">{m.last}</div>
-                <div className="w-20"><button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">編集</button></div>
-              </div>
+              <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+                <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{m.name}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-48 text-slate-500">{m.email}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={m.role} color={m.role === "管理者" ? "blue" : "gray"} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-14 text-center">{m.mfa ? <span className="text-emerald-500">●</span> : <span className="text-rose-400">○</span>}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400">{m.last}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20"><button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">編集</button></td>
+              </tr>
             ))}
+            </TableHeader>
           </div>
         </div>
       )}
@@ -5169,26 +5202,27 @@ const MerchantPaymentLinks = () => {
             <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="商品名 / リンクIDで検索" />
             <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>有効</option><option>無効</option><option>期限切れ</option></select>
           </div>
-          <TableHeader cols={[{ label: "リンクID", w: "w-24" }, { label: "商品名", w: "flex-1" }, { label: "タイプ", w: "w-16" }, { label: "金額", w: "w-20" }, { label: "利用回数", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-24" }]} />
+          <TableHeader cols={[{ label: "リンクID", w: "w-24" }, { label: "商品名", w: "flex-1" }, { label: "タイプ", w: "w-16" }, { label: "金額", w: "w-20" }, { label: "利用回数", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-24" }]}>
           {[{ id: "LNK-001", name: "プレミアムプラン", type: "固定", amt: "¥9,800", uses: "12/∞", st: "有効", stc: "green" },
             { id: "LNK-002", name: "寄付金", type: "入力", amt: "—", uses: "45/100", st: "有効", stc: "green" },
             { id: "LNK-003", name: "コース選択", type: "選択", amt: "選択式", uses: "3/10", st: "有効", stc: "green" },
             { id: "LNK-004", name: "キャンペーン", type: "固定", amt: "¥1,980", uses: "100/100", st: "上限到達", stc: "yellow" }
           ].map((r, i) => (
-            <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
-              <div className="w-24 text-blue-600 font-mono">{r.id}</div>
-              <div className="flex-1">{r.name}</div>
-              <div className="w-16"><Badge text={r.type} color="blue" /></div>
-              <div className="w-20">{r.amt}</div>
-              <div className="w-16">{r.uses}</div>
-              <div className="w-16"><Badge text={r.st} color={r.stc} /></div>
-              <div className="w-24 flex gap-1">
+            <tr key={i} className="border-b hover:bg-slate-50">
+              <td className="px-4 py-2 whitespace-nowrap w-24 text-blue-600 font-mono">{r.id}</td>
+              <td className="px-4 py-2 whitespace-nowrap">{r.name}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.type} color="blue" /></td>
+              <td className="px-4 py-2 whitespace-nowrap w-20">{r.amt}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-16">{r.uses}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st} color={r.stc} /></td>
+              <td className="px-4 py-2 whitespace-nowrap w-24"><div className="flex gap-1">
                 <button className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border">📋</button>
                 <button className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border">QR</button>
                 <button className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border">⏸</button>
-              </div>
-            </div>
+              </div></td>
+            </tr>
           ))}
+          </TableHeader>
         </div>
       )}
       {tab === "stats" && (
@@ -5201,12 +5235,13 @@ const MerchantPaymentLinks = () => {
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 overflow-x-auto">
             <p className="text-xs font-bold mb-2">リンク別実績</p>
-            <TableHeader cols={[{ label: "商品名", w: "flex-1" }, { label: "利用回数", w: "w-20" }, { label: "売上額", w: "w-24" }, { label: "成功率", w: "w-16" }, { label: "最終利用日", w: "w-24" }]} />
+            <TableHeader cols={[{ label: "商品名", w: "flex-1" }, { label: "利用回数", w: "w-20" }, { label: "売上額", w: "w-24" }, { label: "成功率", w: "w-16" }, { label: "最終利用日", w: "w-24" }]}>
             {[["プレミアムプラン", "842", "¥8,251,600", "98.2%", "2026-02-13"], ["寄付金", "245", "¥1,230,000", "96.7%", "2026-02-12"], ["コース選択", "160", "¥960,000", "97.5%", "2026-02-11"]].map((r, i) => (
-              <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap">
-                <div className="flex-1">{r[0]}</div><div className="w-20">{r[1]}</div><div className="w-24 font-bold">{r[2]}</div><div className="w-16 text-emerald-600">{r[3]}</div><div className="w-24 text-slate-400">{r[4]}</div>
-              </div>
+              <tr key={i} className="border-b">
+                <td className="px-4 py-2 whitespace-nowrap">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-20">{r[1]}</td><td className="px-4 py-2 whitespace-nowrap w-24 font-bold">{r[2]}</td><td className="px-4 py-2 whitespace-nowrap w-16 text-emerald-600">{r[3]}</td><td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{r[4]}</td>
+              </tr>
             ))}
+            </TableHeader>
           </div>
         </div>
       )}
@@ -5282,22 +5317,23 @@ const MerchantSubscriptions = () => {
         <div className="space-y-3">
           <button onClick={() => setShowCreatePlan(!showCreatePlan)} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-bold">+ プラン作成</button>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "プラン名", w: "flex-1" }, { label: "タイプ", w: "w-16" }, { label: "金額", w: "w-24" }, { label: "サイクル", w: "w-20" }, { label: "ユーザー数", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]} />
+            <TableHeader cols={[{ label: "プラン名", w: "flex-1" }, { label: "タイプ", w: "w-16" }, { label: "金額", w: "w-24" }, { label: "サイクル", w: "w-20" }, { label: "ユーザー数", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]}>
             {[{ name: "月額スタンダード", type: "継続", amt: "¥2,980/月", cycle: "毎月1日", users: "342", st: "active" },
               { name: "年間プレミアム", type: "継続", amt: "¥29,800/年", cycle: "365日", users: "89", st: "active" },
               { name: "3回分割払い", type: "分割", amt: "¥15,000(3回)", cycle: "毎月15日", users: "56", st: "active" },
               { name: "旧プラン", type: "継続", amt: "¥1,980/月", cycle: "毎月1日", users: "12", st: "archived" }
             ].map((r, i) => (
-              <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
-                <div className="flex-1 font-bold">{r.name}</div>
-                <div className="w-16"><Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} /></div>
-                <div className="w-24">{r.amt}</div>
-                <div className="w-20 text-slate-500">{r.cycle}</div>
-                <div className="w-16 text-center">{r.users}</div>
-                <div className="w-16"><Badge text={r.st === "active" ? "有効" : "アーカイブ"} color={r.st === "active" ? "green" : "gray"} /></div>
-                <div className="w-16"><button className="text-blue-600 text-xs">編集</button></div>
-              </div>
+              <tr key={i} className="border-b hover:bg-slate-50">
+                <td className="px-4 py-2 whitespace-nowrap font-bold">{r.name}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-24">{r.amt}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20 text-slate-500">{r.cycle}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r.users}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st === "active" ? "有効" : "アーカイブ"} color={r.st === "active" ? "green" : "gray"} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-16"><button className="text-blue-600 text-xs">編集</button></td>
+              </tr>
             ))}
+            </TableHeader>
           </div>
         </div>
       )}
@@ -5308,23 +5344,24 @@ const MerchantSubscriptions = () => {
             <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>🟢 課金中</option><option>🔴 自動停止</option><option>🔵 完了</option></select>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "ユーザーID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "プラン", w: "w-28" }, { label: "カード", w: "w-16" }, { label: "次回決済", w: "w-20" }, { label: "失敗", w: "w-10" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-28" }]} />
+            <TableHeader cols={[{ label: "ユーザーID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "プラン", w: "w-28" }, { label: "カード", w: "w-16" }, { label: "次回決済", w: "w-20" }, { label: "失敗", w: "w-10" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-28" }]}>
             {[{ uid: "USR-001", email: "user1@example.com", plan: "月額スタンダード", card: "*4242", next: "03/01", fails: "0", st: "課金中", stc: "green" },
               { uid: "USR-002", email: "user2@example.com", plan: "3回分割払い", card: "*1234", next: "03/15", fails: "0", st: "課金中", stc: "green" },
               { uid: "USR-003", email: "user3@example.com", plan: "月額スタンダード", card: "*5678", next: "02/23", fails: "2", st: "リトライ中", stc: "yellow" },
               { uid: "USR-004", email: "user4@example.com", plan: "月額スタンダード", card: "*9999", next: "—", fails: "3", st: "自動停止", stc: "red" }
             ].map((r, i) => (
-              <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
-                <div className="w-24 font-mono text-blue-600">{r.uid}</div>
-                <div className="flex-1">{r.email}</div>
-                <div className="w-28">{r.plan}</div>
-                <div className="w-16 font-mono">{r.card}</div>
-                <div className="w-20">{r.next}</div>
-                <div className="w-10 text-center">{r.fails !== "0" && <span className="text-rose-600 font-bold">{r.fails}</span>}{r.fails === "0" && "—"}</div>
-                <div className="w-16"><Badge text={r.st} color={r.stc} /></div>
-                <div className="w-28 flex gap-1">{r.st === "課金中" && <><button className="px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-xs border border-amber-200">一時停止</button><button className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200">カード変更URL</button></>}{r.st === "一時停止" && <button className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded text-xs border border-emerald-200">再開</button>}{r.st === "リトライ中" && <button className="px-1.5 py-0.5 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200">永久停止</button>}</div>
-              </div>
+              <tr key={i} className="border-b hover:bg-slate-50">
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{r.uid}</td>
+                <td className="px-4 py-2 whitespace-nowrap">{r.email}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-28">{r.plan}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16 font-mono">{r.card}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20">{r.next}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-10 text-center">{r.fails !== "0" && <span className="text-rose-600 font-bold">{r.fails}</span>}{r.fails === "0" && "—"}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st} color={r.stc} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1">{r.st === "課金中" && <><button className="px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-xs border border-amber-200">一時停止</button><button className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200">カード変更URL</button></>}{r.st === "一時停止" && <button className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded text-xs border border-emerald-200">再開</button>}{r.st === "リトライ中" && <button className="px-1.5 py-0.5 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200">永久停止</button>}</div></td>
+              </tr>
             ))}
+            </TableHeader>
           </div>
           <div className="bg-amber-50 border border-amber-200 rounded p-2 text-xs text-amber-700">⚠️ リトライロジック: 失敗→10日後再トライ→3回連続失敗で自動停止（再開不可）</div>
         </div>
@@ -5337,13 +5374,14 @@ const MerchantSubscriptions = () => {
             <KPICard label="リトライ中" value="3件" color="yellow" />
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "実行日", w: "w-24" }, { label: "ユーザーID", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "金額", w: "w-20" }, { label: "結果", w: "w-14" }, { label: "リトライ", w: "w-14" }, { label: "エラー", w: "w-20" }]} />
+            <TableHeader cols={[{ label: "実行日", w: "w-24" }, { label: "ユーザーID", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "金額", w: "w-20" }, { label: "結果", w: "w-14" }, { label: "リトライ", w: "w-14" }, { label: "エラー", w: "w-20" }]}>
             {[["02/13 02:00", "USR-001", "月額スタンダード", "¥2,980", "成功", "—", "—"], ["02/13 02:00", "USR-003", "月額スタンダード", "¥2,980", "失敗", "2回目", "E-Card01"], ["02/13 02:00", "USR-004", "月額スタンダード", "¥2,980", "失敗", "3回目", "E-Card01"]].map((r, i) => (
-              <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap">
-                <div className="w-24 text-slate-400">{r[0]}</div><div className="w-24 font-mono text-blue-600">{r[1]}</div><div className="flex-1">{r[2]}</div><div className="w-20">{r[3]}</div>
-                <div className="w-14"><Badge text={r[4]} color={r[4] === "成功" ? "green" : "red"} /></div><div className="w-14 text-slate-500">{r[5]}</div><div className="w-20 text-rose-500 font-mono">{r[6]}</div>
-              </div>
+              <tr key={i} className="border-b">
+                <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{r[1]}</td><td className="px-4 py-2 whitespace-nowrap">{r[2]}</td><td className="px-4 py-2 whitespace-nowrap w-20">{r[3]}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={r[4]} color={r[4] === "成功" ? "green" : "red"} /></td><td className="px-4 py-2 whitespace-nowrap w-14 text-slate-500">{r[5]}</td><td className="px-4 py-2 whitespace-nowrap w-20 text-rose-500 font-mono">{r[6]}</td>
+              </tr>
             ))}
+            </TableHeader>
           </div>
         </div>
       )}
@@ -5412,21 +5450,23 @@ const MasterRecurring = () => {
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 overflow-x-auto">
               <p className="text-xs font-bold mb-2">本日の実行予定</p>
-              <TableHeader cols={[{ label: "時刻", w: "w-14" }, { label: "加盟店", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "対象数", w: "w-14" }, { label: "状態", w: "w-14" }]} />
+              <TableHeader cols={[{ label: "時刻", w: "w-14" }, { label: "加盟店", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "対象数", w: "w-14" }, { label: "状態", w: "w-14" }]}>
               {[["02:00", "ABC商事", "月額スタンダード", "342", "完了"], ["02:00", "XYZ物産", "年間プレミアム", "89", "完了"], ["14:00", "DEF Inc", "月額ライト", "56", "待機中"]].map((r, i) => (
-                <div key={i} className="flex px-4 py-1.5 text-xs border-b whitespace-nowrap">
-                  <div className="w-14 text-slate-400">{r[0]}</div><div className="w-24">{r[1]}</div><div className="flex-1">{r[2]}</div><div className="w-14 text-center">{r[3]}</div><div className="w-14"><Badge text={r[4]} color={r[4] === "完了" ? "green" : "yellow"} /></div>
-                </div>
+                <tr key={i} className="border-b">
+                  <td className="px-4 py-1.5 whitespace-nowrap w-14 text-slate-400">{r[0]}</td><td className="px-4 py-1.5 whitespace-nowrap w-24">{r[1]}</td><td className="px-4 py-1.5 whitespace-nowrap">{r[2]}</td><td className="px-4 py-1.5 whitespace-nowrap w-14 text-center">{r[3]}</td><td className="px-4 py-1.5 whitespace-nowrap w-14"><Badge text={r[4]} color={r[4] === "完了" ? "green" : "yellow"} /></td>
+                </tr>
               ))}
+              </TableHeader>
             </div>
             <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 overflow-x-auto">
               <p className="text-xs font-bold mb-2">直近バッチ実行結果</p>
-              <TableHeader cols={[{ label: "実行日時", w: "w-28" }, { label: "処理", w: "w-12" }, { label: "成功", w: "w-12" }, { label: "失敗", w: "w-12" }, { label: "状態", w: "w-14" }]} />
+              <TableHeader cols={[{ label: "実行日時", w: "w-28" }, { label: "処理", w: "w-12" }, { label: "成功", w: "w-12" }, { label: "失敗", w: "w-12" }, { label: "状態", w: "w-14" }]}>
               {[["2026-02-13 02:00", "423", "411", "12", "完了"], ["2026-02-12 02:00", "398", "391", "7", "完了"], ["2026-02-11 02:00", "412", "406", "6", "完了"]].map((r, i) => (
-                <div key={i} className="flex px-4 py-1.5 text-xs border-b whitespace-nowrap">
-                  <div className="w-28 text-slate-400">{r[0]}</div><div className="w-12">{r[1]}</div><div className="w-12 text-emerald-600">{r[2]}</div><div className="w-12 text-rose-600">{r[3]}</div><div className="w-14"><Badge text={r[4]} color="green" /></div>
-                </div>
+                <tr key={i} className="border-b">
+                  <td className="px-4 py-1.5 whitespace-nowrap w-28 text-slate-400">{r[0]}</td><td className="px-4 py-1.5 whitespace-nowrap w-12">{r[1]}</td><td className="px-4 py-1.5 whitespace-nowrap w-12 text-emerald-600">{r[2]}</td><td className="px-4 py-1.5 whitespace-nowrap w-12 text-rose-600">{r[3]}</td><td className="px-4 py-1.5 whitespace-nowrap w-14"><Badge text={r[4]} color="green" /></td>
+                </tr>
               ))}
+              </TableHeader>
             </div>
           </div>
         </div>
@@ -5439,15 +5479,16 @@ const MasterRecurring = () => {
             <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>有効</option><option>アーカイブ</option></select>
             <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs">検索</button>
           </div>
-          <TableHeader cols={[{ label: "プランID", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "サイト", w: "w-20" }, { label: "プラン名", w: "flex-1" }, { label: "タイプ", w: "w-14" }, { label: "金額", w: "w-24" }, { label: "ユーザー", w: "w-16" }, { label: "状態", w: "w-14" }]} />
+          <TableHeader cols={[{ label: "プランID", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "サイト", w: "w-20" }, { label: "プラン名", w: "flex-1" }, { label: "タイプ", w: "w-14" }, { label: "金額", w: "w-24" }, { label: "ユーザー", w: "w-16" }, { label: "状態", w: "w-14" }]}>
           {[{ id: "PLN-001", m: "ABC商事", s: "ECサイトA", name: "月額スタンダード", type: "継続", amt: "¥0→¥2,980/月", users: "342/400", st: "有効" },
             { id: "PLN-002", m: "XYZ物産", s: "ストア", name: "年間プレミアム", type: "継続", amt: "¥29,800/年", users: "89/120", st: "有効" },
             { id: "PLN-003", m: "ABC商事", s: "ECサイトA", name: "3回分割払い", type: "分割", amt: "¥15,000(3回)", users: "56/—", st: "有効" }
           ].map((r, i) => (
-            <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
-              <div className="w-24 font-mono text-blue-600">{r.id}</div><div className="w-24">{r.m}</div><div className="w-20 text-slate-500">{r.s}</div><div className="flex-1 font-bold">{r.name}</div><div className="w-14"><Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} /></div><div className="w-24 text-xs">{r.amt}</div><div className="w-16">{r.users}</div><div className="w-14"><Badge text={r.st} color="green" /></div>
-            </div>
+            <tr key={i} className="border-b hover:bg-slate-50">
+              <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{r.id}</td><td className="px-4 py-2 whitespace-nowrap w-24">{r.m}</td><td className="px-4 py-2 whitespace-nowrap w-20 text-slate-500">{r.s}</td><td className="px-4 py-2 whitespace-nowrap font-bold">{r.name}</td><td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} /></td><td className="px-4 py-2 whitespace-nowrap w-24 text-xs">{r.amt}</td><td className="px-4 py-2 whitespace-nowrap w-16">{r.users}</td><td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={r.st} color="green" /></td>
+            </tr>
           ))}
+          </TableHeader>
         </div>
       )}
       {tab === "users" && (
@@ -5457,30 +5498,32 @@ const MasterRecurring = () => {
             <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>課金中</option><option>一時停止</option><option>自動停止</option></select>
             <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs">検索</button>
           </div>
-          <TableHeader cols={[{ label: "ユーザーID", w: "w-20" }, { label: "メール", w: "w-32" }, { label: "加盟店", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "状態", w: "w-16" }, { label: "次回決済", w: "w-20" }, { label: "失敗", w: "w-10" }, { label: "操作", w: "w-20" }]} />
+          <TableHeader cols={[{ label: "ユーザーID", w: "w-20" }, { label: "メール", w: "w-32" }, { label: "加盟店", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "状態", w: "w-16" }, { label: "次回決済", w: "w-20" }, { label: "失敗", w: "w-10" }, { label: "操作", w: "w-20" }]}>
           {[{ id: "U-5521", email: "t***@gmail.com", m: "ABC商事", plan: "月額スタンダード", st: "課金中", stc: "green", next: "2026-03-01", fail: "0" },
             { id: "U-3302", email: "s***@yahoo.co.jp", m: "XYZ物産", plan: "年間プレミアム", st: "リトライ中", stc: "yellow", next: "2026-02-23", fail: "1" },
             { id: "U-1108", email: "k***@icloud.com", m: "ABC商事", plan: "月額スタンダード", st: "自動停止", stc: "red", next: "—", fail: "3" }
           ].map((r, i) => (
-            <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
-              <div className="w-20 font-mono">{r.id}</div><div className="w-32 text-slate-500">{r.email}</div><div className="w-24">{r.m}</div><div className="flex-1">{r.plan}</div><div className="w-16"><Badge text={r.st} color={r.stc} /></div><div className="w-20 text-slate-400">{r.next}</div><div className="w-10 text-center">{r.fail !== "0" ? <span className="text-rose-600 font-bold">{r.fail}</span> : "0"}</div>
-              <div className="w-20 flex gap-1"><button className="text-blue-600 text-xs">詳細</button><button className="text-rose-500 text-xs">強制停止</button></div>
-            </div>
+            <tr key={i} className="border-b hover:bg-slate-50">
+              <td className="px-4 py-2 whitespace-nowrap w-20 font-mono">{r.id}</td><td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{r.email}</td><td className="px-4 py-2 whitespace-nowrap w-24">{r.m}</td><td className="px-4 py-2 whitespace-nowrap">{r.plan}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st} color={r.stc} /></td><td className="px-4 py-2 whitespace-nowrap w-20 text-slate-400">{r.next}</td><td className="px-4 py-2 whitespace-nowrap w-10 text-center">{r.fail !== "0" ? <span className="text-rose-600 font-bold">{r.fail}</span> : "0"}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-20"><div className="flex gap-1"><button className="text-blue-600 text-xs">詳細</button><button className="text-rose-500 text-xs">強制停止</button></div></td>
+            </tr>
           ))}
+          </TableHeader>
         </div>
       )}
       {tab === "logs" && (
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-          <TableHeader cols={[{ label: "実行日時", w: "w-32" }, { label: "バッチID", w: "w-20" }, { label: "処理件数", w: "w-16" }, { label: "成功", w: "w-14" }, { label: "失敗", w: "w-14" }, { label: "リトライ", w: "w-14" }, { label: "処理時間", w: "w-14" }, { label: "状態", w: "w-16" }, { label: "", w: "w-10" }]} />
+          <TableHeader cols={[{ label: "実行日時", w: "w-32" }, { label: "バッチID", w: "w-20" }, { label: "処理件数", w: "w-16" }, { label: "成功", w: "w-14" }, { label: "失敗", w: "w-14" }, { label: "リトライ", w: "w-14" }, { label: "処理時間", w: "w-14" }, { label: "状態", w: "w-16" }, { label: "", w: "w-10" }]}>
           {[["2026-02-13 02:00:05", "B-4521", "423", "411", "12", "8", "4.2s", "完了"],
             ["2026-02-12 02:00:03", "B-4520", "398", "391", "7", "5", "3.8s", "完了"],
             ["2026-02-11 02:00:04", "B-4519", "412", "406", "6", "4", "3.9s", "完了"],
             ["2026-02-10 02:00:02", "B-4518", "389", "385", "4", "3", "3.5s", "完了"]
           ].map((r, i) => (
-            <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
-              <div className="w-32 text-slate-400">{r[0]}</div><div className="w-20 font-mono">{r[1]}</div><div className="w-16">{r[2]}</div><div className="w-14 text-emerald-600">{r[3]}</div><div className="w-14 text-rose-600">{r[4]}</div><div className="w-14 text-amber-600">{r[5]}</div><div className="w-14">{r[6]}</div><div className="w-16"><Badge text={r[7]} color="green" /></div><div className="w-10"><button className="text-blue-600 text-xs">詳細</button></div>
-            </div>
+            <tr key={i} className="border-b hover:bg-slate-50">
+              <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-20 font-mono">{r[1]}</td><td className="px-4 py-2 whitespace-nowrap w-16">{r[2]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-emerald-600">{r[3]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-rose-600">{r[4]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-amber-600">{r[5]}</td><td className="px-4 py-2 whitespace-nowrap w-14">{r[6]}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r[7]} color="green" /></td><td className="px-4 py-2 whitespace-nowrap w-10"><button className="text-blue-600 text-xs">詳細</button></td>
+            </tr>
           ))}
+          </TableHeader>
         </div>
       )}
     </div>
@@ -5503,21 +5546,22 @@ const MasterAgents = () => {
       {tab === "list" && (
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
           <div className="p-3 border-b"><input className="border rounded px-2 py-1 text-xs w-full" placeholder="代理店名 / コードで検索" /></div>
-          <TableHeader cols={[{ label: "コード", w: "w-20" }, { label: "代理店名", w: "flex-1" }, { label: "代表者", w: "w-20" }, { label: "紹介加盟店数", w: "w-20" }, { label: "紹介料率", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]} />
+          <TableHeader cols={[{ label: "コード", w: "w-20" }, { label: "代理店名", w: "flex-1" }, { label: "代表者", w: "w-20" }, { label: "紹介加盟店数", w: "w-20" }, { label: "紹介料率", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]}>
           {[{ code: "AG-001", name: "デジタルパートナーズ", rep: "田中太郎", merchants: "23", rate: "5.0%", st: "active" },
             { code: "AG-002", name: "ウェブコンサル合同会社", rep: "佐藤花子", merchants: "12", rate: "4.5%", st: "active" },
             { code: "AG-003", name: "ITソリューションズ", rep: "鈴木一郎", merchants: "8", rate: "5.0%", st: "active" }
           ].map((r, i) => (
-            <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
-              <div className="w-20 font-mono">{r.code}</div>
-              <div className="flex-1 font-bold">{r.name}</div>
-              <div className="w-20">{r.rep}</div>
-              <div className="w-20 text-center">{r.merchants}社</div>
-              <div className="w-16">{r.rate}</div>
-              <div className="w-16"><Badge text="有効" color="green" /></div>
-              <div className="w-16"><button className="text-blue-600 text-xs">詳細</button></div>
-            </div>
+            <tr key={i} className="border-b hover:bg-slate-50">
+              <td className="px-4 py-2 whitespace-nowrap w-20 font-mono">{r.code}</td>
+              <td className="px-4 py-2 whitespace-nowrap font-bold">{r.name}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-20">{r.rep}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-20 text-center">{r.merchants}社</td>
+              <td className="px-4 py-2 whitespace-nowrap w-16">{r.rate}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text="有効" color="green" /></td>
+              <td className="px-4 py-2 whitespace-nowrap w-16"><button className="text-blue-600 text-xs">詳細</button></td>
+            </tr>
           ))}
+          </TableHeader>
         </div>
       )}
       {tab === "register" && (
@@ -5538,24 +5582,26 @@ const MasterAgents = () => {
             <button className="px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs border">📥 CSV出力</button>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "代理店", w: "flex-1" }, { label: "対象加盟店", w: "w-16" }, { label: "取引総額", w: "w-24" }, { label: "料率", w: "w-14" }, { label: "報酬額", w: "w-24" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]} />
+            <TableHeader cols={[{ label: "代理店", w: "flex-1" }, { label: "対象加盟店", w: "w-16" }, { label: "取引総額", w: "w-24" }, { label: "料率", w: "w-14" }, { label: "報酬額", w: "w-24" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]}>
             {[["デジタルパートナーズ", "23", "¥45,200,000", "5.0%", "¥2,260,000", "pending"], ["ウェブコンサル合同会社", "12", "¥18,500,000", "4.5%", "¥832,500", "confirmed"], ["ITソリューションズ", "8", "¥8,300,000", "5.0%", "¥415,000", "paid"]].map((r, i) => (
-              <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap items-center">
-                <div className="flex-1 font-bold">{r[0]}</div><div className="w-16 text-center">{r[1]}社</div><div className="w-24">{r[2]}</div><div className="w-14">{r[3]}</div><div className="w-24 font-bold text-emerald-700">{r[4]}</div>
-                <div className="w-16"><Badge text={r[5] === "pending" ? "未確認" : r[5] === "confirmed" ? "確認済" : "支払済"} color={r[5] === "pending" ? "yellow" : r[5] === "confirmed" ? "blue" : "green"} /></div>
-                <div className="w-16">{r[5] === "pending" && <button className="text-blue-600 text-xs">承認</button>}{r[5] === "confirmed" && <button className="text-emerald-600 text-xs">支払</button>}</div>
-              </div>
+              <tr key={i} className="border-b">
+                <td className="px-4 py-2 whitespace-nowrap font-bold">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r[1]}社</td><td className="px-4 py-2 whitespace-nowrap w-24">{r[2]}</td><td className="px-4 py-2 whitespace-nowrap w-14">{r[3]}</td><td className="px-4 py-2 whitespace-nowrap w-24 font-bold text-emerald-700">{r[4]}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r[5] === "pending" ? "未確認" : r[5] === "confirmed" ? "確認済" : "支払済"} color={r[5] === "pending" ? "yellow" : r[5] === "confirmed" ? "blue" : "green"} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-16">{r[5] === "pending" && <button className="text-blue-600 text-xs">承認</button>}{r[5] === "confirmed" && <button className="text-emerald-600 text-xs">支払</button>}</td>
+              </tr>
             ))}
+            </TableHeader>
           </div>
         </div>
       )}
       {tab === "conditions" && (
         <div className="bg-white rounded-lg border p-4">
           <p className="text-xs font-bold mb-3">代理店別 条件設定</p>
-          <TableHeader cols={[{ label: "代理店", w: "flex-1" }, { label: "基本料率", w: "w-20" }, { label: "契約開始", w: "w-24" }, { label: "操作", w: "w-14" }]} />
+          <TableHeader cols={[{ label: "代理店", w: "flex-1" }, { label: "基本料率", w: "w-20" }, { label: "契約開始", w: "w-24" }, { label: "操作", w: "w-14" }]}>
           {[["デジタルパートナーズ", "5.0%", "2025-04-01"], ["ウェブコンサル合同会社", "4.5%", "2025-07-15"], ["ITソリューションズ", "5.0%", "2025-10-01"]].map((r, i) => (
-            <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap items-center"><div className="flex-1">{r[0]}</div><div className="w-20">{r[1]}</div><div className="w-24 text-slate-400">{r[2]}</div><div className="w-14"><button className="text-blue-600">編集</button></div></div>
+            <tr key={i} className="border-b"><td className="px-4 py-2 whitespace-nowrap">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-20">{r[1]}</td><td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{r[2]}</td><td className="px-4 py-2 whitespace-nowrap w-14"><button className="text-blue-600">編集</button></td></tr>
           ))}
+          </TableHeader>
         </div>
       )}
 
@@ -5648,20 +5694,21 @@ const AgentMerchants = () => (
     </div>
     <div className="flex gap-2"><input className="border rounded px-2 py-1 text-xs flex-1" placeholder="加盟店名で検索" /><select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option></select></div>
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-      <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "法人名", w: "w-28" }, { label: "ステータス", w: "w-16" }, { label: "月間取引額", w: "w-24" }, { label: "紹介日", w: "w-20" }, { label: "適用料率", w: "w-16" }]} />
+      <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "法人名", w: "w-28" }, { label: "ステータス", w: "w-16" }, { label: "月間取引額", w: "w-24" }, { label: "紹介日", w: "w-20" }, { label: "適用料率", w: "w-16" }]}>
       {[["ECサイトA", "ABC商事", "稼働中", "green", "¥5,200,000", "2025-06-01", "5.0%"],
         ["オンラインストアB", "XYZ物産", "稼働中", "green", "¥3,100,000", "2025-08-15", "5.0%"],
         ["ネットショップ太郎", "太郎合同会社", "審査中", "yellow", "—", "2026-02-10", "5.0%"]
       ].map((r, i) => (
-        <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
-          <div className="flex-1 font-bold">{r[0]}</div>
-          <div className="w-28 text-slate-500">{r[1]}</div>
-          <div className="w-16"><Badge text={r[2]} color={r[3]} /></div>
-          <div className="w-24">{r[4]}</div>
-          <div className="w-20 text-slate-400">{r[5]}</div>
-          <div className="w-16">{r[6]}</div>
-        </div>
+        <tr key={i} className="border-b hover:bg-slate-50">
+          <td className="px-4 py-2 whitespace-nowrap font-bold">{r[0]}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-500">{r[1]}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r[2]} color={r[3]} /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-24">{r[4]}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-20 text-slate-400">{r[5]}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-16">{r[6]}</td>
+        </tr>
       ))}
+      </TableHeader>
     </div>
   </div>
 );
@@ -5673,20 +5720,21 @@ const AgentReports = () => (
       <h2 className="text-sm font-bold text-slate-800">報告書</h2>
     </div>
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-      <TableHeader cols={[{ label: "対象月", w: "w-20" }, { label: "対象加盟店", w: "w-16" }, { label: "取引総額", w: "w-24" }, { label: "報酬額", w: "w-24" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-32" }]} />
+      <TableHeader cols={[{ label: "対象月", w: "w-20" }, { label: "対象加盟店", w: "w-16" }, { label: "取引総額", w: "w-24" }, { label: "報酬額", w: "w-24" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-32" }]}>
       {[["2026年2月", "23社", "¥45,200,000", "¥2,260,000", "pending", "未確認"],
         ["2026年1月", "22社", "¥42,100,000", "¥2,105,000", "paid", "支払済"],
         ["2025年12月", "21社", "¥38,500,000", "¥1,925,000", "paid", "支払済"]
       ].map((r, i) => (
-        <div key={i} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-slate-50 items-center">
-          <div className="w-20 font-bold">{r[0]}</div>
-          <div className="w-16 text-center">{r[1]}</div>
-          <div className="w-24">{r[2]}</div>
-          <div className="w-24 font-bold text-emerald-700">{r[3]}</div>
-          <div className="w-16"><Badge text={r[5]} color={r[4] === "paid" ? "green" : "yellow"} /></div>
-          <div className="w-32 flex gap-1"><button className="px-2 py-0.5 bg-slate-100 rounded text-xs border">📄 PDF</button><button className="px-2 py-0.5 bg-slate-100 rounded text-xs border">📥 CSV</button><button className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200">詳細</button></div>
-        </div>
+        <tr key={i} className="border-b hover:bg-slate-50">
+          <td className="px-4 py-2 whitespace-nowrap w-20 font-bold">{r[0]}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r[1]}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24">{r[2]}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24 font-bold text-emerald-700">{r[3]}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r[5]} color={r[4] === "paid" ? "green" : "yellow"} /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-32"><div className="flex gap-1"><button className="px-2 py-0.5 bg-slate-100 rounded text-xs border">📄 PDF</button><button className="px-2 py-0.5 bg-slate-100 rounded text-xs border">📥 CSV</button><button className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200">詳細</button></div></td>
+        </tr>
       ))}
+      </TableHeader>
     </div>
   </div>
 );
@@ -5827,21 +5875,22 @@ const MasterCustomers = () => {
             </div>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "最終取引", w: "w-24" }, { label: "サブスク", w: "w-14" }, { label: "セグメント", w: "w-16" }, { label: "リスク", w: "w-12" }]} />
+            <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "最終取引", w: "w-24" }, { label: "サブスク", w: "w-14" }, { label: "セグメント", w: "w-16" }, { label: "リスク", w: "w-12" }]}>
             {customers.map((c, i) => (
-              <div key={i} onClick={() => setSelectedCustomer(c)} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-blue-50 cursor-pointer items-center">
-                <div className="w-24 font-mono text-blue-600">{c.id}</div>
-                <div className="flex-1">{c.email}</div>
-                <div className="w-24 font-mono text-xs">{c.card}</div>
-                <div className="w-24 text-slate-500">{c.merchant}</div>
-                <div className="w-16 text-center">{c.txn}</div>
-                <div className="w-24 font-bold">{c.ltv}</div>
-                <div className="w-24 text-slate-400">{c.last}</div>
-                <div className="w-14"><Badge text={c.sub} color={c.sub === "課金中" ? "green" : c.sub === "停止" ? "red" : "gray"} /></div>
-                <div className="w-16"><Badge text={c.segment} color={segColors[c.segment] || "gray"} /></div>
-                <div className="w-12"><Badge text={c.risk === "low" ? "低" : c.risk === "medium" ? "中" : "高"} color={riskColors[c.risk]} /></div>
-              </div>
+              <tr key={i} onClick={() => setSelectedCustomer(c)} className="border-b hover:bg-blue-50 cursor-pointer">
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{c.id}</td>
+                <td className="px-4 py-2 whitespace-nowrap">{c.email}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-xs">{c.card}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-500">{c.merchant}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{c.txn}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-bold">{c.ltv}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{c.last}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={c.sub} color={c.sub === "課金中" ? "green" : c.sub === "停止" ? "red" : "gray"} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={c.segment} color={segColors[c.segment] || "gray"} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-12"><Badge text={c.risk === "low" ? "低" : c.risk === "medium" ? "中" : "高"} color={riskColors[c.risk]} /></td>
+              </tr>
             ))}
+            </TableHeader>
           </div>
           <div className="text-xs text-slate-400 text-right">5件表示 / 全12,847件</div>
         </div>
@@ -6055,20 +6104,21 @@ const MerchantCustomers = () => {
             </div>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "リピート", w: "w-16" }, { label: "サブスク", w: "w-14" }, { label: "最終取引", w: "w-24" }, { label: "タグ", w: "w-20" }]} />
+            <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "リピート", w: "w-16" }, { label: "サブスク", w: "w-14" }, { label: "最終取引", w: "w-24" }, { label: "タグ", w: "w-20" }]}>
             {customers.map((c, i) => (
-              <div key={i} onClick={() => setDetail(c)} className="flex px-4 py-2 text-xs border-b whitespace-nowrap hover:bg-emerald-50 cursor-pointer items-center">
-                <div className="w-24 font-mono text-emerald-700">{c.id}</div>
-                <div className="flex-1">{c.email}</div>
-                <div className="w-24 font-mono">{c.card}</div>
-                <div className="w-16 text-center">{c.txn}</div>
-                <div className="w-24 font-bold">{c.ltv}</div>
-                <div className="w-16"><Badge text={c.repeat} color={repeatColors[c.repeat]} /></div>
-                <div className="w-14"><Badge text={c.sub} color={c.sub === "課金中" ? "green" : c.sub === "停止" ? "red" : "gray"} /></div>
-                <div className="w-24 text-slate-400">{c.last}</div>
-                <div className="w-20 flex gap-0.5">{c.tags.map((t, j) => <span key={j} className="text-xs px-1 py-0 bg-purple-100 text-purple-700 rounded">{t}</span>)}</div>
-              </div>
+              <tr key={i} onClick={() => setDetail(c)} className="border-b hover:bg-emerald-50 cursor-pointer">
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-emerald-700">{c.id}</td>
+                <td className="px-4 py-2 whitespace-nowrap">{c.email}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono">{c.card}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{c.txn}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-bold">{c.ltv}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={c.repeat} color={repeatColors[c.repeat]} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={c.sub} color={c.sub === "課金中" ? "green" : c.sub === "停止" ? "red" : "gray"} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{c.last}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20"><div className="flex gap-0.5">{c.tags.map((t, j) => <span key={j} className="text-xs px-1 py-0 bg-purple-100 text-purple-700 rounded">{t}</span>)}</div></td>
+              </tr>
             ))}
+            </TableHeader>
           </div>
         </div>
       )}
