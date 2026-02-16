@@ -79,7 +79,7 @@ const MasterDashboard = () => {
   const [chartType, setChartType] = useState("count");
 
   return (
-  <div className="p-4 space-y-4">
+  <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-gray-800">ダッシュボード</h2>
       <div className="flex gap-2">
@@ -221,7 +221,7 @@ const MasterDashboard = () => {
 const MasterExceptionQueue = () => {
   const [queueFilter, setQueueFilter] = useState("all");
   return (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-gray-800">例外キュー</h2>
       <div className="flex gap-2">
@@ -434,7 +434,7 @@ const MasterMerchants = () => {
     });
 
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-5 space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-bold text-gray-800">加盟店管理 <span className="text-gray-400 font-normal">({filtered.length}件)</span></h2>
@@ -606,7 +606,7 @@ const MasterMerchants = () => {
               <h3 className="text-sm font-bold text-gray-800">加盟店詳細</h3>
               <button onClick={() => setSlidePanel(null)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
             </div>
-            <div className="p-4 space-y-4">
+            <div className="p-5 space-y-4">
               {/* 企業情報 */}
               <div>
                 <p className="text-xs font-bold text-gray-600 mb-2">企業情報</p>
@@ -703,7 +703,7 @@ const MasterMerchants = () => {
               <h3 className="text-sm font-bold text-gray-800">加盟店 手動登録</h3>
               <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-5 space-y-4">
               <div className="bg-yellow-50 rounded border border-yellow-200 p-2 text-xs text-yellow-700">⚠️ 手動登録はAI審査をスキップします。audit_logsに記録されます。</div>
               {[
                 { label: "法人名", placeholder: "株式会社〇〇", required: true },
@@ -784,7 +784,7 @@ const MasterMerchants = () => {
               <h3 className="text-sm font-bold text-gray-800">接続先審査を追加申請</h3>
               <button onClick={() => setShowProcApply(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-5 space-y-4">
               <div>
                 <label className="text-xs font-semibold text-gray-600">接続先 <span className="text-red-500">*</span></label>
                 <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>選択してください</option><option>GMO-PG</option><option>三井住友カード</option><option>JCB直接</option><option>PayPay</option></select>
@@ -811,7 +811,7 @@ const MasterAIMonitor = () => {
   const [aiPeriod, setAiPeriod] = useState("month");
 
   return (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <h2 className="text-sm font-bold text-gray-800">AI監視ダッシュボード</h2>
     <div className="flex gap-3">
       <KPICard label="全体自動化率" value="94.2%" sub="目標: 95%" color="purple" />
@@ -935,7 +935,7 @@ const MasterAIMonitor = () => {
 
 // ─── S01: ダッシュボード ───
 const MerchantDashboard = () => (
-  <div className="p-4 space-y-4">
+  <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-gray-800">ダッシュボード</h2>
       <div className="flex items-center gap-2">
@@ -1008,7 +1008,7 @@ const MerchantDashboard = () => (
 
 // ─── S02: 取引一覧 ───
 const MerchantTransactions = () => (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-gray-800">取引一覧</h2>
       <div className="flex gap-2">
@@ -1044,7 +1044,7 @@ const MerchantTransactions = () => (
 
 // ─── S05: API設定 ───
 const MerchantAPISettings = () => (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <h2 className="text-sm font-bold text-gray-800">API設定</h2>
     <div className="grid grid-cols-2 gap-4">
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
@@ -1161,7 +1161,7 @@ const MerchantAIChat = () => (
 const MasterUserManagement = () => {
   const [showInviteM04, setShowInviteM04] = useState(false);
   return (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-gray-800">ユーザー管理（運営スタッフ）</h2>
       <button onClick={() => setShowInviteM04(true)} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold hover:bg-blue-700">📧 スタッフを招待</button>
@@ -1296,7 +1296,7 @@ const MasterUserManagement = () => {
             <h3 className="text-sm font-bold text-gray-800">📧 スタッフを招待</h3>
             <button onClick={() => setShowInviteM04(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
           </div>
-          <div className="p-4 space-y-3">
+          <div className="p-5 space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div><label className="text-xs font-semibold text-gray-600">氏名 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 山田 太郎" /></div>
               <div><label className="text-xs font-semibold text-gray-600">メール <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: yamada@company.jp" /></div>
@@ -1344,7 +1344,7 @@ const MasterMerchantApplications = () => {
   ];
 
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-5 space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-sm font-bold text-gray-800">加盟店 申込・登録管理 <span className="text-xs text-gray-400 font-normal ml-2">※自社審査のみ管理。接続先審査は「🔌 接続先管理」で管理</span></h2>
         <div className="flex gap-2">
@@ -1393,7 +1393,7 @@ const MasterMerchantApplications = () => {
                 <h3 className="text-sm font-bold text-gray-800">{appConfirmDialog.title}</h3>
               </div>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-5 space-y-4">
               <p className="text-xs text-gray-600">{appConfirmDialog.description}</p>
               <div className="bg-gray-50 rounded border p-3 space-y-1">
                 <div className="flex text-xs"><span className="w-24 text-gray-400">申込ID:</span><span className="font-mono text-gray-700">{appConfirmDialog.appId}</span></div>
@@ -1642,7 +1642,7 @@ const MasterMerchantApplications = () => {
 
 // ─── M08: 精算・入金 ───
 const MasterSettlement = () => (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-gray-800">精算・入金管理</h2>
       <div className="flex gap-2">
@@ -1807,7 +1807,7 @@ const MasterSettlement = () => (
 const MasterSystemSettings = () => {
   const [sysTab, setSysTab] = useState(0);
   return (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <h2 className="text-sm font-bold text-gray-800">システム設定</h2>
 
     {/* Tab navigation */}
@@ -1937,7 +1937,7 @@ const MasterSystemSettings = () => {
 const MerchantUserManagement = () => {
   const [showInviteS07, setShowInviteS07] = useState(false);
   return (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-gray-800">ユーザー管理</h2>
       <button onClick={() => setShowInviteS07(!showInviteS07)} className="text-xs bg-green-600 text-white px-3 py-1.5 rounded font-semibold hover:bg-green-700">+ スタッフを招待</button>
@@ -2019,7 +2019,7 @@ const MerchantUserManagement = () => {
 const MerchantPayouts = () => {
   const [payoutTab, setPayoutTab] = useState("payout");
   return (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-gray-800">入金確認</h2>
       <div className="flex gap-2">
@@ -2589,7 +2589,7 @@ const MasterRouting = () => {
   const approvedProcs = currentMerchant?.processors.filter(p => p.status === "approved") || [];
 
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-5 space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-sm font-bold text-gray-800">ルーティング設定</h2>
         <div className="flex gap-2 items-center">
@@ -2899,7 +2899,7 @@ const MasterRouting = () => {
               <h3 className="text-sm font-bold text-gray-800">ルーティングルール追加</h3>
               <button onClick={() => setShowAddRouteRule(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-5 space-y-4">
               <div><label className="text-xs font-semibold text-gray-600">ルール名 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 高額取引はGMO-PG優先" /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="text-xs font-semibold text-gray-600">条件タイプ <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>金額範囲</option><option>ブランド</option><option>加盟店</option><option>時間帯</option><option>地域</option></select></div>
@@ -3004,7 +3004,7 @@ const MasterProcessors = () => {
   const [showAddProc, setShowAddProc] = useState(false);
 
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-5 space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-sm font-bold text-gray-800">接続先管理</h2>
         <div className="flex gap-2">
@@ -3132,7 +3132,7 @@ const MasterProcessors = () => {
                 </div>
 
                 {/* Dialog Body */}
-                <div className="p-4 space-y-3">
+                <div className="p-5 space-y-4">
                   <p className="text-xs text-gray-600">{confirmDialog.description}</p>
 
                   {/* 対象情報 */}
@@ -3701,7 +3701,7 @@ const MasterProcessors = () => {
               <h3 className="text-sm font-bold text-gray-800">接続先を追加</h3>
               <button onClick={() => setShowAddProc(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-5 space-y-4">
               <div><label className="text-xs font-semibold text-gray-600">接続先名 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: GMO-PG" /></div>
               <div><label className="text-xs font-semibold text-gray-600">接続種別 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>アクワイアラ</option><option>PSP（決済代行）</option><option>ウォレット</option></select></div>
               <div className="grid grid-cols-2 gap-3">
@@ -3759,7 +3759,7 @@ const MasterTransactionMonitor = () => {
   const filtered = filterStatus === "all" ? txnData : txnData.filter(t => t.status === filterStatus);
 
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-5 space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-sm font-bold text-gray-800">注文管理</h2>
       </div>
@@ -4014,7 +4014,7 @@ const MasterTransactionMonitor = () => {
             <div className={`p-4 rounded-t-xl border-b ${refundDialog.type === "cancel" ? "bg-red-50" : "bg-purple-50"}`}>
               <h3 className="text-sm font-bold text-gray-800">{refundDialog.type === "cancel" ? "🚫 取引キャンセル" : "💜 返金処理"}</h3>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-5 space-y-4">
               <div className="bg-gray-50 rounded border p-2 space-y-1 text-xs">
                 <div className="flex"><span className="w-20 text-gray-400">取引ID:</span><span className="font-mono">{refundDialog.id}</span></div>
                 <div className="flex"><span className="w-20 text-gray-400">加盟店:</span><span className="font-semibold">{refundDialog.merchant}</span></div>
@@ -4105,7 +4105,7 @@ const MasterFraudSettings = () => {
   ];
 
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-5 space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-sm font-bold text-gray-800">不正検知設定</h2>
         <div className="flex gap-2">
@@ -4409,7 +4409,7 @@ const MasterFraudSettings = () => {
               <h3 className="text-sm font-bold text-gray-800">{showAddBlock === "block" ? "🚫 ブロックリストに追加" : "✅ ホワイトリストに追加"}</h3>
               <button onClick={() => setShowAddBlock(null)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-5 space-y-4">
               <div><label className="text-xs font-semibold text-gray-600">種別 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>BIN（カード番号先頭6桁）</option><option>IPアドレス</option><option>デバイスID</option><option>メールアドレス</option></select></div>
               <div><label className="text-xs font-semibold text-gray-600">値 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 411111 / 192.168.1.1" /></div>
               <div><label className="text-xs font-semibold text-gray-600">理由 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="追加理由を入力" /></div>
@@ -4432,7 +4432,7 @@ const MasterFraudSettings = () => {
               <h3 className="text-sm font-bold text-gray-800">不正検知ルール追加</h3>
               <button onClick={() => setShowAddRule(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
             </div>
-            <div className="p-4 space-y-4">
+            <div className="p-5 space-y-4">
               {/* ルール種別 */}
               <div>
                 <label className="text-xs font-semibold text-gray-600">ルール種別 <span className="text-red-500">*</span></label>
@@ -4548,7 +4548,7 @@ const MasterReport = () => {
   const [showReportModal, setShowReportModal] = useState(null);
   const [reportTab, setReportTab] = useState("summary");
   return (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-gray-800">レポート</h2>
       <div className="flex gap-2">
@@ -4686,7 +4686,7 @@ const MasterReport = () => {
             <h3 className="text-sm font-bold text-gray-800">{showReportModal === "generate" ? "📊 レポート生成" : showReportModal === "schedule" ? "📅 スケジュール追加" : "📝 新規レポート作成"}</h3>
             <button onClick={() => setShowReportModal(null)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
           </div>
-          <div className="p-4 space-y-3">
+          <div className="p-5 space-y-4">
             {showReportModal === "generate" && (<>
               <div><label className="text-xs font-semibold text-gray-600">レポート種別 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>日次サマリー</option><option>月次レポート</option><option>不正検知レポート</option><option>精算レポート</option><option>加盟店別レポート</option></select></div>
               <div className="grid grid-cols-2 gap-3">
@@ -4721,7 +4721,7 @@ const MasterReport = () => {
 
 // ─── S03: 売上レポート ───
 const MerchantSalesReport = () => (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-gray-800">売上レポート</h2>
       <div className="flex gap-2">
@@ -4839,7 +4839,7 @@ const MerchantAccountSettings = () => {
   const [accTab, setAccTab] = useState("company");
 
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-5 space-y-4">
       <h2 className="text-sm font-bold text-gray-800">アカウント設定</h2>
 
       <div className="flex gap-1 border-b">
@@ -5080,7 +5080,7 @@ const MerchantAccountSettings = () => {
               <h3 className="text-sm font-bold text-gray-800">📧 メンバー招待</h3>
               <button onClick={() => setShowInviteS08(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-5 space-y-4">
               <div><label className="text-xs font-semibold text-gray-600">メールアドレス <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: member@company.jp" /></div>
               <div><label className="text-xs font-semibold text-gray-600">権限 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>管理者</option><option>スタッフ</option><option>閲覧のみ</option></select></div>
               <div><label className="text-xs font-semibold text-gray-600">MFA設定</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>必須（推奨）</option><option>任意</option></select></div>
@@ -5107,7 +5107,7 @@ const MerchantPaymentLinks = () => {
     { id: "stats", label: "利用状況" },
   ];
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-gray-800">決済リンク管理</h2>
       </div>
@@ -5235,7 +5235,7 @@ const MerchantPaymentLinks = () => {
               <h3 className="text-sm font-bold text-green-700">✅ 決済リンクを生成しました</h3>
               <button onClick={() => setShowGenerated(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-5 space-y-4">
               <div className="bg-gray-50 rounded border p-3"><p className="text-xs text-gray-400 mb-1">決済リンクURL</p><p className="text-xs font-mono text-blue-600 break-all">https://pay.aquagates.com/link/PL-20260216-001</p></div>
               <div className="flex gap-2">
                 <button className="flex-1 py-2 bg-green-600 text-white rounded text-xs font-bold">📋 コピー</button>
@@ -5258,7 +5258,7 @@ const MerchantSubscriptions = () => {
   const [tab, setTab] = useState("plans");
   const tabs = [{ id: "plans", label: "商品設定" }, { id: "users", label: "ユーザー管理" }, { id: "history", label: "決済履歴" }];
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-gray-800">継続・分割決済管理</h2>
       </div>
@@ -5344,7 +5344,7 @@ const MerchantSubscriptions = () => {
               <h3 className="text-sm font-bold text-gray-800">+ サブスクリプションプラン作成</h3>
               <button onClick={() => setShowCreatePlan(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-5 space-y-4">
               <div><label className="text-xs font-semibold text-gray-600">プラン名 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: スタンダードプラン" /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="text-xs font-semibold text-gray-600">金額 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="¥2,980" /></div>
@@ -5377,7 +5377,7 @@ const MasterRecurring = () => {
     { id: "logs", label: "バッチログ" },
   ];
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-gray-800">リカーリング管理</h2>
       </div>
@@ -5480,7 +5480,7 @@ const MasterAgents = () => {
   const [tab, setTab] = useState("list");
   const tabs = [{ id: "list", label: "代理店一覧" }, { id: "register", label: "代理店登録" }, { id: "conditions", label: "条件設定" }, { id: "commissions", label: "報酬管理" }];
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-gray-800">代理店管理</h2>
       </div>
@@ -5555,7 +5555,7 @@ const MasterAgents = () => {
               <h3 className="text-sm font-bold text-gray-800">代理店を登録</h3>
               <button onClick={() => setShowAddAgent(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-5 space-y-4">
               <div><label className="text-xs font-semibold text-gray-600">法人名 <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="株式会社〇〇" /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="text-xs font-semibold text-gray-600">代理店コード <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="AG-XXX" /></div>
@@ -5583,7 +5583,7 @@ const MasterAgents = () => {
 
 // ─── D01: 代理店ダッシュボード ───
 const AgentDashboard = () => (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-sm font-bold text-gray-800">代理店ダッシュボード</h2>
     </div>
@@ -5629,7 +5629,7 @@ const AgentDashboard = () => (
 
 // ─── D02: 加盟店一覧 ───
 const AgentMerchants = () => (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-sm font-bold text-gray-800">加盟店一覧（自分の紹介のみ）</h2>
     </div>
@@ -5655,7 +5655,7 @@ const AgentMerchants = () => (
 
 // ─── D03: 報告書 ───
 const AgentReports = () => (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-sm font-bold text-gray-800">報告書</h2>
     </div>
@@ -5680,7 +5680,7 @@ const AgentReports = () => (
 
 // ─── D04: 申込紹介 ───
 const AgentReferral = () => (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-sm font-bold text-gray-800">申込紹介</h2>
     </div>
@@ -5718,7 +5718,7 @@ const AgentReferral = () => (
 const AgentAccountSettings = () => {
   const [showInviteD05, setShowInviteD05] = useState(false);
   return (
-  <div className="p-4 space-y-3">
+  <div className="p-5 space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-sm font-bold text-gray-800">アカウント設定</h2>
     </div>
@@ -5758,7 +5758,7 @@ const AgentAccountSettings = () => {
             <h3 className="text-sm font-bold text-gray-800">📧 スタッフを招待</h3>
             <button onClick={() => setShowInviteD05(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
           </div>
-          <div className="p-4 space-y-3">
+          <div className="p-5 space-y-4">
             <div><label className="text-xs font-semibold text-gray-600">メールアドレス <span className="text-red-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="staff@agency.jp" /></div>
             <div><label className="text-xs font-semibold text-gray-600">権限 <span className="text-red-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>管理者</option><option>閲覧のみ</option></select></div>
           </div>
@@ -5788,7 +5788,7 @@ const MasterCustomers = () => {
   const riskColors = { low: "green", medium: "yellow", high: "red", blocked: "gray" };
   const segColors = { "ロイヤル": "purple", "リピーター": "blue", "初回": "gray" };
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-gray-800">顧客管理</h2>
       </div>
@@ -6019,7 +6019,7 @@ const MerchantCustomers = () => {
   ];
   const repeatColors = { "ロイヤル": "purple", "リピーター": "blue", "初回": "gray" };
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-gray-800">顧客管理</h2>
         <div className="flex items-center gap-2">
@@ -6460,17 +6460,17 @@ export default function Wireframes() {
         {view === "master" ? (
           <>
             <Sidebar items={masterMenuItems} active={masterPage} onSelect={setMasterPage} title="マスター管理" color="#60A5FA" />
-            <div className="flex-1 overflow-y-auto bg-gray-100">{renderMaster()}</div>
+            <div className="flex-1 overflow-y-auto bg-gray-100 p-1">{renderMaster()}</div>
           </>
         ) : view === "merchant" ? (
           <>
             <Sidebar items={merchantMenuItems} active={merchantPage} onSelect={setMerchantPage} title="加盟店管理" color="#4ADE80" />
-            <div className="flex-1 overflow-y-auto bg-gray-100">{renderMerchant()}</div>
+            <div className="flex-1 overflow-y-auto bg-gray-100 p-1">{renderMerchant()}</div>
           </>
         ) : view === "agent" ? (
           <>
             <Sidebar items={agentMenuItems} active={agentPage} onSelect={setAgentPage} title="代理店管理" color="#FB923C" />
-            <div className="flex-1 overflow-y-auto bg-gray-100">{renderAgent()}</div>
+            <div className="flex-1 overflow-y-auto bg-gray-100 p-1">{renderAgent()}</div>
           </>
         ) : view === "payment" ? (
           <div className="flex-1 overflow-y-auto"><PaymentPage /></div>
