@@ -1102,7 +1102,7 @@ const MasterMerchants = () => {
                             {s.processors.map((proc, pi) => {
                               const ps = PROC_STATUS[proc.status] || PROC_STATUS.pending;
                               const pInfo = processorList.find(p => p.name === proc.name) || {};
-                              const isCredit = pInfo.type === "credit";
+                              const isCredit = pInfo.type !== "WEBマネー";
                               const brandKeys = isCredit ? ["visa","master","jcb","amex","diners"] : ["webmoney"];
                               return (
                               <div key={pi} className={`rounded-lg border ${proc.status === "approved" ? "border-emerald-300 bg-emerald-50/30" : proc.status === "suspended" ? "border-rose-300 bg-rose-50/30" : "border-slate-300 bg-slate-50/30"} p-2.5`}>
