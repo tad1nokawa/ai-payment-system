@@ -2815,9 +2815,11 @@ const MerchantAIChat = () => {
 
 // ─── M12: ユーザー管理 ───
 const MasterUserManagement = () => {
+  const toast = useToast();
   const [showInviteM04, setShowInviteM04] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [showRoleEdit, setShowRoleEdit] = useState(null);
+  const [actionConfirm, setActionConfirm] = useState(null);
 
   const staffData = [
     { name: "田中 太郎", email: "tanaka@company.jp", roleLabel: "スーパー管理者", categories: ["全カテゴリ"], catColors: ["red"], mfa: true, lastLogin: "2026-02-11 14:30", rColor: "red", joinDate: "2024-01-15", status: "有効", sessions: [
@@ -2924,7 +2926,7 @@ const MasterUserManagement = () => {
           <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{u.lastLogin}</td>
           <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1" onClick={e => e.stopPropagation()}>
             <button onClick={() => setShowRoleEdit(u)} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">編集</button>
-            <button className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs hover:bg-rose-100">無効化</button>
+            <button onClick={() => setActionConfirm({ title: "ユーザー無効化", description: `${u.name}（${u.email}）を無効化します。`, warning: "無効化されたユーザーはログインできなくなります。", type: "danger", onConfirm: () => toast(`${u.name} を無効化しました`, "warning") })} className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs hover:bg-rose-100">無効化</button>
           </div></td>
         </tr>
       ))}
@@ -2977,7 +2979,7 @@ const MasterUserManagement = () => {
         </div>
       </div>
       <div className="flex gap-2 mt-3">
-        <button onClick={() => setShowInviteM04(false)} className="px-4 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold">招待メール送信</button>
+        <button onClick={() => { setShowInviteM04(false); toast("招待メールを送信しました", "success"); }} className="px-4 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold">招待メール送信</button>
         <button onClick={() => setShowInviteM04(false)} className="px-4 py-1.5 bg-slate-100 text-slate-600 rounded text-xs">キャンセル</button>
       </div>
     </div>
@@ -3074,8 +3076,8 @@ const MasterUserManagement = () => {
             {/* Action Buttons */}
             <div className="flex gap-2 pt-2 border-t">
               <button onClick={() => setShowRoleEdit(selectedStaff)} className="flex-1 px-3 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">ロール・カテゴリ編集</button>
-              <button className="px-3 py-2 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded text-xs font-semibold hover:bg-yellow-100">パスワードリセット</button>
-              <button className="px-3 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded text-xs font-semibold hover:bg-rose-100">無効化</button>
+              <button onClick={() => setActionConfirm({ title: "パスワードリセット", description: `${selectedStaff.name} にパスワードリセットメールを送信します。`, type: "warning", onConfirm: () => toast(`${selectedStaff.name} にパスワードリセットメールを送信しました`, "success") })} className="px-3 py-2 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded text-xs font-semibold hover:bg-yellow-100">パスワードリセット</button>
+              <button onClick={() => setActionConfirm({ title: "ユーザー無効化", description: `${selectedStaff.name} を無効化します。`, warning: "無効化されたユーザーはログインできなくなります。", type: "danger", onConfirm: () => toast(`${selectedStaff.name} を無効化しました`, "warning") })} className="px-3 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded text-xs font-semibold hover:bg-rose-100">無効化</button>
             </div>
           </div>
         </div>
@@ -3134,7 +3136,7 @@ const MasterUserManagement = () => {
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
             <button onClick={() => setShowRoleEdit(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => setShowRoleEdit(null)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">変更を保存</button>
+            <button onClick={() => { setShowRoleEdit(null); toast("ロール・カテゴリ設定を保存しました", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">変更を保存</button>
           </div>
         </div>
       </div>
@@ -3162,11 +3164,12 @@ const MasterUserManagement = () => {
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
             <button onClick={() => setShowInviteM04(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => setShowInviteM04(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">招待メール送信</button>
+            <button onClick={() => { setShowInviteM04(false); toast("招待メールを送信しました", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">招待メール送信</button>
           </div>
         </div>
       </div>
     )}
+    <ConfirmDialog config={actionConfirm} onClose={() => setActionConfirm(null)} />
     </div>
   );
 };
@@ -4100,6 +4103,7 @@ const MasterSettlement = () => {
 
 // ─── M13: システム設定 ───
 const MasterSystemSettings = () => {
+  const toast = useToast();
   const [sysTab, setSysTab] = useState(0);
   const [showAddProcessor, setShowAddProcessor] = useState(false);
   const [selectedSysProc, setSelectedSysProc] = useState(null);
@@ -4133,7 +4137,7 @@ const MasterSystemSettings = () => {
               <p className="font-semibold text-slate-700">{m.name}</p>
               <p className="text-slate-400">接続先: {m.processor} / 手数料: {m.fee}</p>
             </div>
-            <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">設定</button>
+            <button onClick={() => toast(`${m.name} の設定画面を開きました`, "info")} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">設定</button>
           </div>
         ))}
       </div>
@@ -4212,7 +4216,7 @@ const MasterSystemSettings = () => {
           </div>
           <div className="flex gap-2 justify-end">
             <button onClick={() => setShowAddProcessor(false)} className="px-3 py-1.5 text-xs text-slate-500 border rounded">キャンセル</button>
-            <button className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded font-semibold">接続テスト実行</button>
+            <button onClick={() => { setShowAddProcessor(false); toast("接続テストを実行中...", "info"); setTimeout(() => toast("接続テスト成功！接続先を追加しました", "success"), 1500); }} className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded font-semibold">接続テスト実行</button>
           </div>
         </div>
       )}
@@ -4270,7 +4274,7 @@ const MasterSystemSettings = () => {
                       {isEditing ? (
                         <>
                           <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(null); }} className="px-2.5 py-1 text-xs text-slate-500 border border-slate-300 rounded hover:bg-slate-100">キャンセル</button>
-                          <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(null); }} className="px-2.5 py-1 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">💾 保存</button>
+                          <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(null); toast("接続先設定を保存しました", "success"); }} className="px-2.5 py-1 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">💾 保存</button>
                         </>
                       ) : (
                         <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(p.id); }} className="px-2.5 py-1 text-xs bg-amber-500 text-white rounded font-semibold hover:bg-amber-600">✏️ 編集（admin）</button>
@@ -4382,7 +4386,7 @@ const MasterSystemSettings = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">ルーティングルール</p>
-        <button className="text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded font-semibold">+ ルール追加</button>
+        <button onClick={() => toast("ルーティングルールを追加しました", "success")} className="text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded font-semibold">+ ルール追加</button>
       </div>
       <div className="space-y-2">
         {[
@@ -4398,7 +4402,7 @@ const MasterSystemSettings = () => {
             <div className={`w-8 h-5 rounded-full relative cursor-pointer ${r.active ? "bg-emerald-500" : "bg-slate-300"}`}>
               <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${r.active ? "right-0.5" : "left-0.5"}`} />
             </div>
-            <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded">編集</button>
+            <button onClick={() => toast(`ルール${r.priority}を編集中`, "info")} className="px-2 py-1 bg-slate-100 text-slate-600 rounded">編集</button>
           </div>
         ))}
       </div>
@@ -4438,7 +4442,7 @@ const MasterSystemSettings = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">通知チャンネル設定</p>
-        <button className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">保存</button>
+        <button onClick={() => toast("通知設定を保存しました", "success")} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">保存</button>
       </div>
 
       {/* Channel configuration */}
@@ -4460,7 +4464,7 @@ const MasterSystemSettings = () => {
               <input className="w-full text-xs border rounded px-2 py-1.5" defaultValue={c.value} />
               {c.channel && <><label className="text-xs text-slate-400">チャンネル</label><input className="w-full text-xs border rounded px-2 py-1.5" defaultValue={c.channel} /></>}
             </div>
-            <button className="text-xs text-blue-600 mt-2 hover:underline">テスト送信</button>
+            <button onClick={() => { toast(`${c.ch}にテスト送信中...`, "info"); setTimeout(() => toast(`${c.ch}のテスト送信が完了しました`, "success"), 1500); }} className="text-xs text-blue-600 mt-2 hover:underline">テスト送信</button>
           </div>
         ))}
       </div>
@@ -4546,7 +4550,7 @@ const MasterSystemSettings = () => {
             <Badge text="接続済" color="green" />
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <div><label className="text-xs text-slate-500">API Key *</label><div className="flex gap-1 mt-0.5"><input type="password" className="flex-1 text-xs border rounded px-2 py-1.5" defaultValue="sk-ant-api03-xxxxxxxxxxxx" /><button className="text-xs px-2 py-1.5 bg-slate-100 rounded">表示</button></div></div>
+            <div><label className="text-xs text-slate-500">API Key *</label><div className="flex gap-1 mt-0.5"><input type="password" className="flex-1 text-xs border rounded px-2 py-1.5" defaultValue="sk-ant-api03-xxxxxxxxxxxx" /><button onClick={() => toast("APIキーを表示しました（セキュリティ注意）", "warning")} className="text-xs px-2 py-1.5 bg-slate-100 rounded">表示</button></div></div>
             <div><label className="text-xs text-slate-500">モデル *</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>claude-sonnet-4-20250514</option><option>claude-opus-4-20250514</option><option>claude-haiku-35-20241022</option></select></div>
             <div><label className="text-xs text-slate-500">月間予算上限</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="¥100,000" /></div>
             <div><label className="text-xs text-slate-500">レート制限（req/min）</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="60" /></div>
@@ -4576,8 +4580,8 @@ const MasterSystemSettings = () => {
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">📝 AI機能別プロンプト設定</p>
         <div className="flex gap-2">
-          <button className="text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded font-semibold">テンプレートに戻す</button>
-          <button className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">全て保存</button>
+          <button onClick={() => toast("プロンプトをデフォルトテンプレートに戻しました", "info")} className="text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded font-semibold">テンプレートに戻す</button>
+          <button onClick={() => toast("全プロンプト設定を保存しました", "success")} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">全て保存</button>
         </div>
       </div>
       <div className="space-y-3">
@@ -4596,8 +4600,8 @@ const MasterSystemSettings = () => {
                 <span className="text-xs text-slate-400 ml-2">{ai.desc}</span>
               </div>
               <div className="flex gap-2">
-                <button className="text-xs text-blue-600 hover:underline">テスト実行</button>
-                <button className="text-xs text-slate-500 hover:underline">履歴</button>
+                <button onClick={() => { toast(`${ai.name}のテスト実行中...`, "info"); setTimeout(() => toast(`${ai.name}のテスト完了`, "success"), 1500); }} className="text-xs text-blue-600 hover:underline">テスト実行</button>
+                <button onClick={() => toast(`${ai.name}の実行履歴を表示`, "info")} className="text-xs text-slate-500 hover:underline">履歴</button>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-2 mb-2">
@@ -4644,8 +4648,8 @@ const MasterSystemSettings = () => {
             <td className="px-3 py-2 text-center"><Badge text={k.env} color="purple" /></td>
             <td className="px-3 py-2 text-center text-slate-400">{k.updated}</td>
             <td className="px-3 py-2 text-center"><div className="flex gap-1 justify-center">
-              <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded">編集</button>
-              <button className="px-2 py-1 bg-blue-50 text-blue-600 rounded">回転</button>
+              <button onClick={() => toast(`${k.service} ${k.type}を編集中`, "info")} className="px-2 py-1 bg-slate-100 text-slate-600 rounded">編集</button>
+              <button onClick={() => toast(`${k.service} ${k.type}をローテーションしました`, "success")} className="px-2 py-1 bg-blue-50 text-blue-600 rounded">回転</button>
             </div></td>
           </tr>
         ))}
@@ -4657,7 +4661,7 @@ const MasterSystemSettings = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">🔔 Webhook設定</p>
-        <button className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">+ Webhook追加</button>
+        <button onClick={() => toast("Webhookを追加しました", "success")} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">+ Webhook追加</button>
       </div>
       <div className="space-y-2">
         {[
@@ -4672,7 +4676,7 @@ const MasterSystemSettings = () => {
             </div>
             <span className="text-slate-400">最終: {w.lastCall}</span>
             <span className="text-emerald-600 font-semibold">{w.successRate}</span>
-            <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded">設定</button>
+            <button onClick={() => toast("Webhook設定を開きました", "info")} className="px-2 py-1 bg-slate-100 text-slate-600 rounded">設定</button>
           </div>
         ))}
       </div>
@@ -4727,7 +4731,7 @@ const MasterSystemSettings = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">🌐 IPアドレス制限</p>
-        <button className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">+ IP追加</button>
+        <button onClick={() => toast("IPアドレスを追加しました", "success")} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">+ IP追加</button>
       </div>
       <table className="w-full text-xs">
         <thead><tr className="bg-slate-50 text-slate-500">
@@ -4749,8 +4753,8 @@ const MasterSystemSettings = () => {
             <td className="px-3 py-2 text-center"><Badge text={ip.target} color="blue" /></td>
             <td className="px-3 py-2 text-center text-slate-400">{ip.date}</td>
             <td className="px-3 py-2 text-center"><div className="flex gap-1 justify-center">
-              <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded">編集</button>
-              <button className="px-2 py-1 bg-rose-50 text-rose-600 rounded">削除</button>
+              <button onClick={() => toast(`${ip.ip}のIP制限を編集中`, "info")} className="px-2 py-1 bg-slate-100 text-slate-600 rounded">編集</button>
+              <button onClick={() => toast(`${ip.ip}のIP制限を削除しました`, "warning")} className="px-2 py-1 bg-rose-50 text-rose-600 rounded">削除</button>
             </div></td>
           </tr>
         ))}
@@ -4810,7 +4814,7 @@ const MasterSystemSettings = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-slate-700">💾 バックアップ設定</p>
-        <button className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">手動バックアップ実行</button>
+        <button onClick={() => { toast("手動バックアップを実行中...", "info"); setTimeout(() => toast("バックアップが完了しました", "success"), 2000); }} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">手動バックアップ実行</button>
       </div>
       <div className="space-y-1.5 text-xs">
         {[
@@ -4832,7 +4836,7 @@ const MasterSystemSettings = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-slate-700">📝 設定変更 監査ログ（直近）</p>
-        <button className="text-xs text-blue-600 hover:underline">全ログ検索 →</button>
+        <button onClick={() => toast("監査ログの全件検索を表示しています", "info")} className="text-xs text-blue-600 hover:underline">全ログ検索 →</button>
       </div>
       <div className="space-y-1 text-xs">
         {[
@@ -4860,7 +4864,7 @@ const MasterSystemSettings = () => {
         <div className="flex gap-2 items-center">
           <input className="text-xs border rounded px-2 py-1.5 w-56" placeholder="コード or メッセージで検索..." />
           <select className="text-xs border rounded px-2 py-1.5"><option>全カテゴリ</option><option>認証エラー</option><option>通信エラー</option><option>カードエラー</option><option>3DSエラー</option><option>システムエラー</option></select>
-          <button className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">検索</button>
+          <button onClick={() => toast("エラーコードを検索しました", "info")} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">検索</button>
         </div>
       </div>
       <div className="text-xs text-slate-400 mb-2">全 287件 表示: 1-20件（1/15ページ）</div>
@@ -4919,13 +4923,13 @@ const MasterSystemSettings = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">お知らせ管理</p>
-        <button className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">+ 新規作成</button>
+        <button onClick={() => toast("お知らせを新規作成しています", "info")} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">+ 新規作成</button>
       </div>
       <div className="grid grid-cols-4 gap-2 mb-3">
         <div><label className="text-xs text-slate-400">サイトID</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="サイトIDで絞込" /></div>
         <div><label className="text-xs text-slate-400">公開状態</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>公開中</option><option>未公開</option><option>終了</option></select></div>
         <div><label className="text-xs text-slate-400">種別</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>障害</option><option>メンテナンス</option><option>機能リリース</option><option>お知らせ</option></select></div>
-        <div className="flex items-end"><button className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
+        <div className="flex items-end"><button onClick={() => toast("お知らせを検索しました", "info")} className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
       </div>
       <table className="w-full text-xs">
         <thead><tr className="bg-slate-50 border-b">
@@ -4953,7 +4957,7 @@ const MasterSystemSettings = () => {
               <td className="p-2"><Badge text={n.type} color={n.type === "障害" ? "red" : n.type === "メンテ" ? "yellow" : n.type === "リリース" ? "blue" : "default"} /></td>
               <td className="p-2 text-center"><Badge text={n.status} color={n.sColor} /></td>
               <td className="p-2 text-slate-500">{n.target}</td>
-              <td className="p-2 text-center"><button className="text-blue-600 hover:underline">編集</button></td>
+              <td className="p-2 text-center"><button onClick={() => toast(`${n.title}を編集中`, "info")} className="text-blue-600 hover:underline">編集</button></td>
             </tr>
           ))}
         </tbody>
@@ -4970,7 +4974,7 @@ const MasterSystemSettings = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">管理画面操作ログ検索</p>
-        <button className="text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded border">CSVエクスポート</button>
+        <button onClick={() => toast("操作ログをCSVエクスポートしました", "success")} className="text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded border">CSVエクスポート</button>
       </div>
       <div className="grid grid-cols-4 gap-2 mb-3">
         <div><label className="text-xs text-slate-400">スタッフ</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="スタッフ名で検索" /></div>
@@ -4980,7 +4984,7 @@ const MasterSystemSettings = () => {
         <div><label className="text-xs text-slate-400">操作日時（From）</label><input type="datetime-local" className="w-full text-xs border rounded px-2 py-1.5" defaultValue="2026-02-10T00:00" /></div>
         <div><label className="text-xs text-slate-400">操作日時（To）</label><input type="datetime-local" className="w-full text-xs border rounded px-2 py-1.5" defaultValue="2026-02-17T23:59" /></div>
         <div><label className="text-xs text-slate-400">URL</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="/admin/..." /></div>
-        <div className="flex items-end"><button className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
+        <div className="flex items-end"><button onClick={() => toast("操作ログを検索しました", "info")} className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
       </div>
       <div className="text-xs text-slate-400 mb-2">検索結果: 1,248件（1/63ページ）</div>
       <table className="w-full text-xs">
@@ -8681,6 +8685,7 @@ const MasterFraudSettings = () => {
 
 // ─── M11: レポート ───
 const MasterReport = () => {
+  const toast = useToast();
   const [showReportModal, setShowReportModal] = useState(null);
   const [reportTab, setReportTab] = useState("summary");
   const [previewReport, setPreviewReport] = useState(null);
@@ -8783,7 +8788,7 @@ const MasterReport = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
       <div className="flex justify-between items-center p-3 border-b">
         <p className="text-xs font-bold text-slate-700">📂 生成済みレポート（直近）</p>
-        <button className="text-xs text-blue-600">すべて表示 →</button>
+        <button onClick={() => toast("全レポート一覧を表示しています", "info")} className="text-xs text-blue-600">すべて表示 →</button>
       </div>
       <TableHeader cols={[{ label: "生成日", w: "w-28" }, { label: "レポート名", w: "flex-1" }, { label: "期間", w: "w-32" }, { label: "形式", w: "w-16" }, { label: "AI要約", w: "w-16" }, { label: "生成者", w: "w-28" }, { label: "操作", w: "w-28" }]}>
       {recentReports.map((r, i) => (
@@ -8795,7 +8800,7 @@ const MasterReport = () => {
           <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r.ai ? "🤖" : "—"}</td>
           <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400">{r.by}</td>
           <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1" onClick={e => e.stopPropagation()}>
-            <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">⬇ DL</button>
+            <button onClick={() => toast(`${r.name}をダウンロードしました`, "success")} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">⬇ DL</button>
             <button onClick={() => setPreviewReport(r)} className="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs hover:bg-blue-200">👁 プレビュー</button>
           </div></td>
         </tr>
@@ -8822,7 +8827,7 @@ const MasterReport = () => {
             <span className="w-32 text-slate-500">{s.schedule}</span>
             <span className="flex-1 text-slate-400">{s.recipients}</span>
             <Badge text={s.format} color="blue" />
-            <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">編集</button>
+            <button onClick={() => { setShowReportModal("schedule"); toast(`${s.name}のスケジュールを編集中`, "info"); }} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">編集</button>
           </div>
         ))}
       </div>
@@ -8867,7 +8872,7 @@ const MasterReport = () => {
               <p className="text-xs text-slate-400 mt-0.5">{previewReport.name} — {previewReport.period}</p>
             </div>
             <div className="flex items-center gap-2">
-              <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">⬇ ダウンロード</button>
+              <button onClick={() => { toast("レポートをダウンロードしました", "success"); }} className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">⬇ ダウンロード</button>
               <button onClick={() => setPreviewReport(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
             </div>
           </div>
@@ -9003,7 +9008,7 @@ const MasterReport = () => {
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
             <button onClick={() => setShowReportModal(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => setShowReportModal(null)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">{showReportModal === "schedule" ? "スケジュール登録" : showReportModal === "custom" ? "レポート作成" : "生成する"}</button>
+            <button onClick={() => { const label = showReportModal === "schedule" ? "スケジュールを登録" : showReportModal === "custom" ? "カスタムレポートを作成" : "レポートを生成開始"; setShowReportModal(null); toast(`${label}しました`, "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">{showReportModal === "schedule" ? "スケジュール登録" : showReportModal === "custom" ? "レポート作成" : "生成する"}</button>
           </div>
         </div>
       </div>
