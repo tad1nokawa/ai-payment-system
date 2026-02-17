@@ -1935,6 +1935,7 @@ const MasterMerchants = () => {
 
 // ─── M05: AI監視 ───
 const MasterAIMonitor = () => {
+  const toast = useToast();
   const [aiPeriod, setAiPeriod] = useState("month");
   const [selectedModule, setSelectedModule] = useState(null);
   const [showTrainModal, setShowTrainModal] = useState(null);
@@ -2182,7 +2183,7 @@ const MasterAIMonitor = () => {
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowTrainModal(null)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
-              <button onClick={() => setShowTrainModal(null)} className="flex-1 py-2 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700">再学習をスケジュール</button>
+              <button onClick={() => { toast(`${showTrainModal.name} の再学習をスケジュールしました`, "success"); setShowTrainModal(null); }} className="flex-1 py-2 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700">再学習をスケジュール</button>
             </div>
           </div>
         </div>
@@ -3172,6 +3173,8 @@ const MasterUserManagement = () => {
 
 // ─── M04: 申込・登録管理 ───
 const MasterMerchantApplications = () => {
+  const toast = useToast();
+  const nav = useNav();
   const [appConfirmDialog, setAppConfirmDialog] = useState(null);
   const [selectedApp, setSelectedApp] = useState("APP-0211-003");
   const [appStatusFilter, setAppStatusFilter] = useState("all");
@@ -3322,7 +3325,7 @@ const MasterMerchantApplications = () => {
             </div>
             <div className="flex justify-end gap-2 p-4 border-t bg-slate-50 rounded-b-xl">
               <button onClick={() => setAppConfirmDialog(null)} className="px-4 py-2 bg-white text-slate-600 rounded border text-xs font-semibold hover:bg-slate-100">キャンセル</button>
-              <button onClick={() => setAppConfirmDialog(null)} className={`px-4 py-2 rounded text-white text-xs font-semibold ${
+              <button onClick={() => { const d = appConfirmDialog; setAppConfirmDialog(null); const msgs = { approve: ["承認しました", "success"], reject: ["却下しました", "warning"], start_proc_review: ["接続先審査を開始しました", "success"], reapply: ["再申込を許可しました", "info"] }; const [msg, type] = msgs[d.type] || ["処理が完了しました", "success"]; toast(`${d.appId} を${msg}`, type); }} className={`px-4 py-2 rounded text-white text-xs font-semibold ${
                 appConfirmDialog.type === "approve" ? "bg-emerald-600 hover:bg-emerald-700" :
                 appConfirmDialog.type === "reject" ? "bg-rose-600 hover:bg-rose-700" :
                 appConfirmDialog.type === "start_proc_review" ? "bg-purple-600 hover:bg-purple-700" :
@@ -3381,7 +3384,7 @@ const MasterMerchantApplications = () => {
                   impacts: ["加盟店ステータスが「却下」に変更", "加盟店に却下通知メールが送信される", "再申請には新規の申込が必要"],
                   confirmLabel: "❌ 却下する"
                 })} className="px-3 py-1.5 bg-white text-rose-600 border border-rose-300 rounded text-xs font-semibold hover:bg-rose-50">❌ 却下</button>
-                <button className="px-3 py-1.5 bg-white text-slate-600 border rounded text-xs hover:bg-slate-100">↩ AI再審査を依頼</button>
+                <button onClick={() => toast(`${selectedApp} のAI再審査をリクエストしました`, "info")} className="px-3 py-1.5 bg-white text-slate-600 border rounded text-xs hover:bg-slate-100">↩ AI再審査を依頼</button>
               </>
             )}
             {/* AI審査中の場合 — プログレスバー（5段階） */}
@@ -3426,7 +3429,7 @@ const MasterMerchantApplications = () => {
               <div className="flex items-center gap-2">
                 <Badge text="接続先審査中" color="blue" />
                 <span className="text-xs text-slate-500">接続先審査は「🔌 接続先審査」画面で進行中です →</span>
-                <button className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs border border-blue-200 font-semibold hover:bg-blue-200">🔌 接続先審査を開く</button>
+                <button onClick={() => { if (nav.setMasterPage) nav.setMasterPage("processorReview"); toast("接続先審査画面に移動します", "info"); }} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs border border-blue-200 font-semibold hover:bg-blue-200">🔌 接続先審査を開く</button>
               </div>
             )}
             {selectedAppData?.status === "却下" && (
@@ -3513,7 +3516,7 @@ const MasterMerchantApplications = () => {
               {a.procStatus ? <Badge text={a.procStatus} color={a.procStatus === "接続先審査中" ? "blue" : "yellow"} /> : <span className="text-slate-300">—</span>}
             </td>
             <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{a.date}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-20"><button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">詳細</button></td>
+            <td className="px-4 py-2 whitespace-nowrap w-20"><button onClick={(e) => { e.stopPropagation(); setSelectedApp(a.id); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">詳細</button></td>
           </tr>
         ))}
         </TableHeader>
@@ -3615,7 +3618,7 @@ const MasterMerchantApplications = () => {
                   impacts: ["サイト追加が却下される", "加盟店に却下通知が送信される", "既存サイトの運用には影響なし"],
                   confirmLabel: "❌ 却下する"
                 })} className="px-3 py-1.5 bg-white text-rose-600 border border-rose-300 rounded text-xs font-semibold hover:bg-rose-50">❌ 却下</button>
-                <button className="px-3 py-1.5 bg-white text-slate-600 border rounded text-xs hover:bg-slate-100">↩ AI再審査を依頼</button>
+                <button onClick={() => toast(`${selectedSiteAppData.id} のAI再審査をリクエストしました`, "info")} className="px-3 py-1.5 bg-white text-slate-600 border rounded text-xs hover:bg-slate-100">↩ AI再審査を依頼</button>
               </>
             )}
             {selectedSiteAppData.status === "AI審査中" && (
@@ -3651,7 +3654,7 @@ const MasterMerchantApplications = () => {
               <div className="flex items-center gap-2">
                 <Badge text="接続先審査中" color="blue" />
                 <span className="text-xs text-slate-500">接続先審査は「🔌 接続先審査」画面で進行中です →</span>
-                <button className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs border border-blue-200 font-semibold hover:bg-blue-200">🔌 接続先審査を開く</button>
+                <button onClick={() => { if (nav.setMasterPage) nav.setMasterPage("processorReview"); toast("接続先審査画面に移動します", "info"); }} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs border border-blue-200 font-semibold hover:bg-blue-200">🔌 接続先審査を開く</button>
               </div>
             )}
             {selectedSiteAppData.status === "却下" && (
@@ -3754,7 +3757,7 @@ const MasterMerchantApplications = () => {
             <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={a.status} color={a.sColor} /></td>
             <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={a.ai} color={a.aColor} /></td>
             <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{a.date}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-20"><button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">詳細</button></td>
+            <td className="px-4 py-2 whitespace-nowrap w-20"><button onClick={(e) => { e.stopPropagation(); setSelectedSiteApp(a.id); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">詳細</button></td>
           </tr>
         ))}
         </TableHeader>
