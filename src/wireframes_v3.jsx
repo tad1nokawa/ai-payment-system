@@ -110,7 +110,77 @@ const MasterDashboard = () => {
   };
 
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-5 flex gap-4">
+    {/* ===== 左カラム: AIチャット ===== */}
+    <div className="w-80 shrink-0 flex flex-col gap-3">
+      {/* AIチャットサポート */}
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden flex flex-col" style={{ height: "calc(100vh - 80px)" }}>
+        <div className="p-3 border-b bg-gradient-to-r from-blue-50 to-purple-50 flex items-center gap-2">
+          <span className="text-sm">💬</span>
+          <p className="text-xs font-bold text-blue-700">AIチャットサポート</p>
+          <Badge text="Claude 4 Opus" color="purple" />
+        </div>
+        {/* クイックアクション */}
+        <div className="p-2 border-b bg-slate-50">
+          <div className="flex flex-wrap gap-1">
+            {["不正検知の状況", "今日の決済件数", "例外キューの確認", "精算状況", "エラーコード検索"].map(q => (
+              <button key={q} className="text-xs bg-white border rounded px-2 py-1 text-slate-500 hover:bg-blue-50 hover:text-blue-600">{q}</button>
+            ))}
+          </div>
+        </div>
+        {/* 会話エリア */}
+        <div className="flex-1 p-3 space-y-2 overflow-y-auto bg-slate-50">
+          <div className="flex gap-2">
+            <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs shrink-0">🤖</div>
+            <div className="bg-white rounded-lg p-2 border border-slate-200">
+              <p className="text-xs text-slate-700">本日の状況をまとめました：取引量 1,247件（前日比+8%）、成功率 99.2%。例外キューに3件の保留あり（うち1件が2時間超過中）。不正検知で2件を自動ブロック済みです。</p>
+            </div>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <div className="bg-blue-600 rounded-lg p-2 max-w-[200px]"><p className="text-xs text-white">例外キューの2時間超過の詳細を教えて</p></div>
+          </div>
+          <div className="flex gap-2">
+            <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs shrink-0">🤖</div>
+            <div className="bg-white rounded-lg p-2 border border-slate-200">
+              <p className="text-xs text-slate-700">例外キュー #1024 は加盟店「ディーライフ」の審査案件です。AI推薦は「承認」（信頼スコア 82/100）。中リスク判定の理由はカテゴリ初回申請のためです。早めの対応をお勧めします。</p>
+              <div className="flex gap-1 mt-1.5 border-t pt-1">
+                <button className="text-xs text-slate-400 hover:text-emerald-600">👍</button>
+                <button className="text-xs text-slate-400 hover:text-red-600">👎</button>
+                <button className="text-xs text-slate-400 hover:text-blue-600 ml-auto">📋</button>
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <div className="bg-blue-600 rounded-lg p-2 max-w-[200px]"><p className="text-xs text-white">加盟店 M-001 のステータスは？</p></div>
+          </div>
+          <div className="flex gap-2">
+            <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs shrink-0">🤖</div>
+            <div className="bg-white rounded-lg p-2 border border-slate-200">
+              <p className="text-xs text-slate-700 mb-1">加盟店 M-001 の情報です：</p>
+              <div className="bg-slate-50 rounded p-1.5 text-xs space-y-0.5">
+                <div className="flex justify-between"><span className="text-slate-400">加盟店名:</span><span className="font-bold">ABCマート</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">ステータス:</span><span className="font-bold text-emerald-600">有効</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">月間売上:</span><span>¥2.4M</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">成功率:</span><span>99.2%</span></div>
+              </div>
+              <div className="flex gap-1 mt-1.5 border-t pt-1">
+                <button className="text-xs text-slate-400 hover:text-emerald-600">👍</button>
+                <button className="text-xs text-slate-400 hover:text-red-600">👎</button>
+                <button className="text-xs text-slate-400 hover:text-blue-600 ml-auto">📋</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* 入力エリア */}
+        <div className="p-2 border-t bg-white flex gap-2">
+          <input className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="AIアシスタントに質問..." />
+          <button className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700">送信</button>
+        </div>
+      </div>
+    </div>
+
+    {/* ===== 右カラム: ダッシュボード本体 ===== */}
+    <div className="flex-1 space-y-4 min-w-0">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-slate-800">ダッシュボード</h2>
       <div className="flex gap-2">
@@ -254,39 +324,7 @@ const MasterDashboard = () => {
         ))}
       </div>
     </div>
-
-    {/* AIチャットサポート（ダッシュボード内） */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-      <div className="p-3 border-b bg-gradient-to-r from-blue-50 to-purple-50 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <span className="text-sm">💬</span>
-          <p className="text-xs font-bold text-blue-700">AIチャットサポート</p>
-          <Badge text="Claude 4 Opus" color="purple" />
-        </div>
-        <button className="text-xs text-blue-500 hover:text-blue-700 underline">全画面で開く →</button>
-      </div>
-      <div className="p-3 space-y-2 max-h-52 overflow-y-auto bg-slate-50">
-        <div className="flex gap-2">
-          <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs shrink-0">🤖</div>
-          <div className="bg-white rounded-lg p-2 border border-slate-200 max-w-sm">
-            <p className="text-xs text-slate-700">本日の状況をまとめました：取引量 1,247件（前日比+8%）、成功率 99.2%。例外キューに3件の保留あり（うち1件が2時間超過中）。不正検知で2件を自動ブロック済みです。</p>
-          </div>
-        </div>
-        <div className="flex gap-2 justify-end">
-          <div className="bg-blue-600 rounded-lg p-2 max-w-xs"><p className="text-xs text-white">例外キューの2時間超過の詳細を教えて</p></div>
-        </div>
-        <div className="flex gap-2">
-          <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs shrink-0">🤖</div>
-          <div className="bg-white rounded-lg p-2 border border-slate-200 max-w-sm">
-            <p className="text-xs text-slate-700">例外キュー #1024 は加盟店「ディーライフ」の審査案件です。AI推薦は「承認」（信頼スコア 82/100）。中リスク判定の理由はカテゴリ初回申請のためです。早めの対応をお勧めします。</p>
-          </div>
-        </div>
-      </div>
-      <div className="p-2 border-t bg-white flex gap-2">
-        <input className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="AIアシスタントに質問..." />
-        <button className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700">送信</button>
-      </div>
-    </div>
+    </div>{/* 右カラム終了 */}
 
     {/* KPIドリルダウンモーダル */}
     {showKpiDrill && kpiDrillData[showKpiDrill] && (
@@ -1793,124 +1831,6 @@ const MerchantAPISettings = () => {
 };
 
 // ─── S06: AIサポート ───
-// ─── M17: マスター管理 AIチャット ───
-const MasterAIChat = () => {
-  const [inputText, setInputText] = useState("");
-  const [showHistory, setShowHistory] = useState(false);
-  return (
-  <div className="p-4 flex gap-4 h-full">
-    <div className="flex-1 bg-white rounded-lg border flex flex-col">
-      <div className="p-3 border-b flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <p className="text-xs font-bold text-slate-700">💬 運営AIアシスタント</p>
-          <Badge text="Claude 4 Opus" color="purple" />
-        </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setShowHistory(!showHistory)} className={`text-xs px-2 py-1 rounded border ${showHistory ? "bg-blue-50 text-blue-600 border-blue-200" : "text-slate-400 border-slate-200 hover:bg-slate-50"}`}>📋 履歴</button>
-          <button className="text-xs px-2 py-1 rounded border text-slate-400 border-slate-200 hover:bg-slate-50">🔄 新規チャット</button>
-        </div>
-      </div>
-      <div className="flex flex-1 overflow-hidden">
-        {/* 会話履歴サイドバー */}
-        {showHistory && (
-          <div className="w-48 border-r bg-slate-50 overflow-y-auto p-2 space-y-1">
-            <p className="text-xs font-bold text-slate-500 px-1 mb-2">会話履歴</p>
-            {[["不正検知の状況確認", "今日 14:23"], ["加盟店M-001の照会", "今日 13:50"], ["精算バッチの確認", "昨日 16:30"], ["エラーE030の調査", "昨日 10:15"], ["月次レポート依頼", "2/15 09:00"]].map(([title, time], i) => (
-              <div key={i} className={`p-2 rounded text-xs cursor-pointer ${i === 0 ? "bg-white border border-blue-200" : "hover:bg-white"}`}>
-                <p className="font-bold text-slate-700 truncate">{title}</p>
-                <p className="text-slate-400">{time}</p>
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="flex-1 p-3 space-y-3 overflow-y-auto">
-          <div className="flex gap-2">
-            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
-            <div className="bg-slate-100 rounded-lg p-2 max-w-md">
-              <p className="text-xs text-slate-700">こんにちは！運営AIアシスタントです。管理画面の操作方法、加盟店情報の確認、決済状況の照会など、何でもお手伝いします。</p>
-              <p className="text-xs text-slate-400 mt-1">💡 ヒント: 「この画面の使い方」と聞くと、現在の画面の操作ガイドを表示します。</p>
-            </div>
-          </div>
-          <div className="flex gap-2 justify-end">
-            <div className="bg-blue-600 rounded-lg p-2 max-w-xs"><p className="text-xs text-white">今日の不正検知件数を教えて</p></div>
-          </div>
-          <div className="flex gap-2">
-            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
-            <div className="bg-slate-100 rounded-lg p-2 max-w-md">
-              <p className="text-xs text-slate-700 mb-2">本日（2/17）の不正検知サマリーです：</p>
-              <div className="bg-white rounded p-2 text-xs space-y-1">
-                <div className="flex justify-between"><span className="text-slate-500">検知総数:</span><span className="font-bold">12件</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">自動ブロック:</span><span className="font-bold text-rose-600">4件</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">例外キュー:</span><span className="font-bold text-amber-600">8件</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">誤検知率:</span><span className="text-emerald-600">3.8%</span></div>
-              </div>
-              <p className="text-xs text-slate-500 mt-2">例外キューに未対応が3件あります。<button className="text-blue-600 hover:underline ml-1">例外キューを開く →</button></p>
-              <div className="flex gap-1 mt-2 border-t pt-1.5">
-                <button className="text-xs text-slate-400 hover:text-emerald-600">👍</button>
-                <button className="text-xs text-slate-400 hover:text-red-600">👎</button>
-                <button className="text-xs text-slate-400 hover:text-blue-600 ml-auto">📋 コピー</button>
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-2 justify-end">
-            <div className="bg-blue-600 rounded-lg p-2 max-w-xs"><p className="text-xs text-white">加盟店 M-001 のステータスを教えて</p></div>
-          </div>
-          <div className="flex gap-2">
-            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
-            <div className="bg-slate-100 rounded-lg p-2 max-w-md">
-              <p className="text-xs text-slate-700 mb-2">加盟店 M-001 の情報です：</p>
-              <div className="bg-white rounded p-2 text-xs space-y-1">
-                <div className="flex justify-between"><span className="text-slate-500">加盟店名:</span><span className="font-bold">株式会社ABCマート</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">ステータス:</span><span className="font-bold text-emerald-600">有効</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">月間売上:</span><span>¥2,400,000</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">成功率:</span><span className="text-emerald-600">99.2%</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">CB率:</span><span>0.3%</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">接続先:</span><span>GMO-PG, 三井住友カード</span></div>
-              </div>
-              <div className="flex gap-2 mt-2">
-                <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">加盟店詳細を開く</button>
-                <button className="px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs">取引履歴を見る</button>
-              </div>
-              <div className="flex gap-1 mt-2 border-t pt-1.5">
-                <button className="text-xs text-slate-400 hover:text-emerald-600">👍</button>
-                <button className="text-xs text-slate-400 hover:text-red-600">👎</button>
-                <button className="text-xs text-slate-400 hover:text-blue-600 ml-auto">📋 コピー</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="p-3 border-t flex gap-2">
-        <button className="px-2 py-2 text-slate-400 border rounded-lg text-xs hover:bg-slate-50" title="画像ファイルを添付">📎</button>
-        <input value={inputText} onChange={e => setInputText(e.target.value)} className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="質問を入力... 例: 「精算管理の使い方」「エラーコード E030 とは？」" />
-        <button className={`px-3 py-2 rounded-lg text-xs font-semibold ${inputText ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-400"}`}>送信</button>
-      </div>
-      <div className="px-3 py-1.5 bg-slate-50 border-t text-xs text-slate-400 text-center">
-        💬 AIが管理画面の操作をリアルタイムでサポートします。画面の使い方、データの確認、設定変更のヘルプが可能です。
-      </div>
-    </div>
-    <div className="w-52">
-      <p className="text-xs font-bold text-slate-600 mb-2">クイックアクション</p>
-      <div className="space-y-1">
-        {["不正検知の状況は？", "今日の決済件数は？", "加盟店を検索して", "精算状況を確認", "システムの使い方", "エラーコードを調べる", "今月の売上レポート", "例外キューの状況"].map(q => (
-          <button key={q} onClick={() => setInputText(q)} className="w-full text-left text-xs bg-white border rounded p-2 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">{q}</button>
-        ))}
-      </div>
-      <div className="mt-4 p-2 bg-purple-50 rounded border border-purple-200">
-        <p className="text-xs font-bold text-purple-700 mb-1">🤖 AI機能</p>
-        <div className="space-y-1 text-xs text-purple-600">
-          <p>• 画面操作ヘルプ</p>
-          <p>• データ照会・集計</p>
-          <p>• エラーコード検索</p>
-          <p>• 設定変更ガイド</p>
-          <p>• レポート生成</p>
-        </div>
-      </div>
-    </div>
-  </div>
-  );
-};
-
 const MerchantAIChat = () => {
   const [inputText, setInputText] = useState("");
   const [showHistory, setShowHistory] = useState(false);
@@ -11157,7 +11077,6 @@ const masterMenuItems = [
   { id: "fraud", icon: "🛡️", label: "不正検知" },
   { separator: true, label: "AI・運用" },
   { id: "ai", icon: "🤖", label: "AI監視" },
-  { id: "master_chat", icon: "💬", label: "AIチャット" },
   { id: "users", icon: "👥", label: "スタッフ管理" },
   { id: "settings", icon: "⚙️", label: "システム設定" },
 ];
@@ -11217,7 +11136,6 @@ export default function Wireframes() {
       case "recurring": return <MasterRecurring />;
       case "agents": return <MasterAgents />;
       case "customers": return <MasterCustomers />;
-      case "master_chat": return <MasterAIChat />;
       default: return <div className="p-4 text-sm text-slate-400 flex items-center justify-center h-64">この画面は詳細設計フェーズで実装します</div>;
     }
   };
