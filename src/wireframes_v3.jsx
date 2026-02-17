@@ -118,7 +118,7 @@ const MasterDashboard = () => {
   const [showAllNotices, setShowAllNotices] = useState(false);
   const kpiDrillData = {
     "取引量": { value: "1,247件", details: [{ label: "VISA", value: "486件" }, { label: "Mastercard", value: "312件" }, { label: "JCB", value: "198件" }, { label: "AMEX", value: "89件" }, { label: "WEBマネー", value: "162件" }] },
-    "売上": { value: "¥16.2M", details: [{ label: "カード決済", value: "¥14.8M" }, { label: "WEBマネー", value: "¥1.4M" }] },
+    "決済高": { value: "¥16.2M", details: [{ label: "カード決済", value: "¥14.8M" }, { label: "WEBマネー", value: "¥1.4M" }] },
     "決済成功率": { value: "99.2%", details: [{ label: "VISA", value: "99.5%" }, { label: "Mastercard", value: "99.1%" }, { label: "JCB", value: "98.8%" }, { label: "AMEX", value: "99.7%" }] },
   };
 
@@ -174,7 +174,7 @@ const MasterDashboard = () => {
               <div className="bg-slate-50 rounded p-1.5 text-xs space-y-0.5">
                 <div className="flex justify-between"><span className="text-slate-400">加盟店名:</span><span className="font-bold">ABCマート</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">ステータス:</span><span className="font-bold text-emerald-600">有効</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">月間売上:</span><span>¥2.4M</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">月間決済高:</span><span>¥2.4M</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">成功率:</span><span>99.2%</span></div>
               </div>
               <div className="flex gap-1 mt-1.5 border-t pt-1">
@@ -278,7 +278,7 @@ const MasterDashboard = () => {
         </div>
       </div>
       <div className="flex gap-3">
-        {[{ label: "取引量", value: "1,247件", sub: "前日比", trend: 8 }, { label: "売上", value: "¥18.3M", sub: "前日比", trend: 12 }, { label: "決済成功率", value: "99.2%", sub: "目標: 99.0%", color: "green" }, { label: "チャージバック率", value: "0.03%", sub: "基準: 1.0%以下", color: "green" }, { label: "自動化率", value: "94.2%", sub: "目標: 95%", color: "purple" }].map((k, i) => (
+        {[{ label: "取引量", value: "1,247件", sub: "前日比", trend: 8 }, { label: "決済高", value: "¥18.3M", sub: "前日比", trend: 12 }, { label: "決済成功率", value: "99.2%", sub: "目標: 99.0%", color: "green" }, { label: "チャージバック率", value: "0.03%", sub: "基準: 1.0%以下", color: "green" }, { label: "自動化率", value: "94.2%", sub: "目標: 95%", color: "purple" }].map((k, i) => (
           <div key={i} onClick={() => kpiDrillData[k.label] && setShowKpiDrill(k.label)} className={`flex-1 ${kpiDrillData[k.label] ? "cursor-pointer hover:ring-2 hover:ring-blue-200 rounded-lg transition-all" : ""}`}>
             <KPICard label={k.label} value={k.value} sub={k.sub} trend={k.trend} color={k.color} />
           </div>
@@ -1216,7 +1216,7 @@ const MasterMerchants = () => {
       <div className="flex items-center gap-2 text-xs text-slate-400">
         <span>並び替え:</span>
         <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-200">
-          {{ id:"加盟店ID", name:"加盟店名", salesNum:"月間売上", cbNum:"CB率", successNum:"成功率", feeNum:"手数料", riskOrder:"リスク" }[sortKey] || sortKey}
+          {{ id:"加盟店ID", name:"加盟店名", salesNum:"月間決済高", cbNum:"CB率", successNum:"成功率", feeNum:"手数料", riskOrder:"リスク" }[sortKey] || sortKey}
           {sortDir === "asc" ? " ↑昇順" : " ↓降順"}
         </span>
         {sortKey !== "id" && (
@@ -1235,7 +1235,7 @@ const MasterMerchants = () => {
             { label: "リスク", w: "w-16", sortKey: "riskOrder" },
             { label: "サイト", w: "w-12" },
             { label: "接続先", w: "w-16" },
-            { label: "月間売上", w: "w-24", sortKey: "salesNum" },
+            { label: "月間決済高", w: "w-24", sortKey: "salesNum" },
             { label: "CB率", w: "w-16", sortKey: "cbNum" },
             { label: "成功率", w: "w-16", sortKey: "successNum" },
             { label: "手数料", w: "w-16", sortKey: "feeNum" },
@@ -1430,7 +1430,7 @@ const MasterMerchants = () => {
                   {/* AI Suggestion */}
                   {m.processors.filter(p => p.status === "approved").length === 1 && m.salesNum > 1000000 && (
                     <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded border border-blue-200 p-2 mt-2">
-                      <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI提案:</span> 月間売上{m.sales}の実績があります。接続先を追加すると、フェイルオーバーやコスト最適化のルーティングが可能になります。Worldpay接続の審査を推薦します。</p>
+                      <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI提案:</span> 月間決済高{m.sales}の実績があります。接続先を追加すると、フェイルオーバーやコスト最適化のルーティングが可能になります。Worldpay接続の審査を推薦します。</p>
                     </div>
                   )}
                   {m.processors.filter(p => p.status === "approved").length >= 3 && (
@@ -1489,7 +1489,7 @@ const MasterMerchants = () => {
               <div className="border-t pt-3">
                 <p className="text-xs font-bold text-slate-600 mb-2">取引統計</p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200"><span className="text-slate-400">月間売上</span><p className="font-bold">{slidePanel.sales}</p></div>
+                  <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200"><span className="text-slate-400">月間決済高</span><p className="font-bold">{slidePanel.sales}</p></div>
                   <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200"><span className="text-slate-400">成功率</span><p className="font-bold">{slidePanel.success}</p></div>
                   <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200"><span className="text-slate-400">CB率</span><p className="font-bold">{slidePanel.cb}</p></div>
                   <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200"><span className="text-slate-400">手数料</span><p className="font-bold">{slidePanel.fee}</p></div>
@@ -1626,7 +1626,7 @@ const MasterMerchants = () => {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600">月間予想売上 <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-semibold text-slate-600">月間予定決済高 <span className="text-rose-500">*</span></label>
                 <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="¥1,000,000" />
               </div>
               <div>
@@ -1970,11 +1970,11 @@ const MerchantDashboard = () => {
   const [showKpiDetail, setShowKpiDetail] = useState(null);
   const [showAllNotices, setShowAllNotices] = useState(false);
   const kpiData = {
-    "今月の売上": { value: "¥12.5M", trend: 18, details: [
+    "今月の決済高": { value: "¥12.5M", trend: 18, details: [
       { label: "カード決済", value: "¥9.75M", pct: "89%" },
       { label: "WEBマネー", value: "¥1.25M", pct: "11%" }
     ], chart: [8.2, 9.1, 10.5, 11.2, 10.8, 12.5] },
-    "今日の売上": { value: "¥412K", trend: 15, details: [
+    "今日の決済高": { value: "¥412K", trend: 15, details: [
       { label: "0-6時", value: "¥28K", pct: "7%" },
       { label: "6-12時", value: "¥95K", pct: "23%" },
       { label: "12-18時", value: "¥148K", pct: "36%" },
@@ -2085,7 +2085,7 @@ const MerchantDashboard = () => {
 
     <div className="flex gap-3">
       <div className="flex-1 bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <p className="text-xs font-bold text-slate-600 mb-2">売上推移（直近30日）</p>
+        <p className="text-xs font-bold text-slate-600 mb-2">決済高推移（直近30日）</p>
         <div className="flex items-center justify-center h-20">
           <MiniChart data={[280,310,295,340,380,350,420,390,410,380,420,450,412,440,470,430,460,480,450,490,510,480,520,540,510,550,530,560,580,550]} w={400} h={70} />
         </div>
@@ -2130,7 +2130,7 @@ const MerchantDashboard = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <p className="text-xs font-bold text-slate-600 mb-2">⚡ クイックアクション</p>
       <div className="flex gap-2">
-        {[["📋 注文一覧", "blue"], ["📊 売上レポート", "emerald"], ["⚙️ API設定", "slate"], ["💬 AIに相談", "purple"]].map(([label, color], i) => (
+        {[["📋 注文一覧", "blue"], ["📊 決済高レポート", "emerald"], ["⚙️ API設定", "slate"], ["💬 AIに相談", "purple"]].map(([label, color], i) => (
           <button key={i} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100`}>{label}</button>
         ))}
       </div>
@@ -3202,7 +3202,7 @@ const MasterMerchantApplications = () => {
               <p className="text-xs font-bold text-slate-600 mb-1">申込内容</p>
               <div className="text-xs space-y-1 text-slate-600">
                 <div>希望決済: VISA / MC / JCB</div>
-                <div>月間予想売上: ¥5M</div>
+                <div>月間予定決済高: ¥5M</div>
                 <div>平均単価: ¥15,000</div>
                 <div>サイトURL: techshop.jp</div>
                 <div>提出書類: 5/5 完了 ✅</div>
@@ -3398,7 +3398,7 @@ const MasterSettlement = () => {
         <button className="text-xs text-blue-600 hover:underline">全加盟店を表示 →</button>
       </div>
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-        <TableHeader cols={[{ label: "加盟店", w: "flex-1" }, { label: "売上総額", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "CB差引", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-28" }]}>
+        <TableHeader cols={[{ label: "加盟店", w: "flex-1" }, { label: "決済高", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "CB差引", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-28" }]}>
         {[
           { merchant: "M-001 ABCマート", sales: "¥4,200,000", fee: "¥127,500", cb: "¥0", hold: "¥420,000", release: "¥280,000", payout: "¥3,932,500" },
           { merchant: "M-002 XYZショップ", sales: "¥1,850,000", fee: "¥58,870", cb: "¥12,000", hold: "¥185,000", release: "¥92,000", payout: "¥1,686,130" },
@@ -3525,7 +3525,7 @@ const MasterSettlement = () => {
           <div className="p-4 space-y-4">
             <div className="flex items-center gap-2"><Badge text={selectedPayout.status} color={selectedPayout.sColor} /><span className="text-xs text-slate-400">{selectedPayout.period}</span></div>
             <div><p className="text-xs font-bold text-slate-700 mb-2">精算サマリー</p>
-              {[["売上総額", selectedPayout.sales], ["手数料合計", `-${selectedPayout.fee}`], ["CB差引", selectedPayout.cb !== "¥0" ? `-${selectedPayout.cb}` : "—"], ["リザーブ留保", `-${selectedPayout.reserve}`], ["入金額", selectedPayout.amount]].map(([l, v], i) => (
+              {[["決済高", selectedPayout.sales], ["手数料合計", `-${selectedPayout.fee}`], ["CB差引", selectedPayout.cb !== "¥0" ? `-${selectedPayout.cb}` : "—"], ["リザーブ留保", `-${selectedPayout.reserve}`], ["入金額", selectedPayout.amount]].map(([l, v], i) => (
                 <div key={i} className={`flex text-xs py-1 border-b ${i === 4 ? "font-bold text-slate-800" : ""}`}><span className="flex-1 text-slate-500">{l}</span><span className={i === 1 || i === 2 || i === 3 ? "text-rose-500" : ""}>{v}</span></div>
               ))}
             </div>
@@ -4792,7 +4792,7 @@ const MerchantPayouts = () => {
       </div>
       <div className="grid grid-cols-5 gap-3 text-xs">
         <div><span className="text-slate-500">精算期間:</span> <span className="font-semibold">02/04 〜 02/10</span></div>
-        <div><span className="text-slate-500">総売上:</span> <span className="font-semibold">¥1,290,000</span></div>
+        <div><span className="text-slate-500">総決済高:</span> <span className="font-semibold">¥1,290,000</span></div>
         <div><span className="text-slate-500">手数料:</span> <span className="text-rose-500">-¥41,280</span></div>
         <div><span className="text-slate-500">リザーブ留保:</span> <span className="text-purple-600">-¥129,000</span></div>
         <div><span className="text-slate-500">入金額:</span> <span className="font-bold text-blue-700">¥1,119,720</span></div>
@@ -4812,7 +4812,7 @@ const MerchantPayouts = () => {
 
     {/* Payout History */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-      <TableHeader cols={[{ label: "入金日", w: "w-20" }, { label: "精算期間", w: "w-32" }, { label: "総売上", w: "w-24" }, { label: "手数料", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-24" }, { label: "ステータス", w: "w-20" }, { label: "明細", w: "w-14" }]}>
+      <TableHeader cols={[{ label: "入金日", w: "w-20" }, { label: "精算期間", w: "w-32" }, { label: "総決済高", w: "w-24" }, { label: "手数料", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-24" }, { label: "ステータス", w: "w-20" }, { label: "明細", w: "w-14" }]}>
       {payoutData.map((p, i) => (
         <tr key={i} className={`border-b cursor-pointer hover:bg-blue-50 ${i % 2 ? "bg-slate-50" : ""}`} onClick={() => setSelectedPayout(p)}>
           <td className="px-4 py-2 whitespace-nowrap w-20 text-slate-600">{p.date}</td>
@@ -4961,7 +4961,7 @@ const MerchantPayouts = () => {
               <p className="text-xs font-bold text-slate-700 mb-2">精算サマリー</p>
               <div className="space-y-1.5 text-xs">
                 <div className="flex justify-between"><span className="text-slate-500">精算期間</span><span className="font-semibold">{selectedPayout.period}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">総売上</span><span className="font-semibold">{selectedPayout.sales}</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">総決済高</span><span className="font-semibold">{selectedPayout.sales}</span></div>
                 <div className="flex justify-between"><span className="text-rose-500">手数料</span><span className="text-rose-500">{selectedPayout.fee}</span></div>
                 <div className="flex justify-between"><span className="text-purple-500">リザーブ留保</span><span className="text-purple-500">{selectedPayout.hold}</span></div>
                 <div className="flex justify-between"><span className="text-emerald-600">リザーブ解放</span><span className="text-emerald-600">{selectedPayout.release}</span></div>
@@ -5126,12 +5126,13 @@ const MerchantApplicationForm = () => {
                 <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 03-1234-5678" />
               </div>
               <div>
-                <label className="text-xs text-slate-500 block mb-1">WebサイトURL *</label>
+                <label className="text-xs text-slate-500 block mb-1">WebサイトURL <span className="text-slate-400 text-[10px]">(任意)</span></label>
                 <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: https://example.jp" />
+                <span className="text-xs text-slate-400 mt-0.5">※ サイトがまだない場合は空欄でも申込可能です</span>
               </div>
             </div>
             <div className="bg-blue-50 rounded p-2 border border-blue-200">
-              <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI審査のポイント:</span> 法人番号を入力すると、国税庁データベースと自動照合します。WebサイトURLからサイト内容のAI解析も自動で行います。</p>
+              <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI審査のポイント:</span> 法人番号を入力すると、国税庁データベースと自動照合します。WebサイトURLが入力されている場合、サイト内容のAI解析も自動で行います。</p>
             </div>
             <div className="flex justify-end gap-2 pt-2 border-t">
               <button onClick={() => setStep(1)} className="px-6 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">次へ: 事業内容 →</button>
@@ -5170,7 +5171,7 @@ const MerchantApplicationForm = () => {
                 </select>
               </div>
               <div>
-                <label className="text-xs text-slate-500 block mb-1">月間予想売上 *</label>
+                <label className="text-xs text-slate-500 block mb-1">月間予定決済高 *</label>
                 <select className="w-full text-xs border rounded px-3 py-2">
                   <option>選択してください</option>
                   <option>〜¥500,000</option>
@@ -8435,7 +8436,7 @@ const MasterReport = () => {
             {showReportModal === "custom" && (<>
               <div><label className="text-xs font-semibold text-slate-600">レポート名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="カスタムレポート名" /></div>
               <div><label className="text-xs font-semibold text-slate-600">含める項目 <span className="text-rose-500">*</span></label>
-                <div className="flex flex-wrap gap-2 mt-1">{["取引数","売上金額","手数料","CB件数","不正検知","接続先別","加盟店別","時間帯別"].map((c,i) => <label key={i} className="flex items-center gap-1 text-xs border rounded px-2 py-1 cursor-pointer hover:bg-blue-50"><input type="checkbox" defaultChecked={i<4} />{c}</label>)}</div>
+                <div className="flex flex-wrap gap-2 mt-1">{["取引数","決済高","手数料","CB件数","不正検知","接続先別","加盟店別","時間帯別"].map((c,i) => <label key={i} className="flex items-center gap-1 text-xs border rounded px-2 py-1 cursor-pointer hover:bg-blue-50"><input type="checkbox" defaultChecked={i<4} />{c}</label>)}</div>
               </div>
               <div><label className="text-xs font-semibold text-slate-600">グラフ種別</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>折れ線グラフ</option><option>棒グラフ</option><option>円グラフ</option><option>表のみ</option></select></div>
             </>)}
@@ -8451,7 +8452,116 @@ const MasterReport = () => {
   );
 };
 
-// ─── S03: 売上レポート ───
+// ─── 新規サイト申請（加盟店管理画面） ───
+const MerchantSiteApplication = () => {
+  const [submitted, setSubmitted] = useState(false);
+  const siteHistory = [
+    { id: "SITE-2026-003", name: "新ECサイト", url: "https://new-shop.example.jp", date: "2026-02-15", status: "審査中", genre: "物販EC" },
+    { id: "SITE-2026-002", name: "会員限定ショップ", url: "https://members.abcmart-ec.jp", date: "2026-01-20", status: "承認済", genre: "物販EC" },
+    { id: "SITE-2026-001", name: "本店ECサイト", url: "https://abcmart-ec.jp", date: "2025-06-01", status: "稼働中", genre: "家電・ガジェットEC" },
+  ];
+  return <div className="p-5 space-y-4">
+    <div className="flex justify-between items-center">
+      <h2 className="text-sm font-bold text-slate-800">新規サイト申請</h2>
+      <span className="text-xs text-slate-400">新しいサイトを追加し、決済審査を申請できます</span>
+    </div>
+
+    {/* 申請フォーム */}
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+      <p className="text-xs font-bold text-slate-700 mb-3 border-b pb-2">📝 新規サイト審査申請</p>
+      {submitted ? (
+        <div className="text-center py-8">
+          <div className="text-3xl mb-2">✅</div>
+          <p className="text-sm font-bold text-emerald-600">申請が送信されました！</p>
+          <p className="text-xs text-slate-500 mt-1">運営による審査が開始されます。通常1〜3営業日で結果をお知らせします。</p>
+          <button onClick={() => setSubmitted(false)} className="mt-3 px-4 py-1.5 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">新しい申請を作成</button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">サイト名 *</label>
+              <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 新ECサイト" />
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">サイトURL <span className="text-slate-400 text-[10px]">(任意)</span></label>
+              <input className="w-full text-xs border rounded px-3 py-2" placeholder="例: https://new-shop.example.jp" />
+              <span className="text-xs text-slate-400">※ 準備中の場合は空欄でも申請可能</span>
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">ジャンル *</label>
+              <select className="w-full text-xs border rounded px-3 py-2">
+                <option>選択してください</option>
+                <option>物販EC（衣料・雑貨）</option>
+                <option>物販EC（家電・ガジェット）</option>
+                <option>デジタルコンテンツ</option>
+                <option>サブスクリプション</option>
+                <option>旅行・宿泊</option>
+                <option>飲食・デリバリー</option>
+                <option>教育・スクール</option>
+                <option>美容・健康</option>
+                <option>その他</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">月間予定決済高 *</label>
+              <select className="w-full text-xs border rounded px-3 py-2">
+                <option>選択してください</option>
+                <option>〜¥500,000</option>
+                <option>¥500,000〜¥1,000,000</option>
+                <option>¥1,000,000〜¥5,000,000</option>
+                <option>¥5,000,000〜¥10,000,000</option>
+                <option>¥10,000,000以上</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-slate-500 block mb-1">希望決済手段</label>
+            <div className="flex gap-3 mt-1">
+              {["クレジットカード（VISA/MC/JCB/AMEX）", "WEBマネー"].map((m, i) => (
+                <label key={i} className="flex items-center gap-1.5 text-xs"><input type="checkbox" defaultChecked={i === 0} />{m}</label>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-slate-500 block mb-1">取扱商品・サービスの説明</label>
+            <textarea className="w-full text-xs border rounded px-3 py-2 h-16 resize-none" placeholder="新サイトで扱う商品やサービスの概要を記入してください" />
+          </div>
+          <div className="bg-blue-50 rounded p-2 border border-blue-200">
+            <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI審査:</span> 申請後、サイトURLが入力されている場合はAIによるサイト内容の自動解析が行われます。審査結果は通常1〜3営業日でお知らせします。</p>
+          </div>
+          <div className="flex justify-end gap-2 pt-2 border-t">
+            <button onClick={() => setSubmitted(true)} className="px-6 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">🚀 審査を申請する</button>
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* 申請履歴 */}
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+      <p className="text-xs font-bold text-slate-700 mb-3">📋 サイト申請履歴</p>
+      <table className="w-full text-xs">
+        <thead><tr className="border-b text-left text-slate-500">
+          <th className="pb-2 px-2">申請ID</th><th className="pb-2 px-2">サイト名</th><th className="pb-2 px-2">URL</th><th className="pb-2 px-2">ジャンル</th><th className="pb-2 px-2">申請日</th><th className="pb-2 px-2">ステータス</th>
+        </tr></thead>
+        <tbody>
+          {siteHistory.map((s, i) => (
+            <tr key={i} className="border-b hover:bg-slate-50">
+              <td className="py-2 px-2 text-blue-600 font-mono">{s.id}</td>
+              <td className="py-2 px-2 font-semibold">{s.name}</td>
+              <td className="py-2 px-2 text-slate-400">{s.url}</td>
+              <td className="py-2 px-2">{s.genre}</td>
+              <td className="py-2 px-2 text-slate-400">{s.date}</td>
+              <td className="py-2 px-2"><Badge text={s.status} color={s.status === "稼働中" ? "green" : s.status === "承認済" ? "blue" : "amber"} /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>;
+};
+
+// ─── S03: 決済高レポート ───
 const MerchantSalesReport = () => {
   const [period, setPeriod] = useState("thisMonth");
   const [selectedTx, setSelectedTx] = useState(null);
@@ -8467,7 +8577,7 @@ const MerchantSalesReport = () => {
   return (
   <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
-      <h2 className="text-sm font-bold text-slate-800">売上レポート</h2>
+      <h2 className="text-sm font-bold text-slate-800">決済高レポート</h2>
       <div className="flex gap-2">
         <select className="text-xs border rounded px-2 py-1" value={period} onChange={e => setPeriod(e.target.value)}><option value="thisMonth">今月（2026年2月）</option><option value="lastMonth">先月（2026年1月）</option><option value="custom">カスタム</option></select>
         {period === "custom" && <><input type="date" className="text-xs border rounded px-2 py-1" /><span className="text-xs text-slate-400">〜</span><input type="date" className="text-xs border rounded px-2 py-1" /></>}
@@ -8478,7 +8588,7 @@ const MerchantSalesReport = () => {
 
     {/* KPIs */}
     <div className="flex gap-3">
-      <KPICard label="今月の売上" value="¥4.8M" sub="前月比" trend={15} />
+      <KPICard label="今月の決済高" value="¥4.8M" sub="前月比" trend={15} />
       <KPICard label="決済件数" value="342件" sub="前月比" trend={8} />
       <KPICard label="平均単価" value="¥14,035" sub="前月比" trend={6} />
       <KPICard label="成功率" value="98.5%" sub="" color="green" />
@@ -8487,7 +8597,7 @@ const MerchantSalesReport = () => {
 
     {/* Daily Chart */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-700 mb-2">📊 日別売上推移（2026年2月）</p>
+      <p className="text-xs font-bold text-slate-700 mb-2">📊 日別決済高推移（2026年2月）</p>
       <div className="flex items-end gap-1 h-32">
         {[320, 410, 380, 520, 480, 120, 90, 450, 510, 490, 560].map((v, i) => (
           <div key={i} className="flex-1 flex flex-col items-center">
@@ -9022,11 +9132,11 @@ const MerchantPaymentLinks = () => {
             <KPICard label="総リンク数" value="24" color="green" />
             <KPICard label="アクティブ" value="18" color="blue" />
             <KPICard label="総利用回数" value="1,247" color="green" />
-            <KPICard label="総売上額" value="¥4,823,600" color="green" />
+            <KPICard label="総決済高" value="¥4,823,600" color="green" />
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 overflow-x-auto">
             <p className="text-xs font-bold mb-2">リンク別実績</p>
-            <TableHeader cols={[{ label: "商品名", w: "flex-1" }, { label: "利用回数", w: "w-20" }, { label: "売上額", w: "w-24" }, { label: "成功率", w: "w-16" }, { label: "最終利用日", w: "w-24" }]}>
+            <TableHeader cols={[{ label: "商品名", w: "flex-1" }, { label: "利用回数", w: "w-20" }, { label: "決済高", w: "w-24" }, { label: "成功率", w: "w-16" }, { label: "最終利用日", w: "w-24" }]}>
             {[["プレミアムプラン", "842", "¥8,251,600", "98.2%", "2026-02-13"], ["寄付金", "245", "¥1,230,000", "96.7%", "2026-02-12"], ["コース選択", "160", "¥960,000", "97.5%", "2026-02-11"]].map((r, i) => (
               <tr key={i} className="border-b">
                 <td className="px-4 py-2 whitespace-nowrap">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-20">{r[1]}</td><td className="px-4 py-2 whitespace-nowrap w-24 font-bold">{r[2]}</td><td className="px-4 py-2 whitespace-nowrap w-16 text-emerald-600">{r[3]}</td><td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{r[4]}</td>
@@ -9106,7 +9216,7 @@ const MerchantPaymentLinks = () => {
                   { label: "金額", value: selectedLink.amt },
                   { label: "利用回数", value: selectedLink.uses },
                   { label: "成功率", value: selectedLink.successRate },
-                  { label: "総売上", value: selectedLink.totalSales },
+                  { label: "総決済高", value: selectedLink.totalSales },
                   { label: "作成日", value: selectedLink.created },
                   { label: "有効期限", value: selectedLink.expires },
                 ].map((s, i) => (
@@ -11038,7 +11148,7 @@ const AgentReferral = () => {
     <div className="grid grid-cols-2 gap-4">
       <div className="bg-white rounded-lg border p-4 space-y-3">
         <p className="text-xs font-bold">新規加盟店 紹介申請</p>
-        {["法人名 *", "代表者名 *", "担当者名 *", "担当者メール *", "担当者電話 *", "サイトURL *", "月間予想売上 *"].map(f => (
+        {["法人名 *", "代表者名 *", "担当者名 *", "担当者メール *", "担当者電話 *", "サイトURL *", "月間予定決済高 *"].map(f => (
           <div key={f}><label className="text-xs text-slate-500">{f}</label><input className="w-full border rounded px-2 py-1.5 text-xs mt-0.5" /></div>
         ))}
         <div><label className="text-xs text-slate-500">業種</label><select className="w-full border rounded px-2 py-1.5 text-xs mt-0.5"><option>選択してください</option><option>EC物販</option><option>デジタルコンテンツ</option><option>サービス業</option></select></div>
@@ -11063,7 +11173,7 @@ const AgentReferral = () => {
         </div>
         <div className="bg-orange-50 border border-orange-200 rounded p-3 text-xs text-orange-700">
           <p className="font-bold">📊 紹介のポイント</p>
-          <p className="mt-1">月間予想売上が高い加盟店ほど審査が通りやすい傾向があります。サイトURLは正確に入力してください。</p>
+          <p className="mt-1">月間予定決済高が高い加盟店ほど審査が通りやすい傾向があります。サイトURLは正確に入力してください。</p>
         </div>
       </div>
     </div>
@@ -11084,7 +11194,7 @@ const AgentReferral = () => {
             </div>
             <div className="space-y-2">
               <p className="text-xs font-bold text-slate-700">入力内容サマリー</p>
-              {[["法人名", "（入力値）"], ["代表者名", "（入力値）"], ["担当者メール", "（入力値）"], ["サイトURL", "（入力値）"], ["月間予想売上", "（入力値）"], ["業種", "（選択値）"]].map(([l, v], i) => (
+              {[["法人名", "（入力値）"], ["代表者名", "（入力値）"], ["担当者メール", "（入力値）"], ["サイトURL", "（入力値）"], ["月間予定決済高", "（入力値）"], ["業種", "（選択値）"]].map(([l, v], i) => (
                 <div key={i} className="flex text-xs border-b pb-1"><span className="w-28 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
               ))}
             </div>
@@ -11117,7 +11227,7 @@ const AgentReferral = () => {
             <div>
               <p className="text-xs font-bold text-slate-700 mb-2">基本情報</p>
               <div className="space-y-1.5">
-                {[["法人名", selectedReferral.corp], ["代表者", selectedReferral.rep], ["メール", selectedReferral.email], ["電話", selectedReferral.tel], ["サイトURL", selectedReferral.url], ["月間予想売上", selectedReferral.sales], ["業種", selectedReferral.industry]].map(([l, v], i) => (
+                {[["法人名", selectedReferral.corp], ["代表者", selectedReferral.rep], ["メール", selectedReferral.email], ["電話", selectedReferral.tel], ["サイトURL", selectedReferral.url], ["月間予定決済高", selectedReferral.sales], ["業種", selectedReferral.industry]].map(([l, v], i) => (
                   <div key={i} className="flex text-xs"><span className="w-24 text-slate-400">{l}</span><span className="font-bold text-slate-700">{v}</span></div>
                 ))}
               </div>
@@ -12296,9 +12406,11 @@ const merchantMenuItems = [
   { separator: true, label: "集金ツール" },
   { id: "m_links", icon: "🔗", label: "決済リンク" },
   { id: "m_subscriptions", icon: "🔄", label: "決済管理" },
-  { separator: true, label: "売上" },
-  { id: "m_report", icon: "📈", label: "売上レポート" },
+  { separator: true, label: "決済高" },
+  { id: "m_report", icon: "📈", label: "決済高レポート" },
   { id: "m_payout", icon: "💰", label: "入金確認" },
+  { separator: true, label: "サイト管理" },
+  { id: "m_site_apply", icon: "📝", label: "新規サイト申請" },
   { separator: true, label: "設定" },
   { id: "m_api", icon: "🔧", label: "API・Webhook" },
   { id: "m_users", icon: "👥", label: "スタッフ管理" },
@@ -12361,6 +12473,7 @@ export default function Wireframes() {
       case "m_links": return <MerchantPaymentLinks />;
       case "m_subscriptions": return <MerchantSubscriptions />;
       case "m_customers": return <MerchantCustomers />;
+      case "m_site_apply": return <MerchantSiteApplication />;
       default: return <div className="p-4 text-sm text-slate-400 flex items-center justify-center h-64">この画面は詳細設計フェーズで実装します</div>;
     }
   };
