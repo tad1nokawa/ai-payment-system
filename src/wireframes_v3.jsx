@@ -440,6 +440,7 @@ const MasterMerchants = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showConfirm, setShowConfirm] = useState(null);
   const [showProcApply, setShowProcApply] = useState(false);
+  const [m03Tab, setM03Tab] = useState("merchants");
 
   const handleSort = (key) => {
     if (sortKey === key) {
@@ -485,6 +486,79 @@ const MasterMerchants = () => {
         </div>
       </div>
 
+      {/* Tabs: 加盟店一覧 / サイト管理 */}
+      <div className="flex gap-1 border-b">
+        {[{ id: "merchants", label: "加盟店一覧" }, { id: "sites", label: "サイト管理" }].map(t => (
+          <button key={t.id} onClick={() => setM03Tab(t.id)} className={`text-xs px-3 py-2 border-b-2 ${m03Tab === t.id ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        ))}
+      </div>
+
+      {/* ===== サイト管理タブ ===== */}
+      {m03Tab === "sites" && (
+        <div className="space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-xs font-bold text-slate-600">サイト管理</p>
+              <div className="flex gap-2">
+                <button className="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded border border-amber-200 font-semibold">⏸ 一括停止</button>
+                <button className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded border border-purple-200 font-semibold">🏦 口座一括変更</button>
+              </div>
+            </div>
+            <div className="grid grid-cols-5 gap-2 mb-3">
+              <div><label className="text-xs text-slate-400">サイトID</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="SITE-..." /></div>
+              <div><label className="text-xs text-slate-400">サイト名</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="サイト名で検索" /></div>
+              <div><label className="text-xs text-slate-400">加盟店名</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="加盟店で絞込" /></div>
+              <div><label className="text-xs text-slate-400">利用状態</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>有効</option><option>停止</option><option>テスト</option></select></div>
+              <div className="flex items-end"><button className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+            <div className="px-3 py-2 border-b text-xs text-slate-400">検索結果: 12件</div>
+            <table className="w-full text-xs">
+              <thead><tr className="bg-slate-50 border-b">
+                <th className="text-left p-2 text-slate-500 font-semibold"><input type="checkbox" className="w-3 h-3" /></th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-20">サイトID</th>
+                <th className="text-left p-2 text-slate-500 font-semibold">サイト名</th>
+                <th className="text-left p-2 text-slate-500 font-semibold">加盟店</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-40">URL</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-12">3DS</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-16">リカーリング</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-12">IP制限</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-28">契約ブランド</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-16">状態</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-16">操作</th>
+              </tr></thead>
+              <tbody>
+                {[
+                  { id: "SITE-001", name: "ABCマート本店", merchant: "ABCマート", url: "abc-mart.co.jp", tds: true, rec: true, ip: true, brands: "V/M/J", status: "有効", sColor: "green" },
+                  { id: "SITE-002", name: "ABCマートEC", merchant: "ABCマート", url: "ec.abc-mart.co.jp", tds: true, rec: false, ip: false, brands: "V/M/J/A", status: "有効", sColor: "green" },
+                  { id: "SITE-003", name: "XYZショップ", merchant: "XYZ商事", url: "xyz-shop.jp", tds: true, rec: true, ip: false, brands: "V/M", status: "有効", sColor: "green" },
+                  { id: "SITE-004", name: "トラベルプラス国内", merchant: "トラベルプラス", url: "travel-plus.jp", tds: true, rec: false, ip: true, brands: "V/M/J/A/D", status: "有効", sColor: "green" },
+                  { id: "SITE-005", name: "トラベルプラス海外", merchant: "トラベルプラス", url: "intl.travel-plus.jp", tds: true, rec: false, ip: true, brands: "V/M/A", status: "停止", sColor: "red" },
+                  { id: "SITE-006", name: "スタイルプラス", merchant: "スタイルプラス", url: "style-plus.co.jp", tds: false, rec: true, ip: false, brands: "V/M/J", status: "有効", sColor: "green" },
+                ].map((s, i) => (
+                  <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50`}>
+                    <td className="p-2"><input type="checkbox" className="w-3 h-3" /></td>
+                    <td className="p-2 font-mono text-slate-500">{s.id}</td>
+                    <td className="p-2 text-slate-700 font-semibold">{s.name}</td>
+                    <td className="p-2 text-slate-600">{s.merchant}</td>
+                    <td className="p-2 text-blue-600 font-mono text-xs truncate max-w-[10rem]">{s.url}</td>
+                    <td className="p-2 text-center">{s.tds ? "✅" : "—"}</td>
+                    <td className="p-2 text-center">{s.rec ? "✅" : "—"}</td>
+                    <td className="p-2 text-center">{s.ip ? "🔒" : "—"}</td>
+                    <td className="p-2"><span className="text-xs text-slate-600">{s.brands}</span></td>
+                    <td className="p-2 text-center"><Badge text={s.status} color={s.sColor} /></td>
+                    <td className="p-2 text-center"><button className="text-blue-600 hover:underline text-xs">詳細</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ===== 加盟店一覧タブ ===== */}
+      {m03Tab === "merchants" && (<>
       {/* Sort indicator */}
       <div className="flex items-center gap-2 text-xs text-slate-400">
         <span>並び替え:</span>
@@ -835,6 +909,7 @@ const MasterMerchants = () => {
           </div>
         </div>
       )}
+      </>)}
     </div>
   );
 };
@@ -1119,6 +1194,114 @@ const MerchantAPISettings = () => (
 );
 
 // ─── S06: AIサポート ───
+// ─── M17: マスター管理 AIチャット ───
+const MasterAIChat = () => (
+  <div className="p-4 flex gap-4 h-full">
+    <div className="flex-1 bg-white rounded-lg border flex flex-col">
+      <div className="p-3 border-b flex justify-between items-center">
+        <p className="text-xs font-bold text-slate-700">💬 運営AIアシスタント</p>
+        <Badge text="Claude 4 Opus" color="purple" />
+      </div>
+      <div className="flex-1 p-3 space-y-3 overflow-y-auto">
+        <div className="flex gap-2">
+          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+          <div className="bg-slate-100 rounded-lg p-2 max-w-md">
+            <p className="text-xs text-slate-700">こんにちは！運営AIアシスタントです。管理画面の操作方法、加盟店情報の確認、決済状況の照会など、何でもお手伝いします。</p>
+            <p className="text-xs text-slate-400 mt-1">💡 ヒント: 「この画面の使い方」と聞くと、現在の画面の操作ガイドを表示します。</p>
+          </div>
+        </div>
+        <div className="flex gap-2 justify-end">
+          <div className="bg-blue-600 rounded-lg p-2 max-w-xs">
+            <p className="text-xs text-white">今日の不正検知件数を教えて</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+          <div className="bg-slate-100 rounded-lg p-2 max-w-md">
+            <p className="text-xs text-slate-700 mb-2">本日（2/17）の不正検知サマリーです：</p>
+            <div className="bg-white rounded p-2 text-xs space-y-1">
+              <div className="flex justify-between"><span className="text-slate-500">検知総数:</span><span className="font-bold">12件</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">自動ブロック:</span><span className="font-bold text-rose-600">4件</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">例外キュー:</span><span className="font-bold text-amber-600">8件</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">誤検知率:</span><span className="text-emerald-600">3.8%</span></div>
+            </div>
+            <p className="text-xs text-slate-500 mt-2">例外キューに未対応が3件あります。<button className="text-blue-600 hover:underline ml-1">例外キューを開く →</button></p>
+          </div>
+        </div>
+        <div className="flex gap-2 justify-end">
+          <div className="bg-blue-600 rounded-lg p-2 max-w-xs">
+            <p className="text-xs text-white">加盟店 M-001 のステータスを教えて</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+          <div className="bg-slate-100 rounded-lg p-2 max-w-md">
+            <p className="text-xs text-slate-700 mb-2">加盟店 M-001 の情報です：</p>
+            <div className="bg-white rounded p-2 text-xs space-y-1">
+              <div className="flex justify-between"><span className="text-slate-500">加盟店名:</span><span className="font-bold">株式会社ABCマート</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">ステータス:</span><span className="font-bold text-emerald-600">有効</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">月間売上:</span><span>¥2,400,000</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">成功率:</span><span className="text-emerald-600">99.2%</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">CB率:</span><span>0.3%</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">接続先:</span><span>GMO-PG, 三井住友カード</span></div>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">加盟店詳細を開く</button>
+              <button className="px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs">取引履歴を見る</button>
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2 justify-end">
+          <div className="bg-blue-600 rounded-lg p-2 max-w-xs">
+            <p className="text-xs text-white">不正検知設定の使い方を教えて</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+          <div className="bg-slate-100 rounded-lg p-2 max-w-md">
+            <p className="text-xs text-slate-700 mb-2">📖 <strong>不正検知設定</strong>の使い方ガイド：</p>
+            <div className="bg-blue-50 rounded p-2 text-xs space-y-1.5 border border-blue-200">
+              <p><strong>1. ルール管理タブ</strong> — 検知ルールの追加・編集・優先度設定</p>
+              <p><strong>2. AIモデル設定タブ</strong> — AI判定の閾値調整（ブロック/要確認）</p>
+              <p><strong>3. ブロック/ホワイトリスト</strong> — BIN・IP・カード番号の手動登録</p>
+              <p><strong>4. CSVインポートタブ</strong> — 制限リストのCSV一括登録</p>
+              <p><strong>5. 検知ログ</strong> — 過去の検知履歴と判定結果の確認</p>
+              <p><strong>6. 加盟店別設定</strong> — 業態に合わせた閾値のカスタマイズ</p>
+            </div>
+            <p className="text-xs text-slate-400 mt-2">⚠️ ルール変更はadmin→super_adminの2段階承認が必要です。</p>
+          </div>
+        </div>
+      </div>
+      <div className="p-3 border-t flex gap-2">
+        <button className="px-2 py-2 text-slate-400 border rounded-lg text-xs hover:bg-slate-50" title="画像ファイルを添付">📎</button>
+        <input className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="質問を入力... 例: 「精算管理の使い方」「エラーコード E030 とは？」" />
+        <button className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold">送信</button>
+      </div>
+      <div className="px-3 py-1.5 bg-slate-50 border-t text-xs text-slate-400 text-center">
+        💬 AIが管理画面の操作をリアルタイムでサポートします。画面の使い方、データの確認、設定変更のヘルプが可能です。
+      </div>
+    </div>
+    <div className="w-52">
+      <p className="text-xs font-bold text-slate-600 mb-2">クイックアクション</p>
+      <div className="space-y-1">
+        {["不正検知の状況は？", "今日の決済件数は？", "加盟店を検索して", "精算状況を確認", "システムの使い方", "エラーコードを調べる", "今月の売上レポート", "例外キューの状況"].map(q => (
+          <button key={q} className="w-full text-left text-xs bg-white border rounded p-2 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">{q}</button>
+        ))}
+      </div>
+      <div className="mt-4 p-2 bg-purple-50 rounded border border-purple-200">
+        <p className="text-xs font-bold text-purple-700 mb-1">🤖 AI機能</p>
+        <div className="space-y-1 text-xs text-purple-600">
+          <p>• 画面操作ヘルプ</p>
+          <p>• データ照会・集計</p>
+          <p>• エラーコード検索</p>
+          <p>• 設定変更ガイド</p>
+          <p>• レポート生成</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const MerchantAIChat = () => (
   <div className="p-4 flex gap-4 h-full">
     <div className="flex-1 bg-white rounded-lg border flex flex-col">
@@ -1894,7 +2077,7 @@ const MasterSystemSettings = () => {
 
     {/* Tab navigation */}
     <div className="flex gap-1 border-b">
-      {["決済手段", "接続先管理", "通知設定", "API設定", "セキュリティ"].map((tab, i) => (
+      {["決済手段", "接続先管理", "通知設定", "API設定", "セキュリティ", "エラーコード", "お知らせ管理", "操作ログ"].map((tab, i) => (
         <button key={i} onClick={() => setSysTab(i)} className={`text-xs px-3 py-2 border-b-2 ${sysTab === i ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-slate-400 hover:text-slate-600"}`}>{tab}</button>
       ))}
     </div>
@@ -2501,6 +2684,177 @@ const MasterSystemSettings = () => {
             <span className="flex-1 text-slate-500">{l.detail}</span>
           </div>
         ))}
+      </div>
+    </div>
+    </>)}
+
+    {/* ─── Tab 5: エラーコード一覧 ─── */}
+    {sysTab === 5 && (<>
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="flex justify-between items-center mb-3">
+        <p className="text-xs font-bold text-slate-600">エラーコード一覧</p>
+        <div className="flex gap-2 items-center">
+          <input className="text-xs border rounded px-2 py-1.5 w-56" placeholder="コード or メッセージで検索..." />
+          <select className="text-xs border rounded px-2 py-1.5"><option>全カテゴリ</option><option>認証エラー</option><option>通信エラー</option><option>カードエラー</option><option>3DSエラー</option><option>システムエラー</option></select>
+          <button className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">検索</button>
+        </div>
+      </div>
+      <div className="text-xs text-slate-400 mb-2">全 287件 表示: 1-20件（1/15ページ）</div>
+      <table className="w-full text-xs">
+        <thead><tr className="bg-slate-50 border-b">
+          <th className="text-left p-2 text-slate-500 font-semibold w-24">コード</th>
+          <th className="text-left p-2 text-slate-500 font-semibold w-24">カテゴリ</th>
+          <th className="text-left p-2 text-slate-500 font-semibold">メッセージ（日本語）</th>
+          <th className="text-left p-2 text-slate-500 font-semibold w-48">対処法</th>
+          <th className="text-center p-2 text-slate-500 font-semibold w-16">API</th>
+          <th className="text-center p-2 text-slate-500 font-semibold w-16">リンク決済</th>
+        </tr></thead>
+        <tbody>
+          {[
+            { code: "E001", cat: "認証", msg: "カード番号が不正です", fix: "カード番号を再確認", api: true, link: true },
+            { code: "E002", cat: "認証", msg: "有効期限切れ", fix: "有効なカードを使用", api: true, link: true },
+            { code: "E003", cat: "認証", msg: "セキュリティコード不一致", fix: "CVV/CVCを再確認", api: true, link: true },
+            { code: "E010", cat: "3DS", msg: "3Dセキュア認証失敗", fix: "カード発行会社に確認", api: true, link: true },
+            { code: "E011", cat: "3DS", msg: "3Dセキュアタイムアウト", fix: "再試行を案内", api: true, link: true },
+            { code: "E020", cat: "カード", msg: "利用限度額超過", fix: "利用限度額の引上げ", api: true, link: true },
+            { code: "E021", cat: "カード", msg: "カード取扱不可", fix: "別のカードを使用", api: true, link: true },
+            { code: "E022", cat: "カード", msg: "暗証番号エラー", fix: "暗証番号を再確認", api: false, link: false },
+            { code: "E030", cat: "通信", msg: "接続先タイムアウト", fix: "時間を置いて再試行", api: true, link: false },
+            { code: "E031", cat: "通信", msg: "接続先応答エラー", fix: "接続先の状態を確認", api: true, link: false },
+            { code: "E040", cat: "システム", msg: "内部処理エラー", fix: "システム管理者に連絡", api: true, link: true },
+            { code: "E041", cat: "システム", msg: "二重処理検知", fix: "取引結果を確認", api: true, link: false },
+            { code: "E050", cat: "カード", msg: "取引拒否（不正検知）", fix: "不正検知ルールを確認", api: true, link: true },
+            { code: "E051", cat: "カード", msg: "ブロックリスト一致", fix: "制限リストを確認", api: true, link: true },
+            { code: "E060", cat: "認証", msg: "加盟店認証失敗", fix: "APIキーを再確認", api: true, link: false },
+            { code: "E070", cat: "通信", msg: "リクエスト形式不正", fix: "APIドキュメント参照", api: true, link: false },
+            { code: "E080", cat: "3DS", msg: "3DSバージョン非対応", fix: "対応バージョンを確認", api: true, link: true },
+            { code: "E090", cat: "システム", msg: "メンテナンス中", fix: "メンテナンス終了後に再試行", api: true, link: true },
+            { code: "E091", cat: "システム", msg: "レートリミット超過", fix: "リクエスト頻度を調整", api: true, link: false },
+            { code: "E100", cat: "カード", msg: "無効なトークン", fix: "トークンを再取得", api: true, link: false },
+          ].map((e, i) => (
+            <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50`}>
+              <td className="p-2 font-mono font-bold text-blue-600">{e.code}</td>
+              <td className="p-2"><Badge text={e.cat} color={e.cat === "認証" ? "blue" : e.cat === "3DS" ? "purple" : e.cat === "カード" ? "yellow" : e.cat === "通信" ? "red" : "default"} /></td>
+              <td className="p-2 text-slate-700">{e.msg}</td>
+              <td className="p-2 text-slate-500">{e.fix}</td>
+              <td className="p-2 text-center">{e.api ? "✅" : "—"}</td>
+              <td className="p-2 text-center">{e.link ? "✅" : "—"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="flex justify-between items-center mt-3 text-xs">
+        <span className="text-slate-400">287件中 1-20件</span>
+        <div className="flex gap-1">{[1,2,3,"...",14,15].map((p,i) => <button key={i} className={`px-2 py-1 rounded ${p === 1 ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>{p}</button>)}</div>
+      </div>
+    </div>
+    </>)}
+
+    {/* ─── Tab 6: お知らせ管理 ─── */}
+    {sysTab === 6 && (<>
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="flex justify-between items-center mb-3">
+        <p className="text-xs font-bold text-slate-600">お知らせ管理</p>
+        <button className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">+ 新規作成</button>
+      </div>
+      <div className="grid grid-cols-4 gap-2 mb-3">
+        <div><label className="text-xs text-slate-400">サイトID</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="サイトIDで絞込" /></div>
+        <div><label className="text-xs text-slate-400">公開状態</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>公開中</option><option>未公開</option><option>終了</option></select></div>
+        <div><label className="text-xs text-slate-400">種別</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>障害</option><option>メンテナンス</option><option>機能リリース</option><option>お知らせ</option></select></div>
+        <div className="flex items-end"><button className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
+      </div>
+      <table className="w-full text-xs">
+        <thead><tr className="bg-slate-50 border-b">
+          <th className="text-left p-2 text-slate-500 font-semibold w-16">ID</th>
+          <th className="text-left p-2 text-slate-500 font-semibold w-28">作成日時</th>
+          <th className="text-left p-2 text-slate-500 font-semibold">タイトル</th>
+          <th className="text-left p-2 text-slate-500 font-semibold w-24">種別</th>
+          <th className="text-center p-2 text-slate-500 font-semibold w-20">公開状態</th>
+          <th className="text-left p-2 text-slate-500 font-semibold w-20">対象</th>
+          <th className="text-center p-2 text-slate-500 font-semibold w-16">操作</th>
+        </tr></thead>
+        <tbody>
+          {[
+            { id: "N-001", date: "02/17 10:00", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテ", status: "公開中", sColor: "green", target: "全体" },
+            { id: "N-002", date: "02/15 14:30", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", status: "公開中", sColor: "green", target: "全体" },
+            { id: "N-003", date: "02/14 09:00", title: "【復旧済】2/14 決済エラー増加について", type: "障害", status: "公開中", sColor: "green", target: "全体" },
+            { id: "N-004", date: "02/12 11:00", title: "3Dセキュア2.0 完全移行のお知らせ", type: "お知らせ", status: "公開中", sColor: "green", target: "全体" },
+            { id: "N-005", date: "02/10 16:00", title: "API仕様変更予告（v3.2 → v3.3）", type: "お知らせ", status: "未公開", sColor: "yellow", target: "全体" },
+            { id: "N-006", date: "02/08 09:00", title: "年末年始の精算スケジュール変更", type: "お知らせ", status: "終了", sColor: "default", target: "全体" },
+          ].map((n, i) => (
+            <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50`}>
+              <td className="p-2 font-mono text-slate-500">{n.id}</td>
+              <td className="p-2 text-slate-400">{n.date}</td>
+              <td className="p-2 text-slate-700 font-semibold">{n.title}</td>
+              <td className="p-2"><Badge text={n.type} color={n.type === "障害" ? "red" : n.type === "メンテ" ? "yellow" : n.type === "リリース" ? "blue" : "default"} /></td>
+              <td className="p-2 text-center"><Badge text={n.status} color={n.sColor} /></td>
+              <td className="p-2 text-slate-500">{n.target}</td>
+              <td className="p-2 text-center"><button className="text-blue-600 hover:underline">編集</button></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    </>)}
+
+    {/* ─── Tab 7: 操作ログ ─── */}
+    {sysTab === 7 && (<>
+    <div className="bg-blue-50 rounded border border-blue-200 p-2 flex items-center gap-2 text-xs">
+      <span>🔒</span>
+      <span className="text-blue-700"><strong>PCI DSS準拠</strong> — 管理画面の全操作を記録しています。ログは90日間保持されます。</span>
+    </div>
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="flex justify-between items-center mb-3">
+        <p className="text-xs font-bold text-slate-600">管理画面操作ログ検索</p>
+        <button className="text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded border">CSVエクスポート</button>
+      </div>
+      <div className="grid grid-cols-4 gap-2 mb-3">
+        <div><label className="text-xs text-slate-400">スタッフ</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="スタッフ名で検索" /></div>
+        <div><label className="text-xs text-slate-400">IPアドレス</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="192.168.x.x" /></div>
+        <div><label className="text-xs text-slate-400">操作対象ページ</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全ページ</option><option>加盟店管理</option><option>決済検索</option><option>不正検知</option><option>精算管理</option><option>システム設定</option><option>スタッフ管理</option></select></div>
+        <div><label className="text-xs text-slate-400">種別</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>画面操作</option><option>メール送信</option><option>データ変更</option><option>ログイン/ログアウト</option></select></div>
+        <div><label className="text-xs text-slate-400">操作日時（From）</label><input type="datetime-local" className="w-full text-xs border rounded px-2 py-1.5" defaultValue="2026-02-10T00:00" /></div>
+        <div><label className="text-xs text-slate-400">操作日時（To）</label><input type="datetime-local" className="w-full text-xs border rounded px-2 py-1.5" defaultValue="2026-02-17T23:59" /></div>
+        <div><label className="text-xs text-slate-400">URL</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="/admin/..." /></div>
+        <div className="flex items-end"><button className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
+      </div>
+      <div className="text-xs text-slate-400 mb-2">検索結果: 1,248件（1/63ページ）</div>
+      <table className="w-full text-xs">
+        <thead><tr className="bg-slate-50 border-b">
+          <th className="text-left p-2 text-slate-500 font-semibold w-12">ID</th>
+          <th className="text-left p-2 text-slate-500 font-semibold w-20">スタッフ</th>
+          <th className="text-left p-2 text-slate-500 font-semibold w-32">操作日時</th>
+          <th className="text-left p-2 text-slate-500 font-semibold w-28">IPアドレス</th>
+          <th className="text-left p-2 text-slate-500 font-semibold w-20">種別</th>
+          <th className="text-left p-2 text-slate-500 font-semibold w-28">対象ページ</th>
+          <th className="text-left p-2 text-slate-500 font-semibold">URL / 詳細</th>
+        </tr></thead>
+        <tbody>
+          {[
+            { id: 1248, staff: "田中太郎", time: "02/17 13:42:15", ip: "192.168.1.10", type: "画面操作", page: "加盟店管理", url: "/admin/merchants/M-001/edit" },
+            { id: 1247, staff: "佐藤花子", time: "02/17 13:38:02", ip: "10.0.0.55", type: "データ変更", page: "不正検知", url: "/admin/fraud/rules/FR-001 — 閾値変更 ¥500,000→¥600,000" },
+            { id: 1246, staff: "田中太郎", time: "02/17 13:25:10", ip: "192.168.1.10", type: "画面操作", page: "決済検索", url: "/admin/transactions/search?q=TXN-14516" },
+            { id: 1245, staff: "鈴木一郎", time: "02/17 12:55:33", ip: "172.16.0.8", type: "メール送信", page: "精算管理", url: "精算報告書送信 → merchant@example.com" },
+            { id: 1244, staff: "佐藤花子", time: "02/17 12:40:18", ip: "10.0.0.55", type: "データ変更", page: "システム設定", url: "/admin/settings/notifications — Slack通知ON" },
+            { id: 1243, staff: "高橋明美", time: "02/17 12:15:45", ip: "192.168.1.22", type: "ログイン", page: "—", url: "ログイン成功 — 2FA認証済" },
+            { id: 1242, staff: "田中太郎", time: "02/17 11:50:30", ip: "192.168.1.10", type: "画面操作", page: "レポート", url: "/admin/report/daily?month=2026-02" },
+            { id: 1241, staff: "鈴木一郎", time: "02/17 11:20:05", ip: "172.16.0.8", type: "データ変更", page: "スタッフ管理", url: "新規スタッフ追加 — yamada@example.com (viewer)" },
+          ].map((l, i) => (
+            <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50`}>
+              <td className="p-2 font-mono text-slate-400">{l.id}</td>
+              <td className="p-2 text-slate-700 font-semibold">{l.staff}</td>
+              <td className="p-2 text-slate-500 font-mono">{l.time}</td>
+              <td className="p-2 font-mono text-slate-500">{l.ip}</td>
+              <td className="p-2"><Badge text={l.type} color={l.type === "データ変更" ? "yellow" : l.type === "メール送信" ? "blue" : l.type === "ログイン" ? "green" : "default"} /></td>
+              <td className="p-2 text-slate-600">{l.page}</td>
+              <td className="p-2 text-slate-400 truncate max-w-xs" title={l.url}>{l.url}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="flex justify-between items-center mt-3 text-xs">
+        <span className="text-slate-400">1,248件中 1-20件</span>
+        <div className="flex gap-1">{[1,2,3,"...",62,63].map((p,i) => <button key={i} className={`px-2 py-1 rounded ${p === 1 ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>{p}</button>)}</div>
       </div>
     </div>
     </>)}
@@ -3385,6 +3739,7 @@ const MasterRouting = () => {
   const [merchantSearch, setMerchantSearch] = useState("");
   const [showMerchantDropdown, setShowMerchantDropdown] = useState(false);
   const [showAddRouteRule, setShowAddRouteRule] = useState(false);
+  const [routeTab, setRouteTab] = useState("config");
   const currentMerchant = merchantData.find(m => m.id === selectedMerchant);
   const filteredMerchants = merchantData.filter(m => m.status === "有効").filter(m =>
     merchantSearch === "" || m.name.toLowerCase().includes(merchantSearch.toLowerCase()) || m.id.toLowerCase().includes(merchantSearch.toLowerCase())
@@ -3395,6 +3750,95 @@ const MasterRouting = () => {
     <div className="p-5 space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-sm font-bold text-slate-800">ルーティング設定</h2>
+      </div>
+
+      <div className="flex gap-1 border-b">
+        {[{ id: "config", label: "ルーティング設定" }, { id: "bulk", label: "一括変更" }].map(t => (
+          <button key={t.id} onClick={() => setRouteTab(t.id)} className={`text-xs px-3 py-2 border-b-2 ${routeTab === t.id ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        ))}
+      </div>
+
+      {/* 一括変更タブ */}
+      {routeTab === "bulk" && (
+        <div className="space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+            <p className="text-xs font-bold text-slate-600 mb-3">決済ライン一括変更</p>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="text-xs text-slate-400">変更種別</label>
+                <div className="flex gap-2 mt-1">
+                  <label className="flex items-center gap-1 text-xs"><input type="radio" name="lineType" defaultChecked className="w-3 h-3" />通常決済ライン</label>
+                  <label className="flex items-center gap-1 text-xs"><input type="radio" name="lineType" className="w-3 h-3" />リカーリング決済ライン</label>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-slate-400">対象サイトID（カンマ区切り）</label>
+                <textarea className="w-full text-xs border rounded px-2 py-1.5 h-16 font-mono" placeholder="SITE-001, SITE-002, SITE-003..." />
+              </div>
+            </div>
+            <p className="text-xs font-bold text-slate-600 mb-2">ブランド別 接続先変更</p>
+            <table className="w-full text-xs mb-3">
+              <thead><tr className="bg-slate-50 border-b">
+                <th className="text-left p-2 text-slate-500 font-semibold w-20">ブランド</th>
+                <th className="text-left p-2 text-slate-500 font-semibold">変更前（現在）</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-8">→</th>
+                <th className="text-left p-2 text-slate-500 font-semibold">変更後</th>
+              </tr></thead>
+              <tbody>
+                {["VISA", "Mastercard", "JCB", "AMEX", "Diners"].map((b, i) => (
+                  <tr key={i} className="border-b">
+                    <td className="p-2 font-semibold text-slate-700">{b}</td>
+                    <td className="p-2"><select className="w-full text-xs border rounded px-2 py-1.5"><option>GMO-PG</option><option>三井住友カード</option><option>JCB直接</option><option>Adyen</option><option>変更なし</option></select></td>
+                    <td className="p-2 text-center text-slate-400">→</td>
+                    <td className="p-2"><select className="w-full text-xs border rounded px-2 py-1.5"><option>変更なし</option><option>GMO-PG</option><option>三井住友カード</option><option>JCB直接</option><option>Adyen</option></select></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="bg-amber-50 rounded border border-amber-200 p-2 text-xs text-amber-700 mb-3">
+              ⚠️ <strong>影響範囲:</strong> 対象サイト 3件 / 影響取引 約 1,200件/日。変更は即時反映されます。
+            </div>
+            <div className="flex gap-2">
+              <button className="text-xs bg-blue-600 text-white px-4 py-2 rounded font-semibold">一括変更を実行</button>
+              <button className="text-xs bg-slate-100 text-slate-600 px-4 py-2 rounded border">プレビュー</button>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <p className="text-xs font-bold text-slate-600 mb-2">変更履歴</p>
+            <table className="w-full text-xs">
+              <thead><tr className="bg-slate-50 border-b">
+                <th className="text-left p-2 text-slate-500 font-semibold w-28">日時</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-20">種別</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-16">対象数</th>
+                <th className="text-left p-2 text-slate-500 font-semibold">変更内容</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-20">実行者</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-16">操作</th>
+              </tr></thead>
+              <tbody>
+                {[
+                  { date: "02/15 14:00", type: "通常", count: "5件", detail: "VISA: GMO-PG → 三井住友カード", user: "田中太郎" },
+                  { date: "02/10 11:00", type: "リカーリング", count: "3件", detail: "JCB: JCB直接 → GMO-PG", user: "佐藤花子" },
+                  { date: "01/28 09:30", type: "通常", count: "12件", detail: "全ブランド: Adyen → GMO-PG（障害対応）", user: "田中太郎" },
+                ].map((h, i) => (
+                  <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+                    <td className="p-2 text-slate-400 font-mono">{h.date}</td>
+                    <td className="p-2"><Badge text={h.type} color={h.type === "リカーリング" ? "purple" : "blue"} /></td>
+                    <td className="p-2 text-slate-600">{h.count}</td>
+                    <td className="p-2 text-slate-700">{h.detail}</td>
+                    <td className="p-2 text-slate-600">{h.user}</td>
+                    <td className="p-2 text-center"><button className="text-amber-600 hover:underline text-xs">戻す</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ルーティング設定タブ */}
+      {routeTab === "config" && (<>
+      <div className="flex justify-between items-center">
+        <div />
         <div className="flex gap-2 items-center">
           <div className="relative">
             <div className="flex items-center border rounded bg-white">
@@ -3730,6 +4174,7 @@ const MasterRouting = () => {
           </div>
         </div>
       )}
+      </>)}
     </div>
   );
 };
@@ -4760,11 +5205,18 @@ const MasterTransactionMonitor = () => {
               <div><label className="text-xs text-slate-400">金額（最大）</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="¥999,999" /></div>
               <div><label className="text-xs text-slate-400">開始日時</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5" defaultValue="2026-02-05" /></div>
               <div><label className="text-xs text-slate-400">終了日時</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5" defaultValue="2026-02-12" /></div>
+              <div><label className="text-xs text-slate-400">代理店名</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="代理店名で検索" /></div>
+              <div><label className="text-xs text-slate-400">チケット番号</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="TKT-..." /></div>
+              <div><label className="text-xs text-slate-400">課金方法</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>通常決済</option><option>URL決済</option><option>リカーリング</option><option>分割払い</option></select></div>
+              <div><label className="text-xs text-slate-400">決済備考</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="備考で検索" /></div>
             </div>
             <div className="flex justify-between items-center mt-2">
-              <div className="flex gap-1 text-xs">
+              <div className="flex gap-1 text-xs flex-wrap">
                 <span className="text-slate-400">ステータス:</span>
                 {["成功","失敗","返金済","キャンセル","3DS失敗"].map(s => <label key={s} className="flex items-center gap-0.5"><input type="checkbox" className="w-3 h-3" defaultChecked />{s}</label>)}
+                <span className="text-slate-400 ml-2">|</span>
+                <label className="flex items-center gap-0.5 ml-1"><input type="checkbox" className="w-3 h-3" />テスト決済を含む</label>
+                <label className="flex items-center gap-0.5 ml-1"><input type="checkbox" className="w-3 h-3" />マネロン疑い</label>
               </div>
               <div className="flex gap-2">
                 <button className="text-xs text-slate-400 hover:text-slate-600">検索条件をクリア</button>
@@ -4933,7 +5385,7 @@ const MasterFraudSettings = () => {
 
       {/* Tabs */}
       <div className="flex gap-1 border-b">
-        {[{ id: "rules", label: "ルール管理" }, { id: "ai", label: "AIモデル設定" }, { id: "lists", label: "ブロック/ホワイトリスト" }, { id: "log", label: "検知ログ" }, { id: "merchant", label: "加盟店別設定" }].map(tab => (
+        {[{ id: "rules", label: "ルール管理" }, { id: "ai", label: "AIモデル設定" }, { id: "lists", label: "ブロック/ホワイトリスト" }, { id: "import", label: "CSVインポート" }, { id: "ng_list", label: "制限登録禁止リスト" }, { id: "log", label: "検知ログ" }, { id: "merchant", label: "加盟店別設定" }].map(tab => (
           <button key={tab.id} onClick={() => setRuleTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 ${ruleTab === tab.id ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-slate-400"}`}>{tab.label}</button>
         ))}
       </div>
@@ -5126,6 +5578,111 @@ const MasterFraudSettings = () => {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: CSVインポート */}
+      {ruleTab === "import" && (
+        <div className="space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+            <p className="text-xs font-bold text-slate-600 mb-3">📤 決済制限CSVインポート</p>
+            <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center bg-slate-50 hover:bg-blue-50 hover:border-blue-300 transition-colors cursor-pointer">
+              <p className="text-2xl mb-2">📁</p>
+              <p className="text-xs font-semibold text-slate-600">CSVファイルをドラッグ＆ドロップ、またはクリックして選択</p>
+              <p className="text-xs text-slate-400 mt-1">対応形式: CSV（UTF-8）/ 最大10,000行</p>
+            </div>
+            <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200 text-xs text-blue-700">
+              <p className="font-semibold mb-1">CSVフォーマット:</p>
+              <p className="font-mono">対象項目,対象値,制限種別,制限金額,備考</p>
+              <p className="mt-1 text-blue-500">対象項目: メールアドレス / カード番号 / IPアドレス / BIN</p>
+              <p className="text-blue-500">制限種別: 決済不可 / 金額制限</p>
+            </div>
+            <div className="flex gap-2 mt-3">
+              <button className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold">インポート実行</button>
+              <button className="text-xs bg-slate-100 text-slate-600 px-4 py-1.5 rounded border">テンプレートDL</button>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <p className="text-xs font-bold text-slate-600 mb-2">インポート履歴</p>
+            <table className="w-full text-xs">
+              <thead><tr className="bg-slate-50 border-b">
+                <th className="text-left p-2 text-slate-500 font-semibold w-28">日時</th>
+                <th className="text-left p-2 text-slate-500 font-semibold">ファイル名</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-16">総件数</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-16">成功</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-16">失敗</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-20">実行者</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-20">状態</th>
+              </tr></thead>
+              <tbody>
+                {[
+                  { date: "02/15 14:30", file: "block_list_202602.csv", total: 156, ok: 152, ng: 4, user: "佐藤花子", status: "完了", sColor: "green" },
+                  { date: "02/10 10:00", file: "fraud_emails_batch.csv", total: 89, ok: 89, ng: 0, user: "田中太郎", status: "完了", sColor: "green" },
+                  { date: "02/05 16:45", file: "ip_block_update.csv", total: 230, ok: 0, ng: 230, user: "鈴木一郎", status: "エラー", sColor: "red" },
+                ].map((h, i) => (
+                  <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+                    <td className="p-2 text-slate-400 font-mono">{h.date}</td>
+                    <td className="p-2 text-slate-700 font-semibold">{h.file}</td>
+                    <td className="p-2 text-center">{h.total}</td>
+                    <td className="p-2 text-center text-emerald-600 font-semibold">{h.ok}</td>
+                    <td className="p-2 text-center text-rose-600 font-semibold">{h.ng}</td>
+                    <td className="p-2 text-slate-600">{h.user}</td>
+                    <td className="p-2 text-center"><Badge text={h.status} color={h.sColor} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: 制限登録禁止リスト */}
+      {ruleTab === "ng_list" && (
+        <div className="space-y-3">
+          <div className="bg-amber-50 rounded border border-amber-200 p-2 text-xs text-amber-700">
+            ⚠️ この「禁止リスト」に登録された値は、決済制限に追加できなくなります。誤ブロック防止のためのホワイトリストです。
+          </div>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-xs font-bold text-slate-600">制限登録禁止リスト検索</p>
+              <button onClick={() => setShowAddBlock("ng")} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ 新規登録</button>
+            </div>
+            <div className="grid grid-cols-4 gap-2 mb-3">
+              <div><label className="text-xs text-slate-400">対象項目</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>メールアドレス</option><option>カード番号</option><option>IPアドレス</option><option>BIN</option></select></div>
+              <div><label className="text-xs text-slate-400">対象値</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="値で検索" /></div>
+              <div><label className="text-xs text-slate-400">登録日</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5" /></div>
+              <div className="flex items-end"><button className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
+            </div>
+            <table className="w-full text-xs">
+              <thead><tr className="bg-slate-50 border-b">
+                <th className="text-left p-2 text-slate-500 font-semibold w-12">ID</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-28">対象項目</th>
+                <th className="text-left p-2 text-slate-500 font-semibold">対象値</th>
+                <th className="text-left p-2 text-slate-500 font-semibold">理由</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-20">登録者</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-28">登録日時</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-16">操作</th>
+              </tr></thead>
+              <tbody>
+                {[
+                  { id: 1, item: "メールアドレス", value: "ceo@abcmart.co.jp", reason: "ABCマート代表 — 正当な高額取引あり", user: "田中太郎", date: "01/20 09:00" },
+                  { id: 2, item: "IPアドレス", value: "203.0.113.0/24", reason: "GMO-PGテスト環境", user: "佐藤花子", date: "01/15 14:30" },
+                  { id: 3, item: "カード番号", value: "4111-****-****-1111", reason: "テストカード", user: "田中太郎", date: "01/10 10:00" },
+                  { id: 4, item: "BIN", value: "411111", reason: "VISAテストBIN", user: "鈴木一郎", date: "12/25 16:00" },
+                ].map((r, i) => (
+                  <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50`}>
+                    <td className="p-2 font-mono text-slate-400">{r.id}</td>
+                    <td className="p-2"><Badge text={r.item} color={r.item === "メールアドレス" ? "blue" : r.item === "IPアドレス" ? "purple" : r.item === "カード番号" ? "yellow" : "default"} /></td>
+                    <td className="p-2 font-mono text-slate-700">{r.value}</td>
+                    <td className="p-2 text-slate-500">{r.reason}</td>
+                    <td className="p-2 text-slate-600">{r.user}</td>
+                    <td className="p-2 text-slate-400 font-mono">{r.date}</td>
+                    <td className="p-2 text-center"><button className="text-rose-500 hover:text-rose-700">削除</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
@@ -5479,7 +6036,7 @@ const MasterReport = () => {
       </div>
       <p className="text-xs text-slate-500 mb-2">テンプレートの項目を自由に組み合わせて独自レポートを作成できます。定期配信にも設定可能。</p>
       <div className="flex gap-2 flex-wrap">
-        {["取引サマリー", "精算明細", "CB分析", "接続先別パフォーマンス", "ブランド別分析", "時間帯別分析", "加盟店別内訳"].map(item => (
+        {["取引サマリー", "精算明細", "CB分析", "接続先別パフォーマンス", "ブランド別分析", "時間帯別分析", "加盟店別内訳", "URL決済分析"].map(item => (
           <label key={item} className="text-xs flex items-center gap-1 px-2 py-1 border rounded cursor-pointer hover:bg-blue-50">
             <input type="checkbox" className="w-3 h-3" />
             {item}
@@ -5504,6 +6061,7 @@ const MasterReport = () => {
                 <div><label className="text-xs font-semibold text-slate-600">対象期間</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
                 <div><label className="text-xs font-semibold text-slate-600">〜</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
               </div>
+              <div><label className="text-xs font-semibold text-slate-600">決済種別フィルタ</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>全て</option><option>URL決済のみ</option><option>URL決済を除外</option><option>リカーリングのみ</option><option>通常決済のみ</option></select></div>
               <div><label className="text-xs font-semibold text-slate-600">出力形式</label><div className="flex gap-2 mt-1">{["PDF","CSV","Excel"].map(f => <label key={f} className="flex items-center gap-1 text-xs"><input type="radio" name="format" defaultChecked={f==="PDF"} />{f}</label>)}</div></div>
             </>)}
             {showReportModal === "schedule" && (<>
@@ -6654,13 +7212,13 @@ const AgentAccountSettings = () => {
 const MasterCustomers = () => {
   const [tab, setTab] = useState("search");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const tabs = [{ id: "search", label: "顧客検索" }, { id: "analysis", label: "顧客分析" }];
+  const tabs = [{ id: "search", label: "顧客検索" }, { id: "analysis", label: "顧客分析" }, { id: "cards", label: "カード情報管理" }];
   const customers = [
-    { id: "CUS-00001", email: "t***@example.com", card: "VISA *4242", merchant: "ABC商事", txn: 47, ltv: "¥892,600", last: "02/13 14:22", sub: "課金中", risk: "low", segment: "ロイヤル" },
-    { id: "CUS-00002", email: "s***@gmail.com", card: "MC *1234", merchant: "XYZ物産", txn: 12, ltv: "¥156,800", last: "02/12 09:45", sub: "なし", risk: "low", segment: "リピーター" },
-    { id: "CUS-00003", email: "h***@yahoo.co.jp", card: "JCB *5678", merchant: "ABC商事", txn: 3, ltv: "¥45,200", last: "02/10 18:30", sub: "停止", risk: "medium", segment: "リピーター" },
-    { id: "CUS-00004", email: "k***@company.jp", card: "VISA *9999", merchant: "DEFサービス", txn: 1, ltv: "¥9,800", last: "02/08 11:00", sub: "なし", risk: "high", segment: "初回" },
-    { id: "CUS-00005", email: "m***@icloud.com", card: "AMEX *3456", merchant: "ABC商事", txn: 89, ltv: "¥2,345,000", last: "02/13 16:05", sub: "課金中", risk: "low", segment: "ロイヤル" },
+    { id: "CUS-00001", email: "t***@example.com", card: "VISA *4242", merchant: "ABC商事", txn: 47, ltv: "¥892,600", last: "02/13 14:22", sub: "課金中", risk: "low", segment: "ロイヤル", pqId: "PQ-10234", recCount: 2, cardSave: "保存" },
+    { id: "CUS-00002", email: "s***@gmail.com", card: "MC *1234", merchant: "XYZ物産", txn: 12, ltv: "¥156,800", last: "02/12 09:45", sub: "なし", risk: "low", segment: "リピーター", pqId: "—", recCount: 0, cardSave: "非保存" },
+    { id: "CUS-00003", email: "h***@yahoo.co.jp", card: "JCB *5678", merchant: "ABC商事", txn: 3, ltv: "¥45,200", last: "02/10 18:30", sub: "停止", risk: "medium", segment: "リピーター", pqId: "PQ-10567", recCount: 1, cardSave: "保存" },
+    { id: "CUS-00004", email: "k***@company.jp", card: "VISA *9999", merchant: "DEFサービス", txn: 1, ltv: "¥9,800", last: "02/08 11:00", sub: "なし", risk: "high", segment: "初回", pqId: "—", recCount: 0, cardSave: "非保存" },
+    { id: "CUS-00005", email: "m***@icloud.com", card: "AMEX *3456", merchant: "ABC商事", txn: 89, ltv: "¥2,345,000", last: "02/13 16:05", sub: "課金中", risk: "low", segment: "ロイヤル", pqId: "PQ-10012", recCount: 3, cardSave: "保存" },
   ];
   const riskColors = { low: "green", medium: "yellow", high: "red", blocked: "gray" };
   const segColors = { "ロイヤル": "purple", "リピーター": "blue", "初回": "gray" };
@@ -6687,11 +7245,17 @@ const MasterCustomers = () => {
               <div><label className="text-xs text-slate-400">サブスク状態</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全て</option><option>課金中</option><option>停止</option><option>なし</option></select></div>
               <div><label className="text-xs text-slate-400">セグメント</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全て</option><option>ロイヤル</option><option>リピーター</option><option>初回</option></select></div>
               <div><label className="text-xs text-slate-400">LTV範囲</label><div className="flex gap-1 mt-0.5"><input className="w-full border rounded px-2 py-1 text-xs" placeholder="¥0" /><span className="text-xs text-slate-400 mt-1">〜</span><input className="w-full border rounded px-2 py-1 text-xs" placeholder="上限なし" /></div></div>
+              <div><label className="text-xs text-slate-400">カード保存</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全て</option><option>保存</option><option>非保存</option></select></div>
+            </div>
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              <div><label className="text-xs text-slate-400">最終利用日（From）</label><input type="date" className="w-full border rounded px-2 py-1 text-xs mt-0.5" /></div>
+              <div><label className="text-xs text-slate-400">最終利用日（To）</label><input type="date" className="w-full border rounded px-2 py-1 text-xs mt-0.5" /></div>
+              <div />
               <div className="flex items-end"><button className="w-full py-1 bg-blue-600 text-white rounded text-xs font-bold">🔍 検索</button></div>
             </div>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "最終取引", w: "w-24" }, { label: "サブスク", w: "w-14" }, { label: "セグメント", w: "w-16" }, { label: "リスク", w: "w-12" }]}>
+            <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "最終取引", w: "w-24" }, { label: "PQ ID", w: "w-20" }, { label: "RC紐付", w: "w-12" }, { label: "サブスク", w: "w-14" }, { label: "セグメント", w: "w-16" }, { label: "リスク", w: "w-12" }]}>
             {customers.map((c, i) => (
               <tr key={i} onClick={() => setSelectedCustomer(c)} className="border-b hover:bg-blue-50 cursor-pointer">
                 <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{c.id}</td>
@@ -6701,6 +7265,8 @@ const MasterCustomers = () => {
                 <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{c.txn}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-24 font-bold">{c.ltv}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{c.last}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20 font-mono text-xs text-slate-500">{c.pqId}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-12 text-center">{c.recCount > 0 ? <Badge text={`${c.recCount}件`} color="blue" /> : <span className="text-slate-300">—</span>}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={c.sub} color={c.sub === "課金中" ? "green" : c.sub === "停止" ? "red" : "gray"} /></td>
                 <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={c.segment} color={segColors[c.segment] || "gray"} /></td>
                 <td className="px-4 py-2 whitespace-nowrap w-12"><Badge text={c.risk === "low" ? "低" : c.risk === "medium" ? "中" : "高"} color={riskColors[c.risk]} /></td>
@@ -6876,6 +7442,69 @@ const MasterCustomers = () => {
                 <div className="w-20 text-right text-slate-500">{r[1].toLocaleString()}人</div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {tab === "cards" && (
+        <div className="space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <p className="text-xs font-bold mb-2">🔍 トークン検索</p>
+            <div className="grid grid-cols-4 gap-2">
+              <div><label className="text-xs text-slate-400">トークンID</label><input className="w-full border rounded px-2 py-1 text-xs mt-0.5" placeholder="TKN-..." /></div>
+              <div><label className="text-xs text-slate-400">ペイクイックID</label><input className="w-full border rounded px-2 py-1 text-xs mt-0.5" placeholder="PQ-..." /></div>
+              <div><label className="text-xs text-slate-400">カード下4桁</label><input className="w-full border rounded px-2 py-1 text-xs mt-0.5" placeholder="4242" /></div>
+              <div><label className="text-xs text-slate-400">加盟店</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全加盟店</option><option>ABC商事</option><option>XYZ物産</option></select></div>
+            </div>
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              <div><label className="text-xs text-slate-400">ブランド</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全て</option><option>VISA</option><option>MC</option><option>JCB</option><option>AMEX</option></select></div>
+              <div><label className="text-xs text-slate-400">ステータス</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全て</option><option>有効</option><option>期限切れ</option><option>無効化済</option></select></div>
+              <div />
+              <div className="flex items-end"><button className="w-full py-1 bg-blue-600 text-white rounded text-xs font-bold">🔍 検索</button></div>
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            <KPICard label="トークン総数" value="28,431" color="blue" />
+            <KPICard label="有効トークン" value="24,102" sub="84.8%" color="green" />
+            <KPICard label="期限切れ" value="3,892" sub="13.7%" color="yellow" />
+            <KPICard label="無効化済" value="437" sub="1.5%" color="red" />
+          </div>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+            <TableHeader cols={[{ label: "トークンID", w: "w-28" }, { label: "PQ ID", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "カード末尾", w: "w-16" }, { label: "有効期限", w: "w-20" }, { label: "顧客ID", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "RC紐付", w: "w-14" }, { label: "最終利用", w: "w-24" }, { label: "状態", w: "w-16" }]}>
+            {[
+              { tkn: "TKN-A00123", pq: "PQ-10234", brand: "VISA", last4: "4242", exp: "12/27", cust: "CUS-00001", merchant: "ABC商事", rc: 2, lastUsed: "02/13 14:22", st: "有効" },
+              { tkn: "TKN-A00124", pq: "PQ-10234", brand: "VISA", last4: "8888", exp: "03/25", cust: "CUS-00001", merchant: "ABC商事", rc: 0, lastUsed: "2024-12-10", st: "期限切れ" },
+              { tkn: "TKN-B00456", pq: "PQ-10567", brand: "JCB", last4: "5678", exp: "08/28", cust: "CUS-00003", merchant: "ABC商事", rc: 1, lastUsed: "02/10 18:30", st: "有効" },
+              { tkn: "TKN-C00789", pq: "PQ-10012", brand: "AMEX", last4: "3456", exp: "11/27", cust: "CUS-00005", merchant: "ABC商事", rc: 3, lastUsed: "02/13 16:05", st: "有効" },
+              { tkn: "TKN-D01012", pq: "—", brand: "MC", last4: "1234", exp: "06/26", cust: "CUS-00002", merchant: "XYZ物産", rc: 0, lastUsed: "02/12 09:45", st: "有効" },
+              { tkn: "TKN-E01345", pq: "—", brand: "VISA", last4: "9999", exp: "01/25", cust: "CUS-00004", merchant: "DEFサービス", rc: 0, lastUsed: "02/08 11:00", st: "無効化済" },
+            ].map((t, i) => (
+              <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+                <td className="px-4 py-2 whitespace-nowrap w-28 font-mono text-blue-600 text-xs">{t.tkn}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-xs text-slate-500">{t.pq}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16 text-xs">{t.brand}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16 font-mono text-xs">*{t.last4}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20 text-xs">{t.exp}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600 text-xs">{t.cust}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-500 text-xs">{t.merchant}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-14 text-center">{t.rc > 0 ? <Badge text={`${t.rc}件`} color="blue" /> : <span className="text-slate-300">—</span>}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400 text-xs">{t.lastUsed}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={t.st} color={t.st === "有効" ? "green" : t.st === "期限切れ" ? "yellow" : "red"} /></td>
+              </tr>
+            ))}
+            </TableHeader>
+          </div>
+          <div className="text-xs text-slate-400 text-right">6件表示 / 全28,431件</div>
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-3">
+            <p className="text-xs font-bold text-blue-700 mb-1">🔐 トークン化サービス</p>
+            <div className="grid grid-cols-3 gap-3 text-xs">
+              <div><span className="text-slate-500">PCI DSS準拠:</span> <span className="font-bold text-emerald-600">Level 1 認定</span></div>
+              <div><span className="text-slate-500">暗号化方式:</span> <span className="font-bold">AES-256 + RSA-2048</span></div>
+              <div><span className="text-slate-500">トークン有効期間:</span> <span className="font-bold">カード有効期限まで</span></div>
+              <div><span className="text-slate-500">自動削除:</span> <span className="font-bold">期限切れ後180日</span></div>
+              <div><span className="text-slate-500">最終監査:</span> <span className="font-bold">2026-01-15</span></div>
+              <div><span className="text-slate-500">次回監査:</span> <span className="font-bold text-amber-600">2026-07-15</span></div>
+            </div>
           </div>
         </div>
       )}
@@ -7223,6 +7852,7 @@ const masterMenuItems = [
   { id: "fraud", icon: "🛡️", label: "不正検知" },
   { separator: true, label: "AI・運用" },
   { id: "ai", icon: "🤖", label: "AI監視" },
+  { id: "master_chat", icon: "💬", label: "AIチャット" },
   { id: "users", icon: "👥", label: "スタッフ管理" },
   { id: "settings", icon: "⚙️", label: "システム設定" },
 ];
@@ -7282,6 +7912,7 @@ export default function Wireframes() {
       case "recurring": return <MasterRecurring />;
       case "agents": return <MasterAgents />;
       case "customers": return <MasterCustomers />;
+      case "master_chat": return <MasterAIChat />;
       default: return <div className="p-4 text-sm text-slate-400 flex items-center justify-center h-64">この画面は詳細設計フェーズで実装します</div>;
     }
   };
@@ -7337,7 +7968,7 @@ export default function Wireframes() {
         <button onClick={() => setView("payment")} className={`text-sm px-4 py-1.5 rounded-lg font-medium transition-colors duration-200 ${view === "payment" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}>
           決済ページ
         </button>
-        <span className="text-xs text-slate-600/40 ml-auto">WIREFRAME v3 / 全35画面実装</span>
+        <span className="text-xs text-slate-600/40 ml-auto">WIREFRAME v3 / 全36画面実装</span>
       </div>
 
       {/* Main content */}
