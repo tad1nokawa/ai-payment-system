@@ -1,4 +1,90 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useCallback, useRef, useEffect, createContext } from "react";
+
+// ─── トースト通知システム ───
+const ToastContext = createContext(() => {});
+const ToastProvider = ({ children }) => {
+  const [toasts, setToasts] = useState([]);
+  const idRef = useRef(0);
+  const addToast = useCallback((message, type = "success", duration = 3000) => {
+    const id = ++idRef.current;
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), duration);
+  }, []);
+  return (
+    <ToastContext.Provider value={addToast}>
+      {children}
+      <div className="fixed top-4 right-4 z-[100] space-y-2 pointer-events-none" style={{minWidth:"320px"}}>
+        {toasts.map(t => (
+          <div key={t.id} className={`pointer-events-auto px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold flex items-center gap-2 animate-slide-in ${
+            t.type === "success" ? "bg-emerald-50 text-emerald-800 border-emerald-200" :
+            t.type === "error" ? "bg-rose-50 text-rose-800 border-rose-200" :
+            t.type === "warning" ? "bg-amber-50 text-amber-800 border-amber-200" :
+            "bg-blue-50 text-blue-800 border-blue-200"
+          }`}>
+            <span>{t.type === "success" ? "✅" : t.type === "error" ? "❌" : t.type === "warning" ? "⚠️" : "ℹ️"}</span>
+            <span>{t.message}</span>
+          </div>
+        ))}
+      </div>
+    </ToastContext.Provider>
+  );
+};
+const useToast = () => useContext(ToastContext);
+
+// ─── ナビゲーションContext ───
+const NavigationContext = createContext({});
+const useNav = () => useContext(NavigationContext);
+
+// ─── 汎用確認ダイアログ ───
+const ConfirmDialog = ({ config, onClose }) => {
+  const [inputVal, setInputVal] = useState("");
+  if (!config) return null;
+  const colors = {
+    approve: { bg: "bg-emerald-50 border-emerald-200", btn: "bg-emerald-600 hover:bg-emerald-700" },
+    reject: { bg: "bg-rose-50 border-rose-200", btn: "bg-rose-600 hover:bg-rose-700" },
+    danger: { bg: "bg-rose-50 border-rose-200", btn: "bg-rose-600 hover:bg-rose-700" },
+    warning: { bg: "bg-amber-50 border-amber-200", btn: "bg-amber-600 hover:bg-amber-700" },
+    info: { bg: "bg-blue-50 border-blue-200", btn: "bg-blue-600 hover:bg-blue-700" },
+  };
+  const c = colors[config.type] || colors.info;
+  const canConfirm = config.inputConfirm ? inputVal === config.inputConfirm : true;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+      <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+        <div className={`p-4 border-b rounded-t-xl ${c.bg}`}>
+          <h3 className="text-sm font-bold text-slate-800">{config.icon || "⚡"} {config.title}</h3>
+        </div>
+        <div className="p-5 space-y-3">
+          <p className="text-xs text-slate-600">{config.description}</p>
+          {config.details && (
+            <div className="bg-slate-50 rounded border p-2 space-y-1">
+              {config.details.map(([l,v], i) => (
+                <div key={i} className="flex text-xs"><span className="w-28 text-slate-400">{l}:</span><span className="font-semibold text-slate-700">{v}</span></div>
+              ))}
+            </div>
+          )}
+          {config.warning && (
+            <div className="bg-yellow-50 rounded border border-yellow-200 p-2 text-xs text-yellow-700">⚠️ {config.warning}</div>
+          )}
+          {config.inputConfirm && (
+            <div>
+              <label className="text-xs text-slate-500">確認のため「{config.inputConfirm}」と入力してください</label>
+              <input value={inputVal} onChange={e => setInputVal(e.target.value)} className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 focus:ring-2 focus:ring-blue-300" />
+            </div>
+          )}
+        </div>
+        <div className="p-4 border-t flex gap-2 justify-end">
+          <button onClick={onClose} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+          <button disabled={!canConfirm} onClick={() => { config.onConfirm?.(); onClose(); }}
+            className={`px-4 py-2 text-xs text-white rounded font-semibold ${canConfirm ? c.btn : "bg-slate-300 cursor-not-allowed"}`}>
+            {config.confirmLabel || "実行する"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // ─── 共通UIコンポーネント ───
 const Sidebar = ({ items, active, onSelect, title, color, user }) => (
@@ -109,6 +195,8 @@ const MiniChart = ({ data, color = "#3B82F6", h = 30, w = 100 }) => {
 
 // ─── M01: ダッシュボード ───
 const MasterDashboard = () => {
+  const toast = useToast();
+  const nav = useNav();
   const [kpiPeriod, setKpiPeriod] = useState("today");
   const [chartPeriod, setChartPeriod] = useState("7d");
   const [chartType, setChartType] = useState("count");
@@ -116,6 +204,36 @@ const MasterDashboard = () => {
   const [expandedQueue, setExpandedQueue] = useState(null);
   const [chatOpen, setChatOpen] = useState(true);
   const [showAllNotices, setShowAllNotices] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [aiSummaryLoading, setAiSummaryLoading] = useState(false);
+  const [chatMessages, setChatMessages] = useState([
+    { role: "ai", text: "本日の状況をまとめました：取引量 1,247件（前日比+8%）、成功率 99.2%。例外キューに3件の保留あり（うち1件が2時間超過中）。不正検知で2件を自動ブロック済みです。" },
+    { role: "user", text: "例外キューの2時間超過の詳細を教えて" },
+    { role: "ai", text: "例外キュー #1024 は加盟店「ディーライフ」の審査案件です。AI推薦は「承認」（信頼スコア 82/100）。中リスク判定の理由はカテゴリ初回申請のためです。早めの対応をお勧めします。" },
+    { role: "user", text: "加盟店 M-001 のステータスは？" },
+    { role: "ai", text: "加盟店 M-001 の情報です：\n加盟店名: ABCマート\nステータス: 有効\n月間決済高: ¥2.4M\n成功率: 99.2%" },
+  ]);
+  const aiResponses = {
+    "不正検知の状況": "本日の不正検知状況です：自動ブロック2件（合計¥156,000）。リスクスコア80以上の保留案件が1件あります。全体の不正率は0.03%で基準値内です。",
+    "今日の決済件数": "本日の決済件数は1,247件（前日比+8%）です。VISA: 486件、MC: 312件、JCB: 198件、AMEX: 89件、WEBマネー: 162件。ピーク時間帯は12:00-14:00でした。",
+    "例外キューの確認": "例外キューに3件の保留があります：\n1. #1024 審査保留（2時間超過）- AI推薦: 承認\n2. #5521 不正検知保留（30分前）- ¥89,000\n3. #1025 審査保留（15分前）- AI推薦: 承認",
+    "精算状況": "本日の精算状況：処理済み45件（¥28.5M）、保留中2件（口座情報不備）。次回精算予定は2/18（金）です。",
+    "エラーコード検索": "よく発生するエラーコード：\n・E001 カード有効期限切れ（本日12件）\n・E003 残高不足（本日8件）\n・E007 3DS認証失敗（本日5件）\n詳細はエラーコード管理画面で確認できます。",
+  };
+  const sendChat = (text) => {
+    if (!text.trim()) return;
+    setChatMessages(prev => [...prev, { role: "user", text }]);
+    setChatInput("");
+    setTimeout(() => {
+      const response = aiResponses[text] || `「${text}」について確認しました。現在のシステム状況は正常です。詳細はサイドメニューから該当画面をご確認ください。`;
+      setChatMessages(prev => [...prev, { role: "ai", text: response }]);
+    }, 1200);
+  };
+  const handleRegenerate = () => {
+    setAiSummaryLoading(true);
+    setTimeout(() => { setAiSummaryLoading(false); toast("AIサマリーを再生成しました", "info"); }, 1500);
+  };
+  const navMap = { "📋 例外キュー": "queue", "🔍 取引検索": "orderSearch", "📊 レポート生成": "report", "👥 加盟店一覧": "merchants", "🤖 AI監視": "ai" };
   const kpiDrillData = {
     "取引量": { value: "1,247件", details: [{ label: "VISA", value: "486件" }, { label: "Mastercard", value: "312件" }, { label: "JCB", value: "198件" }, { label: "AMEX", value: "89件" }, { label: "WEBマネー", value: "162件" }] },
     "決済高": { value: "¥16.2M", details: [{ label: "カード決済", value: "¥14.8M" }, { label: "WEBマネー", value: "¥1.4M" }] },
@@ -138,57 +256,34 @@ const MasterDashboard = () => {
         <div className="p-2 border-b bg-slate-50">
           <div className="flex flex-wrap gap-1">
             {["不正検知の状況", "今日の決済件数", "例外キューの確認", "精算状況", "エラーコード検索"].map(q => (
-              <button key={q} className="text-xs bg-white border rounded px-2 py-1 text-slate-500 hover:bg-blue-50 hover:text-blue-600">{q}</button>
+              <button key={q} onClick={() => sendChat(q)} className="text-xs bg-white border rounded px-2 py-1 text-slate-500 hover:bg-blue-50 hover:text-blue-600">{q}</button>
             ))}
           </div>
         </div>
         {/* 会話エリア */}
         <div className="flex-1 p-3 space-y-2 overflow-y-auto bg-slate-50">
-          <div className="flex gap-2">
-            <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs shrink-0">🤖</div>
-            <div className="bg-white rounded-lg p-2 border border-slate-200">
-              <p className="text-xs text-slate-700">本日の状況をまとめました：取引量 1,247件（前日比+8%）、成功率 99.2%。例外キューに3件の保留あり（うち1件が2時間超過中）。不正検知で2件を自動ブロック済みです。</p>
+          {chatMessages.map((msg, i) => msg.role === "user" ? (
+            <div key={i} className="flex gap-2 justify-end">
+              <div className="bg-blue-600 rounded-lg p-2 max-w-[220px]"><p className="text-xs text-white whitespace-pre-wrap">{msg.text}</p></div>
             </div>
-          </div>
-          <div className="flex gap-2 justify-end">
-            <div className="bg-blue-600 rounded-lg p-2 max-w-[200px]"><p className="text-xs text-white">例外キューの2時間超過の詳細を教えて</p></div>
-          </div>
-          <div className="flex gap-2">
-            <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs shrink-0">🤖</div>
-            <div className="bg-white rounded-lg p-2 border border-slate-200">
-              <p className="text-xs text-slate-700">例外キュー #1024 は加盟店「ディーライフ」の審査案件です。AI推薦は「承認」（信頼スコア 82/100）。中リスク判定の理由はカテゴリ初回申請のためです。早めの対応をお勧めします。</p>
-              <div className="flex gap-1 mt-1.5 border-t pt-1">
-                <button className="text-xs text-slate-400 hover:text-emerald-600">👍</button>
-                <button className="text-xs text-slate-400 hover:text-red-600">👎</button>
-                <button className="text-xs text-slate-400 hover:text-blue-600 ml-auto">📋</button>
+          ) : (
+            <div key={i} className="flex gap-2">
+              <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs shrink-0">🤖</div>
+              <div className="bg-white rounded-lg p-2 border border-slate-200">
+                <p className="text-xs text-slate-700 whitespace-pre-wrap">{msg.text}</p>
+                <div className="flex gap-1 mt-1.5 border-t pt-1">
+                  <button onClick={() => toast("フィードバックを送信しました", "success")} className="text-xs text-slate-400 hover:text-emerald-600">👍</button>
+                  <button onClick={() => toast("フィードバックを送信しました", "info")} className="text-xs text-slate-400 hover:text-red-600">👎</button>
+                  <button onClick={() => { navigator.clipboard?.writeText(msg.text); toast("クリップボードにコピーしました", "info"); }} className="text-xs text-slate-400 hover:text-blue-600 ml-auto">📋</button>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex gap-2 justify-end">
-            <div className="bg-blue-600 rounded-lg p-2 max-w-[200px]"><p className="text-xs text-white">加盟店 M-001 のステータスは？</p></div>
-          </div>
-          <div className="flex gap-2">
-            <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs shrink-0">🤖</div>
-            <div className="bg-white rounded-lg p-2 border border-slate-200">
-              <p className="text-xs text-slate-700 mb-1">加盟店 M-001 の情報です：</p>
-              <div className="bg-slate-50 rounded p-1.5 text-xs space-y-0.5">
-                <div className="flex justify-between"><span className="text-slate-400">加盟店名:</span><span className="font-bold">ABCマート</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">ステータス:</span><span className="font-bold text-emerald-600">有効</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">月間決済高:</span><span>¥2.4M</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">成功率:</span><span>99.2%</span></div>
-              </div>
-              <div className="flex gap-1 mt-1.5 border-t pt-1">
-                <button className="text-xs text-slate-400 hover:text-emerald-600">👍</button>
-                <button className="text-xs text-slate-400 hover:text-red-600">👎</button>
-                <button className="text-xs text-slate-400 hover:text-blue-600 ml-auto">📋</button>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
         {/* 入力エリア */}
         <div className="p-2 border-t bg-white flex gap-2">
-          <input className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="AIアシスタントに質問..." />
-          <button className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700">送信</button>
+          <input value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === "Enter" && sendChat(chatInput)} className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="AIアシスタントに質問..." />
+          <button onClick={() => sendChat(chatInput)} className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700">送信</button>
         </div>
       </div>
       ) : (
@@ -216,9 +311,9 @@ const MasterDashboard = () => {
           <span>🤖</span>
           <span className="text-xs font-bold text-blue-700">AI サマリー</span>
         </div>
-        <button className="text-xs text-blue-500 hover:text-blue-700">🔄 再生成</button>
+        <button onClick={handleRegenerate} className="text-xs text-blue-500 hover:text-blue-700">{aiSummaryLoading ? "⏳ 生成中..." : "🔄 再生成"}</button>
       </div>
-      <p className="text-xs text-slate-700">本日の取引は順調です。取引量は前日比+8%、決済成功率99.2%。不正検知で2件を自動ブロック済み。例外キューに審査保留3件あり（うち1件は2時間超過）。対応をお願いします。</p>
+      <p className={`text-xs text-slate-700 transition-opacity duration-300 ${aiSummaryLoading ? "opacity-30" : "opacity-100"}`}>{aiSummaryLoading ? "AIサマリーを生成しています..." : "本日の取引は順調です。取引量は前日比+8%、決済成功率99.2%。不正検知で2件を自動ブロック済み。例外キューに審査保留3件あり（うち1件は2時間超過）。対応をお願いします。"}</p>
     </div>
 
     {/* お知らせ欄 */}
@@ -331,7 +426,7 @@ const MasterDashboard = () => {
           <p className="text-xs font-bold text-slate-600">例外キュー</p>
           <div className="flex items-center gap-2">
             <span className="bg-rose-500 text-white text-xs rounded-full px-1.5 py-0.5">3件</span>
-            <button className="text-xs text-blue-500 hover:underline">全て見る →</button>
+            <button onClick={() => nav.setMasterPage("queue")} className="text-xs text-blue-500 hover:underline">全て見る →</button>
           </div>
         </div>
         <div className="space-y-2">
@@ -388,7 +483,7 @@ const MasterDashboard = () => {
       <p className="text-xs font-bold text-slate-600 mb-2">⚡ クイックアクション</p>
       <div className="flex gap-2">
         {[["📋 例外キュー", "rose"], ["🔍 取引検索", "blue"], ["📊 レポート生成", "emerald"], ["👥 加盟店一覧", "slate"], ["🤖 AI監視", "purple"]].map(([label, color], i) => (
-          <button key={i} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100`}>{label}</button>
+          <button key={i} onClick={() => nav.setMasterPage(navMap[label])} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100`}>{label}</button>
         ))}
       </div>
     </div>
@@ -12920,7 +13015,11 @@ export default function Wireframes() {
     }
   };
 
+  const navCtx = { setMasterPage, setMerchantPage, setAgentPage, setView };
+
   return (
+    <ToastProvider>
+    <NavigationContext.Provider value={navCtx}>
     <div className="h-screen flex flex-col bg-slate-50 font-sans overflow-hidden">
       {/* Top toggle */}
       <div className="bg-slate-900 px-5 py-3 flex items-center gap-4 shrink-0 border-b border-slate-700/50">
@@ -12972,5 +13071,7 @@ export default function Wireframes() {
         )}
       </div>
     </div>
+    </NavigationContext.Provider>
+    </ToastProvider>
   );
 }
