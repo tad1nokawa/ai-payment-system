@@ -1553,6 +1553,32 @@ const MerchantDashboard = () => {
       </div>
     )}
 
+    {/* お知らせ欄 */}
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span>📢</span>
+          <p className="text-xs font-bold text-slate-600">お知らせ</p>
+        </div>
+        <span className="text-xs text-blue-600 cursor-pointer hover:underline">すべて見る →</span>
+      </div>
+      <div className="space-y-1.5">
+        {[
+          { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: "🔧" },
+          { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: "🚀" },
+          { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: "⚠️" },
+          { date: "02/12", title: "3Dセキュア2.0 完全移行のお知らせ", type: "お知らせ", tColor: "default", icon: "📌" },
+        ].map((n, i) => (
+          <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-blue-50 ${i === 0 ? "border-amber-300 bg-amber-50" : "border-slate-200"}`}>
+            <span>{n.icon}</span>
+            <span className="w-12 text-slate-400 shrink-0">{n.date}</span>
+            <Badge text={n.type} color={n.tColor} />
+            <span className={`flex-1 ${i === 0 ? "text-amber-800 font-semibold" : "text-slate-700"}`}>{n.title}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
     <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-lg border border-emerald-200 p-3">
       <div className="flex items-center gap-2 mb-1">
         <span>🤖</span><span className="text-xs font-bold text-emerald-700">AI インサイト</span><span className="text-xs text-slate-400">毎日更新</span>
