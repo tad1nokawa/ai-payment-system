@@ -9397,10 +9397,13 @@ const MerchantSubscriptions = () => {
 const MasterRecurring = () => {
   const [tab, setTab] = useState("overview");
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [expandedPlanId, setExpandedPlanId] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [expandedUserId, setExpandedUserId] = useState(null);
   const [showForceStop, setShowForceStop] = useState(null);
   const [csvApprovalTab, setCsvApprovalTab] = useState("pending");
   const [selectedCsvApproval, setSelectedCsvApproval] = useState(null);
+  const [expandedCsvId, setExpandedCsvId] = useState(null);
   const [showApprovalConfirm, setShowApprovalConfirm] = useState(null);
   const tabs = [
     { id: "overview", label: "概況" },
@@ -9473,9 +9476,59 @@ const MasterRecurring = () => {
           </div>
           <TableHeader cols={[{ label: "プランID", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "サイト", w: "w-20" }, { label: "プラン名", w: "flex-1" }, { label: "タイプ", w: "w-14" }, { label: "金額", w: "w-24" }, { label: "ユーザー", w: "w-16" }, { label: "状態", w: "w-14" }]}>
           {planDetails.map((r, i) => (
-            <tr key={i} onClick={() => setSelectedPlan(r)} className="border-b hover:bg-blue-50 cursor-pointer">
+            <React.Fragment key={i}>
+            <tr onClick={() => setExpandedPlanId(expandedPlanId === r.id ? null : r.id)} className={`border-b cursor-pointer transition-colors ${expandedPlanId === r.id ? "bg-blue-100 border-l-2 border-l-blue-500" : "hover:bg-blue-50"}`}>
               <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{r.id}</td><td className="px-4 py-2 whitespace-nowrap w-24">{r.m}</td><td className="px-4 py-2 whitespace-nowrap w-20 text-slate-500">{r.s}</td><td className="px-4 py-2 whitespace-nowrap font-bold">{r.name}</td><td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} /></td><td className="px-4 py-2 whitespace-nowrap w-24 text-xs">{r.amt}</td><td className="px-4 py-2 whitespace-nowrap w-16">{r.users}</td><td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={r.st} color="green" /></td>
             </tr>
+            {expandedPlanId === r.id && (
+              <tr><td colSpan={8} className="p-0">
+                <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-xs font-bold text-slate-700">📋 プラン詳細 — {r.name}</p>
+                    <Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} />
+                    <Badge text={r.st} color="green" />
+                    <span className="text-xs text-slate-400 ml-auto">{r.id}</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-3 text-xs">
+                    <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                      <p className="font-semibold text-slate-600 mb-1">基本情報</p>
+                      <div className="space-y-0.5 text-slate-500">
+                        <div>加盟店: <span className="font-semibold text-slate-700">{r.m}</span></div>
+                        <div>サイト: {r.s}</div>
+                        <div>金額: <span className="font-semibold text-slate-700">{r.amt}</span></div>
+                        <div>作成日: {r.created}</div>
+                        <div>トライアル: {r.trial}</div>
+                        <div>リトライ回数: {r.retry}回</div>
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                      <p className="font-semibold text-slate-600 mb-1">パフォーマンス</p>
+                      <div className="space-y-1">
+                        <div className="bg-blue-50 rounded p-1.5 text-center border border-blue-200">
+                          <p className="text-xs text-slate-400">ユーザー数</p>
+                          <p className="text-sm font-bold text-blue-600">{r.users}</p>
+                        </div>
+                        <div className="bg-emerald-50 rounded p-1.5 text-center border border-emerald-200">
+                          <p className="text-xs text-slate-400">収益</p>
+                          <p className="text-sm font-bold text-emerald-600">{r.revenue}</p>
+                        </div>
+                        {r.churn !== "-" && <div className="text-xs"><span className="text-slate-400">解約率:</span> <span className="font-bold text-amber-600">{r.churn}</span></div>}
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-lg border border-slate-200 p-2.5 col-span-2">
+                      <p className="font-semibold text-slate-600 mb-1">ユーザー数推移（6ヶ月）</p>
+                      <div className="flex items-end gap-2 h-16 px-2">
+                        {r.chart.map((v, ci) => {
+                          const max = Math.max(...r.chart);
+                          return (<div key={ci} className="flex-1 flex flex-col items-center"><div className={`w-full rounded-t ${ci === 5 ? "bg-blue-500" : "bg-blue-200"}`} style={{ height: `${(v / max) * 100}%` }} /><p className="text-xs text-slate-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][ci]}</p></div>);
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td></tr>
+            )}
+            </React.Fragment>
           ))}
           </TableHeader>
         </div>
@@ -9489,10 +9542,54 @@ const MasterRecurring = () => {
           </div>
           <TableHeader cols={[{ label: "ユーザーID", w: "w-20" }, { label: "メール", w: "w-32" }, { label: "加盟店", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "状態", w: "w-16" }, { label: "次回決済", w: "w-20" }, { label: "失敗", w: "w-10" }, { label: "操作", w: "w-20" }]}>
           {userData.map((r, i) => (
-            <tr key={i} className="border-b hover:bg-blue-50 cursor-pointer">
-              <td onClick={() => setSelectedUser(r)} className="px-4 py-2 whitespace-nowrap w-20 font-mono text-blue-600">{r.id}</td><td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{r.email}</td><td className="px-4 py-2 whitespace-nowrap w-24">{r.m}</td><td className="px-4 py-2 whitespace-nowrap">{r.plan}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st} color={r.stc} /></td><td className="px-4 py-2 whitespace-nowrap w-20 text-slate-400">{r.next}</td><td className="px-4 py-2 whitespace-nowrap w-10 text-center">{r.fail !== "0" ? <span className="text-rose-600 font-bold">{r.fail}</span> : "0"}</td>
-              <td className="px-4 py-2 whitespace-nowrap w-20"><div className="flex gap-1"><button onClick={() => setSelectedUser(r)} className="text-blue-600 text-xs">詳細</button>{r.st !== "自動停止" && <button onClick={() => setShowForceStop(r)} className="text-rose-500 text-xs">強制停止</button>}</div></td>
+            <React.Fragment key={i}>
+            <tr onClick={() => setExpandedUserId(expandedUserId === r.id ? null : r.id)} className={`border-b cursor-pointer transition-colors ${expandedUserId === r.id ? "bg-blue-100 border-l-2 border-l-blue-500" : "hover:bg-blue-50"}`}>
+              <td className="px-4 py-2 whitespace-nowrap w-20 font-mono text-blue-600">{r.id}</td><td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{r.email}</td><td className="px-4 py-2 whitespace-nowrap w-24">{r.m}</td><td className="px-4 py-2 whitespace-nowrap">{r.plan}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st} color={r.stc} /></td><td className="px-4 py-2 whitespace-nowrap w-20 text-slate-400">{r.next}</td><td className="px-4 py-2 whitespace-nowrap w-10 text-center">{r.fail !== "0" ? <span className="text-rose-600 font-bold">{r.fail}</span> : "0"}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-20" onClick={e => e.stopPropagation()}><div className="flex gap-1">{r.st !== "自動停止" && <button onClick={() => setShowForceStop(r)} className="text-rose-500 text-xs">強制停止</button>}</div></td>
             </tr>
+            {expandedUserId === r.id && (
+              <tr><td colSpan={8} className="p-0">
+                <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-xs font-bold text-slate-700">👤 ユーザー詳細 — {r.id}</p>
+                    <Badge text={r.st} color={r.stc} />
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 text-xs">
+                    <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                      <p className="font-semibold text-slate-600 mb-1">基本情報</p>
+                      <div className="space-y-0.5 text-slate-500">
+                        {[["メール", r.email], ["加盟店", r.m], ["プラン", r.plan], ["登録日", r.created], ["累計課金額", r.total], ["課金回数", `${r.txCount}回`], ["次回決済", r.next], ["失敗回数", r.fail]].map(([l, v], di) => (
+                          <div key={di} className="flex justify-between"><span className="text-slate-400">{l}:</span><span className="font-semibold text-slate-700">{v}</span></div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                      <p className="font-semibold text-slate-600 mb-1">決済履歴</p>
+                      <div className="space-y-1">
+                        {r.history.map((h, hi) => (
+                          <div key={hi} className="flex items-center gap-2 py-1 border-b last:border-0">
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${h.st === "成功" ? "bg-emerald-500" : "bg-rose-500"}`} />
+                            <span className="text-slate-400 w-20">{h.date}</span>
+                            <span className="font-semibold">{h.amt}</span>
+                            <Badge text={h.st} color={h.st === "成功" ? "green" : "red"} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                      <p className="font-semibold text-slate-600 mb-1">操作</p>
+                      <div className="space-y-2">
+                        {r.st === "リトライ中" && <button className="w-full py-1.5 bg-blue-50 text-blue-600 rounded text-xs font-bold border border-blue-200 hover:bg-blue-100">🔄 手動リトライ</button>}
+                        {r.st === "課金中" && <button className="w-full py-1.5 bg-amber-50 text-amber-600 rounded text-xs font-bold border border-amber-200 hover:bg-amber-100">⏸ 一時停止</button>}
+                        {r.st !== "自動停止" && <button onClick={(e) => { e.stopPropagation(); setShowForceStop(r); }} className="w-full py-1.5 bg-red-50 text-red-600 rounded text-xs font-bold border border-red-200 hover:bg-red-100">⛔ 強制停止</button>}
+                        {r.st === "自動停止" && <div className="text-xs text-slate-400 text-center py-2">このユーザーは自動停止済みです</div>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td></tr>
+            )}
+            </React.Fragment>
           ))}
           </TableHeader>
         </div>
@@ -9534,7 +9631,8 @@ const MasterRecurring = () => {
               { id: "CSV-0043", merchant: "株式会社ABCマート", name: "1月月謝決済", count: "38", total: "¥372,400", schedule: "2026-01-20", uploaded: "2026-01-14 09:45", st: "完了", stc: "green" },
               { id: "CSV-0042", merchant: "合同会社XYZショップ", name: "1月会費一括", count: "5", total: "¥49,000", schedule: "2026-01-15", uploaded: "2026-01-10 11:20", st: "完了", stc: "green" },
             ].filter(r => csvApprovalTab === "all" || (csvApprovalTab === "pending" && r.st === "承認待ち") || (csvApprovalTab === "approved" && r.st === "承認済") || (csvApprovalTab === "completed" && r.st === "完了")).map((r, i) => (
-              <tr key={i} className={`border-b hover:bg-blue-50 cursor-pointer ${r.st === "承認待ち" ? "bg-amber-50" : ""}`} onClick={() => setSelectedCsvApproval(r)}>
+              <React.Fragment key={i}>
+              <tr className={`border-b cursor-pointer transition-colors ${expandedCsvId === r.id ? "bg-blue-100 border-l-2 border-l-blue-500" : r.st === "承認待ち" ? "bg-amber-50 hover:bg-amber-100" : "hover:bg-blue-50"}`} onClick={() => setExpandedCsvId(expandedCsvId === r.id ? null : r.id)}>
                 <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{r.id}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-28">{r.merchant}</td>
                 <td className="px-4 py-2 whitespace-nowrap font-semibold">{r.name}</td>
@@ -9554,6 +9652,60 @@ const MasterRecurring = () => {
                   {r.st === "完了" && <button className="text-xs text-blue-600 hover:underline">結果</button>}
                 </td>
               </tr>
+              {expandedCsvId === r.id && (
+                <tr><td colSpan={9} className="p-0">
+                  <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                    <div className="flex items-center gap-2 mb-2">
+                      <p className="text-xs font-bold text-slate-700">📦 CSV決済バッチ詳細 — {r.id}</p>
+                      <Badge text={r.st} color={r.stc} />
+                    </div>
+                    <div className="grid grid-cols-3 gap-3 text-xs">
+                      <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                        <p className="font-semibold text-slate-600 mb-1">バッチ情報</p>
+                        <div className="space-y-0.5 text-slate-500">
+                          {[["加盟店", r.merchant], ["バッチ名", r.name], ["決済件数", `${r.count}件`], ["合計金額", r.total], ["決済予定日", r.schedule], ["アップロード日", r.uploaded]].map(([l, v], di) => (
+                            <div key={di} className="flex justify-between"><span className="text-slate-400">{l}:</span><span className="font-semibold text-slate-700">{v}</span></div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-lg border border-slate-200 p-2.5 col-span-2">
+                        <p className="font-semibold text-slate-600 mb-1">📄 CSVプレビュー（先頭5件）</p>
+                        <div className="overflow-x-auto border rounded">
+                          <table className="w-full text-xs">
+                            <thead><tr className="bg-slate-50 border-b">
+                              <th className="px-2 py-1 text-left text-slate-500">paymentid</th>
+                              <th className="px-2 py-1 text-left text-slate-500">price</th>
+                              <th className="px-2 py-1 text-left text-slate-500">email</th>
+                              <th className="px-2 py-1 text-left text-slate-500">productName</th>
+                              <th className="px-2 py-1 text-left text-slate-500">free1</th>
+                            </tr></thead>
+                            <tbody>
+                              {[["PAY-001", "9,800", "tanaka@ex...", "月額会費", "田中太郎"], ["PAY-002", "9,800", "sato@ex...", "月額会費", "佐藤花子"], ["PAY-003", "5,000", "suzuki@ex...", "月額会費(割引)", "鈴木一郎"], ["", "9,800", "yamada@ex...", "月額会費", "山田明"], ["PAY-005", "12,000", "ito@ex...", "月額会費(上級)", "伊藤涼"]].map((csvr, ci) => (
+                                <tr key={ci} className={`border-b ${!csvr[0] ? "bg-amber-50" : ""}`}>
+                                  <td className="px-2 py-1 font-mono text-blue-600">{csvr[0] || <span className="text-amber-500">新規</span>}</td>
+                                  <td className="px-2 py-1">¥{csvr[1]}</td>
+                                  <td className="px-2 py-1 text-slate-500">{csvr[2]}</td>
+                                  <td className="px-2 py-1">{csvr[3]}</td>
+                                  <td className="px-2 py-1 text-slate-500">{csvr[4]}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-1">全{r.count}件中 5件を表示</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      {r.st === "承認待ち" && (<>
+                        <button onClick={(e) => { e.stopPropagation(); setShowApprovalConfirm({ ...r, action: "approve" }); }} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700">✅ 承認する</button>
+                        <button onClick={(e) => { e.stopPropagation(); setShowApprovalConfirm({ ...r, action: "reject" }); }} className="px-3 py-1.5 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200 hover:bg-rose-100">❌ 却下する</button>
+                      </>)}
+                      <button className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded text-xs border hover:bg-slate-100 ml-auto">📥 元CSVダウンロード</button>
+                    </div>
+                  </div>
+                </td></tr>
+              )}
+              </React.Fragment>
             ))}
             </TableHeader>
           </div>
@@ -9610,81 +9762,7 @@ const MasterRecurring = () => {
         </div>
       )}
 
-      {/* CSV詳細スライドパネル */}
-      {selectedCsvApproval && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedCsvApproval(null)} />
-          <div className="w-[480px] bg-white shadow-xl border-l overflow-y-auto">
-            <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
-              <h3 className="text-sm font-bold text-slate-800">📦 CSV決済バッチ詳細</h3>
-              <button onClick={() => setSelectedCsvApproval(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
-            </div>
-            <div className="p-5 space-y-4">
-              <div className="flex items-center gap-2 justify-center">
-                <span className="font-mono text-sm font-bold text-slate-800">{selectedCsvApproval.id}</span>
-                <Badge text={selectedCsvApproval.st} color={selectedCsvApproval.stc} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: "加盟店", value: selectedCsvApproval.merchant },
-                  { label: "バッチ名", value: selectedCsvApproval.name },
-                  { label: "決済件数", value: `${selectedCsvApproval.count}件` },
-                  { label: "合計金額", value: selectedCsvApproval.total },
-                  { label: "決済予定日", value: selectedCsvApproval.schedule },
-                  { label: "アップロード日", value: selectedCsvApproval.uploaded },
-                ].map((s, i) => (
-                  <div key={i} className="bg-slate-50 rounded p-2">
-                    <p className="text-xs text-slate-400">{s.label}</p>
-                    <p className="text-xs font-bold text-slate-700">{s.value}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* CSV Content Preview */}
-              <div>
-                <p className="text-xs font-bold text-slate-700 mb-2">📄 CSVプレビュー（先頭5件）</p>
-                <div className="overflow-x-auto border rounded">
-                  <table className="w-full text-xs">
-                    <thead><tr className="bg-slate-50 border-b">
-                      <th className="px-2 py-1 text-left text-slate-500">paymentid</th>
-                      <th className="px-2 py-1 text-left text-slate-500">price</th>
-                      <th className="px-2 py-1 text-left text-slate-500">email</th>
-                      <th className="px-2 py-1 text-left text-slate-500">productName</th>
-                      <th className="px-2 py-1 text-left text-slate-500">free1</th>
-                    </tr></thead>
-                    <tbody>
-                      {[
-                        ["PAY-001", "9,800", "tanaka@ex...", "月額会費", "田中太郎"],
-                        ["PAY-002", "9,800", "sato@ex...", "月額会費", "佐藤花子"],
-                        ["PAY-003", "5,000", "suzuki@ex...", "月額会費(割引)", "鈴木一郎"],
-                        ["", "9,800", "yamada@ex...", "月額会費", "山田明"],
-                        ["PAY-005", "12,000", "ito@ex...", "月額会費(上級)", "伊藤涼"],
-                      ].map((r, i) => (
-                        <tr key={i} className={`border-b ${!r[0] ? "bg-amber-50" : ""}`}>
-                          <td className="px-2 py-1 font-mono text-blue-600">{r[0] || <span className="text-amber-500">新規</span>}</td>
-                          <td className="px-2 py-1">¥{r[1]}</td>
-                          <td className="px-2 py-1 text-slate-500">{r[2]}</td>
-                          <td className="px-2 py-1">{r[3]}</td>
-                          <td className="px-2 py-1 text-slate-500">{r[4]}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <p className="text-xs text-slate-400 mt-1">全{selectedCsvApproval.count}件中 5件を表示</p>
-              </div>
-
-              {selectedCsvApproval.st === "承認待ち" && (
-                <div className="flex gap-2 pt-2 border-t">
-                  <button onClick={() => { setShowApprovalConfirm({ ...selectedCsvApproval, action: "approve" }); setSelectedCsvApproval(null); }} className="flex-1 px-3 py-2 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700">✅ 承認する</button>
-                  <button onClick={() => { setShowApprovalConfirm({ ...selectedCsvApproval, action: "reject" }); setSelectedCsvApproval(null); }} className="flex-1 px-3 py-2 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200 hover:bg-rose-100">❌ 却下する</button>
-                </div>
-              )}
-              <button className="w-full px-3 py-2 bg-slate-50 text-slate-600 rounded text-xs border hover:bg-slate-100">📥 元CSVダウンロード</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* (CSV詳細はアコーディオン展開に移行) */}
 
       {tab === "logs" && (
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
@@ -9703,71 +9781,7 @@ const MasterRecurring = () => {
         </div>
       )}
 
-      {/* プラン詳細スライドパネル */}
-      {selectedPlan && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedPlan(null)} />
-          <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
-            <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
-              <p className="text-sm font-bold">{selectedPlan.name}</p>
-              <button onClick={() => setSelectedPlan(null)} className="text-slate-400 hover:text-slate-600">✕</button>
-            </div>
-            <div className="p-4 space-y-4">
-              <div className="flex items-center gap-2"><Badge text={selectedPlan.type} color={selectedPlan.type === "継続" ? "blue" : "purple"} /><Badge text={selectedPlan.st} color="green" /><span className="text-xs text-slate-400">{selectedPlan.id}</span></div>
-              <div className="grid grid-cols-2 gap-2">
-                {[["加盟店", selectedPlan.m], ["サイト", selectedPlan.s], ["金額", selectedPlan.amt], ["作成日", selectedPlan.created], ["トライアル", selectedPlan.trial], ["リトライ回数", `${selectedPlan.retry}回`]].map(([l, v], i) => (
-                  <div key={i} className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">{l}</p><p className="text-xs font-bold">{v}</p></div>
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-blue-50 rounded p-2 text-center border border-blue-200"><p className="text-xs text-slate-400">ユーザー数</p><p className="text-lg font-bold text-blue-600">{selectedPlan.users}</p></div>
-                <div className="bg-emerald-50 rounded p-2 text-center border border-emerald-200"><p className="text-xs text-slate-400">月間収益</p><p className="text-lg font-bold text-emerald-600">{selectedPlan.revenue}</p></div>
-              </div>
-              {selectedPlan.churn !== "-" && <div className="flex text-xs"><span className="text-slate-400">解約率:</span><span className="ml-1 font-bold text-amber-600">{selectedPlan.churn}</span></div>}
-              <div>
-                <p className="text-xs font-bold text-slate-700 mb-2">ユーザー数推移（6ヶ月）</p>
-                <div className="flex items-end gap-2 h-16 px-2">
-                  {selectedPlan.chart.map((v, i) => {
-                    const max = Math.max(...selectedPlan.chart);
-                    return (<div key={i} className="flex-1 flex flex-col items-center"><div className={`w-full rounded-t ${i === 5 ? "bg-blue-500" : "bg-blue-200"}`} style={{ height: `${(v / max) * 100}%` }} /><p className="text-xs text-slate-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p></div>);
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ユーザー詳細スライドパネル */}
-      {selectedUser && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedUser(null)} />
-          <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
-            <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
-              <p className="text-sm font-bold">{selectedUser.id}</p>
-              <button onClick={() => setSelectedUser(null)} className="text-slate-400 hover:text-slate-600">✕</button>
-            </div>
-            <div className="p-4 space-y-4">
-              <div className="flex items-center gap-2"><Badge text={selectedUser.st} color={selectedUser.stc} /></div>
-              <div className="grid grid-cols-2 gap-2">
-                {[["メール", selectedUser.email], ["加盟店", selectedUser.m], ["プラン", selectedUser.plan], ["登録日", selectedUser.created], ["累計課金額", selectedUser.total], ["課金回数", `${selectedUser.txCount}回`], ["次回決済", selectedUser.next], ["失敗回数", selectedUser.fail]].map(([l, v], i) => (
-                  <div key={i} className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">{l}</p><p className="text-xs font-bold">{v}</p></div>
-                ))}
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-700 mb-2">決済履歴</p>
-                {selectedUser.history.map((h, i) => (
-                  <div key={i} className="flex text-xs py-1.5 border-b items-center"><span className="w-24 text-slate-400">{h.date}</span><span className="flex-1 font-bold">{h.amt}</span><Badge text={h.st} color={h.st === "成功" ? "green" : "red"} /></div>
-                ))}
-              </div>
-              <div className="space-y-2 pt-2 border-t">
-                {selectedUser.st === "リトライ中" && <button className="w-full py-2 bg-blue-50 text-blue-600 rounded text-xs font-bold border border-blue-200">🔄 手動リトライ</button>}
-                {selectedUser.st !== "自動停止" && <button onClick={() => { setShowForceStop(selectedUser); setSelectedUser(null); }} className="w-full py-2 bg-red-50 text-red-600 rounded text-xs font-bold border border-red-200">⛔ 強制停止</button>}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* (プラン詳細・ユーザー詳細はアコーディオン展開に移行) */}
 
       {/* 強制停止確認モーダル */}
       {showForceStop && (
@@ -9803,6 +9817,7 @@ const MasterAgents = () => {
   const [showAddAgent, setShowAddAgent] = useState(false);
   const [tab, setTab] = useState("list");
   const [selectedAgent, setSelectedAgent] = useState(null);
+  const [expandedAgentCode, setExpandedAgentCode] = useState(null);
   const tabs = [{ id: "list", label: "代理店一覧" }, { id: "register", label: "代理店登録" }, { id: "conditions", label: "フィー設定" }, { id: "commissions", label: "報酬管理" }];
   const agentData = [
     { code: "AG-001", name: "デジタルパートナーズ", rep: "田中太郎", merchants: "23", rate: "5.0%", st: "active", email: "info@digital-partners.jp", tel: "03-1234-5678", created: "2024-06-01", totalRevenue: "¥25,680,000", monthlyRevenue: "¥2,260,000", topMerchants: ["ECサイトA (¥5.2M)", "ファッションEC (¥3.8M)", "フード通販 (¥2.1M)"], chart: [1800, 1920, 2010, 2080, 2150, 2260] },
@@ -9820,18 +9835,100 @@ const MasterAgents = () => {
       {tab === "list" && (
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
           <div className="p-3 border-b"><input className="border rounded px-2 py-1 text-xs w-full" placeholder="代理店名 / コードで検索" /></div>
-          <TableHeader cols={[{ label: "コード", w: "w-20" }, { label: "代理店名", w: "flex-1" }, { label: "代表者", w: "w-20" }, { label: "紹介加盟店数", w: "w-20" }, { label: "紹介料率", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]}>
-          {agentData.map((r, i) => (
-            <tr key={i} onClick={() => setSelectedAgent(r)} className="border-b hover:bg-blue-50 cursor-pointer">
+          <TableHeader cols={[{ label: "コード", w: "w-20" }, { label: "代理店名", w: "flex-1" }, { label: "代表者", w: "w-20" }, { label: "紹介加盟店数", w: "w-20" }, { label: "紹介料率", w: "w-16" }, { label: "今月報酬", w: "w-24" }, { label: "ステータス", w: "w-16" }]}>
+          {agentData.map((r, i) => {
+            const agentSites = merchantData.flatMap(m => m.sites.filter(s => s.agentId === r.code).map(s => ({ ...s, merchantName: m.name, merchantId: m.id })));
+            return (
+            <React.Fragment key={i}>
+            <tr onClick={() => setExpandedAgentCode(expandedAgentCode === r.code ? null : r.code)} className={`border-b cursor-pointer transition-colors ${expandedAgentCode === r.code ? "bg-blue-100 border-l-2 border-l-blue-500" : "hover:bg-blue-50"}`}>
               <td className="px-4 py-2 whitespace-nowrap w-20 font-mono">{r.code}</td>
               <td className="px-4 py-2 whitespace-nowrap font-bold">{r.name}</td>
               <td className="px-4 py-2 whitespace-nowrap w-20">{r.rep}</td>
               <td className="px-4 py-2 whitespace-nowrap w-20 text-center">{r.merchants}社</td>
               <td className="px-4 py-2 whitespace-nowrap w-16">{r.rate}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-24 font-semibold text-emerald-700">{r.monthlyRevenue}</td>
               <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text="有効" color="green" /></td>
-              <td className="px-4 py-2 whitespace-nowrap w-16"><button className="text-blue-600 text-xs">詳細</button></td>
             </tr>
-          ))}
+            {expandedAgentCode === r.code && (
+              <tr><td colSpan={7} className="p-0">
+                <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-xs font-bold text-slate-700">🤝 代理店詳細 — {r.name}</p>
+                    <Badge text="有効" color="green" />
+                    <span className="text-xs text-slate-400">{r.code}</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-3 text-xs mb-3">
+                    <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                      <p className="font-semibold text-slate-600 mb-1">基本情報</p>
+                      <div className="space-y-0.5 text-slate-500">
+                        {[["代表者", r.rep], ["メール", r.email], ["電話", r.tel], ["契約日", r.created], ["料率", r.rate]].map(([l, v], di) => (
+                          <div key={di} className="flex justify-between"><span className="text-slate-400">{l}:</span><span className="font-semibold text-slate-700">{v}</span></div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                      <p className="font-semibold text-slate-600 mb-1">パフォーマンス</p>
+                      <div className="space-y-1">
+                        <div className="bg-orange-50 rounded p-1.5 text-center border border-orange-200">
+                          <p className="text-xs text-slate-400">紹介加盟店</p>
+                          <p className="text-sm font-bold text-orange-600">{r.merchants}社</p>
+                        </div>
+                        <div className="bg-emerald-50 rounded p-1.5 text-center border border-emerald-200">
+                          <p className="text-xs text-slate-400">今月の報酬</p>
+                          <p className="text-sm font-bold text-emerald-600">{r.monthlyRevenue}</p>
+                        </div>
+                        <div className="text-xs"><span className="text-slate-400">累計:</span> <span className="font-bold">{r.totalRevenue}</span></div>
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-lg border border-slate-200 p-2.5 col-span-2">
+                      <p className="font-semibold text-slate-600 mb-1">月次報酬推移（6ヶ月）</p>
+                      <div className="flex items-end gap-2 h-16 px-2">
+                        {r.chart.map((v, ci) => {
+                          const max = Math.max(...r.chart);
+                          return (<div key={ci} className="flex-1 flex flex-col items-center"><div className={`w-full rounded-t ${ci === 5 ? "bg-orange-500" : "bg-orange-200"}`} style={{ height: `${(v / max) * 100}%` }} /><p className="text-xs text-slate-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][ci]}</p></div>);
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* サイトごとの紐づけ一覧 */}
+                  <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                    <div className="px-3 py-2 bg-slate-50 border-b flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-600">🌐 紹介サイト一覧</span>
+                      <span className="text-xs text-slate-400">（{agentSites.length}サイト）</span>
+                    </div>
+                    {agentSites.length > 0 ? agentSites.map((site, si) => (
+                      <div key={si} className="border-b last:border-0 px-3 py-2">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-mono text-slate-400">{site.siteId}</span>
+                          <span className="text-xs font-bold text-slate-700">{site.siteName}</span>
+                          <span className="text-xs text-slate-400">—</span>
+                          <span className="text-xs text-slate-500">{site.merchantName}</span>
+                          <span className="text-xs text-blue-500 truncate max-w-[180px] ml-auto">{site.url}</span>
+                        </div>
+                        <div className="flex gap-1 flex-wrap">
+                          {site.processors.map((proc, pi) => {
+                            const st = PROC_STATUS[proc.status] || { label: proc.status, color: "gray" };
+                            return (
+                              <div key={pi} className={`text-xs px-2 py-0.5 rounded border ${proc.status === "approved" ? "bg-emerald-50 border-emerald-200" : proc.status === "reviewing" ? "bg-blue-50 border-blue-200" : "bg-slate-50 border-slate-200"}`}>
+                                <span className="font-semibold">{proc.name}</span>
+                                <span className="text-slate-400 ml-1">{proc.brands}</span>
+                                <span className="ml-1">{proc.status === "approved" ? "✅" : proc.status === "reviewing" ? "🔄" : "⏳"}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )) : (
+                      <div className="px-3 py-4 text-center text-xs text-slate-400">紐づけサイトが見つかりません</div>
+                    )}
+                  </div>
+                </div>
+              </td></tr>
+            )}
+            </React.Fragment>
+            );
+          })}
           </TableHeader>
         </div>
       )}
@@ -9865,63 +9962,104 @@ const MasterAgents = () => {
           </div>
         </div>
       )}
-      {tab === "conditions" && (
+      {tab === "conditions" && (() => {
+        const selectedAgentCode = agentData[0].code;
+        const ag = agentData.find(a => a.code === selectedAgentCode);
+        const agSites = merchantData.flatMap(m => m.sites.filter(s => s.agentId === selectedAgentCode).map(s => ({ ...s, merchantName: m.name, merchantId: m.id })));
+        // サイトごとのフィーデータ（代理店フィーはサイト×ブランドごとに設定）
+        const siteFeeData = {
+          "S-001-01": { agentFees: { visa: "0.30%", master: "0.30%", jcb: "0.25%", webmoney: "0.20%" } },
+          "S-001-02": { agentFees: { visa: "0.35%", master: "0.35%", amex: "0.40%", webmoney: "0.25%" } },
+          "S-004-01": { agentFees: { visa: "0.25%", master: "0.25%", jcb: "0.20%" } },
+          "S-002-01": { agentFees: { visa: "0.30%", master: "0.30%" } },
+          "S-006-01": { agentFees: { visa: "0.35%", master: "0.35%", jcb: "0.30%", amex: "0.35%", webmoney: "0.25%" } },
+          "S-006-02": { agentFees: { visa: "0.35%", master: "0.35%" } },
+          "S-007-01": { agentFees: { visa: "0.40%", master: "0.40%", jcb: "0.35%" } },
+        };
+        return (
         <div className="space-y-3">
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 flex items-start gap-2">
             <span className="text-xs">💡</span>
-            <p className="text-xs text-amber-700">代理店フィーは<span className="font-bold">決済手数料から差し引き</span>で支払われます。決済種別ごとに料率を設定してください。加盟店との紐づけは手動で行います。</p>
+            <p className="text-xs text-amber-700">代理店フィーは<span className="font-bold">サイトごと × ブランドごと</span>に設定します。各サイトの接続先・ブランドに応じた決済手数料から代理店フィーが差し引かれます。</p>
           </div>
           <div className="flex items-center gap-2 mb-1">
             <select className="border rounded px-2 py-1 text-xs"><option>AG-001 デジタルパートナーズ</option><option>AG-002 ウェブコンサル合同会社</option><option>AG-003 ITソリューションズ</option></select>
-            <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs">保存</button>
+            <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs">一括保存</button>
           </div>
-          <div className="bg-white rounded-lg border p-4 space-y-3">
-            <p className="text-xs font-bold text-slate-700">AG-001 デジタルパートナーズ — 決済種別ごとのフィー設定</p>
-            <p className="text-xs text-slate-400">契約開始: 2025-04-01 ／ 種別: 紹介型 ／ 紹介加盟店: 23社</p>
-            <TableHeader cols={[{ label: "決済種別", w: "w-32" }, { label: "決済手数料", w: "w-24" }, { label: "代理店フィー", w: "w-24" }, { label: "運営取り分", w: "w-24" }, { label: "有効", w: "w-12" }, { label: "操作", w: "w-14" }]}>
-            {[
-              { brand: "VISA", fee: "3.2%", agentFee: "0.3%", net: "2.9%", active: true },
-              { brand: "Mastercard", fee: "3.2%", agentFee: "0.3%", net: "2.9%", active: true },
-              { brand: "JCB", fee: "3.5%", agentFee: "0.3%", net: "3.2%", active: true },
-              { brand: "AMEX", fee: "3.8%", agentFee: "0.4%", net: "3.4%", active: true },
-              { brand: "WEBマネー", fee: "3.5%〜5.0%", agentFee: "0.3%", net: "3.2%〜4.7%", active: true },
-            ].map((r, i) => (
-              <tr key={i} className={`border-b ${!r.active ? "opacity-40" : ""}`}>
-                <td className="px-4 py-2 whitespace-nowrap w-32 font-semibold">{r.brand}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-600">{r.fee}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-24 font-bold text-orange-600">{r.agentFee}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-500">{r.net}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-12 text-center">{r.active ? "✅" : "—"}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-14"><button className="text-blue-600 text-xs">編集</button></td>
-              </tr>
-            ))}
-            </TableHeader>
-          </div>
-          {/* 紐づけ加盟店 */}
+
+          {/* サイトごとのフィー設定 */}
+          {agSites.length === 0 ? (
+            <div className="bg-slate-50 rounded-lg border p-6 text-center"><p className="text-xs text-slate-400">紐づけサイトがありません</p></div>
+          ) : agSites.map((site, si) => {
+            const sf = siteFeeData[site.siteId] || { agentFees: {} };
+            const approvedProcs = site.processors.filter(p => p.status === "approved");
+            // ブランドごとの行を生成
+            const brandRows = [];
+            approvedProcs.forEach(proc => {
+              const pInfo = processorList.find(p => p.name === proc.name);
+              const brands = proc.brands.includes("WEBマネー") ? ["WEBマネー"] : proc.brands.split("/");
+              brands.forEach(brand => {
+                const brandKey = brand === "VISA" ? "visa" : brand === "MC" ? "master" : brand === "JCB" ? "jcb" : brand === "AMEX" ? "amex" : brand === "Diners" ? "diners" : "webmoney";
+                const defaultFee = pInfo?.fees?.[brandKey] || (pInfo?.fees?.webmoney) || "—";
+                const overrideFee = proc.feeOverride?.[brandKey];
+                const displayFee = overrideFee || defaultFee;
+                const agentFee = sf.agentFees[brandKey] || "—";
+                const feeNum = parseFloat(displayFee);
+                const agentNum = parseFloat(agentFee);
+                const net = (!isNaN(feeNum) && !isNaN(agentNum)) ? (feeNum - agentNum).toFixed(2) + "%" : "—";
+                brandRows.push({ processor: proc.name, brand, displayFee, agentFee, net, brandKey, isOverride: !!overrideFee });
+              });
+            });
+            return (
+            <div key={si} className="bg-white rounded-lg border shadow-sm overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-50 to-slate-50 px-4 py-2 border-b flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">{site.siteId}</span>
+                  <span className="text-xs font-bold text-slate-700">{site.siteName}</span>
+                  <span className="text-xs text-slate-400">({site.merchantName})</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-400">{approvedProcs.length}接続先</span>
+                  <button className="px-2 py-0.5 bg-blue-600 text-white rounded text-xs">保存</button>
+                </div>
+              </div>
+              {brandRows.length === 0 ? (
+                <div className="px-4 py-3"><p className="text-xs text-slate-400">承認済みの接続先がありません</p></div>
+              ) : (
+                <TableHeader cols={[{ label: "接続先", w: "w-32" }, { label: "ブランド", w: "w-24" }, { label: "決済手数料", w: "w-24" }, { label: "代理店フィー", w: "w-28" }, { label: "運営取り分", w: "w-24" }, { label: "操作", w: "w-14" }]}>
+                {brandRows.map((row, ri) => (
+                  <tr key={ri} className="border-b hover:bg-blue-50/30">
+                    <td className="px-3 py-1.5 whitespace-nowrap w-32 text-xs">{row.processor}</td>
+                    <td className="px-3 py-1.5 whitespace-nowrap w-24 text-xs font-semibold">{row.brand}</td>
+                    <td className={`px-3 py-1.5 whitespace-nowrap w-24 text-xs ${row.isOverride ? "text-amber-700 font-semibold" : "text-slate-600"}`}>{row.displayFee}{row.isOverride && <span className="ml-1 text-amber-500">★</span>}</td>
+                    <td className="px-3 py-1.5 whitespace-nowrap w-28">
+                      <input type="text" defaultValue={row.agentFee !== "—" ? row.agentFee : ""} placeholder="0.00%" className="border rounded px-2 py-0.5 text-xs w-16 text-orange-600 font-bold text-center" />
+                    </td>
+                    <td className="px-3 py-1.5 whitespace-nowrap w-24 text-xs text-slate-500">{row.net}</td>
+                    <td className="px-3 py-1.5 whitespace-nowrap w-14"><button className="text-blue-600 text-xs">編集</button></td>
+                  </tr>
+                ))}
+                </TableHeader>
+              )}
+            </div>
+            );
+          })}
+
+          {/* サマリー */}
           <div className="bg-white rounded-lg border p-4">
             <div className="flex justify-between items-center mb-2">
-              <p className="text-xs font-bold text-slate-700">紐づけ加盟店一覧</p>
-              <button className="px-2 py-1 bg-emerald-600 text-white rounded text-xs">+ 加盟店を紐づけ</button>
+              <p className="text-xs font-bold text-slate-700">📊 フィー設定サマリー</p>
             </div>
-            <p className="text-xs text-slate-400 mb-2">※ 代理店と加盟店の紐づけは運営担当者が手動で設定します</p>
-            <TableHeader cols={[{ label: "加盟店ID", w: "w-20" }, { label: "加盟店名", w: "flex-1" }, { label: "紐づけ日", w: "w-24" }, { label: "月間取引額", w: "w-24" }, { label: "操作", w: "w-14" }]}>
-            {[
-              ["M-001", "株式会社ABCマート", "2025-06-01", "¥12.5M"],
-              ["M-002", "合同会社XYZショップ", "2025-06-01", "¥5.8M"],
-              ["M-006", "株式会社トラベルプラス", "2025-08-15", "¥8.2M"],
-            ].map((r, i) => (
-              <tr key={i} className="border-b">
-                <td className="px-4 py-2 whitespace-nowrap w-20 font-mono text-blue-600">{r[0]}</td>
-                <td className="px-4 py-2 whitespace-nowrap font-semibold">{r[1]}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{r[2]}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-24 text-right">{r[3]}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-14"><button className="text-rose-500 text-xs">解除</button></td>
-              </tr>
-            ))}
-            </TableHeader>
+            <div className="grid grid-cols-4 gap-2">
+              <div className="bg-blue-50 rounded p-2 text-center"><p className="text-xs text-slate-400">紐づけサイト数</p><p className="text-sm font-bold text-blue-700">{agSites.length}</p></div>
+              <div className="bg-orange-50 rounded p-2 text-center"><p className="text-xs text-slate-400">フィー設定済み</p><p className="text-sm font-bold text-orange-700">{Object.keys(siteFeeData).filter(k => agSites.some(s => s.siteId === k)).length}</p></div>
+              <div className="bg-emerald-50 rounded p-2 text-center"><p className="text-xs text-slate-400">平均フィー率</p><p className="text-sm font-bold text-emerald-700">0.31%</p></div>
+              <div className="bg-slate-50 rounded p-2 text-center"><p className="text-xs text-slate-400">今月報酬見込</p><p className="text-sm font-bold text-slate-700">{ag.monthlyRevenue}</p></div>
+            </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* ── Modal: 代理店登録 ── */}
       {showAddAgent && (
@@ -9955,47 +10093,7 @@ const MasterAgents = () => {
         </div>
       )}
 
-      {/* 代理店詳細スライドパネル */}
-      {selectedAgent && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedAgent(null)} />
-          <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
-            <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
-              <p className="text-sm font-bold">{selectedAgent.name}</p>
-              <button onClick={() => setSelectedAgent(null)} className="text-slate-400 hover:text-slate-600">✕</button>
-            </div>
-            <div className="p-4 space-y-4">
-              <div className="flex items-center gap-2"><Badge text="有効" color="green" /><span className="text-xs text-slate-400">{selectedAgent.code}</span></div>
-              <div>
-                <p className="text-xs font-bold text-slate-700 mb-2">基本情報</p>
-                {[["代理店名", selectedAgent.name], ["代表者", selectedAgent.rep], ["メール", selectedAgent.email], ["電話", selectedAgent.tel], ["契約日", selectedAgent.created], ["料率", selectedAgent.rate]].map(([l, v], i) => (
-                  <div key={i} className="flex text-xs py-1 border-b"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-orange-50 rounded p-2 text-center border border-orange-200"><p className="text-xs text-slate-400">紹介加盟店</p><p className="text-lg font-bold text-orange-600">{selectedAgent.merchants}社</p></div>
-                <div className="bg-emerald-50 rounded p-2 text-center border border-emerald-200"><p className="text-xs text-slate-400">今月の報酬</p><p className="text-lg font-bold text-emerald-600">{selectedAgent.monthlyRevenue}</p></div>
-              </div>
-              <div className="flex text-xs"><span className="text-slate-400">累計報酬:</span><span className="ml-1 font-bold">{selectedAgent.totalRevenue}</span></div>
-              <div>
-                <p className="text-xs font-bold text-slate-700 mb-2">月次報酬推移</p>
-                <div className="flex items-end gap-2 h-16 px-2">
-                  {selectedAgent.chart.map((v, i) => {
-                    const max = Math.max(...selectedAgent.chart);
-                    return (<div key={i} className="flex-1 flex flex-col items-center"><div className={`w-full rounded-t ${i === 5 ? "bg-orange-500" : "bg-orange-200"}`} style={{ height: `${(v / max) * 100}%` }} /><p className="text-xs text-slate-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p></div>);
-                  })}
-                </div>
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-700 mb-2">トップ紹介加盟店</p>
-                {selectedAgent.topMerchants.map((m, i) => (
-                  <div key={i} className="flex items-center text-xs py-1 border-b last:border-0"><span className="w-5 text-slate-400">{i + 1}.</span><span className="flex-1">{m}</span></div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* (代理店詳細はアコーディオン展開に移行) */}
     </div>
   );
 };
