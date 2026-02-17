@@ -2947,6 +2947,9 @@ const MasterMerchantApplications = () => {
   const [appConfirmDialog, setAppConfirmDialog] = useState(null);
   const [selectedApp, setSelectedApp] = useState("APP-0211-003");
   const [appStatusFilter, setAppStatusFilter] = useState("all");
+  const [appTab, setAppTab] = useState("new_merchant");
+  const [selectedSiteApp, setSelectedSiteApp] = useState("SADD-0212-001");
+  const [siteAppStatusFilter, setSiteAppStatusFilter] = useState("all");
 
   const appList = [
     { id: "APP-0211-003", name: "株式会社テックショップ", biz: "家電EC", status: "AI審査中", sColor: "blue", ai: "処理中", aColor: "blue", date: "02/11 10:15", step: 3, procStatus: null },
@@ -2956,6 +2959,18 @@ const MasterMerchantApplications = () => {
     { id: "APP-0210-006", name: "株式会社ネクストギア", biz: "スポーツEC", status: "自社承認済み", sColor: "green", ai: "承認推薦", aColor: "green", date: "02/10 09:45", step: 5, procStatus: "接続先審査中" },
     { id: "APP-0209-005", name: "有限会社グレーマーケット", biz: "雑貨販売", status: "却下", sColor: "red", ai: "却下推薦", aColor: "red", date: "02/09 14:00", step: -1, procStatus: null },
   ];
+
+  // 既存加盟店からの新規サイト追加審査申請
+  const siteAddAppList = [
+    { id: "SADD-0212-001", merchantId: "M-1001", merchantName: "株式会社ABCマート", siteName: "会員限定ショップ", siteUrl: "https://members.abcmart-ec.jp", genre: "物販EC", monthlyVol: "¥3M", status: "AI審査中", sColor: "blue", ai: "処理中", aColor: "blue", date: "02/12 09:30", existingSites: 2, brands: "VISA/MC/JCB" },
+    { id: "SADD-0211-003", merchantId: "M-1003", merchantName: "株式会社デジタルプラス", siteName: "新規サブスクサイト", siteUrl: "https://sub.digitalplus.jp", genre: "サブスクリプション", monthlyVol: "¥8M", status: "人間判定待ち", sColor: "yellow", ai: "要確認", aColor: "yellow", date: "02/11 14:20", existingSites: 1, brands: "VISA/MC" },
+    { id: "SADD-0211-002", merchantId: "M-1005", merchantName: "合同会社トラベルネクスト", siteName: "海外ツアー予約サイト", siteUrl: "https://overseas.travelnext.co.jp", genre: "旅行・宿泊", monthlyVol: "¥15M", status: "人間判定待ち", sColor: "yellow", ai: "承認推薦", aColor: "green", date: "02/11 11:00", existingSites: 3, brands: "VISA/MC/JCB/AMEX" },
+    { id: "SADD-0210-005", merchantId: "M-1002", merchantName: "株式会社ファッションモール", siteName: "アウトレットEC", siteUrl: "https://outlet.fashion-mall.jp", genre: "物販EC（衣料）", monthlyVol: "¥5M", status: "承認済み", sColor: "green", ai: "自動承認", aColor: "green", date: "02/10 16:45", existingSites: 2, brands: "VISA/MC/JCB", procStatus: "接続先審査中" },
+    { id: "SADD-0210-004", merchantId: "M-1008", merchantName: "株式会社ヘルスケアPro", siteName: "サプリ定期購入サイト", siteUrl: "", genre: "美容・健康", monthlyVol: "¥2M", status: "承認済み", sColor: "green", ai: "承認推薦", aColor: "green", date: "02/10 10:30", existingSites: 1, brands: "VISA/MC", procStatus: "接続先審査待ち" },
+    { id: "SADD-0209-003", merchantId: "M-1004", merchantName: "有限会社グレーマーケット", siteName: "新規雑貨サイト", siteUrl: "https://new.greymarket.jp", genre: "雑貨販売", monthlyVol: "¥1M", status: "却下", sColor: "red", ai: "却下推薦", aColor: "red", date: "02/09 15:20", existingSites: 1, brands: "VISA/MC" },
+  ];
+
+  const selectedSiteAppData = siteAddAppList.find(a => a.id === selectedSiteApp);
 
   const selectedAppData = appList.find(a => a.id === selectedApp);
 
@@ -2969,6 +2984,20 @@ const MasterMerchantApplications = () => {
 
   return (
     <div className="p-5 space-y-4">
+      {/* タブ切替: 新規加盟店申込 / 既存加盟店サイト追加 */}
+      <div className="flex gap-1 border-b border-slate-200">
+        {[
+          { id: "new_merchant", label: "📋 新規加盟店申込", count: 6 },
+          { id: "site_add", label: "🌐 既存加盟店サイト追加", count: siteAddAppList.length },
+        ].map(tab => (
+          <button key={tab.id} onClick={() => setAppTab(tab.id)}
+            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-colors ${appTab === tab.id ? "border-blue-500 text-blue-600 bg-blue-50/50" : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
+            {tab.label} <span className="ml-1 text-slate-400">({tab.count})</span>
+          </button>
+        ))}
+      </div>
+
+      {appTab === "new_merchant" && (<>
       <div className="flex justify-between items-center">
         <h2 className="text-sm font-bold text-slate-800">加盟店 申込・登録管理 <span className="text-xs text-slate-400 font-normal ml-2">※自社審査のみ管理。接続先審査は「🔌 接続先審査」で管理</span></h2>
         <div className="flex gap-2">
@@ -3261,6 +3290,248 @@ const MasterMerchantApplications = () => {
         ))}
         </TableHeader>
       </div>
+      </>)}
+
+      {/* ====== 既存加盟店サイト追加審査タブ ====== */}
+      {appTab === "site_add" && (<>
+      <div className="flex justify-between items-center">
+        <h2 className="text-sm font-bold text-slate-800">既存加盟店 サイト追加審査 <span className="text-xs text-slate-400 font-normal ml-2">※既存加盟店が新サイトを追加する際の審査を管理</span></h2>
+        <div className="flex gap-2">
+          {[{ k: "all", label: `全て (${siteAddAppList.length})` }, { k: "ai", label: "AI審査中" }, { k: "human", label: "人間判定待ち" }, { k: "approved", label: "承認済み" }, { k: "rejected", label: "却下" }].map(f => (
+            <button key={f.k} onClick={() => setSiteAppStatusFilter(f.k)} className={`text-xs px-2 py-1 rounded border ${siteAppStatusFilter === f.k ? "bg-teal-50 text-teal-600 border-teal-200" : "bg-white text-slate-500"}`}>{f.label}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* サイト追加審査フロー図 */}
+      <div className="bg-gradient-to-r from-teal-50 via-white to-gray-50 rounded-lg border p-3">
+        <p className="text-xs font-bold text-slate-600 mb-2">🌐 既存加盟店サイト追加審査フロー（新規加盟店審査との違い）</p>
+        <div className="flex items-center gap-1 text-xs">
+          <div className="bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-center">
+            <p className="text-slate-500">スキップ</p>
+            <p className="text-slate-400 mt-1 line-through">反社チェック・財務分析</p>
+            <p className="text-[10px] text-slate-400">（加盟店登録時に実施済み）</p>
+          </div>
+          <span className="text-2xl text-slate-300 mx-1">→</span>
+          <div className="bg-teal-100 border-2 border-teal-400 rounded-lg px-3 py-2 text-center">
+            <p className="font-bold text-teal-700">この画面で管理</p>
+            <p className="text-teal-600 mt-1">サイト申請受付 → AI<span className="font-semibold">サイト審査</span> → 人間判定 → <span className="font-bold">承認</span></p>
+          </div>
+          <span className="text-2xl text-slate-300 mx-1">→</span>
+          <div className="bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-center">
+            <p className="font-semibold text-slate-500">🔌 接続先審査で管理</p>
+            <p className="text-slate-400 mt-1">接続先選定 → 条件確定 → 決済開始</p>
+          </div>
+        </div>
+      </div>
+
+      {/* サイト追加審査 KPI */}
+      <div className="flex gap-3">
+        <KPICard label="今月のサイト追加申請" value={`${siteAddAppList.length}件`} sub="前月比" trend={15} />
+        <KPICard label="AI自動承認率" value="50.0%" sub="サイト審査特化" color="blue" />
+        <KPICard label="平均審査時間" value="1.2時間" sub="反社・財務スキップ" color="green" />
+        <KPICard label="却下率" value="16.7%" sub="サイト内容不適合" color="yellow" />
+      </div>
+
+      {/* サイト追加審査 詳細パネル */}
+      {selectedSiteAppData && (
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
+        <div className={`p-3 border-b ${
+          selectedSiteAppData.status === "承認済み" ? "bg-emerald-50" :
+          selectedSiteAppData.status === "人間判定待ち" ? "bg-amber-50" :
+          selectedSiteAppData.status === "却下" ? "bg-rose-50" :
+          "bg-teal-50"
+        }`}>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Badge text="サイト追加" color="teal" />
+              <Badge text={selectedSiteAppData.status} color={selectedSiteAppData.sColor} />
+              <span className="text-sm font-bold text-slate-800">{selectedSiteAppData.id} — {selectedSiteAppData.siteName}</span>
+            </div>
+            <span className="text-xs text-slate-400">申請日: {selectedSiteAppData.date}</span>
+          </div>
+        </div>
+        <div className="p-3">
+          {/* 審査ステップ（サイト追加用：簡略版） */}
+          <div className="flex items-center gap-1 mb-3">
+            {[
+              { label: "申請受付", done: true },
+              { label: "AIサイト審査", done: selectedSiteAppData.status !== "AI審査中", active: selectedSiteAppData.status === "AI審査中" },
+              { label: "人間判定", done: selectedSiteAppData.status === "承認済み", active: selectedSiteAppData.status === "人間判定待ち" },
+              { label: "承認", done: selectedSiteAppData.status === "承認済み" },
+            ].map((s, i) => (
+              <div key={i} className="flex items-center gap-1 flex-1">
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${s.done ? "bg-emerald-500 text-white" : s.active ? "bg-teal-500 text-white animate-pulse" : "bg-slate-200 text-slate-400"}`}>
+                  {s.done ? "✓" : s.active ? "⟳" : i + 1}
+                </div>
+                <span className={`text-xs ${s.done ? "text-emerald-700" : s.active ? "text-teal-700 font-semibold" : "text-slate-400"}`}>{s.label}</span>
+                {i < 3 && <div className={`flex-1 h-0.5 ${s.done ? "bg-emerald-300" : "bg-slate-200"}`} />}
+              </div>
+            ))}
+          </div>
+
+          {/* 操作ボタン */}
+          <div className="flex items-center gap-2 mb-3 p-2 bg-slate-50 rounded-lg border">
+            <span className="text-xs text-slate-500">操作:</span>
+            {selectedSiteAppData.status === "人間判定待ち" && (
+              <>
+                <button onClick={() => setAppConfirmDialog({
+                  type: "approve", icon: "✅", title: "サイト追加承認", appId: selectedSiteAppData.id, merchantName: `${selectedSiteAppData.merchantName} — ${selectedSiteAppData.siteName}`,
+                  description: "AIサイト審査結果を確認の上、この新規サイトの追加を承認します。承認後、接続先の審査・設定を行います。",
+                  impacts: ["サイトが加盟店マスターに追加される", "接続先審査の開始が可能になる", "既存の加盟店契約情報が引き継がれる"],
+                  confirmLabel: "✅ サイト追加を承認"
+                })} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700 shadow-sm">✅ 承認</button>
+                <button onClick={() => setAppConfirmDialog({
+                  type: "reject", icon: "❌", title: "サイト追加却下", appId: selectedSiteAppData.id, merchantName: `${selectedSiteAppData.merchantName} — ${selectedSiteAppData.siteName}`,
+                  description: "このサイト追加申請を却下します。理由は加盟店に通知されます。",
+                  impacts: ["サイト追加が却下される", "加盟店に却下通知が送信される", "既存サイトの運用には影響なし"],
+                  confirmLabel: "❌ 却下する"
+                })} className="px-3 py-1.5 bg-white text-rose-600 border border-rose-300 rounded text-xs font-semibold hover:bg-rose-50">❌ 却下</button>
+                <button className="px-3 py-1.5 bg-white text-slate-600 border rounded text-xs hover:bg-slate-100">↩ AI再審査を依頼</button>
+              </>
+            )}
+            {selectedSiteAppData.status === "AI審査中" && (
+              <div className="bg-teal-50 rounded-lg border border-teal-200 p-3 w-full">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-teal-700">🤖 AIサイト審査を実行中...</span>
+                  <span className="text-xs text-teal-500">1/3 ステップ完了 — 33%</span>
+                </div>
+                <div className="w-full bg-teal-200 rounded-full h-2 mb-2">
+                  <div className="bg-teal-600 h-2 rounded-full transition-all" style={{ width: "33%" }} />
+                </div>
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> サイトコンテンツ解析... 完了 <span className="text-slate-400 ml-auto">15秒</span></div>
+                  <div className="flex items-center gap-2"><span className="text-teal-500 animate-pulse">🔄</span> ジャンル適合性チェック... 実行中</div>
+                  <div className="flex items-center gap-2"><span className="text-slate-300">⏳</span> リスクスコア算出... 待機中</div>
+                </div>
+                <p className="text-xs text-slate-400 mt-2">※ サイト追加審査は反社・財務チェックをスキップ。通常15秒〜1分で完了</p>
+              </div>
+            )}
+            {selectedSiteAppData.status === "承認済み" && selectedSiteAppData.procStatus === "接続先審査待ち" && (
+              <>
+                <button onClick={() => setAppConfirmDialog({
+                  type: "start_proc_review", icon: "🔌", title: "接続先審査を開始（サイト追加）", appId: selectedSiteAppData.id, merchantName: `${selectedSiteAppData.merchantName} — ${selectedSiteAppData.siteName}`,
+                  description: "サイト追加が承認されました。このサイト用の接続先を選択して審査を開始してください。既存接続先の流用も可能です。",
+                  impacts: ["選択した接続先に審査申請が送信される", "既存加盟店の書類情報が自動転送される", "接続先審査画面に案件が追加される"],
+                  processorName: "既存接続先流用 or 新規選定",
+                  confirmLabel: "🔌 接続先審査を開始"
+                })} className="px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700 shadow-sm ring-2 ring-purple-300 ring-offset-1">🔌 接続先審査を開始</button>
+                <span className="text-xs text-slate-400 ml-1">→ 既存接続先の流用 or 新規接続先の審査</span>
+              </>
+            )}
+            {selectedSiteAppData.status === "承認済み" && selectedSiteAppData.procStatus === "接続先審査中" && (
+              <div className="flex items-center gap-2">
+                <Badge text="接続先審査中" color="blue" />
+                <span className="text-xs text-slate-500">接続先審査は「🔌 接続先審査」画面で進行中です →</span>
+                <button className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs border border-blue-200 font-semibold hover:bg-blue-200">🔌 接続先審査を開く</button>
+              </div>
+            )}
+            {selectedSiteAppData.status === "却下" && (
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-rose-500">このサイト追加申請は却下されています</span>
+                <button onClick={() => setAppConfirmDialog({
+                  type: "reapply", icon: "🔄", title: "再申請を許可",
+                  appId: selectedSiteAppData.id, merchantName: `${selectedSiteAppData.merchantName} — ${selectedSiteAppData.siteName}`,
+                  description: "サイト追加の再申請を許可しますか？加盟店管理画面から再申請が可能になります。",
+                  impacts: ["加盟店の「新規サイト申請」から再申請が可能になる", "加盟店担当者にメール通知"],
+                  confirmLabel: "🔄 再申請を許可する"
+                })} className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold hover:bg-blue-200 border border-blue-200">🔄 再申請を許可</button>
+              </div>
+            )}
+          </div>
+
+          {/* 申請情報グリッド */}
+          <div className="grid grid-cols-3 gap-4 mb-3">
+            <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
+              <p className="text-xs font-bold text-slate-600 mb-1">申請元加盟店</p>
+              <div className="text-xs space-y-1 text-slate-600">
+                <div>加盟店ID: <span className="font-mono text-blue-600">{selectedSiteAppData.merchantId}</span></div>
+                <div>法人名: {selectedSiteAppData.merchantName}</div>
+                <div>既存サイト数: {selectedSiteAppData.existingSites}サイト</div>
+                <div>ステータス: <span className="text-emerald-600 font-semibold">稼働中</span></div>
+                <div className="pt-1 border-t mt-1">
+                  <span className="text-[10px] text-emerald-500">✅ 反社チェック済み ✅ 財務審査済み</span>
+                </div>
+              </div>
+            </div>
+            <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
+              <p className="text-xs font-bold text-slate-600 mb-1">新規サイト情報</p>
+              <div className="text-xs space-y-1 text-slate-600">
+                <div>サイト名: <span className="font-semibold">{selectedSiteAppData.siteName}</span></div>
+                <div>URL: {selectedSiteAppData.siteUrl || <span className="text-slate-400">（準備中）</span>}</div>
+                <div>ジャンル: {selectedSiteAppData.genre}</div>
+                <div>月間予定決済高: {selectedSiteAppData.monthlyVol}</div>
+                <div>希望ブランド: {selectedSiteAppData.brands}</div>
+              </div>
+            </div>
+            <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
+              <p className="text-xs font-bold text-slate-600 mb-1">AIサイト審査（簡易版）</p>
+              <div className="text-xs space-y-1.5">
+                <div className="flex items-center gap-2"><span className="text-slate-300 line-through">反社チェック</span> <span className="text-[10px] text-emerald-500 bg-emerald-50 px-1 rounded">登録時済み</span></div>
+                <div className="flex items-center gap-2"><span className="text-slate-300 line-through">財務分析</span> <span className="text-[10px] text-emerald-500 bg-emerald-50 px-1 rounded">登録時済み</span></div>
+                {selectedSiteAppData.status === "AI審査中" ? (
+                  <>
+                    <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> サイトコンテンツ確認: 完了</div>
+                    <div className="flex items-center gap-2"><span className="text-teal-500 animate-pulse">⟳</span> ジャンル適合性: 処理中...</div>
+                    <div className="flex items-center gap-2"><span className="text-slate-300">○</span> 総合判定: 待機中</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> サイトコンテンツ確認: 問題なし</div>
+                    <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> ジャンル適合性: 適合</div>
+                    <div className="flex items-center gap-2">
+                      {selectedSiteAppData.ai === "却下推薦" ? <span className="text-rose-500">❌</span> : <span className="text-emerald-500">✅</span>}
+                      総合判定: <span className={selectedSiteAppData.ai === "却下推薦" ? "text-rose-600 font-semibold" : "text-emerald-600 font-semibold"}>{selectedSiteAppData.ai}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* 承認済みの場合のサマリー */}
+          {selectedSiteAppData.status === "承認済み" && (
+            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-200 p-3">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-xs font-bold text-emerald-700">✅ サイト追加承認済み → 接続先設定フェーズ</p>
+                {selectedSiteAppData.procStatus === "接続先審査中" && <Badge text="接続先審査中" color="blue" />}
+                {selectedSiteAppData.procStatus === "接続先審査待ち" && <Badge text="接続先審査未開始" color="yellow" />}
+              </div>
+              <div className="flex gap-4 text-xs text-slate-600">
+                <div><span className="text-slate-400">承認日:</span> 2026-02-10</div>
+                <div><span className="text-slate-400">承認者:</span> admin@aipaymentsys.com</div>
+                <div><span className="text-slate-400">AI判定:</span> <span className="text-emerald-600 font-semibold">{selectedSiteAppData.ai}</span></div>
+                <div><span className="text-slate-400">既存接続先流用:</span> <span className="text-blue-600 font-semibold">可能</span></div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      )}
+
+      {/* サイト追加申請 一覧テーブル */}
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+        <TableHeader cols={[{ label: "申請ID", w: "w-36" }, { label: "加盟店", w: "w-44" }, { label: "新規サイト名", w: "flex-1" }, { label: "ジャンル", w: "w-28" }, { label: "予定決済高", w: "w-24" }, { label: "審査状況", w: "w-24" }, { label: "AI判定", w: "w-24" }, { label: "申請日", w: "w-24" }, { label: "操作", w: "w-20" }]}>
+        {siteAddAppList.map((a, i) => (
+          <tr key={i} className={`border-b cursor-pointer transition-colors ${selectedSiteApp === a.id ? "bg-teal-50 border-l-2 border-l-teal-500" : i % 2 ? "bg-slate-50 hover:bg-teal-50" : "hover:bg-teal-50"}`}
+               onClick={() => setSelectedSiteApp(a.id)}>
+            <td className="px-4 py-2 whitespace-nowrap w-36 font-mono text-slate-500">{a.id}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-44">
+              <div className="font-semibold text-slate-700">{a.merchantName}</div>
+              <div className="text-[10px] text-slate-400">{a.merchantId} · {a.existingSites}サイト稼働中</div>
+            </td>
+            <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{a.siteName}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-500">{a.genre}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-500">{a.monthlyVol}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={a.status} color={a.sColor} /></td>
+            <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={a.ai} color={a.aColor} /></td>
+            <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{a.date}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-20"><button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">詳細</button></td>
+          </tr>
+        ))}
+        </TableHeader>
+      </div>
+      </>)}
     </div>
   );
 };
@@ -6236,6 +6507,7 @@ const processorList = [
 const reviewFlowData = [
   {
     merchantId: "M-002", merchantName: "合同会社XYZショップ", processorId: "PROC-001", processorName: "Univa Pay cast",
+    reviewType: "initial", // 初回法人審査
     status: "reviewing", appliedAt: "2026-01-28", currentStep: 3, totalSteps: 7,
     timeline: [
       { step: "審査申請", date: "01/28", status: "done", note: "自動申請" },
@@ -6258,6 +6530,7 @@ const reviewFlowData = [
   },
   {
     merchantId: "M-006", merchantName: "株式会社トラベルプラス", processorId: "PROC-007", processorName: "Asiabill",
+    reviewType: "initial", // 初回法人審査
     status: "additional_docs", appliedAt: "2026-01-15", currentStep: 4, totalSteps: 7,
     timeline: [
       { step: "審査申請", date: "01/15", status: "done", note: "手動申請" },
@@ -6281,14 +6554,53 @@ const reviewFlowData = [
       { date: "02/06", from: "Asiabill審査部", items: ["旅行業登録証の写し", "過去6ヶ月のチャージバック実績レポート"], deadline: "02/13", status: "対応中" },
     ],
   },
+  {
+    merchantId: "M-1002", merchantName: "株式会社ファッションモール", processorId: "PROC-001", processorName: "Univa Pay cast",
+    reviewType: "site_add", // 既存加盟店サイト追加審査
+    siteName: "アウトレットEC", siteUrl: "https://outlet.fashion-mall.jp", siteGenre: "物販EC（衣料）",
+    status: "reviewing", appliedAt: "2026-02-10", currentStep: 2, totalSteps: 5,
+    timeline: [
+      { step: "サイト審査申請", date: "02/10", status: "done", note: "既存加盟店からのサイト追加" },
+      { step: "接続先サイト審査", date: "02/11〜", status: "active", note: "Univa Pay cast側でサイト審査中（法人審査済み）" },
+      { step: "条件確定", date: "—", status: "pending", note: "サイト別手数料・制限の確定" },
+      { step: "契約追補", date: "—", status: "pending", note: "既存契約への追補（サイト追加）" },
+      { step: "決済開始", date: "—", status: "pending", note: "新サイトの決済開始" },
+    ],
+    documents: [
+      { name: "サイト追加審査申請書", type: "自動生成", format: "PDF", size: "180KB", date: "02/10", status: "sent", auto: true },
+      { name: "サイトスクリーンショット", type: "自動生成", format: "PNG", size: "1.5MB", date: "02/10", status: "sent", auto: true },
+      { name: "特定商取引法表記", type: "自動生成", format: "PNG", size: "420KB", date: "02/10", status: "sent", auto: true },
+    ],
+    additionalRequests: [],
+  },
+  {
+    merchantId: "M-1005", merchantName: "合同会社トラベルネクスト", processorId: "PROC-004", processorName: "TCMS",
+    reviewType: "site_add", // 既存加盟店サイト追加審査
+    siteName: "海外ツアー予約サイト", siteUrl: "https://overseas.travelnext.co.jp", siteGenre: "旅行・宿泊",
+    status: "reviewing", appliedAt: "2026-02-11", currentStep: 1, totalSteps: 5,
+    timeline: [
+      { step: "サイト審査申請", date: "02/11", status: "done", note: "既存加盟店からのサイト追加" },
+      { step: "接続先サイト審査", date: "—", status: "active", note: "TCMS側でサイト審査中" },
+      { step: "条件確定", date: "—", status: "pending", note: "サイト別手数料の確定" },
+      { step: "契約追補", date: "—", status: "pending", note: "既存契約への追補" },
+      { step: "決済開始", date: "—", status: "pending", note: "" },
+    ],
+    documents: [
+      { name: "サイト追加審査申請書", type: "自動生成", format: "PDF", size: "195KB", date: "02/11", status: "sent", auto: true },
+      { name: "サイトスクリーンショット", type: "自動生成", format: "PNG", size: "2.0MB", date: "02/11", status: "sent", auto: true },
+    ],
+    additionalRequests: [],
+  },
 ];
 
 const approvedHistory = [
-  { merchantName: "株式会社ABCマート", processorName: "ビットキャッシュ", approvedAt: "2025-10-18", reviewDays: 4, docs: 5 },
-  { merchantName: "株式会社ABCマート", processorName: "TCMS", approvedAt: "2025-08-22", reviewDays: 18, docs: 6 },
-  { merchantName: "株式会社トラベルプラス", processorName: "ONTHELINE", approvedAt: "2025-07-10", reviewDays: 16, docs: 7 },
-  { merchantName: "合同会社XYZショップ", processorName: "Simpletransact", approvedAt: "2025-06-05", reviewDays: 5, docs: 5 },
-  { merchantName: "株式会社ABCマート", processorName: "Univa Pay cast", approvedAt: "2025-04-12", reviewDays: 6, docs: 5 },
+  { merchantName: "株式会社ABCマート", processorName: "ビットキャッシュ", reviewType: "initial", approvedAt: "2025-10-18", reviewDays: 4, docs: 5 },
+  { merchantName: "株式会社ABCマート", processorName: "TCMS", reviewType: "initial", approvedAt: "2025-08-22", reviewDays: 18, docs: 6 },
+  { merchantName: "株式会社トラベルプラス", processorName: "ONTHELINE", reviewType: "initial", approvedAt: "2025-07-10", reviewDays: 16, docs: 7 },
+  { merchantName: "合同会社XYZショップ", processorName: "Simpletransact", reviewType: "initial", approvedAt: "2025-06-05", reviewDays: 5, docs: 5 },
+  { merchantName: "株式会社ABCマート", processorName: "Univa Pay cast", reviewType: "initial", approvedAt: "2025-04-12", reviewDays: 6, docs: 5 },
+  { merchantName: "株式会社ファッションモール", processorName: "楽天銀行", reviewType: "site_add", siteName: "メンズ専門EC", approvedAt: "2025-12-05", reviewDays: 3, docs: 3 },
+  { merchantName: "株式会社ABCマート", processorName: "Worldpay", reviewType: "site_add", siteName: "海外向けEC", approvedAt: "2025-11-20", reviewDays: 5, docs: 3 },
 ];
 
 const MasterProcessors = () => {
@@ -6310,7 +6622,7 @@ const MasterProcessors = () => {
       <div className="flex gap-1 border-b">
         {[
           { id: "overview", label: "接続先一覧", badge: null },
-          { id: "reviews", label: "審査フロー管理", badge: 2 },
+          { id: "reviews", label: "審査フロー管理", badge: 4 },
           { id: "history", label: "審査完了履歴", badge: null },
           { id: "documents", label: "審査資料管理", badge: 1 },
         ].map((tab) => (
@@ -6670,11 +6982,12 @@ const MasterProcessors = () => {
           {reviewFlowData.map((review, ri) => (
             <div key={ri} className="bg-white rounded-lg border border-slate-200 shadow-sm">
               {/* Header */}
-              <div className={`p-3 border-b ${review.status === "additional_docs" ? "bg-amber-50" : "bg-blue-50"}`}>
+              <div className={`p-3 border-b ${review.status === "additional_docs" ? "bg-amber-50" : review.reviewType === "site_add" ? "bg-teal-50" : "bg-blue-50"}`}>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
+                    <Badge text={review.reviewType === "site_add" ? "サイト追加" : "初回法人"} color={review.reviewType === "site_add" ? "teal" : "purple"} />
                     <Badge text={review.status === "additional_docs" ? "追加書類待ち" : "審査中"} color={review.status === "additional_docs" ? "yellow" : "blue"} />
-                    <span className="text-sm font-bold text-slate-800">{review.merchantName} → {review.processorName}</span>
+                    <span className="text-sm font-bold text-slate-800">{review.merchantName}{review.reviewType === "site_add" ? ` (${review.siteName})` : ""} → {review.processorName}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-slate-400">申請日: {review.appliedAt}</span>
@@ -6938,10 +7251,14 @@ const MasterProcessors = () => {
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "接続先", w: "w-32" }, { label: "承認日", w: "w-28" }, { label: "審査日数", w: "w-20" }, { label: "提出書類", w: "w-20" }, { label: "結果", w: "w-20" }, { label: "書類", w: "w-20" }]}>
+            <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "審査種別", w: "w-24" }, { label: "接続先", w: "w-32" }, { label: "承認日", w: "w-28" }, { label: "審査日数", w: "w-20" }, { label: "提出書類", w: "w-20" }, { label: "結果", w: "w-20" }, { label: "書類", w: "w-20" }]}>
             {approvedHistory.map((h, i) => (
               <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
-                <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{h.merchantName}</td>
+                <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">
+                  {h.merchantName}
+                  {h.reviewType === "site_add" && h.siteName && <span className="text-[10px] text-teal-500 ml-1">({h.siteName})</span>}
+                </td>
+                <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={h.reviewType === "site_add" ? "サイト追加" : "初回法人"} color={h.reviewType === "site_add" ? "teal" : "purple"} /></td>
                 <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-600">{h.processorName}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-500">{h.approvedAt}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-20 text-center"><Badge text={`${h.reviewDays}日`} color={h.reviewDays <= 7 ? "green" : h.reviewDays <= 14 ? "blue" : "yellow"} /></td>
