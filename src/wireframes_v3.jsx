@@ -2455,7 +2455,7 @@ const MasterMerchantApplications = () => {
   return (
     <div className="p-5 space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-sm font-bold text-slate-800">加盟店 申込・登録管理 <span className="text-xs text-slate-400 font-normal ml-2">※自社審査のみ管理。接続先審査は「🔌 接続先管理」で管理</span></h2>
+        <h2 className="text-sm font-bold text-slate-800">加盟店 申込・登録管理 <span className="text-xs text-slate-400 font-normal ml-2">※自社審査のみ管理。接続先審査は「🔌 接続先審査」で管理</span></h2>
         <div className="flex gap-2">
           {[{ k: "all", label: "全て (12)" }, { k: "ai", label: "AI審査中 (3)" }, { k: "human", label: "人間判定待ち (2)" }, { k: "approved", label: "自社承認済み (5)" }, { k: "rejected", label: "却下 (2)" }].map(f => (
             <button key={f.k} onClick={() => setAppStatusFilter(f.k)} className={`text-xs px-2 py-1 rounded border ${appStatusFilter === f.k ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-white text-slate-500"}`}>{f.label}</button>
@@ -2473,7 +2473,7 @@ const MasterMerchantApplications = () => {
           </div>
           <span className="text-2xl text-slate-300 mx-1">→</span>
           <div className="bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-center">
-            <p className="font-semibold text-slate-500">🔌 接続先管理で管理</p>
+            <p className="font-semibold text-slate-500">🔌 接続先審査で管理</p>
             <p className="text-slate-400 mt-1">審査申請 → 書類送付 → 審査 → <span className="font-semibold text-slate-500">条件確定 → 契約 → 決済開始</span></p>
           </div>
         </div>
@@ -2641,20 +2641,20 @@ const MasterMerchantApplications = () => {
                   impacts: [
                     "選択した接続先に審査申請が送信される",
                     "申込時の書類（登記簿・本人確認・決算書等）が審査パッケージとして転送される",
-                    "接続先管理画面の「審査フロー管理」タブに案件が追加される",
-                    "以降の審査進捗は「🔌 接続先管理」画面で管理"
+                    "接続先審査画面の「審査フロー管理」タブに案件が追加される",
+                    "以降の審査進捗は「🔌 接続先審査」画面で管理"
                   ],
                   processorName: "Simpletransact（AI推薦）",
                   confirmLabel: "🔌 接続先審査を開始"
                 })} className="px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700 shadow-sm ring-2 ring-purple-300 ring-offset-1">🔌 接続先審査を開始</button>
-                <span className="text-xs text-slate-400 ml-1">→ 接続先管理画面に審査案件が作成されます</span>
+                <span className="text-xs text-slate-400 ml-1">→ 接続先審査画面に審査案件が作成されます</span>
               </>
             )}
             {selectedAppData?.status === "自社承認済み" && selectedAppData?.procStatus === "接続先審査中" && (
               <div className="flex items-center gap-2">
                 <Badge text="接続先審査中" color="blue" />
-                <span className="text-xs text-slate-500">接続先審査は「🔌 接続先管理」画面で進行中です →</span>
-                <button className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs border border-blue-200 font-semibold hover:bg-blue-200">🔌 接続先管理を開く</button>
+                <span className="text-xs text-slate-500">接続先審査は「🔌 接続先審査」画面で進行中です →</span>
+                <button className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs border border-blue-200 font-semibold hover:bg-blue-200">🔌 接続先審査を開く</button>
               </div>
             )}
             {selectedAppData?.status === "却下" && (
@@ -5561,7 +5561,7 @@ const MasterRouting = () => {
   );
 };
 
-// ─── M09: 接続先管理 ───
+// ─── M09: 接続先審査 ───
 const processorList = [
   { id: "PROC-001", name: "Univa Pay cast", type: "カードプロセッサー", brands: ["VISA","MC"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.95%", merchants: 5, reviewing: 1, avgReviewDays: 10,
     fees: { visa: "3.55%", master: "3.55%", jcb: "3.80%", amex: "3.80%", diners: "3.80%" },
@@ -5758,7 +5758,7 @@ const MasterProcessors = () => {
   return (
     <div className="p-5 space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-sm font-bold text-slate-800">接続先管理</h2>
+        <h2 className="text-sm font-bold text-slate-800">接続先審査</h2>
         <div className="flex gap-2">
           <button onClick={() => setShowAddProc(true)} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold hover:bg-blue-700">+ 接続先追加</button>
         </div>
@@ -11537,12 +11537,12 @@ const masterMenuItems = [
   { separator: true, label: "加盟店" },
   { id: "merchants", icon: "🏢", label: "加盟店管理" },
   { id: "applications", icon: "📝", label: "審査・申込", badge: 2 },
+  { id: "processors", icon: "🔌", label: "接続先審査", badge: 2 },
   { id: "agents", icon: "🤝", label: "代理店管理" },
   { separator: true, label: "精算" },
   { id: "settlement", icon: "💰", label: "精算・入金管理" },
   { id: "report", icon: "📈", label: "レポート" },
   { separator: true, label: "決済インフラ" },
-  { id: "processors", icon: "🔌", label: "接続先管理", badge: 2 },
   { id: "routing", icon: "🔀", label: "ルーティング" },
   { id: "fraud", icon: "🛡️", label: "不正検知" },
   { separator: true, label: "運用" },
