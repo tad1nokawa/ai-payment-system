@@ -649,20 +649,24 @@ const merchantData = [
       { siteId: "S-001-01", siteName: "本店ECサイト", url: "https://abc-mart.example.com", agentId: "AG-001", agentName: "株式会社メディアパートナーズ",
         processors: [
           { name: "Univa Pay cast", brands: "VISA/MC", status: "approved", since: "2025-04", txnCount: 8200, mid: "UPC-ABC-001",
-            feeOverride: { visa: "3.20%", master: "3.20%" }, depositOverride: { rate: "5%", period: "120日" }, limitOverride: { trMax: "¥300,000", monthly: "¥50,000,000", count: "3回/日、7回/月" }, settlementOverride: "15日締め末払い / 末締め翌15日払い" },
+            feeOverride: { visa: "3.85%", master: "3.85%" }, trFeesOverride: { success: "35円", fail: "35円", cb: "3,500円", refund: "150円", tds: "5円/件" },
+            depositOverride: { rate: "5%", period: "120日" }, limitOverride: { trMax: "¥300,000", monthly: "¥50,000,000", count: "3回/日、7回/月" }, settlementOverride: "15日締め末払い / 末締め翌15日払い" },
           { name: "楽天銀行", brands: "VISA/MC", status: "approved", since: "2025-04", txnCount: 5600, mid: "RKT-ABC-001",
-            feeOverride: { visa: "2.50%", master: "2.50%" }, depositOverride: { rate: "5%", period: "120日" }, limitOverride: { trMax: "¥500,000" }, settlementOverride: null },
+            feeOverride: { visa: "2.95%", master: "2.95%" }, trFeesOverride: { success: "15円" },
+            depositOverride: { rate: "5%", period: "120日" }, limitOverride: { trMax: "¥500,000" }, settlementOverride: null },
           { name: "TCMS", brands: "VISA/MC/JCB", status: "approved", since: "2025-08", txnCount: 2100, mid: "TCMS-ABC-001",
-            feeOverride: { visa: "3.50%", master: "3.50%", jcb: "3.40%" }, depositOverride: null, limitOverride: { trMax: "¥200,000" }, settlementOverride: null },
+            feeOverride: { visa: "4.10%", master: "4.10%", jcb: "3.90%" }, trFeesOverride: { success: "25円", tds: "2円/件" },
+            depositOverride: null, limitOverride: { trMax: "¥200,000" }, settlementOverride: null },
           { name: "ビットキャッシュ", brands: "WEBマネー", status: "approved", since: "2025-11", txnCount: 900, mid: "BC-ABC-001",
-            feeOverride: { webmoney: "4.5%" }, depositOverride: null, limitOverride: null, settlementOverride: null },
+            feeOverride: { webmoney: "5.8%" }, depositOverride: null, limitOverride: null, settlementOverride: null },
         ]},
       { siteId: "S-001-02", siteName: "会員限定ショップ", url: "https://members.abc-mart.example.com", agentId: "AG-001", agentName: "株式会社メディアパートナーズ",
         processors: [
           { name: "Worldpay", brands: "VISA/MC/AMEX", status: "approved", since: "2025-10", txnCount: 2800, mid: "WP-ABC-002",
-            feeOverride: { visa: "3.20%", master: "3.35%" }, depositOverride: { rate: "10%", period: "180日" }, limitOverride: null, settlementOverride: null },
+            feeOverride: { visa: "3.72%", master: "3.89%" }, trFeesOverride: { success: "15円", fail: "15円", cb: "1,500円", refund: "600円" },
+            depositOverride: { rate: "10%", period: "180日" }, limitOverride: null, settlementOverride: null },
           { name: "ペイディ", brands: "WEBマネー", status: "approved", since: "2025-12", txnCount: 600, mid: "PD-ABC-002",
-            feeOverride: { webmoney: "3.2%" }, depositOverride: null, limitOverride: null, settlementOverride: null },
+            feeOverride: { webmoney: "4.0%" }, depositOverride: null, limitOverride: null, settlementOverride: null },
         ]},
     ],
     // 後方互換: 全サイトのprocessorsを統合した配列
@@ -673,7 +677,8 @@ const merchantData = [
       { siteId: "S-002-01", siteName: "メインショップ", url: "https://xyz-shop.example.com", agentId: "AG-002", agentName: "合同会社デジタルエージェント",
         processors: [
           { name: "Simpletransact", brands: "VISA/MC", status: "approved", since: "2025-06", txnCount: 5400, mid: "ST-XYZ-001",
-            feeOverride: { visa: "4.00%", master: "4.00%" }, depositOverride: null, limitOverride: { trMax: "¥500,000" }, settlementOverride: null },
+            feeOverride: { visa: "4.80%", master: "4.80%" }, trFeesOverride: { success: "0.45USD", fail: "0.45USD", cb: "55USD", refund: "3USD" },
+            depositOverride: null, limitOverride: { trMax: "¥500,000" }, settlementOverride: null },
           { name: "Univa Pay cast", brands: "VISA/MC", status: "reviewing", since: null, txnCount: 0, mid: null,
             feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
           { name: "Gマネー", brands: "WEBマネー", status: "pending", since: null, txnCount: 0, mid: null,
@@ -697,7 +702,8 @@ const merchantData = [
       { siteId: "S-004-01", siteName: "テスト商事オンライン", url: "https://test-shoji.example.com", agentId: "AG-001", agentName: "株式会社メディアパートナーズ",
         processors: [
           { name: "楽天銀行", brands: "VISA/MC", status: "approved", since: "2025-09", txnCount: 2800, mid: "RKT-TST-001",
-            feeOverride: { visa: "2.80%", master: "2.80%" }, depositOverride: { rate: "10%", period: "180日" }, limitOverride: { trMax: "¥300,000", count: "3回/日、7回/月" }, settlementOverride: null },
+            feeOverride: { visa: "2.80%", master: "2.80%" }, trFeesOverride: { success: "12円", cb: "1,500円" },
+            depositOverride: { rate: "10%", period: "180日" }, limitOverride: { trMax: "¥300,000", count: "3回/日、7回/月" }, settlementOverride: null },
           { name: "ネットライドキャッシュ", brands: "WEBマネー", status: "approved", since: "2025-11", txnCount: 450, mid: "NRC-TST-001",
             feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
         ]},
@@ -709,7 +715,8 @@ const merchantData = [
       { siteId: "S-005-01", siteName: "グレーサービス", url: "https://grey-industry.example.com", agentId: null, agentName: null,
         processors: [
           { name: "Simpletransact", brands: "VISA/MC", status: "suspended", since: "2025-07", txnCount: 1500, mid: "ST-GRY-001",
-            feeOverride: { visa: "4.80%", master: "4.80%" }, depositOverride: { rate: "10%", period: "180日" }, limitOverride: { trMax: "¥100,000", count: "2回/日、5回/月" }, settlementOverride: null },
+            feeOverride: { visa: "5.20%", master: "5.20%" }, trFeesOverride: { success: "0.50USD", fail: "0.50USD", cb: "60USD" },
+            depositOverride: { rate: "10%", period: "180日" }, limitOverride: { trMax: "¥100,000", count: "2回/日、5回/月" }, settlementOverride: null },
         ]},
     ],
     get processors() { return this.sites.flatMap(s => s.processors); },
@@ -719,16 +726,18 @@ const merchantData = [
       { siteId: "S-006-01", siteName: "国内旅行サイト", url: "https://travel-plus.example.com", agentId: "AG-002", agentName: "合同会社デジタルエージェント",
         processors: [
           { name: "Univa Pay cast", brands: "VISA/MC", status: "approved", since: "2025-03", txnCount: 6500, mid: "UPC-TRV-001",
-            feeOverride: { visa: "3.30%", master: "3.30%" }, depositOverride: { rate: "10%", period: "180日" }, limitOverride: { trMax: "¥500,000", monthly: "¥100,000,000" }, settlementOverride: "15日締め末払い / 末締め翌15日払い" },
+            feeOverride: { visa: "3.80%", master: "3.80%" }, trFeesOverride: { success: "35円", fail: "35円", cb: "3,500円", refund: "120円", tds: "5円/件" },
+            depositOverride: { rate: "10%", period: "180日" }, limitOverride: { trMax: "¥500,000", monthly: "¥100,000,000" }, settlementOverride: "15日締め末払い / 末締め翌15日払い" },
           { name: "ONTHELINE", brands: "JCB", status: "approved", since: "2025-07", txnCount: 2100, mid: "OTL-TRV-001",
-            feeOverride: { jcb: "3.30%" }, depositOverride: { rate: "5%", period: "180日" }, limitOverride: null, settlementOverride: null },
+            feeOverride: { jcb: "3.80%" }, depositOverride: { rate: "5%", period: "180日" }, limitOverride: null, settlementOverride: null },
           { name: "スマートピット", brands: "WEBマネー", status: "approved", since: "2025-09", txnCount: 800, mid: "SMP-TRV-001",
             feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
         ]},
       { siteId: "S-006-02", siteName: "海外旅行サイト", url: "https://overseas.travel-plus.example.com", agentId: "AG-002", agentName: "合同会社デジタルエージェント",
         processors: [
           { name: "Worldpay", brands: "VISA/MC/AMEX", status: "approved", since: "2025-03", txnCount: 6200, mid: "WP-TRV-002",
-            feeOverride: { visa: "3.20%", master: "3.35%" }, depositOverride: { rate: "10%", period: "180日" }, limitOverride: null, settlementOverride: null },
+            feeOverride: { visa: "3.65%", master: "3.80%" }, trFeesOverride: { success: "14円", fail: "14円", cb: "1,400円", tds: "2円/件" },
+            depositOverride: { rate: "10%", period: "180日" }, limitOverride: null, settlementOverride: null },
           { name: "Asiabill", brands: "AMEX/Diners", status: "reviewing", since: null, txnCount: 0, mid: null,
             feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
           { name: "セキュリティマネー", brands: "WEBマネー", status: "approved", since: "2025-10", txnCount: 450, mid: "SCM-TRV-002",
@@ -742,7 +751,8 @@ const merchantData = [
       { siteId: "S-007-01", siteName: "デジタルコンテンツ販売", url: "https://digi-works.example.com", agentId: "AG-003", agentName: "有限会社テックブリッジ",
         processors: [
           { name: "TCMS", brands: "VISA/MC/JCB", status: "approved", since: "2025-11", txnCount: 1800, mid: "TCMS-DW-001",
-            feeOverride: { visa: "3.60%", master: "3.60%", jcb: "3.40%" }, depositOverride: null, limitOverride: { trMax: "¥200,000" }, settlementOverride: null },
+            feeOverride: { visa: "4.10%", master: "4.10%", jcb: "3.50%" }, trFeesOverride: { success: "25円", tds: "2円/件" },
+            depositOverride: null, limitOverride: { trMax: "¥200,000" }, settlementOverride: null },
           { name: "楽天銀行", brands: "VISA/MC", status: "pending", since: null, txnCount: 0, mid: null,
             feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
           { name: "ビットキャッシュ", brands: "WEBマネー", status: "approved", since: "2025-12", txnCount: 350, mid: "BC-DW-001",
@@ -756,7 +766,8 @@ const merchantData = [
       { siteId: "S-008-01", siteName: "オーガニック食品EC", url: "https://fresh-foods.example.com", agentId: null, agentName: null,
         processors: [
           { name: "Simpletransact", brands: "VISA/MC", status: "approved", since: "2025-12", txnCount: 900, mid: "ST-FF-001",
-            feeOverride: { visa: "4.20%", master: "4.20%" }, depositOverride: null, limitOverride: { trMax: "¥200,000" }, settlementOverride: null },
+            feeOverride: { visa: "4.30%", master: "4.30%" }, trFeesOverride: { success: "0.30USD", fail: "0.30USD", cb: "50USD" },
+            depositOverride: null, limitOverride: { trMax: "¥200,000" }, settlementOverride: null },
           { name: "ニーハオペイ", brands: "WEBマネー", status: "approved", since: "2026-01", txnCount: 120, mid: "NHP-FF-001",
             feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
         ]},
@@ -1105,11 +1116,20 @@ const MasterMerchants = () => {
                                     return (!isNaN(c) && !isNaN(sv)) ? sv - c : null;
                                   }).filter(v => v !== null);
                                 });
-                                if (siteMargins.length === 0) return null;
-                                const avg = (siteMargins.reduce((a,b)=>a+b,0)/siteMargins.length).toFixed(2);
-                                const hasNeg = siteMargins.some(m => m < 0);
+                                const hasTrBelowCost = s.processors.some(p => {
+                                  if (!p.trFeesOverride) return false;
+                                  const pi2 = processorList.find(pp => pp.name === p.name) || {};
+                                  return Object.entries(p.trFeesOverride).some(([k,v]) => {
+                                    const costNum = parseFloat((pi2.trFees?.[k]||"").replace(/[^0-9.]/g,""));
+                                    const ovrNum = parseFloat((v||"").replace(/[^0-9.]/g,""));
+                                    return !isNaN(costNum) && !isNaN(ovrNum) && ovrNum < costNum;
+                                  });
+                                });
+                                if (siteMargins.length === 0 && !hasTrBelowCost) return null;
+                                const avg = siteMargins.length > 0 ? (siteMargins.reduce((a,b)=>a+b,0)/siteMargins.length).toFixed(2) : null;
+                                const hasNeg = siteMargins.some(m => m < 0) || hasTrBelowCost;
                                 return <span className={`ml-2 text-xs font-bold px-2 py-0.5 rounded ${hasNeg ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}>
-                                  サイト平均粗利: {avg >= 0 ? "+" : ""}{avg}%
+                                  {avg !== null ? <>サイト平均粗利: {avg >= 0 ? "+" : ""}{avg}%</> : null}{hasTrBelowCost ? " ⚠TR仕入れ割れ有" : ""}
                                 </span>;
                               })()}
                             </div>
@@ -1162,7 +1182,7 @@ const MasterMerchants = () => {
                                   {/* TR手数料 */}
                                   {isCredit && (
                                   <div>
-                                    <p className="text-slate-400 mb-1 font-semibold">TR手数料</p>
+                                    <p className="text-slate-400 mb-1 font-semibold">TR手数料 <span className="text-amber-500 font-normal">（利益込み）</span></p>
                                     <div className="grid grid-cols-3 gap-1">
                                       {[["TR(成功)", pInfo.trFees?.success, proc.trFeesOverride?.success],
                                         ["TR(失敗)", pInfo.trFees?.fail, proc.trFeesOverride?.fail],
@@ -1170,12 +1190,23 @@ const MasterMerchants = () => {
                                         ["返金", pInfo.trFees?.refund, proc.trFeesOverride?.refund],
                                         ["3DS", pInfo.trFees?.tds, proc.trFeesOverride?.tds],
                                         ["CB取消", pInfo.trFees?.cbCancel, proc.trFeesOverride?.cbCancel]
-                                      ].map(([label, def, ovr], ti) => (
+                                      ].map(([label, def, ovr], ti) => {
+                                        const costStr = def || "-";
+                                        const costNum = parseFloat((costStr || "").replace(/[^0-9.]/g, ""));
+                                        const ovrNum = parseFloat((ovr || "").replace(/[^0-9.]/g, ""));
+                                        const hasBoth = !isNaN(costNum) && !isNaN(ovrNum) && costNum > 0;
+                                        const trMargin = hasBoth ? (ovrNum - costNum) : null;
+                                        const trBelowCost = hasBoth && ovrNum < costNum;
+                                        return (
                                         <div key={ti}>
                                           <p className="text-slate-400" style={{fontSize:"9px"}}>{label}</p>
-                                          <input type="text" defaultValue={ovr || ""} placeholder={def || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${ovr ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                          <input type="text" defaultValue={ovr || ""} placeholder={costStr} className={`w-full border rounded px-1 py-0.5 text-xs ${trBelowCost ? "border-rose-400 bg-rose-50 text-rose-700 font-semibold" : ovr ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                          <p className="text-slate-300" style={{fontSize:"8px"}}>仕入: {costStr}</p>
+                                          {trMargin !== null && !trBelowCost && <p className="text-emerald-500 font-semibold" style={{fontSize:"8px"}}>粗利 +{trMargin.toFixed(trMargin < 1 ? 2 : 0)}{costStr.includes("USD") ? "USD" : costStr.includes("%") ? "%" : "円"}</p>}
+                                          {trBelowCost && <p className="text-rose-500 font-semibold" style={{fontSize:"8px"}}>⚠ 仕入れ割れ</p>}
                                         </div>
-                                      ))}
+                                        );
+                                      })}
                                     </div>
                                   </div>
                                   )}
@@ -1219,34 +1250,57 @@ const MasterMerchants = () => {
                                   </div>
                                 </div>
                                 {/* 粗利サマリー */}
-                                {proc.feeOverride && (() => {
+                                {(proc.feeOverride || proc.trFeesOverride) && (() => {
                                   const margins = brandKeys.map(bk => {
                                     const cost = parseFloat(pInfo.fees?.[bk]);
                                     const sell = parseFloat(proc.feeOverride?.[bk]);
-                                    if (!isNaN(cost) && !isNaN(sell)) return { brand: bk, cost, sell, margin: sell - cost };
+                                    if (!isNaN(cost) && !isNaN(sell)) return { brand: bk, cost, sell, margin: sell - cost, type: "rate" };
                                     return null;
                                   }).filter(Boolean);
-                                  if (margins.length === 0) return null;
-                                  const avgMargin = (margins.reduce((s, m) => s + m.margin, 0) / margins.length).toFixed(2);
-                                  const hasNegative = margins.some(m => m.margin < 0);
+                                  const trLabels = {success:"TR(成功)",fail:"TR(失敗)",cb:"CB手数料",refund:"返金",tds:"3DS",cbCancel:"CB取消"};
+                                  const trMargins = proc.trFeesOverride ? Object.entries(proc.trFeesOverride).map(([k,v]) => {
+                                    const costStr = pInfo.trFees?.[k] || "";
+                                    const costNum = parseFloat((costStr).replace(/[^0-9.]/g, ""));
+                                    const ovrNum = parseFloat((v || "").replace(/[^0-9.]/g, ""));
+                                    if (!isNaN(costNum) && !isNaN(ovrNum) && costNum > 0) {
+                                      const unit = costStr.includes("USD") ? "USD" : costStr.includes("%") ? "%" : "円";
+                                      return { brand: trLabels[k] || k, margin: ovrNum - costNum, type: "tr", unit };
+                                    }
+                                    return null;
+                                  }).filter(Boolean) : [];
+                                  if (margins.length === 0 && trMargins.length === 0) return null;
+                                  const avgMargin = margins.length > 0 ? (margins.reduce((s, m) => s + m.margin, 0) / margins.length).toFixed(2) : null;
+                                  const hasNegative = margins.some(m => m.margin < 0) || trMargins.some(m => m.margin < 0);
                                   return (
                                     <div className={`mt-2 pt-2 border-t border-dashed ${hasNegative ? "border-rose-300" : "border-emerald-300"}`}>
-                                      <div className="flex items-center justify-between">
+                                      <div className="flex items-center justify-between flex-wrap gap-1">
                                         <p className="text-xs font-semibold text-slate-500">📊 この接続先の粗利</p>
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-2 flex-wrap">
                                           {margins.map(m => (
                                             <span key={m.brand} className={`text-xs ${m.margin < 0 ? "text-rose-600 font-bold" : "text-emerald-600"}`}>
                                               {m.brand.toUpperCase()}: {m.margin >= 0 ? "+" : ""}{m.margin.toFixed(2)}%
                                             </span>
                                           ))}
-                                          <span className={`text-xs font-bold px-2 py-0.5 rounded ${hasNegative ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}>
-                                            平均粗利: {avgMargin >= 0 ? "+" : ""}{avgMargin}%
-                                          </span>
+                                          {avgMargin !== null && (
+                                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${margins.some(m => m.margin < 0) ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}>
+                                              料率平均粗利: {avgMargin >= 0 ? "+" : ""}{avgMargin}%
+                                            </span>
+                                          )}
                                         </div>
                                       </div>
+                                      {trMargins.length > 0 && (
+                                        <div className="flex items-center gap-2 flex-wrap mt-1">
+                                          <p className="text-[10px] text-slate-400">TR手数料粗利:</p>
+                                          {trMargins.map(m => (
+                                            <span key={m.brand} className={`text-[10px] ${m.margin < 0 ? "text-rose-600 font-bold" : "text-emerald-600"}`}>
+                                              {m.brand}: {m.margin >= 0 ? "+" : ""}{m.margin < 1 && m.margin > -1 ? m.margin.toFixed(2) : Math.round(m.margin)}{m.unit}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      )}
                                       {hasNegative && (
                                         <div className="mt-1 bg-rose-50 border border-rose-300 rounded p-1.5">
-                                          <p className="text-[10px] text-rose-600 font-semibold">⚠ 仕入れ原価を下回る手数料率が設定されています。このまま登録すると赤字になります。料率を見直してください。</p>
+                                          <p className="text-[10px] text-rose-600 font-semibold">⚠ 仕入れ原価を下回る手数料が設定されています。このまま登録すると赤字になります。料率を見直してください。</p>
                                         </div>
                                       )}
                                     </div>
