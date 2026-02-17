@@ -1094,9 +1094,28 @@ const MasterMerchants = () => {
                                 <span>成功率: <span className="font-bold text-emerald-700">{s.settings.successRate || "—"}</span></span>
                                 <span>総取引: <span className="font-bold text-slate-700">{s.totalTxn.toLocaleString()}</span></span>
                               </div>
-                              <span className="ml-2 text-slate-300">|</span>
-                              <span className="text-amber-600 font-semibold" style={{fontSize:"9px"}}>※ 空欄はシステム設定のデフォルト値が適用されます</span>
+                              {/* サイト全体の粗利サマリー */}
+                              {(() => {
+                                const siteMargins = s.processors.filter(p => p.feeOverride).flatMap(p => {
+                                  const pi2 = processorList.find(pp => pp.name === p.name) || {};
+                                  const bKeys = pi2.type !== "WEBマネー" ? ["visa","master","jcb","amex","diners"] : ["webmoney"];
+                                  return bKeys.map(bk => {
+                                    const c = parseFloat(pi2.fees?.[bk]);
+                                    const sv = parseFloat(p.feeOverride?.[bk]);
+                                    return (!isNaN(c) && !isNaN(sv)) ? sv - c : null;
+                                  }).filter(v => v !== null);
+                                });
+                                if (siteMargins.length === 0) return null;
+                                const avg = (siteMargins.reduce((a,b)=>a+b,0)/siteMargins.length).toFixed(2);
+                                const hasNeg = siteMargins.some(m => m < 0);
+                                return <span className={`ml-2 text-xs font-bold px-2 py-0.5 rounded ${hasNeg ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}>
+                                  サイト平均粗利: {avg >= 0 ? "+" : ""}{avg}%
+                                </span>;
+                              })()}
                             </div>
+                          </div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-amber-600 font-semibold" style={{fontSize:"9px"}}>※ 空欄=システム設定の仕入れ値が適用。利益を載せた料率を入力してください</span>
                           </div>
                           <div className="space-y-2">
                             {s.processors.map((proc, pi) => {
@@ -1119,16 +1138,22 @@ const MasterMerchants = () => {
                                 {/* ブランド別手数料率 */}
                                 <div className="grid grid-cols-2 gap-2">
                                   <div>
-                                    <p className="text-slate-400 mb-1 font-semibold">ブランド別手数料率 <span className="text-amber-500 font-normal">(オーバーライド)</span></p>
+                                    <p className="text-slate-400 mb-1 font-semibold">加盟店提示料率 <span className="text-amber-500 font-normal">（利益込み）</span></p>
                                     <div className="grid gap-1" style={{gridTemplateColumns: `repeat(${brandKeys.length}, 1fr)`}}>
                                       {brandKeys.map(bk => {
-                                        const defaultVal = pInfo.fees?.[bk] || "-";
+                                        const costVal = pInfo.fees?.[bk] || "-";
                                         const overrideVal = proc.feeOverride?.[bk] || "";
+                                        const costNum = parseFloat(costVal);
+                                        const ovrNum = parseFloat(overrideVal);
+                                        const margin = (!isNaN(costNum) && !isNaN(ovrNum) && costNum > 0) ? (ovrNum - costNum).toFixed(2) : null;
+                                        const belowCost = (!isNaN(costNum) && !isNaN(ovrNum) && ovrNum < costNum);
                                         return (
                                         <div key={bk} className="text-center">
                                           <p className="text-slate-400 uppercase" style={{fontSize:"9px"}}>{bk === "webmoney" ? "WEBマネー" : bk}</p>
-                                          <input type="text" defaultValue={overrideVal} placeholder={defaultVal} className={`w-full border rounded px-1 py-0.5 text-center text-xs ${overrideVal ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
-                                          {overrideVal && <p className="text-slate-300 line-through" style={{fontSize:"8px"}}>{defaultVal}</p>}
+                                          <input type="text" defaultValue={overrideVal} placeholder={costVal} className={`w-full border rounded px-1 py-0.5 text-center text-xs ${belowCost ? "border-rose-400 bg-rose-50 text-rose-700 font-semibold" : overrideVal ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                          <p className="text-slate-300" style={{fontSize:"8px"}}>仕入: {costVal}</p>
+                                          {margin !== null && !belowCost && <p className="text-emerald-500 font-semibold" style={{fontSize:"8px"}}>粗利 +{margin}%</p>}
+                                          {belowCost && <p className="text-rose-500 font-semibold" style={{fontSize:"8px"}}>⚠ 仕入れ割れ</p>}
                                         </div>
                                         );
                                       })}
@@ -1193,6 +1218,40 @@ const MasterMerchants = () => {
                                     <p className="text-slate-300 mt-0.5" style={{fontSize:"8px"}}>デフォルト: {pInfo.settlement?.cycle || "-"}</p>
                                   </div>
                                 </div>
+                                {/* 粗利サマリー */}
+                                {proc.feeOverride && (() => {
+                                  const margins = brandKeys.map(bk => {
+                                    const cost = parseFloat(pInfo.fees?.[bk]);
+                                    const sell = parseFloat(proc.feeOverride?.[bk]);
+                                    if (!isNaN(cost) && !isNaN(sell)) return { brand: bk, cost, sell, margin: sell - cost };
+                                    return null;
+                                  }).filter(Boolean);
+                                  if (margins.length === 0) return null;
+                                  const avgMargin = (margins.reduce((s, m) => s + m.margin, 0) / margins.length).toFixed(2);
+                                  const hasNegative = margins.some(m => m.margin < 0);
+                                  return (
+                                    <div className={`mt-2 pt-2 border-t border-dashed ${hasNegative ? "border-rose-300" : "border-emerald-300"}`}>
+                                      <div className="flex items-center justify-between">
+                                        <p className="text-xs font-semibold text-slate-500">📊 この接続先の粗利</p>
+                                        <div className="flex items-center gap-3">
+                                          {margins.map(m => (
+                                            <span key={m.brand} className={`text-xs ${m.margin < 0 ? "text-rose-600 font-bold" : "text-emerald-600"}`}>
+                                              {m.brand.toUpperCase()}: {m.margin >= 0 ? "+" : ""}{m.margin.toFixed(2)}%
+                                            </span>
+                                          ))}
+                                          <span className={`text-xs font-bold px-2 py-0.5 rounded ${hasNegative ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}>
+                                            平均粗利: {avgMargin >= 0 ? "+" : ""}{avgMargin}%
+                                          </span>
+                                        </div>
+                                      </div>
+                                      {hasNegative && (
+                                        <div className="mt-1 bg-rose-50 border border-rose-300 rounded p-1.5">
+                                          <p className="text-[10px] text-rose-600 font-semibold">⚠ 仕入れ原価を下回る手数料率が設定されています。このまま登録すると赤字になります。料率を見直してください。</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                               </div>
                               );
                             })}
@@ -4052,7 +4111,8 @@ const MasterSystemSettings = () => {
                     {/* 左列: 手数料 */}
                     <div className="space-y-2">
                       <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                        <p className="text-xs font-bold text-slate-600 mb-2">💰 ブランド別手数料率</p>
+                        <p className="text-xs font-bold text-slate-600 mb-2">💰 ブランド別手数料率 <span className="text-rose-500 font-normal">（仕入れ原価）</span></p>
+                        <p className="text-[10px] text-slate-400 -mt-1 mb-2">※ 接続先から提示された原価手数料率。加盟店への提示料率は「加盟店管理 → サイト管理」でオーバーライド設定</p>
                         {isCard ? (
                           <div className="grid grid-cols-5 gap-1.5">
                             {[{b:"VISA",k:"visa"},{b:"MC",k:"master"},{b:"JCB",k:"jcb"},{b:"AMEX",k:"amex"},{b:"Diners",k:"diners"}].map(({b,k}) => (
@@ -4064,7 +4124,7 @@ const MasterSystemSettings = () => {
                           </div>
                         ) : (
                           <div className="bg-blue-50 rounded border border-blue-200 p-2 text-center">
-                            <p className="text-xs text-slate-400">WEBマネー手数料</p>
+                            <p className="text-xs text-slate-400">WEBマネー手数料 <span className="text-rose-400">（仕入れ）</span></p>
                             {isEditing ? <input defaultValue={p.fees.webmoney} className="w-20 text-sm border border-blue-300 rounded px-1.5 py-0.5 bg-white text-center font-bold focus:outline-none focus:ring-1 focus:ring-blue-400 mx-auto block" onClick={(e) => e.stopPropagation()} /> : <p className="text-sm font-bold text-blue-700">{p.fees.webmoney}</p>}
                           </div>
                         )}
