@@ -985,8 +985,8 @@ const MasterMerchants = () => {
                           </div>
                         </div>
 
-                        {/* ── 4カラム編集フォーム ── */}
-                        <div className="grid grid-cols-4 gap-3 text-xs">
+                        {/* ── 上段3カラム + 下段接続先全幅 ── */}
+                        <div className="grid grid-cols-3 gap-3 text-xs">
                           {/* カラム1: サイト基本情報（編集可能） */}
                           <div className="bg-white rounded-lg border border-slate-200 p-2.5">
                             <p className="font-semibold text-slate-600 mb-1.5">🌐 サイト基本情報</p>
@@ -1082,50 +1082,120 @@ const MasterMerchants = () => {
                             </div>
                           </div>
 
-                          {/* カラム4: パフォーマンス + 接続先 */}
-                          <div className="space-y-3">
-                            <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                              <p className="font-semibold text-slate-600 mb-1.5">📊 パフォーマンス</p>
-                              <div className="grid grid-cols-3 gap-1.5">
-                                <div className="bg-blue-50 rounded p-1 text-center border border-blue-200">
-                                  <p className="text-slate-400" style={{fontSize:"9px"}}>月間処理額</p>
-                                  <p className="text-xs font-bold text-blue-700">{s.settings.monthlyVol || "—"}</p>
-                                </div>
-                                <div className="bg-emerald-50 rounded p-1 text-center border border-emerald-200">
-                                  <p className="text-slate-400" style={{fontSize:"9px"}}>成功率</p>
-                                  <p className="text-xs font-bold text-emerald-700">{s.settings.successRate || "—"}</p>
-                                </div>
-                                <div className="bg-slate-50 rounded p-1 text-center border border-slate-200">
-                                  <p className="text-slate-400" style={{fontSize:"9px"}}>総取引</p>
-                                  <p className="text-xs font-bold text-slate-700">{s.totalTxn.toLocaleString()}</p>
-                                </div>
+                        </div>
+
+                        {/* ── 接続先条件（全幅・編集可能） ── */}
+                        <div className="mt-3 bg-white rounded-lg border border-slate-200 p-2.5 text-xs">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="font-semibold text-slate-600">🔌 接続先条件 ({s.processors.length})</p>
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-3 text-slate-400">
+                                <span>月間処理額: <span className="font-bold text-blue-700">{s.settings.monthlyVol || "—"}</span></span>
+                                <span>成功率: <span className="font-bold text-emerald-700">{s.settings.successRate || "—"}</span></span>
+                                <span>総取引: <span className="font-bold text-slate-700">{s.totalTxn.toLocaleString()}</span></span>
                               </div>
-                              <div className="mt-1.5 text-slate-400">ブランド:
-                                <span className="ml-1">{s.allBrands.map((b, bi) => <span key={bi} className="bg-slate-100 text-slate-600 px-1 py-0.5 rounded text-xs mr-0.5">{b}</span>)}</span>
-                              </div>
+                              <span className="ml-2 text-slate-300">|</span>
+                              <span className="text-amber-600 font-semibold" style={{fontSize:"9px"}}>※ 空欄はシステム設定のデフォルト値が適用されます</span>
                             </div>
-                            <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                              <p className="font-semibold text-slate-600 mb-1.5">🔌 接続先 ({s.processors.length})</p>
-                              <div className="space-y-1">
-                                {s.processors.map((proc, pi) => {
-                                  const ps = PROC_STATUS[proc.status] || PROC_STATUS.pending;
-                                  return (
-                                  <div key={pi} className={`rounded p-1.5 border ${proc.status === "approved" ? "bg-emerald-50 border-emerald-200" : proc.status === "suspended" ? "bg-rose-50 border-rose-200" : "bg-slate-50 border-slate-200"}`}>
-                                    <div className="flex justify-between items-center">
-                                      <span className="font-semibold text-slate-700">{proc.name}</span>
-                                      <span className={`text-xs ${ps.textClass}`}>{ps.label}</span>
-                                    </div>
-                                    <div className="text-slate-400">{proc.brands}{proc.mid && <span className="ml-1 font-mono text-slate-500">MID:{proc.mid}</span>}</div>
-                                    {proc.feeOverride && (
-                                      <div className="mt-0.5 flex flex-wrap gap-0.5">
-                                        {Object.entries(proc.feeOverride).map(([k, v]) => <span key={k} className="bg-amber-100 text-amber-700 px-1 rounded" style={{fontSize:"9px"}}>{k.toUpperCase()} {v}</span>)}
-                                      </div>
-                                    )}
+                          </div>
+                          <div className="space-y-2">
+                            {s.processors.map((proc, pi) => {
+                              const ps = PROC_STATUS[proc.status] || PROC_STATUS.pending;
+                              const pInfo = processorList.find(p => p.name === proc.name) || {};
+                              const isCredit = pInfo.type === "credit";
+                              const brandKeys = isCredit ? ["visa","master","jcb","amex","diners"] : ["webmoney"];
+                              return (
+                              <div key={pi} className={`rounded-lg border ${proc.status === "approved" ? "border-emerald-300 bg-emerald-50/30" : proc.status === "suspended" ? "border-rose-300 bg-rose-50/30" : "border-slate-300 bg-slate-50/30"} p-2.5`}>
+                                {/* 接続先ヘッダー */}
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-bold text-slate-700">{proc.name}</span>
+                                    <span className={`text-xs px-1.5 py-0.5 rounded ${ps.bgClass || "bg-slate-100"} ${ps.textClass}`}>{ps.label}</span>
+                                    <span className="text-slate-400">{proc.brands}</span>
+                                    {proc.mid && <span className="font-mono text-slate-500 bg-slate-100 px-1 rounded">MID: {proc.mid}</span>}
                                   </div>
-                                  );
-                                })}
+                                  <span className="text-slate-400">取引: {(proc.txnCount || 0).toLocaleString()}件</span>
+                                </div>
+                                {/* ブランド別手数料率 */}
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <p className="text-slate-400 mb-1 font-semibold">ブランド別手数料率 <span className="text-amber-500 font-normal">(オーバーライド)</span></p>
+                                    <div className="grid gap-1" style={{gridTemplateColumns: `repeat(${brandKeys.length}, 1fr)`}}>
+                                      {brandKeys.map(bk => {
+                                        const defaultVal = pInfo.fees?.[bk] || "-";
+                                        const overrideVal = proc.feeOverride?.[bk] || "";
+                                        return (
+                                        <div key={bk} className="text-center">
+                                          <p className="text-slate-400 uppercase" style={{fontSize:"9px"}}>{bk === "webmoney" ? "WEBマネー" : bk}</p>
+                                          <input type="text" defaultValue={overrideVal} placeholder={defaultVal} className={`w-full border rounded px-1 py-0.5 text-center text-xs ${overrideVal ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                          {overrideVal && <p className="text-slate-300 line-through" style={{fontSize:"8px"}}>{defaultVal}</p>}
+                                        </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                  {/* TR手数料 */}
+                                  {isCredit && (
+                                  <div>
+                                    <p className="text-slate-400 mb-1 font-semibold">TR手数料</p>
+                                    <div className="grid grid-cols-3 gap-1">
+                                      {[["TR(成功)", pInfo.trFees?.success, proc.trFeesOverride?.success],
+                                        ["TR(失敗)", pInfo.trFees?.fail, proc.trFeesOverride?.fail],
+                                        ["CB手数料", pInfo.trFees?.cb, proc.trFeesOverride?.cb],
+                                        ["返金", pInfo.trFees?.refund, proc.trFeesOverride?.refund],
+                                        ["3DS", pInfo.trFees?.tds, proc.trFeesOverride?.tds],
+                                        ["CB取消", pInfo.trFees?.cbCancel, proc.trFeesOverride?.cbCancel]
+                                      ].map(([label, def, ovr], ti) => (
+                                        <div key={ti}>
+                                          <p className="text-slate-400" style={{fontSize:"9px"}}>{label}</p>
+                                          <input type="text" defaultValue={ovr || ""} placeholder={def || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${ovr ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  )}
+                                </div>
+                                {/* デポジット・制限・入金 */}
+                                <div className="grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-dashed border-slate-200">
+                                  <div>
+                                    <p className="text-slate-400 mb-1 font-semibold">デポジット</p>
+                                    <div className="grid grid-cols-2 gap-1">
+                                      <div>
+                                        <p className="text-slate-400" style={{fontSize:"9px"}}>留保率</p>
+                                        <input type="text" defaultValue={proc.depositOverride?.rate || ""} placeholder={pInfo.deposit?.rate || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.depositOverride?.rate ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                      </div>
+                                      <div>
+                                        <p className="text-slate-400" style={{fontSize:"9px"}}>期間</p>
+                                        <input type="text" defaultValue={proc.depositOverride?.period || ""} placeholder={pInfo.deposit?.period || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.depositOverride?.period ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <p className="text-slate-400 mb-1 font-semibold">取引制限</p>
+                                    <div className="grid grid-cols-3 gap-1">
+                                      <div>
+                                        <p className="text-slate-400" style={{fontSize:"9px"}}>1件上限</p>
+                                        <input type="text" defaultValue={proc.limitOverride?.trMax || ""} placeholder={pInfo.limits?.trMax || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.limitOverride?.trMax ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                      </div>
+                                      <div>
+                                        <p className="text-slate-400" style={{fontSize:"9px"}}>月間上限</p>
+                                        <input type="text" defaultValue={proc.limitOverride?.monthly || ""} placeholder={pInfo.limits?.monthlyMax || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.limitOverride?.monthly ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                      </div>
+                                      <div>
+                                        <p className="text-slate-400" style={{fontSize:"9px"}}>回数制限</p>
+                                        <input type="text" defaultValue={proc.limitOverride?.count || ""} placeholder={pInfo.limits?.countLimit || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.limitOverride?.count ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <p className="text-slate-400 mb-1 font-semibold">入金サイクル</p>
+                                    <input type="text" defaultValue={proc.settlementOverride || ""} placeholder={pInfo.settlement?.cycle || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.settlementOverride ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                    <p className="text-slate-300 mt-0.5" style={{fontSize:"8px"}}>デフォルト: {pInfo.settlement?.cycle || "-"}</p>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>
