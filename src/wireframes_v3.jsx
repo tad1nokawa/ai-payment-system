@@ -1120,6 +1120,7 @@ const MasterMerchants = () => {
             { label: "加盟店名", w: "flex-1", sortKey: "name" },
             { label: "ステータス", w: "w-20" },
             { label: "リスク", w: "w-16", sortKey: "riskOrder" },
+            { label: "サイト", w: "w-12" },
             { label: "接続先", w: "w-16" },
             { label: "月間売上", w: "w-24", sortKey: "salesNum" },
             { label: "CB率", w: "w-16", sortKey: "cbNum" },
@@ -1142,6 +1143,7 @@ const MasterMerchants = () => {
                 <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{m.name}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={m.status} color={m.sColor} /></td>
                 <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={m.risk} color={m.rColor} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-12 text-center"><span className="text-xs font-semibold text-slate-600">{m.sites.length}</span></td>
                 <td className="px-4 py-2 whitespace-nowrap w-16">
                   <span className={`text-xs font-semibold ${approvedCount === 0 ? "text-slate-400" : approvedCount >= 3 ? "text-emerald-600" : "text-blue-600"}`}>
                     {approvedCount}/{totalCount}
@@ -1156,7 +1158,7 @@ const MasterMerchants = () => {
 
               {/* ── Expanded: サイト→接続先→各条件 階層パネル ── */}
               {isExpanded && (
-                <tr><td colSpan={10} className="p-0"><div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                <tr><td colSpan={11} className="p-0"><div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
                   <div className="flex justify-between items-center mb-2">
                     <p className="text-xs font-bold text-slate-700">🏢 サイト・接続先一覧 — {m.name}（{m.sites.length}サイト / {m.processors.length}接続先）</p>
                     <button onClick={() => setShowProcApply(true)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">+ 接続先審査を追加申請</button>
@@ -1329,7 +1331,7 @@ const MasterMerchants = () => {
           );
         })}
         {filtered.length === 0 && (
-          <tr><td colSpan={10} className="p-6 text-center text-xs text-slate-400">該当する加盟店がありません</td></tr>
+          <tr><td colSpan={11} className="p-6 text-center text-xs text-slate-400">該当する加盟店がありません</td></tr>
         )}
         </SortableHeader>
       </div>
