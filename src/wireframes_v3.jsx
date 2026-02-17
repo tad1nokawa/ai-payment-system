@@ -115,6 +115,7 @@ const MasterDashboard = () => {
   const [showKpiDrill, setShowKpiDrill] = useState(null);
   const [expandedQueue, setExpandedQueue] = useState(null);
   const [chatOpen, setChatOpen] = useState(true);
+  const [showAllNotices, setShowAllNotices] = useState(false);
   const kpiDrillData = {
     "取引量": { value: "1,247件", details: [{ label: "VISA", value: "486件" }, { label: "Mastercard", value: "312件" }, { label: "JCB", value: "198件" }, { label: "AMEX", value: "89件" }, { label: "WEBマネー", value: "162件" }] },
     "売上": { value: "¥16.2M", details: [{ label: "カード決済", value: "¥14.8M" }, { label: "WEBマネー", value: "¥1.4M" }] },
@@ -221,34 +222,50 @@ const MasterDashboard = () => {
     </div>
 
     {/* お知らせ欄 */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <span>📢</span>
-          <p className="text-xs font-bold text-slate-600">お知らせ</p>
-          <Badge text="管理者向け" color="purple" />
+    {(() => {
+      const allNotices = [
+        { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: "🔧", target: "全体" },
+        { date: "02/16", title: "Worldpay接続 レート改定のお知らせ（3月適用）", type: "重要", tColor: "red", icon: "💳", target: "管理者" },
+        { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: "🚀", target: "全体" },
+        { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: "⚠️", target: "全体" },
+        { date: "02/12", title: "3Dセキュア2.0 完全移行のお知らせ", type: "お知らせ", tColor: "default", icon: "📌", target: "全体" },
+        { date: "02/10", title: "代理店向け報酬計算ロジック変更について", type: "重要", tColor: "red", icon: "🤝", target: "管理者" },
+      ];
+      const renderNotice = (n, i) => (
+        <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-blue-50 ${i === 0 ? "border-amber-300 bg-amber-50" : i === 1 ? "border-rose-200 bg-rose-50/50" : "border-slate-200"}`}>
+          <span>{n.icon}</span>
+          <span className="w-12 text-slate-400 shrink-0">{n.date}</span>
+          <Badge text={n.type} color={n.tColor} />
+          <span className="px-1.5 py-0.5 bg-slate-100 rounded text-xs text-slate-500">{n.target}</span>
+          <span className={`flex-1 ${i <= 1 ? "font-semibold" : ""} ${i === 0 ? "text-amber-800" : i === 1 ? "text-rose-700" : "text-slate-700"}`}>{n.title}</span>
         </div>
-        <span className="text-xs text-blue-600 cursor-pointer hover:underline" onClick={() => {}}>すべて見る →</span>
-      </div>
-      <div className="space-y-1.5">
-        {[
-          { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: "🔧", target: "全体" },
-          { date: "02/16", title: "Worldpay接続 レート改定のお知らせ（3月適用）", type: "重要", tColor: "red", icon: "💳", target: "管理者" },
-          { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: "🚀", target: "全体" },
-          { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: "⚠️", target: "全体" },
-          { date: "02/12", title: "3Dセキュア2.0 完全移行のお知らせ", type: "お知らせ", tColor: "default", icon: "📌", target: "全体" },
-          { date: "02/10", title: "代理店向け報酬計算ロジック変更について", type: "重要", tColor: "red", icon: "🤝", target: "管理者" },
-        ].map((n, i) => (
-          <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-blue-50 ${i === 0 ? "border-amber-300 bg-amber-50" : i === 1 ? "border-rose-200 bg-rose-50/50" : "border-slate-200"}`}>
-            <span>{n.icon}</span>
-            <span className="w-12 text-slate-400 shrink-0">{n.date}</span>
-            <Badge text={n.type} color={n.tColor} />
-            <span className="px-1.5 py-0.5 bg-slate-100 rounded text-xs text-slate-500">{n.target}</span>
-            <span className={`flex-1 ${i <= 1 ? "font-semibold" : ""} ${i === 0 ? "text-amber-800" : i === 1 ? "text-rose-700" : "text-slate-700"}`}>{n.title}</span>
+      );
+      return (
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span>📢</span>
+            <p className="text-xs font-bold text-slate-600">お知らせ</p>
+            <Badge text="管理者向け" color="purple" />
+            {allNotices.length > 3 && <span className="text-xs text-slate-300">({allNotices.length}件)</span>}
           </div>
-        ))}
+          {allNotices.length > 3 && (
+            <button className="text-xs text-blue-600 cursor-pointer hover:underline" onClick={() => setShowAllNotices(!showAllNotices)}>
+              {showAllNotices ? "閉じる ▲" : `すべて見る (${allNotices.length - 3}件) ▼`}
+            </button>
+          )}
+        </div>
+        <div className="space-y-1.5">
+          {allNotices.slice(0, 3).map(renderNotice)}
+          {showAllNotices && (
+            <div className="space-y-1.5 pt-1 border-t border-dashed border-slate-200 mt-1">
+              {allNotices.slice(3).map((n, i) => renderNotice(n, i + 3))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      );
+    })()}
 
     {/* KPIs + Period Toggle */}
     <div className="space-y-2">
@@ -846,68 +863,239 @@ const MasterMerchants = () => {
       </div>
 
       {/* ===== サイト管理タブ ===== */}
-      {m03Tab === "sites" && (
+      {m03Tab === "sites" && (() => {
+        // merchantDataから全サイトをフラットに展開
+        const allSites = merchantData.flatMap(m => m.sites.map(s => {
+          const approvedProcs = s.processors.filter(p => p.status === "approved");
+          const allBrands = [...new Set(s.processors.flatMap(p => p.brands.split("/")))];
+          const totalTxn = s.processors.reduce((sum, p) => sum + p.txnCount, 0);
+          // サイト別の設定データ（実運用ではDB管理）
+          const siteSettings = {
+            "S-001-01": { tds: true, tdsMode: "全件", rec: true, recMax: 12, ipRestrict: true, ipList: ["203.0.113.0/24", "198.51.100.0/24"], cvvRequired: true, tokenize: true, linkPay: true, apiPay: true, callbackUrl: "https://abc-mart.example.com/callback", webhookUrl: "https://abc-mart.example.com/webhook", testMode: false, created: "2025-03-15", lastTxn: "2026-02-17 14:23", monthlyVol: "¥8.2M", successRate: "99.6%", notifyEmail: "admin@abc-mart.example.com", authToken: "aip_tk_upc_abc001_xxxx" },
+            "S-001-02": { tds: true, tdsMode: "条件付き", rec: false, recMax: 0, ipRestrict: false, ipList: [], cvvRequired: true, tokenize: true, linkPay: true, apiPay: false, callbackUrl: "https://members.abc-mart.example.com/callback", webhookUrl: "https://members.abc-mart.example.com/webhook", testMode: false, created: "2025-09-20", lastTxn: "2026-02-17 11:05", monthlyVol: "¥4.3M", successRate: "99.2%", notifyEmail: "admin@abc-mart.example.com", authToken: "aip_tk_wp_abc002_yyyy" },
+            "S-002-01": { tds: true, tdsMode: "全件", rec: true, recMax: 6, ipRestrict: false, ipList: [], cvvRequired: true, tokenize: true, linkPay: true, apiPay: true, callbackUrl: "https://xyz-shop.example.com/pay/callback", webhookUrl: "https://xyz-shop.example.com/pay/webhook", testMode: false, created: "2025-05-10", lastTxn: "2026-02-17 09:45", monthlyVol: "¥5.8M", successRate: "99.1%", notifyEmail: "tech@xyz-shop.example.com", authToken: "aip_tk_st_xyz001_zzzz" },
+            "S-003-01": { tds: true, tdsMode: "全件", rec: false, recMax: 0, ipRestrict: false, ipList: [], cvvRequired: true, tokenize: false, linkPay: true, apiPay: false, callbackUrl: "", webhookUrl: "", testMode: true, created: "2026-01-20", lastTxn: "—", monthlyVol: "—", successRate: "—", notifyEmail: "info@sample-ec.example.com", authToken: "aip_tk_test_smp001" },
+            "S-004-01": { tds: true, tdsMode: "条件付き", rec: true, recMax: 3, ipRestrict: true, ipList: ["192.0.2.0/24"], cvvRequired: true, tokenize: true, linkPay: true, apiPay: true, callbackUrl: "https://test-shoji.example.com/api/callback", webhookUrl: "https://test-shoji.example.com/api/webhook", testMode: false, created: "2025-08-01", lastTxn: "2026-02-17 13:10", monthlyVol: "¥2.1M", successRate: "98.8%", notifyEmail: "system@test-shoji.example.com", authToken: "aip_tk_rkt_tst001_aaaa" },
+            "S-005-01": { tds: false, tdsMode: "—", rec: false, recMax: 0, ipRestrict: false, ipList: [], cvvRequired: false, tokenize: false, linkPay: true, apiPay: false, callbackUrl: "", webhookUrl: "", testMode: false, created: "2025-06-15", lastTxn: "2025-12-01 18:30", monthlyVol: "¥0", successRate: "95.2%", notifyEmail: "info@grey.example.com", authToken: "aip_tk_suspended" },
+            "S-006-01": { tds: true, tdsMode: "全件", rec: false, recMax: 0, ipRestrict: true, ipList: ["203.0.113.50/32", "198.51.100.0/24"], cvvRequired: true, tokenize: true, linkPay: true, apiPay: true, callbackUrl: "https://travel-plus.example.com/payment/callback", webhookUrl: "https://travel-plus.example.com/payment/webhook", testMode: false, created: "2025-02-20", lastTxn: "2026-02-17 15:02", monthlyVol: "¥5.6M", successRate: "99.4%", notifyEmail: "pay@travel-plus.example.com", authToken: "aip_tk_upc_trv001_bbbb" },
+            "S-006-02": { tds: true, tdsMode: "全件", rec: false, recMax: 0, ipRestrict: true, ipList: ["203.0.113.60/32"], cvvRequired: true, tokenize: true, linkPay: false, apiPay: true, callbackUrl: "https://overseas.travel-plus.example.com/callback", webhookUrl: "https://overseas.travel-plus.example.com/webhook", testMode: false, created: "2025-02-20", lastTxn: "2026-02-17 12:38", monthlyVol: "¥2.6M", successRate: "99.1%", notifyEmail: "pay@travel-plus.example.com", authToken: "aip_tk_wp_trv002_cccc" },
+            "S-007-01": { tds: true, tdsMode: "条件付き", rec: true, recMax: 12, ipRestrict: false, ipList: [], cvvRequired: true, tokenize: true, linkPay: true, apiPay: true, callbackUrl: "https://digi-works.example.com/hook", webhookUrl: "https://digi-works.example.com/webhook", testMode: false, created: "2025-10-05", lastTxn: "2026-02-17 10:15", monthlyVol: "¥3.4M", successRate: "99.7%", notifyEmail: "dev@digi-works.example.com", authToken: "aip_tk_tcms_dw001_dddd" },
+            "S-008-01": { tds: true, tdsMode: "全件", rec: false, recMax: 0, ipRestrict: false, ipList: [], cvvRequired: true, tokenize: false, linkPay: true, apiPay: false, callbackUrl: "https://fresh-foods.example.com/pay_result", webhookUrl: "", testMode: false, created: "2025-11-20", lastTxn: "2026-02-16 21:45", monthlyVol: "¥1.5M", successRate: "99.0%", notifyEmail: "shop@fresh-foods.example.com", authToken: "aip_tk_st_ff001_eeee" },
+          };
+          const ss = siteSettings[s.siteId] || {};
+          const mStatus = m.status === "停止中" ? "停止" : m.status === "審査中" ? "審査中" : ss.testMode ? "テスト" : "有効";
+          const sColor = mStatus === "停止" ? "red" : mStatus === "審査中" ? "yellow" : mStatus === "テスト" ? "purple" : "green";
+          return { ...s, merchantId: m.id, merchantName: m.name, merchantStatus: m.status, approvedProcs, allBrands, totalTxn, settings: ss, siteStatus: mStatus, siteStatusColor: sColor };
+        }));
+
+        const [expandedSiteId, setExpandedSiteId] = [expandedId, setExpandedId]; // reuse state
+
+        return (
         <div className="space-y-3">
+          {/* KPI */}
+          <div className="grid grid-cols-5 gap-3">
+            {[
+              ["🌐", "総サイト数", allSites.length, "blue"],
+              ["✅", "有効", allSites.filter(s => s.siteStatus === "有効").length, "emerald"],
+              ["🔄", "審査中", allSites.filter(s => s.siteStatus === "審査中").length, "amber"],
+              ["🧪", "テスト", allSites.filter(s => s.siteStatus === "テスト").length, "purple"],
+              ["⛔", "停止", allSites.filter(s => s.siteStatus === "停止").length, "rose"],
+            ].map(([icon, label, val, color], i) => (
+              <div key={i} className={`bg-${color}-50 rounded-lg border border-${color}-200 p-2 text-center`}>
+                <p className="text-xs text-slate-400">{icon} {label}</p>
+                <p className={`text-lg font-bold text-${color}-700`}>{val}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* 検索・操作バー */}
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
             <div className="flex justify-between items-center mb-3">
               <p className="text-xs font-bold text-slate-600">サイト管理</p>
               <div className="flex gap-2">
+                <button className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ サイト追加</button>
                 <button className="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded border border-amber-200 font-semibold">⏸ 一括停止</button>
-                <button className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded border border-purple-200 font-semibold">🏦 口座一括変更</button>
+                <button className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50">📥 CSV</button>
               </div>
             </div>
-            <div className="grid grid-cols-5 gap-2 mb-3">
-              <div><label className="text-xs text-slate-400">サイトID</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="SITE-..." /></div>
+            <div className="grid grid-cols-6 gap-2">
+              <div><label className="text-xs text-slate-400">サイトID</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="S-XXX-XX" /></div>
               <div><label className="text-xs text-slate-400">サイト名</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="サイト名で検索" /></div>
               <div><label className="text-xs text-slate-400">加盟店名</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="加盟店で絞込" /></div>
-              <div><label className="text-xs text-slate-400">利用状態</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>有効</option><option>停止</option><option>テスト</option></select></div>
+              <div><label className="text-xs text-slate-400">代理店</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>AG-001</option><option>AG-002</option><option>AG-003</option><option>なし</option></select></div>
+              <div><label className="text-xs text-slate-400">利用状態</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>有効</option><option>審査中</option><option>テスト</option><option>停止</option></select></div>
               <div className="flex items-end"><button className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
             </div>
           </div>
+
+          {/* サイト一覧テーブル */}
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <div className="px-3 py-2 border-b text-xs text-slate-400">検索結果: 12件</div>
+            <div className="px-3 py-2 border-b flex justify-between items-center">
+              <span className="text-xs text-slate-400">全 {allSites.length} サイト</span>
+              <span className="text-xs text-slate-300">💡 行クリックで詳細展開</span>
+            </div>
             <table className="w-full text-xs">
               <thead><tr className="bg-slate-50 border-b">
-                <th className="text-left p-2 text-slate-500 font-semibold"><input type="checkbox" className="w-3 h-3" /></th>
+                <th className="text-left p-2 text-slate-500 font-semibold"><input type="checkbox" className="w-3 h-3" onClick={e => e.stopPropagation()} /></th>
                 <th className="text-left p-2 text-slate-500 font-semibold w-20">サイトID</th>
                 <th className="text-left p-2 text-slate-500 font-semibold">サイト名</th>
-                <th className="text-left p-2 text-slate-500 font-semibold">加盟店</th>
-                <th className="text-left p-2 text-slate-500 font-semibold w-40">URL</th>
-                <th className="text-center p-2 text-slate-500 font-semibold w-12">3DS</th>
-                <th className="text-center p-2 text-slate-500 font-semibold w-16">リカーリング</th>
-                <th className="text-center p-2 text-slate-500 font-semibold w-12">IP制限</th>
-                <th className="text-left p-2 text-slate-500 font-semibold w-28">契約ブランド</th>
-                <th className="text-center p-2 text-slate-500 font-semibold w-16">状態</th>
-                <th className="text-center p-2 text-slate-500 font-semibold w-16">操作</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-24">加盟店</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-20">代理店</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-24">URL</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-10">3DS</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-10">継続</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-10">IP</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-16">接続先</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-20">月間処理</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-14">状態</th>
               </tr></thead>
               <tbody>
-                {[
-                  { id: "SITE-001", name: "ABCマート本店", merchant: "ABCマート", url: "abc-mart.co.jp", tds: true, rec: true, ip: true, brands: "V/M/J", status: "有効", sColor: "green" },
-                  { id: "SITE-002", name: "ABCマートEC", merchant: "ABCマート", url: "ec.abc-mart.co.jp", tds: true, rec: false, ip: false, brands: "V/M/J/A", status: "有効", sColor: "green" },
-                  { id: "SITE-003", name: "XYZショップ", merchant: "XYZ商事", url: "xyz-shop.jp", tds: true, rec: true, ip: false, brands: "V/M", status: "有効", sColor: "green" },
-                  { id: "SITE-004", name: "トラベルプラス国内", merchant: "トラベルプラス", url: "travel-plus.jp", tds: true, rec: false, ip: true, brands: "V/M/J/A/D", status: "有効", sColor: "green" },
-                  { id: "SITE-005", name: "トラベルプラス海外", merchant: "トラベルプラス", url: "intl.travel-plus.jp", tds: true, rec: false, ip: true, brands: "V/M/A", status: "停止", sColor: "red" },
-                  { id: "SITE-006", name: "スタイルプラス", merchant: "スタイルプラス", url: "style-plus.co.jp", tds: false, rec: true, ip: false, brands: "V/M/J", status: "有効", sColor: "green" },
-                ].map((s, i) => (
-                  <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50`}>
-                    <td className="p-2"><input type="checkbox" className="w-3 h-3" /></td>
-                    <td className="p-2 font-mono text-slate-500">{s.id}</td>
-                    <td className="p-2 text-slate-700 font-semibold">{s.name}</td>
-                    <td className="p-2 text-slate-600">{s.merchant}</td>
-                    <td className="p-2 text-blue-600 font-mono text-xs truncate max-w-[10rem]">{s.url}</td>
-                    <td className="p-2 text-center">{s.tds ? "✅" : "—"}</td>
-                    <td className="p-2 text-center">{s.rec ? "✅" : "—"}</td>
-                    <td className="p-2 text-center">{s.ip ? "🔒" : "—"}</td>
-                    <td className="p-2"><span className="text-xs text-slate-600">{s.brands}</span></td>
-                    <td className="p-2 text-center"><Badge text={s.status} color={s.sColor} /></td>
-                    <td className="p-2 text-center"><button className="text-blue-600 hover:underline text-xs">詳細</button></td>
+                {allSites.map((s, i) => (
+                  <React.Fragment key={s.siteId}>
+                  <tr onClick={() => setExpandedSiteId(expandedSiteId === s.siteId ? null : s.siteId)} className={`border-b cursor-pointer transition-colors ${expandedSiteId === s.siteId ? "bg-blue-100 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50/50 hover:bg-blue-50" : "hover:bg-blue-50"}`}>
+                    <td className="p-2" onClick={e => e.stopPropagation()}><input type="checkbox" className="w-3 h-3" /></td>
+                    <td className="p-2 font-mono text-blue-600">{s.siteId}</td>
+                    <td className="p-2 text-slate-700 font-semibold">{s.siteName}</td>
+                    <td className="p-2 text-slate-500 w-24 truncate">{s.merchantName.replace(/株式会社|合同会社|有限会社/g, "")}</td>
+                    <td className="p-2 w-20">{s.agentId ? <span className="text-xs font-mono text-orange-600">{s.agentId}</span> : <span className="text-slate-300">—</span>}</td>
+                    <td className="p-2 text-blue-500 font-mono truncate max-w-[6rem]" title={s.url}>{s.url.replace(/https?:\/\//, "").split("/")[0]}</td>
+                    <td className="p-2 text-center">{s.settings.tds ? "✅" : "—"}</td>
+                    <td className="p-2 text-center">{s.settings.rec ? "🔄" : "—"}</td>
+                    <td className="p-2 text-center">{s.settings.ipRestrict ? "🔒" : "—"}</td>
+                    <td className="p-2 w-16"><span className="text-emerald-600 font-bold">{s.approvedProcs.length}</span><span className="text-slate-300">/{s.processors.length}</span></td>
+                    <td className="p-2 w-20 text-right font-semibold">{s.settings.monthlyVol || "—"}</td>
+                    <td className="p-2 text-center"><Badge text={s.siteStatus} color={s.siteStatusColor} /></td>
                   </tr>
+                  {expandedSiteId === s.siteId && (
+                    <tr><td colSpan={12} className="p-0">
+                      <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                        {/* ── ヘッダー ── */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-mono bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">{s.siteId}</span>
+                            <span className="text-xs font-bold text-slate-700">{s.siteName}</span>
+                            <Badge text={s.siteStatus} color={s.siteStatusColor} />
+                            {s.settings.testMode && <Badge text="テストモード" color="purple" />}
+                          </div>
+                          <div className="flex gap-1">
+                            <button className="px-2 py-0.5 bg-blue-600 text-white rounded text-xs">編集</button>
+                            <button className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-xs border border-amber-200">停止</button>
+                            <button className="px-2 py-0.5 bg-white text-slate-600 rounded text-xs border">トークン再発行</button>
+                          </div>
+                        </div>
+
+                        {/* ── 5カラム詳細 ── */}
+                        <div className="grid grid-cols-5 gap-3 text-xs">
+                          {/* カラム1: サイト基本情報 */}
+                          <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                            <p className="font-semibold text-slate-600 mb-1.5">🌐 サイト基本情報</p>
+                            <div className="space-y-1 text-slate-500">
+                              <div>加盟店: <span className="font-semibold text-slate-700">{s.merchantName}</span> <span className="text-slate-400 font-mono">({s.merchantId})</span></div>
+                              <div>URL: <span className="text-blue-600 font-mono break-all">{s.url}</span></div>
+                              <div>代理店: {s.agentId ? <span className="text-orange-600 font-semibold">{s.agentName} ({s.agentId})</span> : <span className="text-slate-300">紐付なし</span>}</div>
+                              <div>作成日: {s.settings.created || "—"}</div>
+                              <div>最終取引: {s.settings.lastTxn || "—"}</div>
+                              <div>通知先: <span className="font-mono text-slate-600">{s.settings.notifyEmail || "—"}</span></div>
+                            </div>
+                          </div>
+
+                          {/* カラム2: 決済設定 */}
+                          <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                            <p className="font-semibold text-slate-600 mb-1.5">💳 決済設定</p>
+                            <div className="space-y-1">
+                              <div className="flex justify-between"><span className="text-slate-400">3DS認証</span><span className={`font-semibold ${s.settings.tds ? "text-emerald-600" : "text-slate-300"}`}>{s.settings.tds ? `有効 (${s.settings.tdsMode})` : "無効"}</span></div>
+                              <div className="flex justify-between"><span className="text-slate-400">リカーリング</span><span className={`font-semibold ${s.settings.rec ? "text-emerald-600" : "text-slate-300"}`}>{s.settings.rec ? `有効 (最大${s.settings.recMax}回)` : "無効"}</span></div>
+                              <div className="flex justify-between"><span className="text-slate-400">CVV必須</span><span className={`font-semibold ${s.settings.cvvRequired ? "text-emerald-600" : "text-amber-600"}`}>{s.settings.cvvRequired ? "必須" : "任意"}</span></div>
+                              <div className="flex justify-between"><span className="text-slate-400">トークン決済</span><span>{s.settings.tokenize ? "✅" : "—"}</span></div>
+                              <div className="flex justify-between"><span className="text-slate-400">LINK決済</span><span>{s.settings.linkPay ? "✅" : "—"}</span></div>
+                              <div className="flex justify-between"><span className="text-slate-400">API決済</span><span>{s.settings.apiPay ? "✅" : "—"}</span></div>
+                            </div>
+                          </div>
+
+                          {/* カラム3: セキュリティ・API */}
+                          <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                            <p className="font-semibold text-slate-600 mb-1.5">🔒 セキュリティ・API</p>
+                            <div className="space-y-1">
+                              <div className="flex justify-between"><span className="text-slate-400">IP制限</span><span className={`font-semibold ${s.settings.ipRestrict ? "text-emerald-600" : "text-slate-300"}`}>{s.settings.ipRestrict ? `有効 (${s.settings.ipList.length}件)` : "無効"}</span></div>
+                              {s.settings.ipRestrict && s.settings.ipList.length > 0 && (
+                                <div className="bg-slate-50 rounded p-1 mt-0.5">
+                                  {s.settings.ipList.map((ip, ii) => <div key={ii} className="font-mono text-slate-600">{ip}</div>)}
+                                </div>
+                              )}
+                              <div className="mt-1.5">
+                                <span className="text-slate-400">コールバックURL:</span>
+                                <div className="font-mono text-blue-600 break-all mt-0.5">{s.settings.callbackUrl || <span className="text-slate-300">未設定</span>}</div>
+                              </div>
+                              <div className="mt-1">
+                                <span className="text-slate-400">Webhook URL:</span>
+                                <div className="font-mono text-blue-600 break-all mt-0.5">{s.settings.webhookUrl || <span className="text-slate-300">未設定</span>}</div>
+                              </div>
+                              <div className="mt-1.5">
+                                <span className="text-slate-400">認証トークン:</span>
+                                <div className="font-mono text-slate-500 bg-slate-50 rounded px-1 py-0.5 mt-0.5">{s.settings.authToken ? s.settings.authToken.substring(0, 12) + "••••••" : "—"}</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* カラム4: パフォーマンス */}
+                          <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                            <p className="font-semibold text-slate-600 mb-1.5">📊 パフォーマンス</p>
+                            <div className="space-y-1.5">
+                              <div className="bg-blue-50 rounded p-1.5 text-center border border-blue-200">
+                                <p className="text-slate-400">月間処理額</p>
+                                <p className="text-sm font-bold text-blue-700">{s.settings.monthlyVol || "—"}</p>
+                              </div>
+                              <div className="bg-emerald-50 rounded p-1.5 text-center border border-emerald-200">
+                                <p className="text-slate-400">成功率</p>
+                                <p className="text-sm font-bold text-emerald-700">{s.settings.successRate || "—"}</p>
+                              </div>
+                              <div className="bg-slate-50 rounded p-1.5 text-center border border-slate-200">
+                                <p className="text-slate-400">総取引件数</p>
+                                <p className="text-sm font-bold text-slate-700">{s.totalTxn.toLocaleString()}</p>
+                              </div>
+                              <div className="text-slate-400">対応ブランド:
+                                <div className="flex flex-wrap gap-1 mt-0.5">{s.allBrands.map((b, bi) => <span key={bi} className="bg-slate-100 text-slate-600 px-1 py-0.5 rounded text-xs">{b}</span>)}</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* カラム5: 接続先一覧 */}
+                          <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                            <p className="font-semibold text-slate-600 mb-1.5">🔌 接続先 ({s.processors.length})</p>
+                            <div className="space-y-1">
+                              {s.processors.map((proc, pi) => {
+                                const ps = PROC_STATUS[proc.status] || PROC_STATUS.pending;
+                                return (
+                                <div key={pi} className={`rounded p-1.5 border ${proc.status === "approved" ? "bg-emerald-50 border-emerald-200" : proc.status === "suspended" ? "bg-rose-50 border-rose-200" : "bg-slate-50 border-slate-200"}`}>
+                                  <div className="flex justify-between items-center">
+                                    <span className="font-semibold text-slate-700">{proc.name}</span>
+                                    <span className={`text-xs ${ps.textClass}`}>{ps.label}</span>
+                                  </div>
+                                  <div className="text-slate-400 mt-0.5">{proc.brands}</div>
+                                  {proc.mid && <div className="font-mono text-slate-500 mt-0.5">MID: {proc.mid}</div>}
+                                  {proc.txnCount > 0 && <div className="text-slate-400">取引: {proc.txnCount.toLocaleString()}件</div>}
+                                  {proc.feeOverride && (
+                                    <div className="mt-0.5 flex flex-wrap gap-1">
+                                      {Object.entries(proc.feeOverride).map(([k, v]) => <span key={k} className="bg-amber-100 text-amber-700 px-1 rounded text-xs">{k.toUpperCase()} {v}</span>)}
+                                    </div>
+                                  )}
+                                </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td></tr>
+                  )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* ===== 加盟店一覧タブ ===== */}
       {m03Tab === "merchants" && (<>
@@ -1665,6 +1853,7 @@ const MasterAIMonitor = () => {
 const MerchantDashboard = () => {
   const [period, setPeriod] = useState("今月");
   const [showKpiDetail, setShowKpiDetail] = useState(null);
+  const [showAllNotices, setShowAllNotices] = useState(false);
   const kpiData = {
     "今月の売上": { value: "¥12.5M", trend: 18, details: [
       { label: "カード決済", value: "¥9.75M", pct: "89%" },
@@ -1723,30 +1912,46 @@ const MerchantDashboard = () => {
     )}
 
     {/* お知らせ欄 */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <span>📢</span>
-          <p className="text-xs font-bold text-slate-600">お知らせ</p>
+    {(() => {
+      const mNotices = [
+        { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: "🔧" },
+        { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: "🚀" },
+        { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: "⚠️" },
+        { date: "02/12", title: "3Dセキュア2.0 完全移行のお知らせ", type: "お知らせ", tColor: "default", icon: "📌" },
+      ];
+      const renderMNotice = (n, i) => (
+        <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-blue-50 ${i === 0 ? "border-amber-300 bg-amber-50" : "border-slate-200"}`}>
+          <span>{n.icon}</span>
+          <span className="w-12 text-slate-400 shrink-0">{n.date}</span>
+          <Badge text={n.type} color={n.tColor} />
+          <span className={`flex-1 ${i === 0 ? "text-amber-800 font-semibold" : "text-slate-700"}`}>{n.title}</span>
         </div>
-        <span className="text-xs text-blue-600 cursor-pointer hover:underline">すべて見る →</span>
-      </div>
-      <div className="space-y-1.5">
-        {[
-          { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: "🔧" },
-          { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: "🚀" },
-          { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: "⚠️" },
-          { date: "02/12", title: "3Dセキュア2.0 完全移行のお知らせ", type: "お知らせ", tColor: "default", icon: "📌" },
-        ].map((n, i) => (
-          <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-blue-50 ${i === 0 ? "border-amber-300 bg-amber-50" : "border-slate-200"}`}>
-            <span>{n.icon}</span>
-            <span className="w-12 text-slate-400 shrink-0">{n.date}</span>
-            <Badge text={n.type} color={n.tColor} />
-            <span className={`flex-1 ${i === 0 ? "text-amber-800 font-semibold" : "text-slate-700"}`}>{n.title}</span>
+      );
+      return (
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span>📢</span>
+            <p className="text-xs font-bold text-slate-600">お知らせ</p>
+            {mNotices.length > 3 && <span className="text-xs text-slate-300">({mNotices.length}件)</span>}
           </div>
-        ))}
+          {mNotices.length > 3 && (
+            <button className="text-xs text-blue-600 cursor-pointer hover:underline" onClick={() => setShowAllNotices(!showAllNotices)}>
+              {showAllNotices ? "閉じる ▲" : `すべて見る (${mNotices.length - 3}件) ▼`}
+            </button>
+          )}
+        </div>
+        <div className="space-y-1.5">
+          {mNotices.slice(0, 3).map(renderMNotice)}
+          {showAllNotices && (
+            <div className="space-y-1.5 pt-1 border-t border-dashed border-slate-200 mt-1">
+              {mNotices.slice(3).map((n, i) => renderMNotice(n, i + 3))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      );
+    })()}
 
     <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-lg border border-emerald-200 p-3">
       <div className="flex items-center gap-2 mb-1">
@@ -10102,6 +10307,7 @@ const MasterAgents = () => {
 const AgentDashboard = () => {
   const [period, setPeriod] = useState("今月");
   const [showDetail, setShowDetail] = useState(null);
+  const [showAllNotices, setShowAllNotices] = useState(false);
   const kpiDetails = {
     "紹介加盟店（稼働中）": { value: "23社", details: [{ label: "EC物販", value: "12社" }, { label: "デジタルコンテンツ", value: "5社" }, { label: "サービス業", value: "4社" }, { label: "その他", value: "2社" }], chart: [18, 19, 20, 21, 22, 23] },
     "今月の取引総額": { value: "¥45.2M", details: [{ label: "VISA/MC", value: "¥32.1M" }, { label: "JCB", value: "¥8.5M" }, { label: "WEBマネー", value: "¥4.6M" }], chart: [38, 40, 42, 41, 43, 45.2] },
@@ -10128,30 +10334,46 @@ const AgentDashboard = () => {
     </div>
 
     {/* お知らせ欄 */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <span>📢</span>
-          <p className="text-xs font-bold text-slate-600">お知らせ</p>
+    {(() => {
+      const aNotices = [
+        { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: "🔧" },
+        { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: "🚀" },
+        { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: "⚠️" },
+        { date: "02/10", title: "代理店向け報酬計算ロジック変更について", type: "重要", tColor: "red", icon: "🤝" },
+      ];
+      const renderANotice = (n, i) => (
+        <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-orange-50 ${i === 0 ? "border-amber-300 bg-amber-50" : i === 3 ? "border-rose-200 bg-rose-50/50" : "border-slate-200"}`}>
+          <span>{n.icon}</span>
+          <span className="w-12 text-slate-400 shrink-0">{n.date}</span>
+          <Badge text={n.type} color={n.tColor} />
+          <span className={`flex-1 ${i === 0 ? "text-amber-800 font-semibold" : i === 3 ? "text-rose-700 font-semibold" : "text-slate-700"}`}>{n.title}</span>
         </div>
-        <span className="text-xs text-orange-600 cursor-pointer hover:underline">すべて見る →</span>
-      </div>
-      <div className="space-y-1.5">
-        {[
-          { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: "🔧" },
-          { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: "🚀" },
-          { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: "⚠️" },
-          { date: "02/10", title: "代理店向け報酬計算ロジック変更について", type: "重要", tColor: "red", icon: "🤝" },
-        ].map((n, i) => (
-          <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-orange-50 ${i === 0 ? "border-amber-300 bg-amber-50" : i === 3 ? "border-rose-200 bg-rose-50/50" : "border-slate-200"}`}>
-            <span>{n.icon}</span>
-            <span className="w-12 text-slate-400 shrink-0">{n.date}</span>
-            <Badge text={n.type} color={n.tColor} />
-            <span className={`flex-1 ${i === 0 ? "text-amber-800 font-semibold" : i === 3 ? "text-rose-700 font-semibold" : "text-slate-700"}`}>{n.title}</span>
+      );
+      return (
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span>📢</span>
+            <p className="text-xs font-bold text-slate-600">お知らせ</p>
+            {aNotices.length > 3 && <span className="text-xs text-slate-300">({aNotices.length}件)</span>}
           </div>
-        ))}
+          {aNotices.length > 3 && (
+            <button className="text-xs text-orange-600 cursor-pointer hover:underline" onClick={() => setShowAllNotices(!showAllNotices)}>
+              {showAllNotices ? "閉じる ▲" : `すべて見る (${aNotices.length - 3}件) ▼`}
+            </button>
+          )}
+        </div>
+        <div className="space-y-1.5">
+          {aNotices.slice(0, 3).map(renderANotice)}
+          {showAllNotices && (
+            <div className="space-y-1.5 pt-1 border-t border-dashed border-slate-200 mt-1">
+              {aNotices.slice(3).map((n, i) => renderANotice(n, i + 3))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      );
+    })()}
 
     {/* AIインサイト */}
     <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border border-orange-200 p-3">
