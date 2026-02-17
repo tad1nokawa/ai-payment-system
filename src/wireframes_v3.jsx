@@ -6587,7 +6587,7 @@ const MasterRouting = () => {
                   <div><label className="text-xs text-slate-500">演算子</label><select className="w-full text-xs border rounded px-2 py-1"><option>≧（以上）</option><option>＜（未満）</option><option>＝</option></select></div>
                   <div><label className="text-xs text-slate-500">値</label><input className="w-full text-xs border rounded px-2 py-1" placeholder="500000" /></div>
                 </div>
-                <button className="text-xs text-blue-600 hover:underline">+ AND条件を追加</button>
+                <button onClick={() => toast("AND条件を追加しました", "info")} className="text-xs text-blue-600 hover:underline">+ AND条件を追加</button>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="text-xs font-semibold text-slate-600">フォールバック先</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>自動（AI判定）</option><option>Worldpay</option><option>Simpletransact</option><option>ONTHELINE</option></select></div>
@@ -8106,10 +8106,12 @@ const MasterOrderSearch = () => {
 
 // ─── M07: 不正検知設定 ───
 const MasterFraudSettings = () => {
+  const toast = useToast();
   const [ruleTab, setRuleTab] = useState("rules");
   const [showAddRule, setShowAddRule] = useState(false);
   const [testMode, setTestMode] = useState(false);
   const [showAddBlock, setShowAddBlock] = useState(null);
+  const [actionConfirm, setActionConfirm] = useState(null);
 
   const fraudRules = [
     { id: "FR-001", name: "高額取引チェック", type: "金額閾値", condition: "金額 > ¥500,000", action: "例外キュー送り", priority: 1, enabled: true, hits30d: 12 },
@@ -8169,8 +8171,8 @@ const MasterFraudSettings = () => {
                 <td className="px-4 py-2 whitespace-nowrap w-20 text-center text-slate-600">{r.hits30d}件</td>
                 <td className="px-4 py-2 whitespace-nowrap w-14 text-center">{r.enabled ? <span className="text-emerald-500">●</span> : <span className="text-slate-300">○</span>}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1">
-                  <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">編集</button>
-                  <button className="px-1.5 py-1 bg-amber-100 text-amber-700 rounded text-xs">🧪</button>
+                  <button onClick={() => { setShowAddRule(true); toast(`${r.id} を編集モードで開きました`, "info"); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">編集</button>
+                  <button onClick={() => toast(`${r.id} のルールテストを開始しました`, "info")} className="px-1.5 py-1 bg-amber-100 text-amber-700 rounded text-xs">🧪</button>
                 </div></td>
               </tr>
             ))}
@@ -8180,7 +8182,7 @@ const MasterFraudSettings = () => {
           <div className="bg-amber-50 rounded-lg border border-amber-300 p-3">
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-bold text-amber-800">🧪 シミュレーション実行</p>
-              <button className="text-xs bg-amber-600 text-white px-3 py-1 rounded font-semibold">過去30日データで実行</button>
+              <button onClick={() => toast("シミュレーションを開始しました（過去30日データ）", "info")} className="text-xs bg-amber-600 text-white px-3 py-1 rounded font-semibold">過去30日データで実行</button>
             </div>
             <p className="text-xs text-amber-700 mb-2">ルール変更前に、過去30日の取引データに対して変更後のルールを適用し、影響を確認できます。</p>
             <div className="bg-white rounded-lg border border-slate-200 p-2.5">
@@ -8279,8 +8281,8 @@ const MasterFraudSettings = () => {
                     <p className="text-xs text-emerald-700 mt-0.5">偽陽性率: <span className="font-semibold">0.3% → 0.2%</span>（改善）/ 検知率: 96.8% → 97.1%（改善）</p>
                   </div>
                   <div className="flex gap-2">
-                    <button className="px-3 py-1.5 bg-white text-slate-600 rounded text-xs border">却下</button>
-                    <button className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-semibold">✅ 本番に切替</button>
+                    <button onClick={() => setActionConfirm({ title: "新モデル却下", description: "新モデル v2.4 を却下します。現行モデル v2.3 が継続使用されます。", type: "warning", onConfirm: () => toast("新モデル v2.4 を却下しました", "warning") })} className="px-3 py-1.5 bg-white text-slate-600 rounded text-xs border">却下</button>
+                    <button onClick={() => setActionConfirm({ title: "本番モデル切替", description: "不正検知AIモデルを v2.3 → v2.4 に切り替えます。", warning: "切替後は即時反映されます。問題発生時は手動でロールバックが必要です。", type: "approve", onConfirm: () => toast("不正検知AIモデルを v2.4 に切り替えました", "success") })} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-semibold">✅ 本番に切替</button>
                   </div>
                 </div>
               </div>
@@ -8312,7 +8314,7 @@ const MasterFraudSettings = () => {
                   <span className="font-mono text-slate-700">{b.value}</span>
                   <span className="text-slate-400 flex-1">{b.reason}</span>
                   <span className="text-slate-400">{b.added}</span>
-                  <button className="text-rose-400 hover:text-rose-600">✕</button>
+                  <button onClick={() => toast(`ブロックリストから ${b.value} を削除しました`, "warning")} className="text-rose-400 hover:text-rose-600">✕</button>
                 </div>
               ))}
             </div>
@@ -8332,7 +8334,7 @@ const MasterFraudSettings = () => {
                   <span className="font-mono text-slate-700">{w.value}</span>
                   <span className="text-slate-400 flex-1">{w.reason}</span>
                   <span className="text-slate-400">{w.added}</span>
-                  <button className="text-rose-400 hover:text-rose-600">✕</button>
+                  <button onClick={() => toast(`ホワイトリストから ${w.value} を削除しました`, "warning")} className="text-rose-400 hover:text-rose-600">✕</button>
                 </div>
               ))}
             </div>
@@ -8357,8 +8359,8 @@ const MasterFraudSettings = () => {
               <p className="text-blue-500">制限種別: 決済不可 / 金額制限</p>
             </div>
             <div className="flex gap-2 mt-3">
-              <button className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold">インポート実行</button>
-              <button className="text-xs bg-slate-100 text-slate-600 px-4 py-1.5 rounded border">テンプレートDL</button>
+              <button onClick={() => toast("CSVインポートを実行しました（3件成功 / 0件失敗）", "success")} className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold">インポート実行</button>
+              <button onClick={() => toast("テンプレートCSVをダウンロードしました", "success")} className="text-xs bg-slate-100 text-slate-600 px-4 py-1.5 rounded border">テンプレートDL</button>
             </div>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
@@ -8410,7 +8412,7 @@ const MasterFraudSettings = () => {
               <div><label className="text-xs text-slate-400">対象項目</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>メールアドレス</option><option>カード番号</option><option>IPアドレス</option><option>BIN</option></select></div>
               <div><label className="text-xs text-slate-400">対象値</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="値で検索" /></div>
               <div><label className="text-xs text-slate-400">登録日</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5" /></div>
-              <div className="flex items-end"><button className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
+              <div className="flex items-end"><button onClick={() => toast("検索条件を適用しました", "info")} className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
             </div>
             <table className="w-full text-xs">
               <thead><tr className="bg-slate-50 border-b">
@@ -8436,7 +8438,7 @@ const MasterFraudSettings = () => {
                     <td className="p-2 text-slate-500">{r.reason}</td>
                     <td className="p-2 text-slate-600">{r.user}</td>
                     <td className="p-2 text-slate-400 font-mono">{r.date}</td>
-                    <td className="p-2 text-center"><button className="text-rose-500 hover:text-rose-700">削除</button></td>
+                    <td className="p-2 text-center"><button onClick={() => setActionConfirm({ title: "禁止リスト項目削除", description: `${r.item}: ${r.value} を禁止リストから削除します。`, warning: "削除後、この値は制限登録の対象になります。", type: "danger", onConfirm: () => toast(`${r.value} を禁止リストから削除しました`, "warning") })} className="text-rose-500 hover:text-rose-700">削除</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -8510,7 +8512,7 @@ const MasterFraudSettings = () => {
                     <td className="p-2 text-center text-slate-400">{r.global}</td>
                     <td className="p-2 text-center font-bold text-blue-700">{r.custom}</td>
                     <td className="p-2 text-center font-semibold text-blue-600">{r.diff}</td>
-                    <td className="p-2 text-center"><button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">編集</button> <button className="px-2 py-0.5 bg-rose-100 text-rose-600 rounded text-xs">削除</button></td>
+                    <td className="p-2 text-center"><button onClick={() => toast(`${r.rule} のカスタム設定を編集中`, "info")} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">編集</button> <button onClick={() => setActionConfirm({ title: "カスタム設定削除", description: `${r.rule} のカスタム設定を削除します。グローバル値 ${r.global} に戻ります。`, type: "danger", onConfirm: () => toast(`${r.rule} のカスタム設定を削除しました`, "warning") })} className="px-2 py-0.5 bg-rose-100 text-rose-600 rounded text-xs">削除</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -8518,7 +8520,7 @@ const MasterFraudSettings = () => {
           </div>
           <div className="bg-amber-50 rounded border border-amber-300 p-2 flex items-center justify-between">
             <span className="text-xs text-amber-800">🧪 この加盟店の過去取引データでシミュレーションを実行できます</span>
-            <button className="text-xs bg-amber-600 text-white px-3 py-1 rounded font-semibold">シミュレーション実行</button>
+            <button onClick={() => toast("加盟店別シミュレーションを開始しました", "info")} className="text-xs bg-amber-600 text-white px-3 py-1 rounded font-semibold">シミュレーション実行</button>
           </div>
         </div>
       )}
@@ -8543,11 +8545,13 @@ const MasterFraudSettings = () => {
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowAddBlock(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setShowAddBlock(null)} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showAddBlock === "block" ? "bg-rose-600 hover:bg-rose-700" : "bg-emerald-600 hover:bg-emerald-700"}`}>追加する</button>
+              <button onClick={() => { const type = showAddBlock === "block" ? "ブロックリスト" : showAddBlock === "white" ? "ホワイトリスト" : showAddBlock === "ng" ? "禁止リスト" : "カスタム設定"; setShowAddBlock(null); toast(`${type}に追加しました`, "success"); }} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showAddBlock === "block" ? "bg-rose-600 hover:bg-rose-700" : "bg-emerald-600 hover:bg-emerald-700"}`}>追加する</button>
             </div>
           </div>
         </div>
       )}
+
+      <ConfirmDialog config={actionConfirm} onClose={() => setActionConfirm(null)} />
 
       {showAddRule && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -8611,7 +8615,7 @@ const MasterFraudSettings = () => {
                     <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 500000" />
                   </div>
                 </div>
-                <button className="text-xs text-blue-600 hover:underline">+ AND条件を追加</button>
+                <button onClick={() => toast("AND条件を追加しました", "info")} className="text-xs text-blue-600 hover:underline">+ AND条件を追加</button>
               </div>
               {/* アクション */}
               <div>
@@ -8659,7 +8663,7 @@ const MasterFraudSettings = () => {
             {/* Footer */}
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowAddRule(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setShowAddRule(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">ルールを作成</button>
+              <button onClick={() => { setShowAddRule(false); toast("不正検知ルールを作成しました（承認待ち）", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">ルールを作成</button>
             </div>
           </div>
         </div>
