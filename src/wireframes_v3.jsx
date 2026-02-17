@@ -923,6 +923,7 @@ const SortableHeader = ({ cols, sortKey, sortDir, onSort, children }) => (
 
 // ─── M03: 加盟店管理 ───
 const MasterMerchants = () => {
+  const toast = useToast();
   const [sortKey, setSortKey] = useState("id");
   const [sortDir, setSortDir] = useState("asc");
   const [searchText, setSearchText] = useState("");
@@ -933,6 +934,7 @@ const MasterMerchants = () => {
   const [showConfirm, setShowConfirm] = useState(null);
   const [showProcApply, setShowProcApply] = useState(false);
   const [m03Tab, setM03Tab] = useState("merchants");
+  const [actionConfirm, setActionConfirm] = useState(null);
 
   const handleSort = (key) => {
     if (sortKey === key) {
@@ -964,8 +966,8 @@ const MasterMerchants = () => {
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-bold text-slate-800">加盟店管理 <span className="text-slate-400 font-normal">({filtered.length}件)</span></h2>
           <button onClick={() => setShowAddModal(true)} className="text-xs bg-blue-600 text-white px-2.5 py-1 rounded hover:bg-blue-700">+ 手動登録</button>
-          <button className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50">📥 CSV</button>
-          <button className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50">📥 Excel</button>
+          <button onClick={() => toast("加盟店一覧をCSV出力しました", "success")} className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50">📥 CSV</button>
+          <button onClick={() => toast("加盟店一覧をExcel出力しました", "success")} className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50">📥 Excel</button>
         </div>
         <div className="flex gap-2">
           <input className="text-xs border rounded px-2 py-1 w-48" placeholder="加盟店名 / IDで検索..." value={searchText} onChange={e => setSearchText(e.target.value)} />
@@ -1036,9 +1038,9 @@ const MasterMerchants = () => {
             <div className="flex justify-between items-center mb-3">
               <p className="text-xs font-bold text-slate-600">サイト管理</p>
               <div className="flex gap-2">
-                <button className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ サイト追加</button>
-                <button className="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded border border-amber-200 font-semibold">⏸ 一括停止</button>
-                <button className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50">📥 CSV</button>
+                <button onClick={() => toast("サイト追加モーダルを開きました（実装予定）", "info")} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ サイト追加</button>
+                <button onClick={() => setActionConfirm({ title: "サイト一括停止", description: "表示中の全サイトを一括停止します。", warning: "停止すると該当サイトの決済処理が停止されます。", type: "danger", onConfirm: () => toast("選択したサイトを一括停止しました", "warning") })} className="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded border border-amber-200 font-semibold">⏸ 一括停止</button>
+                <button onClick={() => toast("サイト一覧をCSV出力しました", "success")} className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50">📥 CSV</button>
               </div>
             </div>
             <div className="grid grid-cols-6 gap-2">
@@ -1047,7 +1049,7 @@ const MasterMerchants = () => {
               <div><label className="text-xs text-slate-400">加盟店名</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="加盟店で絞込" /></div>
               <div><label className="text-xs text-slate-400">代理店</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>AG-001</option><option>AG-002</option><option>AG-003</option><option>なし</option></select></div>
               <div><label className="text-xs text-slate-400">利用状態</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>有効</option><option>審査中</option><option>テスト</option><option>停止</option></select></div>
-              <div className="flex items-end"><button className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
+              <div className="flex items-end"><button onClick={() => toast("検索条件を適用しました", "info")} className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
             </div>
           </div>
 
@@ -1101,10 +1103,10 @@ const MasterMerchants = () => {
                             {s.settings.testMode && <Badge text="テストモード" color="purple" />}
                           </div>
                           <div className="flex gap-1">
-                            <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold">💾 保存</button>
-                            <button className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs border border-amber-200">⏸ 停止</button>
-                            <button className="px-2 py-1 bg-white text-slate-600 rounded text-xs border">🔑 トークン再発行</button>
-                            <button className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200">🗑 削除</button>
+                            <button onClick={() => toast(`${s.siteName} の設定を保存しました`, "success")} className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold">💾 保存</button>
+                            <button onClick={() => setActionConfirm({ title: "サイト停止", description: `${s.siteId} ${s.siteName} を停止します。`, warning: "停止すると該当サイトの決済処理が停止されます。", type: "warning", onConfirm: () => toast(`${s.siteName} を停止しました`, "warning") })} className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs border border-amber-200">⏸ 停止</button>
+                            <button onClick={() => setActionConfirm({ title: "トークン再発行", description: `${s.siteId} ${s.siteName} の認証トークンを再発行します。`, warning: "再発行すると現在のトークンは無効になります。", type: "warning", inputConfirm: "再発行", onConfirm: () => toast(`${s.siteName} のトークンを再発行しました`, "success") })} className="px-2 py-1 bg-white text-slate-600 rounded text-xs border">🔑 トークン再発行</button>
+                            <button onClick={() => setActionConfirm({ title: "サイト削除", description: `${s.siteId} ${s.siteName} を完全に削除します。`, warning: "削除したサイトは復元できません。関連する全ての取引データも失われます。", type: "danger", inputConfirm: "削除", onConfirm: () => toast(`${s.siteName} を削除しました`, "error") })} className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200">🗑 削除</button>
                           </div>
                         </div>
 
@@ -1199,7 +1201,7 @@ const MasterMerchants = () => {
                                 <label className="text-slate-400">認証トークン</label>
                                 <div className="flex gap-1 mt-0.5">
                                   <input type="text" value={s.settings.authToken ? s.settings.authToken.substring(0, 12) + "••••••" : "—"} readOnly className="flex-1 border rounded px-2 py-1 text-xs font-mono bg-slate-50 text-slate-500" />
-                                  <button className="px-1.5 py-1 bg-slate-100 text-slate-500 rounded text-xs border hover:bg-slate-200">📋</button>
+                                  <button onClick={() => toast("トークンをクリップボードにコピーしました", "success")} className="px-1.5 py-1 bg-slate-100 text-slate-500 rounded text-xs border hover:bg-slate-200">📋</button>
                                 </div>
                               </div>
                             </div>
@@ -1521,7 +1523,7 @@ const MasterMerchants = () => {
                               {site.agentName && <span className="text-xs text-slate-400">代理店: {site.agentName}</span>}
                             </div>
                           </div>
-                          <button className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">+ 接続先追加</button>
+                          <button onClick={() => toast("接続先追加モーダルを開きました（実装予定）", "info")} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">+ 接続先追加</button>
                         </div>
 
                         {/* サイト内の接続先一覧 */}
@@ -1866,7 +1868,7 @@ const MasterMerchants = () => {
               </div>
             </div>
             <div className="p-4 border-t space-y-2">
-              <button onClick={() => setShowAddModal(false)} className="w-full py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">登録する</button>
+              <button onClick={() => { setShowAddModal(false); toast("加盟店を手動登録しました", "success"); }} className="w-full py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">登録する</button>
               <button onClick={() => setShowAddModal(false)} className="w-full py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
             </div>
           </div>
@@ -1890,7 +1892,7 @@ const MasterMerchants = () => {
             </div>
             <div className="flex gap-2 justify-end">
               <button onClick={() => setShowConfirm(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setShowConfirm(null)} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showConfirm === "suspend" ? "bg-amber-600 hover:bg-amber-700" : "bg-rose-600 hover:bg-rose-700"}`}>
+              <button onClick={() => { const action = showConfirm === "suspend" ? "サスペンド" : "解約"; setShowConfirm(null); toast(`加盟店を${action}しました`, showConfirm === "suspend" ? "warning" : "error"); }} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showConfirm === "suspend" ? "bg-amber-600 hover:bg-amber-700" : "bg-rose-600 hover:bg-rose-700"}`}>
                 {showConfirm === "suspend" ? "サスペンドする" : "解約する"}
               </button>
             </div>
@@ -1920,12 +1922,13 @@ const MasterMerchants = () => {
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowProcApply(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setShowProcApply(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">申請する</button>
+              <button onClick={() => { setShowProcApply(false); toast("接続先審査を申請しました", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">申請する</button>
             </div>
           </div>
         </div>
       )}
       </>)}
+      <ConfirmDialog config={actionConfirm} onClose={() => setActionConfirm(null)} />
     </div>
   );
 };
