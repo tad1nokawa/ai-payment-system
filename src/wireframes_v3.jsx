@@ -101,6 +101,13 @@ const MasterDashboard = () => {
   const [kpiPeriod, setKpiPeriod] = useState("today");
   const [chartPeriod, setChartPeriod] = useState("7d");
   const [chartType, setChartType] = useState("count");
+  const [showKpiDrill, setShowKpiDrill] = useState(null);
+  const [expandedQueue, setExpandedQueue] = useState(null);
+  const kpiDrillData = {
+    "取引量": { value: "1,247件", details: [{ label: "VISA", value: "486件" }, { label: "Mastercard", value: "312件" }, { label: "JCB", value: "198件" }, { label: "AMEX", value: "89件" }, { label: "QR決済", value: "102件" }, { label: "コンビニ", value: "60件" }] },
+    "売上": { value: "¥18.3M", details: [{ label: "カード決済", value: "¥14.8M" }, { label: "銀行振込", value: "¥2.1M" }, { label: "QR決済", value: "¥0.9M" }, { label: "コンビニ", value: "¥0.5M" }] },
+    "決済成功率": { value: "99.2%", details: [{ label: "VISA", value: "99.5%" }, { label: "Mastercard", value: "99.1%" }, { label: "JCB", value: "98.8%" }, { label: "AMEX", value: "99.7%" }] },
+  };
 
   return (
   <div className="p-5 space-y-4">
@@ -135,11 +142,11 @@ const MasterDashboard = () => {
         </div>
       </div>
       <div className="flex gap-3">
-        <KPICard label="取引量" value="1,247件" sub="前日比" trend={8} />
-        <KPICard label="売上" value="¥18.3M" sub="前日比" trend={12} />
-        <KPICard label="決済成功率" value="99.2%" sub="目標: 99.0%" color="green" />
-        <KPICard label="チャージバック率" value="0.03%" sub="基準: 1.0%以下" color="green" />
-        <KPICard label="自動化率" value="94.2%" sub="目標: 95%" color="purple" />
+        {[{ label: "取引量", value: "1,247件", sub: "前日比", trend: 8 }, { label: "売上", value: "¥18.3M", sub: "前日比", trend: 12 }, { label: "決済成功率", value: "99.2%", sub: "目標: 99.0%", color: "green" }, { label: "チャージバック率", value: "0.03%", sub: "基準: 1.0%以下", color: "green" }, { label: "自動化率", value: "94.2%", sub: "目標: 95%", color: "purple" }].map((k, i) => (
+          <div key={i} onClick={() => kpiDrillData[k.label] && setShowKpiDrill(k.label)} className={`flex-1 ${kpiDrillData[k.label] ? "cursor-pointer hover:ring-2 hover:ring-blue-200 rounded-lg transition-all" : ""}`}>
+            <KPICard label={k.label} value={k.value} sub={k.sub} trend={k.trend} color={k.color} />
+          </div>
+        ))}
       </div>
     </div>
 
@@ -237,6 +244,70 @@ const MasterDashboard = () => {
         ))}
       </div>
     </div>
+
+    {/* クイックアクション */}
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <p className="text-xs font-bold text-slate-600 mb-2">⚡ クイックアクション</p>
+      <div className="flex gap-2">
+        {[["📋 例外キュー", "rose"], ["🔍 取引検索", "blue"], ["📊 レポート生成", "emerald"], ["👥 加盟店一覧", "slate"], ["🤖 AI監視", "purple"]].map(([label, color], i) => (
+          <button key={i} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100`}>{label}</button>
+        ))}
+      </div>
+    </div>
+
+    {/* AIチャットサポート（ダッシュボード内） */}
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+      <div className="p-3 border-b bg-gradient-to-r from-blue-50 to-purple-50 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <span className="text-sm">💬</span>
+          <p className="text-xs font-bold text-blue-700">AIチャットサポート</p>
+          <Badge text="Claude 4 Opus" color="purple" />
+        </div>
+        <button className="text-xs text-blue-500 hover:text-blue-700 underline">全画面で開く →</button>
+      </div>
+      <div className="p-3 space-y-2 max-h-52 overflow-y-auto bg-slate-50">
+        <div className="flex gap-2">
+          <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs shrink-0">🤖</div>
+          <div className="bg-white rounded-lg p-2 border border-slate-200 max-w-sm">
+            <p className="text-xs text-slate-700">本日の状況をまとめました：取引量 1,247件（前日比+8%）、成功率 99.2%。例外キューに3件の保留あり（うち1件が2時間超過中）。不正検知で2件を自動ブロック済みです。</p>
+          </div>
+        </div>
+        <div className="flex gap-2 justify-end">
+          <div className="bg-blue-600 rounded-lg p-2 max-w-xs"><p className="text-xs text-white">例外キューの2時間超過の詳細を教えて</p></div>
+        </div>
+        <div className="flex gap-2">
+          <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs shrink-0">🤖</div>
+          <div className="bg-white rounded-lg p-2 border border-slate-200 max-w-sm">
+            <p className="text-xs text-slate-700">例外キュー #1024 は加盟店「ディーライフ」の審査案件です。AI推薦は「承認」（信頼スコア 82/100）。中リスク判定の理由はカテゴリ初回申請のためです。早めの対応をお勧めします。</p>
+          </div>
+        </div>
+      </div>
+      <div className="p-2 border-t bg-white flex gap-2">
+        <input className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="AIアシスタントに質問..." />
+        <button className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700">送信</button>
+      </div>
+    </div>
+
+    {/* KPIドリルダウンモーダル */}
+    {showKpiDrill && kpiDrillData[showKpiDrill] && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowKpiDrill(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
+          <div className="p-4 border-b flex items-center justify-between">
+            <p className="text-sm font-bold">{showKpiDrill} - 内訳</p>
+            <button onClick={() => setShowKpiDrill(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+          <div className="p-4 space-y-4">
+            <div className="text-center py-2"><p className="text-2xl font-bold text-slate-800">{kpiDrillData[showKpiDrill].value}</p></div>
+            <div className="space-y-2">
+              {kpiDrillData[showKpiDrill].details.map((d, i) => (
+                <div key={i} className="flex items-center text-xs border-b pb-1.5"><span className="flex-1 text-slate-600">{d.label}</span><span className="font-bold text-slate-800">{d.value}</span></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
   </div>
   );
 };
@@ -244,6 +315,19 @@ const MasterDashboard = () => {
 // ─── M02: 例外キュー ───
 const MasterExceptionQueue = () => {
   const [queueFilter, setQueueFilter] = useState("all");
+  const [checkedItems, setCheckedItems] = useState([]);
+  const [showBatchConfirm, setShowBatchConfirm] = useState(null);
+
+  const toggleCheck = (id) => setCheckedItems(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const toggleAll = (ids) => setCheckedItems(prev => prev.length === ids.length ? [] : ids);
+
+  const queueItems = [
+    { id: "#5521", type: "不正検知", target: "¥89,000 / カード決済 / 山本商店", ai: "ブロック推薦", aiColor: "red", time: "30分", timeColor: "gray", locked: false },
+    { id: "#1025", type: "審査保留", target: "合同会社テストショップ / 雑貨EC", ai: "承認推薦", aiColor: "green", time: "15分", timeColor: "gray", locked: true, lockedBy: "田中" },
+    { id: "#5518", type: "URL巡回", target: "sample-shop.jp / 商品ページ変更検知", ai: "要確認", aiColor: "yellow", time: "1時間", timeColor: "yellow", locked: false },
+    { id: "#5515", type: "精算", target: "GMO-PG / バッチ#B-0210 / エラー3件", ai: "再実行推薦", aiColor: "blue", time: "2時間", timeColor: "red", locked: false },
+  ];
+
   return (
   <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
@@ -265,6 +349,14 @@ const MasterExceptionQueue = () => {
         <span className="text-slate-400">AI一致率:</span>
         <span className="font-bold text-emerald-600">87%</span>
       </div>
+      {checkedItems.length > 0 && (
+        <div className="flex items-center gap-2 ml-auto bg-blue-50 rounded px-3 py-1 border border-blue-200">
+          <span className="font-bold text-blue-700">{checkedItems.length}件選択中</span>
+          <button onClick={() => setShowBatchConfirm("approve")} className="px-2 py-0.5 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700">一括承認</button>
+          <button onClick={() => setShowBatchConfirm("reject")} className="px-2 py-0.5 bg-rose-600 text-white rounded text-xs font-semibold hover:bg-rose-700">一括拒否</button>
+          <button onClick={() => setCheckedItems([])} className="text-xs text-slate-400 hover:text-slate-600">✕ 解除</button>
+        </div>
+      )}
     </div>
 
     {/* Detail card */}
@@ -327,26 +419,71 @@ const MasterExceptionQueue = () => {
 
     {/* Queue list */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-      <TableHeader cols={[{ label: "ID", w: "w-16" }, { label: "種別", w: "w-20" }, { label: "対象", w: "flex-1" }, { label: "AI推薦", w: "w-24" }, { label: "滞留時間", w: "w-24" }, { label: "操作", w: "w-32" }]}>
-      {[
-        { id: "#5521", type: "不正検知", target: "¥89,000 / カード決済 / 山本商店", ai: "ブロック推薦", aiColor: "red", time: "30分", timeColor: "gray", locked: false },
-        { id: "#1025", type: "審査保留", target: "合同会社テストショップ / 雑貨EC", ai: "承認推薦", aiColor: "green", time: "15分", timeColor: "gray", locked: true, lockedBy: "田中" },
-      ].map((item, i) => (
-        <tr key={i} className={`border-b ${item.locked ? "bg-orange-50" : i % 2 ? "bg-slate-50" : ""}`}>
+      <TableHeader cols={[{ label: "", w: "w-8" }, { label: "ID", w: "w-16" }, { label: "種別", w: "w-20" }, { label: "対象", w: "flex-1" }, { label: "AI推薦", w: "w-24" }, { label: "滞留時間", w: "w-24" }, { label: "操作", w: "w-32" }]}>
+      <tr className="border-b bg-slate-50">
+        <td className="px-4 py-1 w-8"><input type="checkbox" className="w-3.5 h-3.5" checked={checkedItems.length === queueItems.length} onChange={() => toggleAll(queueItems.map(q => q.id))} /></td>
+        <td colSpan="6" className="px-4 py-1 text-xs text-slate-400">{checkedItems.length > 0 ? `${checkedItems.length}件選択中` : "全選択"}</td>
+      </tr>
+      {queueItems.map((item, i) => (
+        <tr key={i} className={`border-b ${item.locked ? "bg-orange-50" : checkedItems.includes(item.id) ? "bg-blue-50" : i % 2 ? "bg-slate-50" : ""}`}>
+          <td className="px-4 py-2 whitespace-nowrap w-8"><input type="checkbox" className="w-3.5 h-3.5" checked={checkedItems.includes(item.id)} onChange={() => toggleCheck(item.id)} /></td>
           <td className="px-4 py-2 whitespace-nowrap w-16 font-mono text-slate-600"><div className="flex items-center gap-1">{item.locked && <span title={`${item.lockedBy}さんが対応中`}>🔒</span>}{item.id}</div></td>
           <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={item.type} color="yellow" /></td>
           <td className="px-4 py-2 whitespace-nowrap text-slate-700">{item.target}</td>
           <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={item.ai} color={item.aiColor} /></td>
           <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={item.time} color={item.timeColor} /></td>
           <td className="px-4 py-2 whitespace-nowrap w-32"><div className="flex gap-1">
-            <button className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs">承認</button>
-            <button className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs">拒否</button>
-            <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">詳細</button>
+            <button className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs hover:bg-emerald-200">承認</button>
+            <button className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs hover:bg-rose-200">拒否</button>
+            <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">詳細</button>
           </div></td>
         </tr>
       ))}
       </TableHeader>
     </div>
+
+    {/* ── Modal: バッチ操作確認 ── */}
+    {showBatchConfirm && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowBatchConfirm(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+          <div className={`p-4 border-b rounded-t-xl flex justify-between items-center ${showBatchConfirm === "approve" ? "bg-emerald-50" : "bg-rose-50"}`}>
+            <h3 className="text-sm font-bold text-slate-800">{showBatchConfirm === "approve" ? "✅ 一括承認の確認" : "❌ 一括拒否の確認"}</h3>
+            <button onClick={() => setShowBatchConfirm(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          </div>
+          <div className="p-5 space-y-4">
+            <div className={`rounded-lg border p-3 ${showBatchConfirm === "approve" ? "bg-emerald-50 border-emerald-200" : "bg-rose-50 border-rose-200"}`}>
+              <p className="text-xs font-bold text-slate-700 mb-2">対象: {checkedItems.length}件</p>
+              <div className="space-y-1">
+                {checkedItems.map((id, i) => {
+                  const item = queueItems.find(q => q.id === id);
+                  return item ? (
+                    <div key={i} className="flex items-center gap-2 text-xs">
+                      <span className="font-mono text-slate-500">{item.id}</span>
+                      <Badge text={item.type} color="yellow" />
+                      <span className="text-slate-600 truncate">{item.target}</span>
+                    </div>
+                  ) : null;
+                })}
+              </div>
+            </div>
+            {showBatchConfirm === "reject" && (
+              <div>
+                <label className="text-xs font-semibold text-slate-600">拒否理由 <span className="text-rose-500">*</span></label>
+                <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>ポリシー違反</option><option>不正利用の疑い</option><option>書類不備</option><option>その他</option></select>
+              </div>
+            )}
+            <div className="bg-yellow-50 rounded border border-yellow-200 p-2 text-xs text-yellow-700">
+              ⚠️ この操作は元に戻せません。{showBatchConfirm === "approve" ? "承認" : "拒否"}後、関連する通知が自動送信されます。
+            </div>
+          </div>
+          <div className="p-4 border-t flex gap-2 justify-end">
+            <button onClick={() => setShowBatchConfirm(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+            <button onClick={() => { setShowBatchConfirm(null); setCheckedItems([]); }} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showBatchConfirm === "approve" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"}`}>{checkedItems.length}件を{showBatchConfirm === "approve" ? "承認" : "拒否"}する</button>
+          </div>
+        </div>
+      </div>
+    )}
   </div>
   );
 };
@@ -917,6 +1054,31 @@ const MasterMerchants = () => {
 // ─── M05: AI監視 ───
 const MasterAIMonitor = () => {
   const [aiPeriod, setAiPeriod] = useState("month");
+  const [selectedModule, setSelectedModule] = useState(null);
+  const [showTrainModal, setShowTrainModal] = useState(null);
+
+  const aiModules = [
+    { name: "不正検知AI", version: "v2.3", lastTrain: "2026-02-09", trainData: "124,500件", enabled: true, trend: "FP率", trendData: [0.4, 0.35, 0.38, 0.3, 0.28, 0.3, 0.3], metrics: [{ l: "日次判定件数", v: "1,247" }, { l: "自動承認", v: "1,182 (94.8%)" }, { l: "自動ブロック", v: "12 (1.0%)" }, { l: "保留→人的判断", v: "53 (4.2%)" }, { l: "偽陽性率(FP率)", v: "0.3%" }],
+      dailyMetrics: [{ date: "2/11", total: 1247, blocked: 12, fp: 3 }, { date: "2/12", total: 1198, blocked: 8, fp: 2 }, { date: "2/13", total: 1312, blocked: 15, fp: 4 }, { date: "2/14", total: 1156, blocked: 10, fp: 1 }, { date: "2/15", total: 1280, blocked: 11, fp: 3 }],
+      confusion: { tp: 142, fp: 4, tn: 1089, fn: 12 },
+      samples: [{ id: "FD-001", result: "ブロック", confidence: "98.2%", reason: "異常IP + 高額", correct: true }, { id: "FD-002", result: "通過", confidence: "15.3%", reason: "常連顧客", correct: true }, { id: "FD-003", result: "ブロック", confidence: "72.1%", reason: "新規カード + 高頻度", correct: false }]
+    },
+    { name: "審査AI", version: "v1.8", lastTrain: "2026-02-05", trainData: "2,400件", enabled: true, trend: "人間同意率", trendData: [82, 85, 84, 87, 86, 88, 87], metrics: [{ l: "今月の審査件数", v: "24" }, { l: "自動承認（低リスク）", v: "15 (62.5%)" }, { l: "AI推薦→承認", v: "7 (29.2%)" }, { l: "人的審査", v: "2 (8.3%)" }, { l: "平均審査時間", v: "1.8時間" }],
+      dailyMetrics: [{ date: "2/11", total: 5, auto: 3, manual: 2 }, { date: "2/12", total: 3, auto: 2, manual: 1 }, { date: "2/13", total: 4, auto: 3, manual: 1 }],
+      confusion: { tp: 18, fp: 1, tn: 3, fn: 2 },
+      samples: [{ id: "RV-001", result: "承認", confidence: "95.1%", reason: "低リスク業種 + 売上安定", correct: true }, { id: "RV-002", result: "要確認", confidence: "55.3%", reason: "新規業種 + 高額", correct: true }]
+    },
+    { name: "AIチャットサポート", version: "v1.5", lastTrain: "-", trainData: "-", enabled: true, trend: "AI完結率", trendData: [78, 80, 79, 82, 81, 83, 82], metrics: [{ l: "今月の対話数", v: "342" }, { l: "AI完結", v: "281 (82.2%)" }, { l: "エスカレーション", v: "61 (17.8%)" }, { l: "平均応答時間", v: "2.1秒" }, { l: "CSAT", v: "4.2 / 5.0" }],
+      dailyMetrics: [{ date: "2/11", total: 42, resolved: 35, escalated: 7 }, { date: "2/12", total: 38, resolved: 32, escalated: 6 }, { date: "2/13", total: 45, resolved: 37, escalated: 8 }],
+      confusion: null,
+      samples: [{ id: "CH-001", result: "完結", confidence: "-", reason: "売上照会", correct: true }, { id: "CH-002", result: "エスカレ", confidence: "-", reason: "返金処理依頼", correct: true }]
+    },
+    { name: "レポートAI", version: "v1.2", lastTrain: "-", trainData: "-", enabled: true, trend: "生成成功率", trendData: [98, 99, 99, 100, 98, 99, 99], metrics: [{ l: "今月の生成数", v: "156" }, { l: "日次サマリー", v: "82" }, { l: "月次レポート", v: "24" }, { l: "カスタム分析", v: "50" }, { l: "平均生成時間", v: "8.3秒" }],
+      dailyMetrics: [{ date: "2/11", total: 12, success: 12, failed: 0 }, { date: "2/12", total: 15, success: 14, failed: 1 }, { date: "2/13", total: 11, success: 11, failed: 0 }],
+      confusion: null,
+      samples: [{ id: "RP-001", result: "成功", confidence: "-", reason: "月次売上レポート", correct: true }, { id: "RP-002", result: "成功", confidence: "-", reason: "不正検知分析", correct: true }]
+    },
+  ];
 
   return (
   <div className="p-5 space-y-4">
@@ -930,18 +1092,13 @@ const MasterAIMonitor = () => {
 
     {/* AI Modules with version info, toggle, trend */}
     <div className="grid grid-cols-2 gap-3">
-      {[
-        { name: "不正検知AI", version: "v2.3", lastTrain: "2026-02-09", trainData: "124,500件", enabled: true, trend: "FP率", trendData: [0.4, 0.35, 0.38, 0.3, 0.28, 0.3, 0.3], metrics: [{ l: "日次判定件数", v: "1,247" }, { l: "自動承認", v: "1,182 (94.8%)" }, { l: "自動ブロック", v: "12 (1.0%)" }, { l: "保留→人的判断", v: "53 (4.2%)" }, { l: "偽陽性率(FP率)", v: "0.3%" }] },
-        { name: "審査AI", version: "v1.8", lastTrain: "2026-02-05", trainData: "2,400件", enabled: true, trend: "人間同意率", trendData: [82, 85, 84, 87, 86, 88, 87], metrics: [{ l: "今月の審査件数", v: "24" }, { l: "自動承認（低リスク）", v: "15 (62.5%)" }, { l: "AI推薦→承認", v: "7 (29.2%)" }, { l: "人的審査", v: "2 (8.3%)" }, { l: "平均審査時間", v: "1.8時間" }] },
-        { name: "AIチャットサポート", version: "v1.5", lastTrain: "-", trainData: "-", enabled: true, trend: "AI完結率", trendData: [78, 80, 79, 82, 81, 83, 82], metrics: [{ l: "今月の対話数", v: "342" }, { l: "AI完結", v: "281 (82.2%)" }, { l: "エスカレーション", v: "61 (17.8%)" }, { l: "平均応答時間", v: "2.1秒" }, { l: "CSAT", v: "4.2 / 5.0" }] },
-        { name: "レポートAI", version: "v1.2", lastTrain: "-", trainData: "-", enabled: true, trend: "生成成功率", trendData: [98, 99, 99, 100, 98, 99, 99], metrics: [{ l: "今月の生成数", v: "156" }, { l: "日次サマリー", v: "82" }, { l: "月次レポート", v: "24" }, { l: "カスタム分析", v: "50" }, { l: "平均生成時間", v: "8.3秒" }] },
-      ].map((ai, i) => (
-        <div key={i} className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      {aiModules.map((ai, i) => (
+        <div key={i} className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 cursor-pointer hover:ring-2 hover:ring-blue-200 transition-all" onClick={() => setSelectedModule(ai)}>
           <div className="flex justify-between items-center mb-2">
             <p className="text-xs font-bold text-slate-700">🤖 {ai.name}</p>
             <div className="flex items-center gap-2">
               <span className="text-xs text-slate-400">{ai.version}</span>
-              <div className={`w-8 h-4 rounded-full flex items-center px-0.5 cursor-pointer ${ai.enabled ? "bg-emerald-500 justify-end" : "bg-slate-300 justify-start"}`}>
+              <div className={`w-8 h-4 rounded-full flex items-center px-0.5 cursor-pointer ${ai.enabled ? "bg-emerald-500 justify-end" : "bg-slate-300 justify-start"}`} onClick={e => e.stopPropagation()}>
                 <div className="w-3 h-3 bg-white rounded-full shadow" />
               </div>
             </div>
@@ -1037,19 +1194,167 @@ const MasterAIMonitor = () => {
         ))}
       </div>
     </div>
+
+    {/* アラート閾値設定 */}
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <p className="text-xs font-bold text-slate-700 mb-2">⚠️ アラート閾値設定</p>
+      <div className="grid grid-cols-4 gap-3">
+        {[{ label: "FP率アラート", value: "0.5%", desc: "偽陽性率がこの値を超えたら通知" },
+          { label: "自動化率低下", value: "90%", desc: "自動処理率がこの値を下回ったら通知" },
+          { label: "応答時間上限", value: "5秒", desc: "AI応答が遅延した場合に通知" },
+          { label: "エスカレ率上限", value: "25%", desc: "エスカレーション率の上限" }
+        ].map((a, i) => (
+          <div key={i} className="bg-slate-50 rounded p-2 border">
+            <p className="text-xs font-bold text-slate-700">{a.label}</p>
+            <p className="text-sm font-bold text-blue-600 my-1">{a.value}</p>
+            <p className="text-xs text-slate-400">{a.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* AIモジュール詳細ドリルダウンモーダル */}
+    {selectedModule && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setSelectedModule(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[600px] max-h-[85vh] overflow-y-auto">
+          <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-bold">🤖 {selectedModule.name}</p>
+              <Badge text={selectedModule.version} color="blue" />
+            </div>
+            <div className="flex items-center gap-2">
+              <button onClick={e => { e.stopPropagation(); setShowTrainModal(selectedModule); setSelectedModule(null); }} className="text-xs px-3 py-1 bg-purple-50 text-purple-600 rounded border border-purple-200 hover:bg-purple-100">🔄 再学習</button>
+              <button onClick={() => setSelectedModule(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+          </div>
+          <div className="p-4 space-y-4">
+            {/* 日次メトリクス */}
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">日次メトリクス（直近5日）</p>
+              <table className="w-full text-xs">
+                <thead><tr className="bg-slate-50 border-b">{Object.keys(selectedModule.dailyMetrics[0]).map(k => <th key={k} className="text-left py-1.5 px-2 font-semibold text-slate-500">{k}</th>)}</tr></thead>
+                <tbody>{selectedModule.dailyMetrics.map((row, i) => (
+                  <tr key={i} className="border-b"><td className="py-1.5 px-2 text-slate-400">{row.date}</td>{Object.values(row).slice(1).map((v, j) => <td key={j} className="py-1.5 px-2 font-bold">{v}</td>)}</tr>
+                ))}</tbody>
+              </table>
+            </div>
+
+            {/* 混同行列 */}
+            {selectedModule.confusion && (
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">混同行列（今月）</p>
+                <div className="grid grid-cols-2 gap-2 w-64">
+                  <div className="bg-emerald-50 rounded p-2 text-center border border-emerald-200"><p className="text-xs text-slate-500">真陽性(TP)</p><p className="text-lg font-bold text-emerald-600">{selectedModule.confusion.tp}</p></div>
+                  <div className="bg-red-50 rounded p-2 text-center border border-red-200"><p className="text-xs text-slate-500">偽陽性(FP)</p><p className="text-lg font-bold text-red-600">{selectedModule.confusion.fp}</p></div>
+                  <div className="bg-amber-50 rounded p-2 text-center border border-amber-200"><p className="text-xs text-slate-500">偽陰性(FN)</p><p className="text-lg font-bold text-amber-600">{selectedModule.confusion.fn}</p></div>
+                  <div className="bg-emerald-50 rounded p-2 text-center border border-emerald-200"><p className="text-xs text-slate-500">真陰性(TN)</p><p className="text-lg font-bold text-emerald-600">{selectedModule.confusion.tn}</p></div>
+                </div>
+              </div>
+            )}
+
+            {/* 判定サンプル */}
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">最新判定サンプル</p>
+              {selectedModule.samples.map((s, i) => (
+                <div key={i} className="flex items-center gap-3 py-2 border-b text-xs last:border-0">
+                  <span className="font-mono text-slate-400 w-16">{s.id}</span>
+                  <Badge text={s.result} color={s.result === "ブロック" || s.result === "エスカレ" ? "red" : s.result === "要確認" ? "yellow" : "green"} />
+                  {s.confidence !== "-" && <span className="text-slate-500">信頼度: {s.confidence}</span>}
+                  <span className="flex-1 text-slate-400">{s.reason}</span>
+                  <span>{s.correct ? "✅" : "❌"}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* 再学習スケジュールモーダル */}
+    {showTrainModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowTrainModal(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
+          <div className="p-4 border-b flex items-center justify-between">
+            <p className="text-sm font-bold">🔄 再学習スケジュール</p>
+            <button onClick={() => setShowTrainModal(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+          <div className="p-4 space-y-3">
+            <div className="flex items-center gap-2 text-xs"><span className="text-slate-400">対象:</span><span className="font-bold">{showTrainModal.name}</span><Badge text={showTrainModal.version} color="blue" /></div>
+            <div>
+              <label className="text-xs text-slate-500">学習タイプ</label>
+              <select className="w-full border rounded px-2 py-1.5 text-xs mt-0.5"><option>差分学習（推奨）</option><option>フル再学習</option><option>ファインチューニング</option></select>
+            </div>
+            <div>
+              <label className="text-xs text-slate-500">スケジュール</label>
+              <select className="w-full border rounded px-2 py-1.5 text-xs mt-0.5"><option>即時実行</option><option>今夜 02:00</option><option>毎週日曜 02:00</option><option>毎月1日 02:00</option></select>
+            </div>
+            <div>
+              <label className="text-xs text-slate-500">学習データ期間</label>
+              <select className="w-full border rounded px-2 py-1.5 text-xs mt-0.5"><option>直近1ヶ月</option><option>直近3ヶ月</option><option>直近6ヶ月</option><option>全期間</option></select>
+            </div>
+            <div className="bg-amber-50 border border-amber-200 rounded p-2 text-xs text-amber-700">
+              <p className="font-bold">⚠️ 注意</p>
+              <p>再学習中はAI精度が一時的に低下する場合があります。深夜帯の実行を推奨します。</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setShowTrainModal(null)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
+              <button onClick={() => setShowTrainModal(null)} className="flex-1 py-2 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700">再学習をスケジュール</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
   </div>
   );
 };
 
 // ─── S01: ダッシュボード ───
-const MerchantDashboard = () => (
+const MerchantDashboard = () => {
+  const [period, setPeriod] = useState("今月");
+  const [showKpiDetail, setShowKpiDetail] = useState(null);
+  const kpiData = {
+    "今月の売上": { value: "¥12.5M", trend: 18, details: [
+      { label: "カード決済", value: "¥9.75M", pct: "78%" },
+      { label: "銀行振込", value: "¥1.50M", pct: "12%" },
+      { label: "QR決済", value: "¥875K", pct: "7%" },
+      { label: "コンビニ", value: "¥375K", pct: "3%" }
+    ], chart: [8.2, 9.1, 10.5, 11.2, 10.8, 12.5] },
+    "今日の売上": { value: "¥412K", trend: 15, details: [
+      { label: "0-6時", value: "¥28K", pct: "7%" },
+      { label: "6-12時", value: "¥95K", pct: "23%" },
+      { label: "12-18時", value: "¥148K", pct: "36%" },
+      { label: "18-24時", value: "¥141K", pct: "34%" }
+    ], chart: [320, 355, 380, 412, 0, 0] },
+    "決済成功率": { value: "99.5%", trend: 0.2, details: [
+      { label: "VISA", value: "99.7%", pct: "" },
+      { label: "Mastercard", value: "99.4%", pct: "" },
+      { label: "JCB", value: "99.2%", pct: "" },
+      { label: "AMEX", value: "99.8%", pct: "" }
+    ], chart: [99.1, 99.3, 99.2, 99.5, 99.4, 99.5] },
+    "平均単価": { value: "¥8,200", trend: 3, details: [
+      { label: "カード決済", value: "¥9,500", pct: "" },
+      { label: "銀行振込", value: "¥15,200", pct: "" },
+      { label: "QR決済", value: "¥3,800", pct: "" },
+      { label: "コンビニ", value: "¥2,100", pct: "" }
+    ], chart: [7800, 7900, 8100, 8000, 8150, 8200] }
+  };
+  const recentTx = [
+    { id: "pay_8f3a2b", time: "14:23", amount: "¥12,800", status: "成功", sc: "green", method: "VISA" },
+    { id: "pay_7e2c3d", time: "14:18", amount: "¥5,500", status: "成功", sc: "green", method: "MC" },
+    { id: "pay_6d1b2a", time: "14:05", amount: "¥3,200", status: "失敗", sc: "red", method: "JCB" },
+    { id: "pay_5c0a1b", time: "13:52", amount: "¥28,000", status: "成功", sc: "green", method: "VISA" },
+    { id: "pay_4b9z0a", time: "13:41", amount: "¥1,980", status: "成功", sc: "green", method: "QR" },
+  ];
+  return (
   <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-slate-800">ダッシュボード</h2>
       <div className="flex items-center gap-2">
         <div className="flex bg-slate-100 rounded-lg p-1">
-          {["今日", "今週", "今月"].map((p, i) => (
-            <button key={p} className={`text-sm px-3 py-1.5 rounded ${i === 2 ? "bg-white shadow-sm text-blue-600 font-semibold" : "text-slate-500"}`}>{p}</button>
+          {["今日", "今週", "今月"].map(p => (
+            <button key={p} onClick={() => setPeriod(p)} className={`text-sm px-3 py-1.5 rounded ${period === p ? "bg-white shadow-sm text-blue-600 font-semibold" : "text-slate-500"}`}>{p}</button>
           ))}
         </div>
         <span className="text-xs text-slate-400">株式会社ABCマート</span>
@@ -1078,10 +1383,11 @@ const MerchantDashboard = () => (
     </div>
 
     <div className="flex gap-3">
-      <KPICard label="今月の売上" value="¥12.5M" sub="前月比" trend={18} />
-      <KPICard label="今日の売上" value="¥412K" sub="前日比" trend={15} />
-      <KPICard label="決済成功率" value="99.5%" sub="" color="green" />
-      <KPICard label="平均単価" value="¥8,200" sub="前月比" trend={3} />
+      {Object.entries(kpiData).map(([label, d]) => (
+        <div key={label} onClick={() => setShowKpiDetail(label)} className="flex-1 cursor-pointer hover:ring-2 hover:ring-blue-200 rounded-lg transition-all">
+          <KPICard label={label} value={d.value} sub={label === "決済成功率" ? "" : "前月比"} trend={d.trend} color={label === "決済成功率" ? "green" : undefined} />
+        </div>
+      ))}
     </div>
 
     <div className="flex gap-3">
@@ -1104,38 +1410,121 @@ const MerchantDashboard = () => (
       </div>
     </div>
 
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-600 mb-2">💡 AIからの改善提案</p>
-      <div className="grid grid-cols-2 gap-2">
-        <div className="bg-blue-50 rounded p-2 text-xs text-blue-700">📊 19-21時台の売上が全体の35%を占めています。この時間帯のサーバー応答速度を最適化すると成功率が向上する可能性があります。</div>
-        <div className="bg-emerald-50 rounded p-2 text-xs text-emerald-700">💳 3Dセキュアのフリクションレス率が92%です。チャレンジ率をさらに下げるために、デバイス情報の送信を強化しましょう。</div>
+    <div className="grid grid-cols-2 gap-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+        <p className="text-xs font-bold text-slate-600 mb-2">💡 AIからの改善提案</p>
+        <div className="space-y-2">
+          <div className="bg-blue-50 rounded p-2 text-xs text-blue-700">📊 19-21時台の売上が全体の35%を占めています。この時間帯のサーバー応答速度を最適化すると成功率が向上する可能性があります。</div>
+          <div className="bg-emerald-50 rounded p-2 text-xs text-emerald-700">💳 3Dセキュアのフリクションレス率が92%です。チャレンジ率をさらに下げるために、デバイス情報の送信を強化しましょう。</div>
+        </div>
+      </div>
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-bold text-slate-600">直近の取引</p>
+          <span className="text-xs text-blue-600 cursor-pointer">すべて見る →</span>
+        </div>
+        {recentTx.map((tx, i) => (
+          <div key={i} className="flex items-center py-1.5 text-xs border-b last:border-0">
+            <span className="w-16 font-mono text-slate-400">{tx.time}</span>
+            <span className="flex-1 font-bold">{tx.amount}</span>
+            <span className="w-10 text-slate-400">{tx.method}</span>
+            <Badge text={tx.status} color={tx.sc} />
+          </div>
+        ))}
       </div>
     </div>
+
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <p className="text-xs font-bold text-slate-600 mb-2">⚡ クイックアクション</p>
+      <div className="flex gap-2">
+        {[["📋 取引一覧", "blue"], ["📊 売上レポート", "emerald"], ["⚙️ API設定", "slate"], ["💬 AIに相談", "purple"]].map(([label, color], i) => (
+          <button key={i} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100`}>{label}</button>
+        ))}
+      </div>
+    </div>
+
+    {/* KPIドリルダウンモーダル */}
+    {showKpiDetail && kpiData[showKpiDetail] && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowKpiDetail(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[480px] max-h-[80vh] overflow-y-auto">
+          <div className="p-4 border-b flex items-center justify-between">
+            <p className="text-sm font-bold">{showKpiDetail} - 詳細</p>
+            <button onClick={() => setShowKpiDetail(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+          <div className="p-4 space-y-4">
+            <div className="text-center py-3">
+              <p className="text-2xl font-bold text-slate-800">{kpiData[showKpiDetail].value}</p>
+              <p className="text-xs text-emerald-600 mt-1">前月比 +{kpiData[showKpiDetail].trend}%</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">月次推移（直近6ヶ月）</p>
+              <div className="flex items-end gap-2 h-20 px-2">
+                {kpiData[showKpiDetail].chart.map((v, i) => {
+                  const max = Math.max(...kpiData[showKpiDetail].chart);
+                  const h = max > 0 ? (v / max) * 100 : 0;
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center">
+                      <p className="text-xs text-slate-500 mb-1">{typeof v === "number" && v > 1000 ? `${(v/1000).toFixed(0)}K` : v}</p>
+                      <div className={`w-full rounded-t ${i === 5 ? "bg-blue-500" : "bg-blue-200"}`} style={{ height: `${h}%` }} />
+                      <p className="text-xs text-slate-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">内訳</p>
+              <div className="space-y-2">
+                {kpiData[showKpiDetail].details.map((d, i) => (
+                  <div key={i} className="flex items-center text-xs border-b pb-1.5">
+                    <span className="flex-1 text-slate-600">{d.label}</span>
+                    <span className="font-bold text-slate-800 w-20 text-right">{d.value}</span>
+                    {d.pct && <span className="w-12 text-right text-slate-400">{d.pct}</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
   </div>
-);
+  );
+};
 
 // ─── S02: 取引一覧 ───
-const MerchantTransactions = () => (
+const MerchantTransactions = () => {
+  const [selectedTx, setSelectedTx] = useState(null);
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const txData = [
+    { id: "pay_8f3a2b1c", time: "2026-02-11 14:23", amount: "¥12,800", rawAmt: 12800, status: "成功", sColor: "green", method: "VISA", card: "****4242", order: "ORD-20260211-001", threeD: "認証済", fee: "¥384", net: "¥12,416", customer: "t***@example.com" },
+    { id: "pay_7e2c3d4a", time: "2026-02-11 14:18", amount: "¥5,500", rawAmt: 5500, status: "成功", sColor: "green", method: "Mastercard", card: "****8888", order: "ORD-20260211-002", threeD: "認証済", fee: "¥165", net: "¥5,335", customer: "s***@gmail.com" },
+    { id: "pay_6d1b5e9f", time: "2026-02-11 14:12", amount: "¥89,000", rawAmt: 89000, status: "ブロック", sColor: "red", method: "VISA", card: "****1234", order: "ORD-20260211-003", threeD: "未実施", fee: "—", net: "—", customer: "k***@company.jp" },
+    { id: "pay_5c4a6f8e", time: "2026-02-11 13:55", amount: "¥3,200", rawAmt: 3200, status: "返金済", sColor: "yellow", method: "JCB", card: "****5678", order: "ORD-20260210-045", threeD: "認証済", fee: "¥96", net: "¥0", customer: "h***@yahoo.co.jp" },
+    { id: "pay_4b3d7g2h", time: "2026-02-11 13:42", amount: "¥15,600", rawAmt: 15600, status: "成功", sColor: "green", method: "PayPay", card: "-", order: "ORD-20260211-004", threeD: "—", fee: "¥468", net: "¥15,132", customer: "m***@icloud.com" },
+  ];
+  return (
   <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-slate-800">取引一覧</h2>
       <div className="flex gap-2">
         <input className="text-xs border rounded px-2 py-1 w-40" placeholder="注文番号 / 金額で検索" />
-        <select className="text-xs border rounded px-2 py-1"><option>全ステータス</option></select>
+        <select className="text-xs border rounded px-2 py-1"><option>全ステータス</option><option>成功</option><option>失敗</option><option>返金済</option><option>ブロック</option></select>
         <input type="date" className="text-xs border rounded px-2 py-1" />
         <button className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200" title="出力項目: 決済ID/日時/金額/ステータス/決済手段/注文番号（カード番号等の機密情報は含みません）">📥 CSV出力</button>
       </div>
     </div>
+    <div className="grid grid-cols-4 gap-3">
+      <KPICard label="今月の取引数" value="342件" trend={8.2} color="blue" />
+      <KPICard label="取引総額" value="¥4,280,000" trend={5.1} color="blue" />
+      <KPICard label="成功率" value="97.4%" sub="" color="green" />
+      <KPICard label="返金件数" value="3件" sub="¥9,200" color="yellow" />
+    </div>
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
       <TableHeader cols={[{ label: "決済ID", w: "w-28" }, { label: "日時", w: "w-32" }, { label: "金額", w: "w-20" }, { label: "ステータス", w: "w-20" }, { label: "決済手段", w: "w-24" }, { label: "カード", w: "w-20" }, { label: "注文番号", w: "flex-1" }, { label: "操作", w: "w-16" }]}>
-      {[
-        { id: "pay_8f3a2b1c", time: "2026-02-11 14:23", amount: "¥12,800", status: "成功", sColor: "green", method: "VISA", card: "****4242", order: "ORD-20260211-001" },
-        { id: "pay_7e2c3d4a", time: "2026-02-11 14:18", amount: "¥5,500", status: "成功", sColor: "green", method: "Mastercard", card: "****8888", order: "ORD-20260211-002" },
-        { id: "pay_6d1b5e9f", time: "2026-02-11 14:12", amount: "¥89,000", status: "ブロック", sColor: "red", method: "VISA", card: "****1234", order: "ORD-20260211-003" },
-        { id: "pay_5c4a6f8e", time: "2026-02-11 13:55", amount: "¥3,200", status: "返金済", sColor: "yellow", method: "JCB", card: "****5678", order: "ORD-20260210-045" },
-        { id: "pay_4b3d7g2h", time: "2026-02-11 13:42", amount: "¥15,600", status: "成功", sColor: "green", method: "PayPay", card: "-", order: "ORD-20260211-004" },
-      ].map((tx, i) => (
-        <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+      {txData.map((tx, i) => (
+        <tr key={i} onClick={() => setSelectedTx(tx)} className={`border-b cursor-pointer hover:bg-blue-50 ${i % 2 ? "bg-slate-50" : ""}`}>
           <td className="px-4 py-2 whitespace-nowrap w-28 font-mono text-blue-600">{tx.id}</td>
           <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{tx.time}</td>
           <td className="px-4 py-2 whitespace-nowrap w-20 font-semibold text-right">{tx.amount}</td>
@@ -1148,134 +1537,353 @@ const MerchantTransactions = () => (
       ))}
       </TableHeader>
     </div>
-  </div>
-);
+    <div className="text-xs text-slate-400 text-right">5件表示 / 全342件</div>
 
-// ─── S05: API設定 ───
-const MerchantAPISettings = () => (
-  <div className="p-5 space-y-4">
-    <h2 className="text-sm font-bold text-slate-800">API設定</h2>
-    <div className="grid grid-cols-2 gap-4">
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <div className="flex items-center gap-2 mb-2"><Badge text="本番環境" color="green" /></div>
-        <div className="space-y-2">
-          <div><p className="text-xs text-slate-400">API公開キー</p><p className="text-xs font-mono bg-slate-50 rounded p-1.5">pk_live_a1b2c3d4e5f6g7h8i9j0...</p></div>
-          <div><p className="text-xs text-slate-400">APIシークレットキー</p><p className="text-xs font-mono bg-slate-50 rounded p-1.5">sk_live_••••••••••••••••••••</p><button className="text-xs text-blue-600 mt-1">表示</button></div>
-        </div>
-      </div>
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <div className="flex items-center gap-2 mb-2"><Badge text="テスト環境" color="yellow" /></div>
-        <div className="space-y-2">
-          <div><p className="text-xs text-slate-400">API公開キー</p><p className="text-xs font-mono bg-slate-50 rounded p-1.5">pk_test_z9y8x7w6v5u4t3s2r1q0...</p></div>
-          <div><p className="text-xs text-slate-400">APIシークレットキー</p><p className="text-xs font-mono bg-slate-50 rounded p-1.5">sk_test_••••••••••••••••••••</p><button className="text-xs text-blue-600 mt-1">表示</button></div>
-        </div>
-      </div>
-    </div>
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-700 mb-2">Webhook設定</p>
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 bg-slate-50 rounded-lg p-2.5 border border-slate-200">
-          <Badge text="本番" color="green" />
-          <span className="text-xs font-mono flex-1">https://api.abc-mart.co.jp/webhooks/payment</span>
-          <Badge text="稼働中" color="green" />
-          <button className="text-xs text-blue-600">編集</button>
-        </div>
-        <div>
-          <p className="text-xs text-slate-400 mb-1">受信イベント:</p>
-          <div className="flex flex-wrap gap-1">
-            {["payment.succeeded", "payment.failed", "payment.refunded", "chargeback.received"].map(e => (
-              <span key={e} className="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">{e}</span>
-            ))}
+    {/* 取引詳細スライドパネル */}
+    {selectedTx && (
+      <div className="fixed inset-0 z-50 flex">
+        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedTx(null)} />
+        <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+          <div className="p-4 border-b bg-blue-50 flex justify-between items-center">
+            <h3 className="text-sm font-bold text-slate-800">取引詳細</h3>
+            <button onClick={() => setSelectedTx(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          </div>
+          <div className="p-5 space-y-4">
+            <div>
+              <p className="text-xs text-slate-400 mb-1">取引サマリー</p>
+              <div className="space-y-1.5">
+                {[["決済ID", selectedTx.id], ["日時", selectedTx.time], ["金額", selectedTx.amount], ["注文番号", selectedTx.order]].map(([l, v], i) => (
+                  <div key={i} className="flex text-xs"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
+                ))}
+                <div className="flex text-xs"><span className="w-20 text-slate-400">ステータス</span><Badge text={selectedTx.status} color={selectedTx.sColor} /></div>
+              </div>
+            </div>
+            <div className="border-t pt-3">
+              <p className="text-xs text-slate-400 mb-1">決済情報</p>
+              <div className="space-y-1.5">
+                {[["決済手段", selectedTx.method], ["カード番号", selectedTx.card], ["3Dセキュア", selectedTx.threeD], ["顧客メール", selectedTx.customer]].map(([l, v], i) => (
+                  <div key={i} className="flex text-xs"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
+                ))}
+              </div>
+            </div>
+            <div className="border-t pt-3">
+              <p className="text-xs text-slate-400 mb-1">手数料・精算</p>
+              <div className="space-y-1.5">
+                {[["決済手数料", selectedTx.fee], ["入金額", selectedTx.net]].map(([l, v], i) => (
+                  <div key={i} className="flex text-xs"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
+                ))}
+              </div>
+            </div>
+            <div className="border-t pt-3">
+              <p className="text-xs text-slate-400 mb-2">イベントタイムライン</p>
+              <div className="space-y-2">
+                {[
+                  { time: "14:23:01", event: "決済リクエスト受信", icon: "📥" },
+                  { time: "14:23:02", event: selectedTx.threeD === "認証済" ? "3Dセキュア認証完了" : "3Dセキュア未実施", icon: selectedTx.threeD === "認証済" ? "🔐" : "⚠️" },
+                  { time: "14:23:03", event: "オーソリ承認", icon: "✅" },
+                  { time: "14:23:03", event: selectedTx.status === "成功" ? "売上確定" : selectedTx.status === "返金済" ? "返金処理完了" : "ブロック判定", icon: selectedTx.status === "成功" ? "💰" : selectedTx.status === "返金済" ? "↩️" : "🚫" },
+                ].map((e, i) => (
+                  <div key={i} className="flex items-start gap-2 text-xs">
+                    <span>{e.icon}</span>
+                    <div><p className="font-bold">{e.event}</p><p className="text-slate-400">{e.time}</p></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {selectedTx.status === "成功" && (
+              <div className="border-t pt-3 flex gap-2">
+                <button onClick={() => setShowRefundModal(true)} className="flex-1 py-1.5 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200 font-bold">↩️ 返金する</button>
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </div>
+    )}
+
+    {/* 返金確認モーダル */}
+    {showRefundModal && selectedTx && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowRefundModal(false)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
+          <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
+            <h3 className="text-sm font-bold text-slate-800">↩️ 返金処理</h3>
+            <button onClick={() => setShowRefundModal(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          </div>
+          <div className="p-5 space-y-4">
+            <div className="bg-blue-50 rounded p-3 text-xs">
+              <div className="flex justify-between"><span className="text-slate-500">対象取引</span><span className="font-mono font-bold">{selectedTx.id}</span></div>
+              <div className="flex justify-between mt-1"><span className="text-slate-500">決済金額</span><span className="font-bold">{selectedTx.amount}</span></div>
+            </div>
+            <div><label className="text-xs font-semibold text-slate-600">返金金額 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue={selectedTx.rawAmt} /><p className="text-xs text-slate-400 mt-0.5">一部返金の場合は金額を変更してください</p></div>
+            <div><label className="text-xs font-semibold text-slate-600">返金理由 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>お客様都合</option><option>商品不良・欠品</option><option>重複決済</option><option>不正利用</option><option>その他</option></select></div>
+            <div><label className="text-xs font-semibold text-slate-600">備考</label><textarea className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 h-16" placeholder="任意メモ" /></div>
+          </div>
+          <div className="p-4 border-t flex gap-2 justify-end">
+            <button onClick={() => setShowRefundModal(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+            <button onClick={() => setShowRefundModal(false)} className="px-4 py-2 text-xs bg-rose-600 text-white rounded font-semibold hover:bg-rose-700">返金を実行</button>
+          </div>
+        </div>
+      </div>
+    )}
   </div>
-);
+  );
+};
+
+// ─── S05: API設定 ───
+const MerchantAPISettings = () => {
+  const [showKey, setShowKey] = useState({ live: false, test: false });
+  const [showRegenerateModal, setShowRegenerateModal] = useState(null);
+  const [webhookTab, setWebhookTab] = useState("settings");
+  const [confirmText, setConfirmText] = useState("");
+  const webhookLogs = [
+    { id: "wh_01", event: "payment.succeeded", url: "https://api.abc-mart.co.jp/webhooks/payment", status: 200, sc: "green", time: "2026-02-11 14:23:05", duration: "120ms" },
+    { id: "wh_02", event: "payment.failed", url: "https://api.abc-mart.co.jp/webhooks/payment", status: 200, sc: "green", time: "2026-02-11 14:18:12", duration: "95ms" },
+    { id: "wh_03", event: "payment.succeeded", url: "https://api.abc-mart.co.jp/webhooks/payment", status: 500, sc: "red", time: "2026-02-11 13:55:30", duration: "3012ms" },
+    { id: "wh_04", event: "chargeback.received", url: "https://api.abc-mart.co.jp/webhooks/payment", status: 200, sc: "green", time: "2026-02-11 12:40:18", duration: "88ms" },
+    { id: "wh_05", event: "payment.refunded", url: "https://api.abc-mart.co.jp/webhooks/payment", status: 200, sc: "green", time: "2026-02-11 11:22:45", duration: "105ms" },
+  ];
+  return (
+  <div className="p-5 space-y-4">
+    <div className="flex items-center justify-between">
+      <h2 className="text-sm font-bold text-slate-800">API設定</h2>
+      <a href="#" className="text-xs text-blue-600 hover:underline">📖 APIドキュメント →</a>
+    </div>
+    <div className="grid grid-cols-2 gap-4">
+      {[{ env: "本番環境", badge: "green", pk: "aip_pk_live_xxxxxxxxxxxx...", sk: "aip_sk_live_xxxxxxxxxxxxxxxxxxxxxxxx", key: "live" },
+        { env: "テスト環境", badge: "yellow", pk: "aip_pk_test_xxxxxxxxxxxx...", sk: "aip_sk_test_xxxxxxxxxxxxxxxxxxxxxxxx", key: "test" }
+      ].map(e => (
+        <div key={e.key} className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="flex items-center justify-between mb-2">
+            <Badge text={e.env} color={e.badge} />
+            <button onClick={() => setShowRegenerateModal(e.key)} className="text-xs text-red-500 hover:text-red-700">🔄 キーを再発行</button>
+          </div>
+          <div className="space-y-2">
+            <div>
+              <p className="text-xs text-slate-400">API公開キー</p>
+              <div className="flex items-center gap-1">
+                <p className="text-xs font-mono bg-slate-50 rounded p-1.5 flex-1">{e.pk}</p>
+                <button className="text-xs text-blue-600 px-1">📋</button>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400">APIシークレットキー</p>
+              <div className="flex items-center gap-1">
+                <p className="text-xs font-mono bg-slate-50 rounded p-1.5 flex-1">{showKey[e.key] ? e.sk : "sk_" + e.key + "_••••••••••••••••••••"}</p>
+                <button onClick={() => setShowKey(prev => ({ ...prev, [e.key]: !prev[e.key] }))} className="text-xs text-blue-600 px-1">{showKey[e.key] ? "🙈 隠す" : "👁 表示"}</button>
+                <button className="text-xs text-blue-600 px-1">📋</button>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400">最終使用: 2026-02-11 14:23</p>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* Webhook セクション */}
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs font-bold text-slate-700">Webhook設定</p>
+        <div className="flex bg-slate-100 rounded p-0.5">
+          {["settings", "logs"].map(t => (
+            <button key={t} onClick={() => setWebhookTab(t)} className={`text-xs px-3 py-1 rounded ${webhookTab === t ? "bg-white shadow-sm font-bold" : "text-slate-500"}`}>{t === "settings" ? "設定" : "配信ログ"}</button>
+          ))}
+        </div>
+      </div>
+
+      {webhookTab === "settings" && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 bg-slate-50 rounded-lg p-2.5 border border-slate-200">
+            <Badge text="本番" color="green" />
+            <span className="text-xs font-mono flex-1">https://api.abc-mart.co.jp/webhooks/payment</span>
+            <Badge text="稼働中" color="green" />
+            <button className="text-xs text-blue-600">編集</button>
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 mb-1">受信イベント:</p>
+            <div className="flex flex-wrap gap-1">
+              {["payment.succeeded", "payment.failed", "payment.refunded", "chargeback.received", "subscription.created", "subscription.cancelled"].map(e => (
+                <span key={e} className="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">{e}</span>
+              ))}
+            </div>
+          </div>
+          <div className="flex gap-2 pt-1">
+            <button className="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded border border-blue-200 hover:bg-blue-100">🧪 テスト送信</button>
+            <button className="text-xs px-3 py-1.5 bg-slate-50 text-slate-600 rounded border border-slate-200 hover:bg-slate-100">+ エンドポイント追加</button>
+          </div>
+          <div className="mt-3 pt-3 border-t">
+            <p className="text-xs font-bold text-slate-700 mb-2">Webhook署名検証</p>
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-slate-400">署名シークレット:</p>
+              <p className="text-xs font-mono bg-slate-50 rounded p-1.5">whsec_••••••••••••••••</p>
+              <button className="text-xs text-blue-600">表示</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {webhookTab === "logs" && (
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xs text-slate-400">配信成功率:</span>
+            <span className="text-xs font-bold text-emerald-600">96.8%</span>
+            <span className="text-xs text-slate-400 ml-2">直近24時間: 245件</span>
+          </div>
+          <table className="w-full text-xs">
+            <thead><tr className="border-b bg-slate-50"><th className="text-left py-1.5 px-2 font-semibold text-slate-500">イベント</th><th className="text-left py-1.5 px-2 font-semibold text-slate-500">日時</th><th className="text-left py-1.5 px-2 font-semibold text-slate-500">Status</th><th className="text-left py-1.5 px-2 font-semibold text-slate-500">応答時間</th><th className="py-1.5 px-2"></th></tr></thead>
+            <tbody>
+              {webhookLogs.map(log => (
+                <tr key={log.id} className="border-b hover:bg-slate-50">
+                  <td className="py-1.5 px-2 font-mono">{log.event}</td>
+                  <td className="py-1.5 px-2 text-slate-400">{log.time}</td>
+                  <td className="py-1.5 px-2"><Badge text={String(log.status)} color={log.sc} /></td>
+                  <td className="py-1.5 px-2 text-slate-500">{log.duration}</td>
+                  <td className="py-1.5 px-2"><button className="text-blue-600">再送</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+
+    {/* IP制限 */}
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <p className="text-xs font-bold text-slate-700 mb-2">IP制限（APIアクセス元）</p>
+      <div className="space-y-1.5">
+        {[["203.0.113.0/24", "本番サーバー", "green"], ["198.51.100.10", "開発環境", "yellow"]].map(([ip, label, color], i) => (
+          <div key={i} className="flex items-center gap-2 text-xs bg-slate-50 rounded p-2 border">
+            <span className="font-mono flex-1">{ip}</span>
+            <span className="text-slate-400">{label}</span>
+            <Badge text="許可" color={color} />
+            <button className="text-red-400 hover:text-red-600">✕</button>
+          </div>
+        ))}
+        <button className="text-xs text-blue-600 mt-1">+ IPアドレスを追加</button>
+      </div>
+    </div>
+
+    {/* キー再発行確認モーダル */}
+    {showRegenerateModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => { setShowRegenerateModal(null); setConfirmText(""); }} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
+          <div className="p-4 border-b flex items-center justify-between">
+            <p className="text-sm font-bold text-red-600">⚠️ APIキーの再発行</p>
+            <button onClick={() => { setShowRegenerateModal(null); setConfirmText(""); }} className="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+          <div className="p-4 space-y-3">
+            <div className="bg-red-50 border border-red-200 rounded p-3 text-xs text-red-700">
+              <p className="font-bold">この操作は取り消せません</p>
+              <p className="mt-1">現在の{showRegenerateModal === "live" ? "本番" : "テスト"}環境のシークレットキーは無効化され、新しいキーが発行されます。既存のAPI連携が停止する可能性があります。</p>
+            </div>
+            <div>
+              <label className="text-xs text-slate-500">確認のため「再発行」と入力してください</label>
+              <input value={confirmText} onChange={e => setConfirmText(e.target.value)} className="w-full border rounded px-2 py-1.5 text-xs mt-0.5" placeholder="再発行" />
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => { setShowRegenerateModal(null); setConfirmText(""); }} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
+              <button disabled={confirmText !== "再発行"} className={`flex-1 py-2 rounded text-xs font-bold text-white ${confirmText === "再発行" ? "bg-red-500 hover:bg-red-600" : "bg-slate-300 cursor-not-allowed"}`}>キーを再発行する</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+  );
+};
 
 // ─── S06: AIサポート ───
 // ─── M17: マスター管理 AIチャット ───
-const MasterAIChat = () => (
+const MasterAIChat = () => {
+  const [inputText, setInputText] = useState("");
+  const [showHistory, setShowHistory] = useState(false);
+  return (
   <div className="p-4 flex gap-4 h-full">
     <div className="flex-1 bg-white rounded-lg border flex flex-col">
       <div className="p-3 border-b flex justify-between items-center">
-        <p className="text-xs font-bold text-slate-700">💬 運営AIアシスタント</p>
-        <Badge text="Claude 4 Opus" color="purple" />
+        <div className="flex items-center gap-2">
+          <p className="text-xs font-bold text-slate-700">💬 運営AIアシスタント</p>
+          <Badge text="Claude 4 Opus" color="purple" />
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowHistory(!showHistory)} className={`text-xs px-2 py-1 rounded border ${showHistory ? "bg-blue-50 text-blue-600 border-blue-200" : "text-slate-400 border-slate-200 hover:bg-slate-50"}`}>📋 履歴</button>
+          <button className="text-xs px-2 py-1 rounded border text-slate-400 border-slate-200 hover:bg-slate-50">🔄 新規チャット</button>
+        </div>
       </div>
-      <div className="flex-1 p-3 space-y-3 overflow-y-auto">
-        <div className="flex gap-2">
-          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
-          <div className="bg-slate-100 rounded-lg p-2 max-w-md">
-            <p className="text-xs text-slate-700">こんにちは！運営AIアシスタントです。管理画面の操作方法、加盟店情報の確認、決済状況の照会など、何でもお手伝いします。</p>
-            <p className="text-xs text-slate-400 mt-1">💡 ヒント: 「この画面の使い方」と聞くと、現在の画面の操作ガイドを表示します。</p>
+      <div className="flex flex-1 overflow-hidden">
+        {/* 会話履歴サイドバー */}
+        {showHistory && (
+          <div className="w-48 border-r bg-slate-50 overflow-y-auto p-2 space-y-1">
+            <p className="text-xs font-bold text-slate-500 px-1 mb-2">会話履歴</p>
+            {[["不正検知の状況確認", "今日 14:23"], ["加盟店M-001の照会", "今日 13:50"], ["精算バッチの確認", "昨日 16:30"], ["エラーE030の調査", "昨日 10:15"], ["月次レポート依頼", "2/15 09:00"]].map(([title, time], i) => (
+              <div key={i} className={`p-2 rounded text-xs cursor-pointer ${i === 0 ? "bg-white border border-blue-200" : "hover:bg-white"}`}>
+                <p className="font-bold text-slate-700 truncate">{title}</p>
+                <p className="text-slate-400">{time}</p>
+              </div>
+            ))}
           </div>
-        </div>
-        <div className="flex gap-2 justify-end">
-          <div className="bg-blue-600 rounded-lg p-2 max-w-xs">
-            <p className="text-xs text-white">今日の不正検知件数を教えて</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
-          <div className="bg-slate-100 rounded-lg p-2 max-w-md">
-            <p className="text-xs text-slate-700 mb-2">本日（2/17）の不正検知サマリーです：</p>
-            <div className="bg-white rounded p-2 text-xs space-y-1">
-              <div className="flex justify-between"><span className="text-slate-500">検知総数:</span><span className="font-bold">12件</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">自動ブロック:</span><span className="font-bold text-rose-600">4件</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">例外キュー:</span><span className="font-bold text-amber-600">8件</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">誤検知率:</span><span className="text-emerald-600">3.8%</span></div>
-            </div>
-            <p className="text-xs text-slate-500 mt-2">例外キューに未対応が3件あります。<button className="text-blue-600 hover:underline ml-1">例外キューを開く →</button></p>
-          </div>
-        </div>
-        <div className="flex gap-2 justify-end">
-          <div className="bg-blue-600 rounded-lg p-2 max-w-xs">
-            <p className="text-xs text-white">加盟店 M-001 のステータスを教えて</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
-          <div className="bg-slate-100 rounded-lg p-2 max-w-md">
-            <p className="text-xs text-slate-700 mb-2">加盟店 M-001 の情報です：</p>
-            <div className="bg-white rounded p-2 text-xs space-y-1">
-              <div className="flex justify-between"><span className="text-slate-500">加盟店名:</span><span className="font-bold">株式会社ABCマート</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">ステータス:</span><span className="font-bold text-emerald-600">有効</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">月間売上:</span><span>¥2,400,000</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">成功率:</span><span className="text-emerald-600">99.2%</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">CB率:</span><span>0.3%</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">接続先:</span><span>GMO-PG, 三井住友カード</span></div>
-            </div>
-            <div className="flex gap-2 mt-2">
-              <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">加盟店詳細を開く</button>
-              <button className="px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs">取引履歴を見る</button>
+        )}
+        <div className="flex-1 p-3 space-y-3 overflow-y-auto">
+          <div className="flex gap-2">
+            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+            <div className="bg-slate-100 rounded-lg p-2 max-w-md">
+              <p className="text-xs text-slate-700">こんにちは！運営AIアシスタントです。管理画面の操作方法、加盟店情報の確認、決済状況の照会など、何でもお手伝いします。</p>
+              <p className="text-xs text-slate-400 mt-1">💡 ヒント: 「この画面の使い方」と聞くと、現在の画面の操作ガイドを表示します。</p>
             </div>
           </div>
-        </div>
-        <div className="flex gap-2 justify-end">
-          <div className="bg-blue-600 rounded-lg p-2 max-w-xs">
-            <p className="text-xs text-white">不正検知設定の使い方を教えて</p>
+          <div className="flex gap-2 justify-end">
+            <div className="bg-blue-600 rounded-lg p-2 max-w-xs"><p className="text-xs text-white">今日の不正検知件数を教えて</p></div>
           </div>
-        </div>
-        <div className="flex gap-2">
-          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
-          <div className="bg-slate-100 rounded-lg p-2 max-w-md">
-            <p className="text-xs text-slate-700 mb-2">📖 <strong>不正検知設定</strong>の使い方ガイド：</p>
-            <div className="bg-blue-50 rounded p-2 text-xs space-y-1.5 border border-blue-200">
-              <p><strong>1. ルール管理タブ</strong> — 検知ルールの追加・編集・優先度設定</p>
-              <p><strong>2. AIモデル設定タブ</strong> — AI判定の閾値調整（ブロック/要確認）</p>
-              <p><strong>3. ブロック/ホワイトリスト</strong> — BIN・IP・カード番号の手動登録</p>
-              <p><strong>4. CSVインポートタブ</strong> — 制限リストのCSV一括登録</p>
-              <p><strong>5. 検知ログ</strong> — 過去の検知履歴と判定結果の確認</p>
-              <p><strong>6. 加盟店別設定</strong> — 業態に合わせた閾値のカスタマイズ</p>
+          <div className="flex gap-2">
+            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+            <div className="bg-slate-100 rounded-lg p-2 max-w-md">
+              <p className="text-xs text-slate-700 mb-2">本日（2/17）の不正検知サマリーです：</p>
+              <div className="bg-white rounded p-2 text-xs space-y-1">
+                <div className="flex justify-between"><span className="text-slate-500">検知総数:</span><span className="font-bold">12件</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">自動ブロック:</span><span className="font-bold text-rose-600">4件</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">例外キュー:</span><span className="font-bold text-amber-600">8件</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">誤検知率:</span><span className="text-emerald-600">3.8%</span></div>
+              </div>
+              <p className="text-xs text-slate-500 mt-2">例外キューに未対応が3件あります。<button className="text-blue-600 hover:underline ml-1">例外キューを開く →</button></p>
+              <div className="flex gap-1 mt-2 border-t pt-1.5">
+                <button className="text-xs text-slate-400 hover:text-emerald-600">👍</button>
+                <button className="text-xs text-slate-400 hover:text-red-600">👎</button>
+                <button className="text-xs text-slate-400 hover:text-blue-600 ml-auto">📋 コピー</button>
+              </div>
             </div>
-            <p className="text-xs text-slate-400 mt-2">⚠️ ルール変更はadmin→super_adminの2段階承認が必要です。</p>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <div className="bg-blue-600 rounded-lg p-2 max-w-xs"><p className="text-xs text-white">加盟店 M-001 のステータスを教えて</p></div>
+          </div>
+          <div className="flex gap-2">
+            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+            <div className="bg-slate-100 rounded-lg p-2 max-w-md">
+              <p className="text-xs text-slate-700 mb-2">加盟店 M-001 の情報です：</p>
+              <div className="bg-white rounded p-2 text-xs space-y-1">
+                <div className="flex justify-between"><span className="text-slate-500">加盟店名:</span><span className="font-bold">株式会社ABCマート</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">ステータス:</span><span className="font-bold text-emerald-600">有効</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">月間売上:</span><span>¥2,400,000</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">成功率:</span><span className="text-emerald-600">99.2%</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">CB率:</span><span>0.3%</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">接続先:</span><span>GMO-PG, 三井住友カード</span></div>
+              </div>
+              <div className="flex gap-2 mt-2">
+                <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">加盟店詳細を開く</button>
+                <button className="px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs">取引履歴を見る</button>
+              </div>
+              <div className="flex gap-1 mt-2 border-t pt-1.5">
+                <button className="text-xs text-slate-400 hover:text-emerald-600">👍</button>
+                <button className="text-xs text-slate-400 hover:text-red-600">👎</button>
+                <button className="text-xs text-slate-400 hover:text-blue-600 ml-auto">📋 コピー</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       <div className="p-3 border-t flex gap-2">
         <button className="px-2 py-2 text-slate-400 border rounded-lg text-xs hover:bg-slate-50" title="画像ファイルを添付">📎</button>
-        <input className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="質問を入力... 例: 「精算管理の使い方」「エラーコード E030 とは？」" />
-        <button className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold">送信</button>
+        <input value={inputText} onChange={e => setInputText(e.target.value)} className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="質問を入力... 例: 「精算管理の使い方」「エラーコード E030 とは？」" />
+        <button className={`px-3 py-2 rounded-lg text-xs font-semibold ${inputText ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-400"}`}>送信</button>
       </div>
       <div className="px-3 py-1.5 bg-slate-50 border-t text-xs text-slate-400 text-center">
         💬 AIが管理画面の操作をリアルタイムでサポートします。画面の使い方、データの確認、設定変更のヘルプが可能です。
@@ -1285,7 +1893,7 @@ const MasterAIChat = () => (
       <p className="text-xs font-bold text-slate-600 mb-2">クイックアクション</p>
       <div className="space-y-1">
         {["不正検知の状況は？", "今日の決済件数は？", "加盟店を検索して", "精算状況を確認", "システムの使い方", "エラーコードを調べる", "今月の売上レポート", "例外キューの状況"].map(q => (
-          <button key={q} className="w-full text-left text-xs bg-white border rounded p-2 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">{q}</button>
+          <button key={q} onClick={() => setInputText(q)} className="w-full text-left text-xs bg-white border rounded p-2 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">{q}</button>
         ))}
       </div>
       <div className="mt-4 p-2 bg-purple-50 rounded border border-purple-200">
@@ -1300,64 +1908,90 @@ const MasterAIChat = () => (
       </div>
     </div>
   </div>
-);
+  );
+};
 
-const MerchantAIChat = () => (
+const MerchantAIChat = () => {
+  const [inputText, setInputText] = useState("");
+  const [showHistory, setShowHistory] = useState(false);
+  return (
   <div className="p-4 flex gap-4 h-full">
     <div className="flex-1 bg-white rounded-lg border flex flex-col">
-      <div className="p-3 border-b">
+      <div className="p-3 border-b flex justify-between items-center">
         <p className="text-xs font-bold text-slate-700">🤖 AIサポートチャット</p>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowHistory(!showHistory)} className={`text-xs px-2 py-1 rounded border ${showHistory ? "bg-blue-50 text-blue-600 border-blue-200" : "text-slate-400 border-slate-200"}`}>📋 履歴</button>
+          <button className="text-xs px-2 py-1 rounded border text-slate-400 border-slate-200">🔄 新規</button>
+        </div>
       </div>
-      <div className="flex-1 p-3 space-y-3 overflow-y-auto">
-        <div className="flex gap-2">
-          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
-          <div className="bg-slate-100 rounded-lg p-2 max-w-xs">
-            <p className="text-xs text-slate-700">こんにちは！ABCマートのサポートAIです。取引の照会、API設定の変更、返金処理など、何でもお手伝いします。</p>
+      <div className="flex flex-1 overflow-hidden">
+        {showHistory && (
+          <div className="w-44 border-r bg-slate-50 overflow-y-auto p-2 space-y-1">
+            <p className="text-xs font-bold text-slate-500 px-1 mb-2">会話履歴</p>
+            {[["売上照会", "今日 14:23"], ["返金処理の依頼", "昨日 16:30"], ["API設定の質問", "2/15 09:00"]].map(([title, time], i) => (
+              <div key={i} className={`p-2 rounded text-xs cursor-pointer ${i === 0 ? "bg-white border border-blue-200" : "hover:bg-white"}`}>
+                <p className="font-bold text-slate-700 truncate">{title}</p>
+                <p className="text-slate-400">{time}</p>
+              </div>
+            ))}
           </div>
-        </div>
-        <div className="flex gap-2 justify-end">
-          <div className="bg-blue-600 rounded-lg p-2 max-w-xs">
-            <p className="text-xs text-white">昨日の売上を教えて</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
-          <div className="bg-slate-100 rounded-lg p-2 max-w-sm">
-            <p className="text-xs text-slate-700 mb-2">昨日（2/10）の売上サマリーです：</p>
-            <div className="bg-white rounded p-2 text-xs space-y-1">
-              <div className="flex justify-between"><span className="text-slate-500">総売上:</span><span className="font-bold">¥412,000</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">取引件数:</span><span>48件</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">成功率:</span><span className="text-emerald-600">99.5%</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">前週比:</span><span className="text-emerald-600">+15%</span></div>
+        )}
+        <div className="flex-1 p-3 space-y-3 overflow-y-auto">
+          <div className="flex gap-2">
+            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+            <div className="bg-slate-100 rounded-lg p-2 max-w-xs">
+              <p className="text-xs text-slate-700">こんにちは！ABCマートのサポートAIです。取引の照会、API設定の変更、返金処理など、何でもお手伝いします。</p>
             </div>
-            <p className="text-xs text-slate-500 mt-2">詳細レポートが必要でしたら「月次レポートを出して」と言ってください。</p>
           </div>
-        </div>
-        <div className="flex gap-2 justify-end">
-          <div className="bg-blue-600 rounded-lg p-2 max-w-xs">
-            <p className="text-xs text-white">注文番号 ORD-20260210-045 を返金して</p>
+          <div className="flex gap-2 justify-end">
+            <div className="bg-blue-600 rounded-lg p-2 max-w-xs"><p className="text-xs text-white">昨日の売上を教えて</p></div>
           </div>
-        </div>
-        <div className="flex gap-2">
-          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
-          <div className="bg-slate-100 rounded-lg p-2 max-w-sm">
-            <p className="text-xs text-slate-700 mb-2">確認します。以下の取引を返金してよろしいですか？</p>
-            <div className="bg-amber-50 border border-amber-200 rounded p-2 text-xs space-y-1">
-              <div className="flex justify-between"><span className="text-slate-500">注文番号:</span><span>ORD-20260210-045</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">金額:</span><span className="font-bold">¥3,200</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">カード:</span><span>JCB ****5678</span></div>
+          <div className="flex gap-2">
+            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+            <div className="bg-slate-100 rounded-lg p-2 max-w-sm">
+              <p className="text-xs text-slate-700 mb-2">昨日（2/10）の売上サマリーです：</p>
+              <div className="bg-white rounded p-2 text-xs space-y-1">
+                <div className="flex justify-between"><span className="text-slate-500">総売上:</span><span className="font-bold">¥412,000</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">取引件数:</span><span>48件</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">成功率:</span><span className="text-emerald-600">99.5%</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">前週比:</span><span className="text-emerald-600">+15%</span></div>
+              </div>
+              <p className="text-xs text-slate-500 mt-2">詳細レポートが必要でしたら「月次レポートを出して」と言ってください。</p>
+              <div className="flex gap-1 mt-2 border-t pt-1.5">
+                <button className="text-xs text-slate-400 hover:text-emerald-600">👍</button>
+                <button className="text-xs text-slate-400 hover:text-red-600">👎</button>
+                <button className="text-xs text-slate-400 hover:text-blue-600 ml-auto">📋 コピー</button>
+              </div>
             </div>
-            <div className="flex gap-2 mt-2">
-              <button className="px-3 py-1 bg-rose-100 text-rose-700 rounded text-xs font-semibold">返金実行</button>
-              <button className="px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs">キャンセル</button>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <div className="bg-blue-600 rounded-lg p-2 max-w-xs"><p className="text-xs text-white">注文番号 ORD-20260210-045 を返金して</p></div>
+          </div>
+          <div className="flex gap-2">
+            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+            <div className="bg-slate-100 rounded-lg p-2 max-w-sm">
+              <p className="text-xs text-slate-700 mb-2">確認します。以下の取引を返金してよろしいですか？</p>
+              <div className="bg-amber-50 border border-amber-200 rounded p-2 text-xs space-y-1">
+                <div className="flex justify-between"><span className="text-slate-500">注文番号:</span><span>ORD-20260210-045</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">金額:</span><span className="font-bold">¥3,200</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">カード:</span><span>JCB ****5678</span></div>
+              </div>
+              <div className="flex gap-2 mt-2">
+                <button className="px-3 py-1 bg-rose-100 text-rose-700 rounded text-xs font-semibold">返金実行</button>
+                <button className="px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs">キャンセル</button>
+              </div>
+              <div className="flex gap-1 mt-2 border-t pt-1.5">
+                <button className="text-xs text-slate-400 hover:text-emerald-600">👍</button>
+                <button className="text-xs text-slate-400 hover:text-red-600">👎</button>
+              </div>
             </div>
           </div>
         </div>
       </div>
       <div className="p-3 border-t flex gap-2">
         <button className="px-2 py-2 text-slate-400 border rounded-lg text-xs hover:bg-slate-50" title="画像ファイルを添付">📎</button>
-        <input className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="メッセージを入力..." />
-        <button className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold">送信</button>
+        <input value={inputText} onChange={e => setInputText(e.target.value)} className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="メッセージを入力..." />
+        <button className={`px-3 py-2 rounded-lg text-xs font-semibold ${inputText ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-400"}`}>送信</button>
       </div>
       <div className="px-3 py-1.5 bg-slate-50 border-t text-xs text-slate-400 text-center">
         🤖 営業時間外はAIが一次対応します。エスカレーションが必要な場合は営業時間内に担当者から回答します。
@@ -1367,16 +2001,62 @@ const MerchantAIChat = () => (
       <p className="text-xs font-bold text-slate-600 mb-2">クイックアクション</p>
       <div className="space-y-1">
         {["昨日の売上は？", "今月のレポートを出して", "決済成功率は？", "Webhook URLを変更したい", "テスト決済をしたい", "APIキーを再発行したい"].map(q => (
-          <button key={q} className="w-full text-left text-xs bg-white border rounded p-2 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">{q}</button>
+          <button key={q} onClick={() => setInputText(q)} className="w-full text-left text-xs bg-white border rounded p-2 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">{q}</button>
         ))}
       </div>
     </div>
   </div>
-);
+  );
+};
 
 // ─── M12: ユーザー管理 ───
 const MasterUserManagement = () => {
   const [showInviteM04, setShowInviteM04] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState(null);
+  const [showRoleEdit, setShowRoleEdit] = useState(null);
+
+  const staffData = [
+    { name: "田中 太郎", email: "tanaka@company.jp", roleLabel: "スーパー管理者", categories: ["全カテゴリ"], catColors: ["red"], mfa: true, lastLogin: "2026-02-11 14:30", rColor: "red", joinDate: "2024-01-15", status: "有効", sessions: [
+      { date: "02/11 14:30", ip: "203.0.113.10", device: "Chrome / macOS", duration: "2h 15m" },
+      { date: "02/11 09:00", ip: "203.0.113.10", device: "Chrome / macOS", duration: "4h 30m" },
+      { date: "02/10 13:20", ip: "203.0.113.10", device: "Chrome / macOS", duration: "3h 10m" },
+    ], activity: [
+      { date: "02/11 14:35", action: "加盟店承認", target: "ABCマート", page: "M04" },
+      { date: "02/11 10:20", action: "システム設定変更", target: "通知設定", page: "M13" },
+      { date: "02/10 16:00", action: "スタッフ招待", target: "新規レビュアー", page: "M12" },
+      { date: "02/10 11:30", action: "ルーティング変更", target: "VISA接続先", page: "M10" },
+    ]},
+    { name: "佐藤 花子", email: "sato@company.jp", roleLabel: "管理者", categories: ["全カテゴリ"], catColors: ["blue"], mfa: true, lastLogin: "2026-02-11 13:45", rColor: "blue", joinDate: "2024-03-01", status: "有効", sessions: [
+      { date: "02/11 13:45", ip: "198.51.100.5", device: "Firefox / Windows", duration: "3h 20m" },
+      { date: "02/10 09:15", ip: "198.51.100.5", device: "Firefox / Windows", duration: "6h 45m" },
+    ], activity: [
+      { date: "02/11 14:00", action: "レポート生成", target: "月次サマリー", page: "M11" },
+      { date: "02/11 10:30", action: "精算バッチ実行", target: "2026-02-10分", page: "M08" },
+    ]},
+    { name: "山田 一郎", email: "yamada@company.jp", roleLabel: "レビュアー", categories: ["審査", "不正検知"], catColors: ["purple", "yellow"], mfa: true, lastLogin: "2026-02-11 14:20", rColor: "purple", joinDate: "2024-06-15", status: "有効", sessions: [
+      { date: "02/11 14:20", ip: "192.0.2.100", device: "Chrome / Windows", duration: "5h 10m" },
+    ], activity: [
+      { date: "02/11 14:25", action: "審査承認", target: "DEFショップ", page: "M04" },
+      { date: "02/11 11:00", action: "不正検知確認", target: "TX-89012", page: "M07" },
+    ]},
+    { name: "鈴木 美咲", email: "suzuki@company.jp", roleLabel: "レビュアー", categories: ["不正検知", "URL巡回"], catColors: ["yellow", "green"], mfa: true, lastLogin: "2026-02-11 12:10", rColor: "purple", joinDate: "2024-08-01", status: "有効", sessions: [
+      { date: "02/11 12:10", ip: "10.0.0.50", device: "Safari / macOS", duration: "3h 00m" },
+    ], activity: [
+      { date: "02/11 12:15", action: "ブロック解除", target: "IP: 45.xxx.xxx.1", page: "M07" },
+    ]},
+    { name: "高橋 健太", email: "takahashi@company.jp", roleLabel: "レビュアー", categories: ["URL巡回"], catColors: ["green"], mfa: false, lastLogin: "2026-02-10 18:00", rColor: "purple", joinDate: "2025-01-10", status: "有効", sessions: [
+      { date: "02/10 18:00", ip: "172.16.0.20", device: "Chrome / Windows", duration: "1h 30m" },
+    ], activity: [
+      { date: "02/10 18:10", action: "URL巡回確認", target: "サイト#S-042", page: "M06" },
+    ]},
+    { name: "伊藤 翔", email: "ito@company.jp", roleLabel: "レビュアー", categories: ["審査", "精算"], catColors: ["purple", "blue"], mfa: true, lastLogin: "2026-02-11 09:30", rColor: "purple", joinDate: "2025-03-20", status: "有効", sessions: [
+      { date: "02/11 09:30", ip: "10.0.0.80", device: "Edge / Windows", duration: "4h 20m" },
+    ], activity: [
+      { date: "02/11 09:45", action: "精算確認", target: "バッチ#B-0211", page: "M08" },
+      { date: "02/11 09:35", action: "審査レビュー", target: "GHIトレーディング", page: "M04" },
+    ]},
+  ];
+
   return (
   <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
@@ -1423,15 +2103,8 @@ const MasterUserManagement = () => {
     {/* User List */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
       <TableHeader cols={[{ label: "名前", w: "w-36" }, { label: "メール", w: "flex-1" }, { label: "ロール", w: "w-24" }, { label: "担当カテゴリ", w: "w-44" }, { label: "MFA", w: "w-16" }, { label: "最終ログイン", w: "w-32" }, { label: "操作", w: "w-28" }]}>
-      {[
-        { name: "田中 太郎", email: "tanaka@company.jp", roleLabel: "スーパー管理者", categories: ["全カテゴリ"], catColors: ["red"], mfa: true, lastLogin: "2026-02-11 14:30", rColor: "red" },
-        { name: "佐藤 花子", email: "sato@company.jp", roleLabel: "管理者", categories: ["全カテゴリ"], catColors: ["blue"], mfa: true, lastLogin: "2026-02-11 13:45", rColor: "blue" },
-        { name: "山田 一郎", email: "yamada@company.jp", roleLabel: "レビュアー", categories: ["審査", "不正検知"], catColors: ["purple", "yellow"], mfa: true, lastLogin: "2026-02-11 14:20", rColor: "purple" },
-        { name: "鈴木 美咲", email: "suzuki@company.jp", roleLabel: "レビュアー", categories: ["不正検知", "URL巡回"], catColors: ["yellow", "green"], mfa: true, lastLogin: "2026-02-11 12:10", rColor: "purple" },
-        { name: "高橋 健太", email: "takahashi@company.jp", roleLabel: "レビュアー", categories: ["URL巡回"], catColors: ["green"], mfa: false, lastLogin: "2026-02-10 18:00", rColor: "purple" },
-        { name: "伊藤 翔", email: "ito@company.jp", roleLabel: "レビュアー", categories: ["審査", "精算"], catColors: ["purple", "blue"], mfa: true, lastLogin: "2026-02-11 09:30", rColor: "purple" },
-      ].map((u, i) => (
-        <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+      {staffData.map((u, i) => (
+        <tr key={i} className={`border-b cursor-pointer hover:bg-blue-50 ${i % 2 ? "bg-slate-50" : ""}`} onClick={() => setSelectedStaff(u)}>
           <td className="px-4 py-2 whitespace-nowrap w-36 font-semibold text-slate-700"><div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs">👤</div>
             {u.name}
@@ -1445,9 +2118,9 @@ const MasterUserManagement = () => {
           </div></td>
           <td className="px-4 py-2 whitespace-nowrap w-16">{u.mfa ? <span className="text-emerald-600">✅</span> : <span className="text-rose-500">❌</span>}</td>
           <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{u.lastLogin}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1">
-            <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">編集</button>
-            <button className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs">無効化</button>
+          <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setShowRoleEdit(u)} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">編集</button>
+            <button className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs hover:bg-rose-100">無効化</button>
           </div></td>
         </tr>
       ))}
@@ -1504,6 +2177,164 @@ const MasterUserManagement = () => {
         <button onClick={() => setShowInviteM04(false)} className="px-4 py-1.5 bg-slate-100 text-slate-600 rounded text-xs">キャンセル</button>
       </div>
     </div>
+
+    {/* ── Slide Panel: スタッフ詳細 ── */}
+    {selectedStaff && (
+      <div className="fixed inset-0 z-50 flex">
+        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedStaff(null)} />
+        <div className="w-[480px] bg-white shadow-xl border-l overflow-y-auto">
+          <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
+            <h3 className="text-sm font-bold text-slate-800">👤 スタッフ詳細</h3>
+            <button onClick={() => setSelectedStaff(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          </div>
+          <div className="p-5 space-y-4">
+            {/* Profile */}
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center text-2xl">👤</div>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-slate-800">{selectedStaff.name}</p>
+                <p className="text-xs text-slate-500">{selectedStaff.email}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge text={selectedStaff.roleLabel} color={selectedStaff.rColor} />
+                  <Badge text={selectedStaff.status} color="green" />
+                  {selectedStaff.mfa ? <span className="text-xs text-emerald-600">🔒 MFA有効</span> : <span className="text-xs text-rose-500">⚠️ MFA無効</span>}
+                </div>
+              </div>
+            </div>
+
+            {/* Info Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "参加日", value: selectedStaff.joinDate },
+                { label: "最終ログイン", value: selectedStaff.lastLogin },
+                { label: "セッション数（今月）", value: `${selectedStaff.sessions.length}回` },
+                { label: "操作数（今月）", value: `${selectedStaff.activity.length}件` },
+              ].map((item, i) => (
+                <div key={i} className="bg-slate-50 rounded p-2">
+                  <p className="text-xs text-slate-400">{item.label}</p>
+                  <p className="text-xs font-bold text-slate-700">{item.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Category Assignment */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-xs font-bold text-slate-700">📂 担当カテゴリ</p>
+                <button onClick={() => { setShowRoleEdit(selectedStaff); }} className="text-xs text-blue-600 hover:underline">変更</button>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {selectedStaff.categories.map((cat, ci) => (
+                  <span key={ci} className="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-xs font-semibold text-blue-700">{cat}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* Activity Log */}
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">📝 最近の操作</p>
+              <div className="space-y-2">
+                {selectedStaff.activity.map((a, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 rounded-full bg-blue-400 mt-1" />
+                      {i < selectedStaff.activity.length - 1 && <div className="w-px h-6 bg-slate-200" />}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-slate-700">{a.action}</span>
+                        <Badge text={a.page} color="blue" />
+                      </div>
+                      <p className="text-xs text-slate-400">{a.target} — {a.date}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Session History */}
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">💻 セッション履歴</p>
+              <div className="space-y-1">
+                {selectedStaff.sessions.map((s, i) => (
+                  <div key={i} className="flex items-center gap-3 text-xs p-2 bg-slate-50 rounded border">
+                    <span className="w-24 text-slate-400">{s.date}</span>
+                    <span className="w-28 text-slate-500">{s.ip}</span>
+                    <span className="flex-1 text-slate-600">{s.device}</span>
+                    <span className="text-slate-400">{s.duration}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 pt-2 border-t">
+              <button onClick={() => setShowRoleEdit(selectedStaff)} className="flex-1 px-3 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">ロール・カテゴリ編集</button>
+              <button className="px-3 py-2 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded text-xs font-semibold hover:bg-yellow-100">パスワードリセット</button>
+              <button className="px-3 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded text-xs font-semibold hover:bg-rose-100">無効化</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* ── Modal: ロール編集 ── */}
+    {showRoleEdit && (
+      <div className="fixed inset-0 z-[60] flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowRoleEdit(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
+          <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
+            <h3 className="text-sm font-bold text-slate-800">✏️ ロール・カテゴリ編集</h3>
+            <button onClick={() => setShowRoleEdit(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          </div>
+          <div className="p-5 space-y-4">
+            <div className="flex items-center gap-3 bg-slate-50 rounded p-3">
+              <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">👤</div>
+              <div>
+                <p className="text-sm font-bold text-slate-800">{showRoleEdit.name}</p>
+                <p className="text-xs text-slate-400">{showRoleEdit.email}</p>
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-600">ロール <span className="text-rose-500">*</span></label>
+              <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue={showRoleEdit.roleLabel}>
+                <option>スーパー管理者</option>
+                <option>管理者</option>
+                <option>レビュアー</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-600">担当カテゴリ（レビュアーの場合）</label>
+              <div className="flex gap-2 mt-1 flex-wrap">
+                {[
+                  { cat: "審査", icon: "📋", checked: showRoleEdit.categories.includes("審査") || showRoleEdit.categories.includes("全カテゴリ") },
+                  { cat: "不正検知", icon: "🛡️", checked: showRoleEdit.categories.includes("不正検知") || showRoleEdit.categories.includes("全カテゴリ") },
+                  { cat: "URL巡回", icon: "🌐", checked: showRoleEdit.categories.includes("URL巡回") || showRoleEdit.categories.includes("全カテゴリ") },
+                  { cat: "精算", icon: "💰", checked: showRoleEdit.categories.includes("精算") || showRoleEdit.categories.includes("全カテゴリ") },
+                ].map((c, i) => (
+                  <label key={i} className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded border cursor-pointer ${c.checked ? "bg-blue-50 border-blue-300 text-blue-700" : "bg-white border-slate-200 text-slate-500"}`}>
+                    <input type="checkbox" defaultChecked={c.checked} className="w-3 h-3" />
+                    <span>{c.icon}</span>
+                    <span>{c.cat}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-600">変更理由 <span className="text-rose-500">*</span></label>
+              <textarea className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 h-16 resize-none" placeholder="ロール変更の理由を入力（監査ログに記録されます）" />
+            </div>
+            <div className="bg-yellow-50 rounded border border-yellow-200 p-2 text-xs text-yellow-700">
+              ⚠️ ロール変更は即時反映されます。変更内容は操作ログに記録されます。
+            </div>
+          </div>
+          <div className="p-4 border-t flex gap-2 justify-end">
+            <button onClick={() => setShowRoleEdit(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+            <button onClick={() => setShowRoleEdit(null)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">変更を保存</button>
+          </div>
+        </div>
+      </div>
+    )}
 
     {/* ── Modal: 招待確認 ── */}
     {showInviteM04 && (
@@ -1860,13 +2691,29 @@ const MasterMerchantApplications = () => {
 };
 
 // ─── M08: 精算・入金 ───
-const MasterSettlement = () => (
+const MasterSettlement = () => {
+  const [selectedBatch, setSelectedBatch] = useState(null);
+  const [selectedPayout, setSelectedPayout] = useState(null);
+  const [showBatchConfirm, setShowBatchConfirm] = useState(false);
+  const batchData = [
+    { date: "2026-02-11", status: "完了", count: "248件", amount: "¥8.2M", errors: 0, color: "green", logs: [{ time: "02:00:00", msg: "バッチ開始", st: "ok" }, { time: "02:01:15", msg: "売上集計完了 (248件)", st: "ok" }, { time: "02:02:30", msg: "手数料計算完了", st: "ok" }, { time: "02:03:45", msg: "入金データ生成", st: "ok" }, { time: "02:04:12", msg: "バッチ完了", st: "ok" }] },
+    { date: "2026-02-10", status: "完了", count: "312件", amount: "¥10.5M", errors: 1, color: "green", logs: [{ time: "02:00:00", msg: "バッチ開始", st: "ok" }, { time: "02:01:30", msg: "売上集計完了 (312件)", st: "ok" }, { time: "02:02:45", msg: "手数料計算完了", st: "ok" }, { time: "02:03:10", msg: "M-019: 口座情報エラー", st: "error" }, { time: "02:04:00", msg: "バッチ完了（エラー1件）", st: "warn" }] },
+    { date: "2026-02-09", status: "完了", count: "189件", amount: "¥6.3M", errors: 0, color: "green", logs: [] },
+    { date: "2026-02-08", status: "完了（エラーあり）", count: "276件", amount: "¥9.1M", errors: 2, color: "yellow", logs: [] },
+    { date: "2026-02-07", status: "完了", count: "234件", amount: "¥7.8M", errors: 0, color: "green", logs: [] },
+  ];
+  const payoutData = [
+    { id: "PAY-0211-001", merchant: "M-001 ABCマート", period: "02/04 〜 02/10", amount: "¥3,825,000", fee: "¥127,500", status: "入金完了", sColor: "green", date: "02/12", sales: "¥4,200,000", brands: [{ name: "VISA", amt: "¥2,100,000", fee: "¥63,000" }, { name: "MC", amt: "¥1,050,000", fee: "¥31,500" }, { name: "JCB", amt: "¥840,000", fee: "¥27,720" }], cb: "¥0", reserve: "¥420,000", bank: "三菱UFJ銀行 新宿支店 普通 1234567" },
+    { id: "PAY-0211-002", merchant: "M-002 XYZショップ", period: "02/04 〜 02/10", amount: "¥1,682,000", fee: "¥58,870", status: "入金完了", sColor: "green", date: "02/12", sales: "¥1,850,000", brands: [{ name: "VISA", amt: "¥1,110,000", fee: "¥33,300" }, { name: "JCB", amt: "¥740,000", fee: "¥25,570" }], cb: "¥12,000", reserve: "¥185,000", bank: "みずほ銀行 渋谷支店 普通 7654321" },
+    { id: "PAY-0211-003", merchant: "M-004 テスト商事", period: "02/04 〜 02/10", amount: "¥612,000", fee: "¥23,256", status: "保留", sColor: "yellow", date: "-", sales: "¥680,000", brands: [{ name: "VISA", amt: "¥680,000", fee: "¥23,256" }], cb: "¥0", reserve: "¥68,000", bank: "三井住友銀行 品川支店 普通 9876543" },
+  ];
+  return (
   <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-slate-800">精算・入金管理</h2>
       <div className="flex gap-2">
         <select className="text-xs border rounded px-2 py-1"><option>2026年2月</option><option>2026年1月</option></select>
-        <button className="text-xs bg-emerald-600 text-white px-3 py-1 rounded font-semibold">精算バッチ実行</button>
+        <button onClick={() => setShowBatchConfirm(true)} className="text-xs bg-emerald-600 text-white px-3 py-1 rounded font-semibold">精算バッチ実行</button>
       </div>
     </div>
 
@@ -1882,20 +2729,14 @@ const MasterSettlement = () => (
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <p className="text-xs font-bold text-slate-600 mb-2">精算バッチ状況（直近5回）</p>
       <div className="space-y-2">
-        {[
-          { date: "2026-02-11", status: "完了", count: "248件", amount: "¥8.2M", errors: 0, color: "green" },
-          { date: "2026-02-10", status: "完了", count: "312件", amount: "¥10.5M", errors: 1, color: "green" },
-          { date: "2026-02-09", status: "完了", count: "189件", amount: "¥6.3M", errors: 0, color: "green" },
-          { date: "2026-02-08", status: "完了（エラーあり）", count: "276件", amount: "¥9.1M", errors: 2, color: "yellow" },
-          { date: "2026-02-07", status: "完了", count: "234件", amount: "¥7.8M", errors: 0, color: "green" },
-        ].map((b, i) => (
-          <div key={i} className="flex items-center gap-3 text-xs">
+        {batchData.map((b, i) => (
+          <div key={i} onClick={() => setSelectedBatch(b)} className="flex items-center gap-3 text-xs cursor-pointer hover:bg-slate-50 rounded p-1 -m-1">
             <span className="w-24 text-slate-500">{b.date}</span>
             <Badge text={b.status} color={b.color} />
             <span className="text-slate-600">{b.count}</span>
             <span className="font-semibold text-slate-700">{b.amount}</span>
             {b.errors > 0 && <Badge text={`エラー ${b.errors}件`} color="red" />}
-            <button className="ml-auto px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">詳細</button>
+            <span className="ml-auto text-slate-300">›</span>
           </div>
         ))}
       </div>
@@ -2005,12 +2846,8 @@ const MasterSettlement = () => (
     {/* Payout List */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
       <TableHeader cols={[{ label: "入金ID", w: "w-28" }, { label: "加盟店", w: "flex-1" }, { label: "精算期間", w: "w-36" }, { label: "入金額", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "ステータス", w: "w-24" }, { label: "入金日", w: "w-24" }]}>
-      {[
-        { id: "PAY-0211-001", merchant: "M-001 ABCマート", period: "02/04 〜 02/10", amount: "¥3,825,000", fee: "¥127,500", status: "入金完了", sColor: "green", date: "02/12" },
-        { id: "PAY-0211-002", merchant: "M-002 XYZショップ", period: "02/04 〜 02/10", amount: "¥1,682,000", fee: "¥58,870", status: "入金完了", sColor: "green", date: "02/12" },
-        { id: "PAY-0211-003", merchant: "M-004 テスト商事", period: "02/04 〜 02/10", amount: "¥612,000", fee: "¥23,256", status: "保留", sColor: "yellow", date: "-" },
-      ].map((p, i) => (
-        <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+      {payoutData.map((p, i) => (
+        <tr key={i} onClick={() => setSelectedPayout(p)} className={`border-b cursor-pointer hover:bg-blue-50 ${i % 2 ? "bg-slate-50" : ""}`}>
           <td className="px-4 py-2 whitespace-nowrap w-28 font-mono text-slate-500">{p.id}</td>
           <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{p.merchant}</td>
           <td className="px-4 py-2 whitespace-nowrap w-36 text-slate-500">{p.period}</td>
@@ -2064,8 +2901,105 @@ const MasterSettlement = () => (
       </div>
       <p className="text-xs text-orange-600 mt-2">※ 代理店フィーは各加盟店の決済手数料から自動差引されます。決済種別ごとの料率はフィー設定画面で管理します。</p>
     </div>
+
+    {/* バッチ詳細スライドパネル */}
+    {selectedBatch && (
+      <div className="fixed inset-0 z-50 flex">
+        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedBatch(null)} />
+        <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+          <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
+            <p className="text-sm font-bold">精算バッチ詳細</p>
+            <button onClick={() => setSelectedBatch(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+          <div className="p-4 space-y-4">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">実行日</p><p className="text-xs font-bold">{selectedBatch.date}</p></div>
+              <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">ステータス</p><Badge text={selectedBatch.status} color={selectedBatch.color} /></div>
+              <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">処理件数</p><p className="text-xs font-bold">{selectedBatch.count}</p></div>
+              <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">精算総額</p><p className="text-xs font-bold">{selectedBatch.amount}</p></div>
+            </div>
+            {selectedBatch.logs.length > 0 && (
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">実行ログ</p>
+                {selectedBatch.logs.map((log, i) => (
+                  <div key={i} className="flex items-center gap-2 py-1.5 border-b text-xs last:border-0">
+                    <span className="font-mono text-slate-400 w-16">{log.time}</span>
+                    <span className={log.st === "error" ? "text-red-600" : log.st === "warn" ? "text-amber-600" : "text-slate-600"}>{log.st === "error" ? "❌" : log.st === "warn" ? "⚠️" : "✅"}</span>
+                    <span className={`flex-1 ${log.st === "error" ? "text-red-600 font-bold" : ""}`}>{log.msg}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {selectedBatch.errors > 0 && (
+              <button className="w-full py-2 bg-emerald-50 text-emerald-600 rounded text-xs font-bold border border-emerald-200 hover:bg-emerald-100">🔄 エラー分を再実行</button>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* 入金詳細スライドパネル */}
+    {selectedPayout && (
+      <div className="fixed inset-0 z-50 flex">
+        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedPayout(null)} />
+        <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+          <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
+            <p className="text-sm font-bold">{selectedPayout.id}</p>
+            <button onClick={() => setSelectedPayout(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+          <div className="p-4 space-y-4">
+            <div className="flex items-center gap-2"><Badge text={selectedPayout.status} color={selectedPayout.sColor} /><span className="text-xs text-slate-400">{selectedPayout.period}</span></div>
+            <div><p className="text-xs font-bold text-slate-700 mb-2">精算サマリー</p>
+              {[["売上総額", selectedPayout.sales], ["手数料合計", `-${selectedPayout.fee}`], ["CB差引", selectedPayout.cb !== "¥0" ? `-${selectedPayout.cb}` : "—"], ["リザーブ留保", `-${selectedPayout.reserve}`], ["入金額", selectedPayout.amount]].map(([l, v], i) => (
+                <div key={i} className={`flex text-xs py-1 border-b ${i === 4 ? "font-bold text-slate-800" : ""}`}><span className="flex-1 text-slate-500">{l}</span><span className={i === 1 || i === 2 || i === 3 ? "text-rose-500" : ""}>{v}</span></div>
+              ))}
+            </div>
+            <div><p className="text-xs font-bold text-slate-700 mb-2">ブランド別内訳</p>
+              {selectedPayout.brands.map((b, i) => (
+                <div key={i} className="flex text-xs py-1 border-b"><span className="w-14">{b.name}</span><span className="flex-1 text-slate-500">{b.amt}</span><span className="text-rose-500">-{b.fee}</span></div>
+              ))}
+            </div>
+            <div><p className="text-xs font-bold text-slate-700 mb-1">振込先口座</p><p className="text-xs text-slate-600 bg-slate-50 rounded p-2">{selectedPayout.bank}</p></div>
+            <button className="w-full py-2 bg-blue-50 text-blue-600 rounded text-xs font-bold border border-blue-200">📥 明細をダウンロード</button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* バッチ実行確認モーダル */}
+    {showBatchConfirm && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowBatchConfirm(false)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[450px]">
+          <div className="p-4 border-b flex items-center justify-between">
+            <p className="text-sm font-bold">精算バッチの実行確認</p>
+            <button onClick={() => setShowBatchConfirm(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+          <div className="p-4 space-y-3">
+            <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-700">
+              <p className="font-bold">実行概要</p>
+              <div className="mt-2 space-y-1">
+                <div className="flex justify-between"><span>対象期間:</span><span className="font-bold">2026/02/04 〜 2026/02/10</span></div>
+                <div className="flex justify-between"><span>対象加盟店:</span><span className="font-bold">42社</span></div>
+                <div className="flex justify-between"><span>推定精算額:</span><span className="font-bold">¥45,200,000</span></div>
+                <div className="flex justify-between"><span>推定手数料:</span><span className="font-bold">¥1,560,000</span></div>
+              </div>
+            </div>
+            <div>
+              <label className="text-xs text-slate-500">実行モード</label>
+              <select className="w-full border rounded px-2 py-1.5 text-xs mt-0.5"><option>本番実行</option><option>ドライラン（テスト実行）</option></select>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setShowBatchConfirm(false)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
+              <button onClick={() => setShowBatchConfirm(false)} className="flex-1 py-2 bg-emerald-600 text-white rounded text-xs font-bold hover:bg-emerald-700">バッチを実行</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
   </div>
-);
+  );
+};
 
 // ─── M13: システム設定 ───
 const MasterSystemSettings = () => {
@@ -2865,11 +3799,36 @@ const MasterSystemSettings = () => {
 // ─── S07: ユーザー管理 ───
 const MerchantUserManagement = () => {
   const [showInviteS07, setShowInviteS07] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(null);
+  const users = [
+    { name: "佐々木 健一", email: "sasaki@techshop.jp", role: "オーナー", rColor: "purple", mfa: true, last: "2026-02-11 14:30", ip: "203.0.113.45", sessions: 3, created: "2024-06-01", logs: [
+      { action: "ログイン", time: "2026-02-11 14:30", ip: "203.0.113.45" },
+      { action: "APIキー再発行", time: "2026-02-11 13:00", ip: "203.0.113.45" },
+      { action: "Webhook URL変更", time: "2026-02-10 16:20", ip: "203.0.113.45" },
+      { action: "ログイン", time: "2026-02-10 09:15", ip: "203.0.113.45" },
+    ]},
+    { name: "中村 美月", email: "nakamura@techshop.jp", role: "管理者", rColor: "blue", mfa: true, last: "2026-02-11 12:00", ip: "198.51.100.10", sessions: 1, created: "2025-01-15", logs: [
+      { action: "ログイン", time: "2026-02-11 12:00", ip: "198.51.100.10" },
+      { action: "返金処理実行", time: "2026-02-11 11:45", ip: "198.51.100.10" },
+      { action: "ログイン", time: "2026-02-10 09:30", ip: "198.51.100.10" },
+    ]},
+    { name: "小林 大輔", email: "kobayashi@techshop.jp", role: "スタッフ", rColor: "green", mfa: true, last: "2026-02-10 18:20", ip: "192.0.2.55", sessions: 0, created: "2025-06-20", logs: [
+      { action: "ログイン", time: "2026-02-10 18:20", ip: "192.0.2.55" },
+      { action: "取引詳細閲覧", time: "2026-02-10 17:50", ip: "192.0.2.55" },
+    ]},
+    { name: "渡辺 さくら", email: "watanabe@techshop.jp", role: "閲覧のみ", rColor: "gray", mfa: false, last: "2026-02-08 10:00", ip: "192.0.2.100", sessions: 0, created: "2025-11-01", logs: [
+      { action: "ログイン", time: "2026-02-08 10:00", ip: "192.0.2.100" },
+    ]},
+  ];
   return (
   <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-slate-800">ユーザー管理</h2>
-      <button onClick={() => setShowInviteS07(!showInviteS07)} className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded font-semibold hover:bg-emerald-700">+ スタッフを招待</button>
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-slate-400">スタッフ: <span className="font-bold text-slate-700">{users.length}名</span></span>
+        <button onClick={() => setShowInviteS07(!showInviteS07)} className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded font-semibold hover:bg-emerald-700">+ スタッフを招待</button>
+      </div>
     </div>
 
     {showInviteS07 && (
@@ -2890,13 +3849,8 @@ const MerchantUserManagement = () => {
 
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
       <TableHeader cols={[{ label: "名前", w: "w-36" }, { label: "メール", w: "flex-1" }, { label: "権限", w: "w-28" }, { label: "MFA", w: "w-14" }, { label: "最終ログイン", w: "w-32" }, { label: "操作", w: "w-28" }]}>
-      {[
-        { name: "佐々木 健一", email: "sasaki@techshop.jp", role: "オーナー", rColor: "purple", mfa: true, last: "2026-02-11 14:30" },
-        { name: "中村 美月", email: "nakamura@techshop.jp", role: "管理者", rColor: "blue", mfa: true, last: "2026-02-11 12:00" },
-        { name: "小林 大輔", email: "kobayashi@techshop.jp", role: "スタッフ", rColor: "green", mfa: true, last: "2026-02-10 18:20" },
-        { name: "渡辺 さくら", email: "watanabe@techshop.jp", role: "閲覧のみ", rColor: "gray", mfa: false, last: "2026-02-08 10:00" },
-      ].map((u, i) => (
-        <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+      {users.map((u, i) => (
+        <tr key={i} onClick={() => setSelectedUser(u)} className={`border-b cursor-pointer hover:bg-blue-50 ${i % 2 ? "bg-slate-50" : ""}`}>
           <td className="px-4 py-2 whitespace-nowrap w-36 font-semibold text-slate-700"><div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-xs">👤</div>
             {u.name}
@@ -2906,8 +3860,8 @@ const MerchantUserManagement = () => {
           <td className="px-4 py-2 whitespace-nowrap w-14">{u.mfa ? "✅" : "❌"}</td>
           <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{u.last}</td>
           <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1">
-            <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">編集</button>
-            {u.role !== "オーナー" && <button className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs">削除</button>}
+            <button onClick={e => { e.stopPropagation(); setShowEditModal(u); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">編集</button>
+            {u.role !== "オーナー" && <button onClick={e => e.stopPropagation()} className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs">削除</button>}
           </div></td>
         </tr>
       ))}
@@ -2941,6 +3895,101 @@ const MerchantUserManagement = () => {
         ))}
       </div>
     </div>
+
+    {/* ユーザー詳細スライドパネル */}
+    {selectedUser && (
+      <div className="fixed inset-0 z-50 flex">
+        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedUser(null)} />
+        <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+          <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
+            <p className="text-sm font-bold">{selectedUser.name}</p>
+            <button onClick={() => setSelectedUser(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+          <div className="p-4 space-y-4">
+            {/* プロフィール */}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-xl">👤</div>
+              <div>
+                <p className="text-sm font-bold text-slate-800">{selectedUser.name}</p>
+                <p className="text-xs text-slate-400">{selectedUser.email}</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">権限</p><Badge text={selectedUser.role} color={selectedUser.rColor} /></div>
+              <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">MFA</p><p className="text-xs font-bold">{selectedUser.mfa ? "有効 ✅" : "無効 ❌"}</p></div>
+              <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">アクティブセッション</p><p className="text-xs font-bold">{selectedUser.sessions}件</p></div>
+              <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">登録日</p><p className="text-xs font-bold">{selectedUser.created}</p></div>
+            </div>
+
+            {/* 最終ログイン */}
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">最終アクセス</p>
+              <div className="space-y-1">
+                <div className="flex text-xs"><span className="w-20 text-slate-400">日時</span><span className="font-bold">{selectedUser.last}</span></div>
+                <div className="flex text-xs"><span className="w-20 text-slate-400">IPアドレス</span><span className="font-mono">{selectedUser.ip}</span></div>
+              </div>
+            </div>
+
+            {/* 活動ログ */}
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">活動ログ（直近）</p>
+              <div className="space-y-0">
+                {selectedUser.logs.map((log, i) => (
+                  <div key={i} className="flex items-start gap-3 py-1.5">
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 rounded-full bg-blue-400 mt-1" />
+                      {i < selectedUser.logs.length - 1 && <div className="w-0.5 h-4 bg-slate-200" />}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-700">{log.action}</p>
+                      <p className="text-xs text-slate-400">{log.time} · {log.ip}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* アクションボタン */}
+            <div className="space-y-2 pt-2 border-t">
+              <button onClick={() => { setShowEditModal(selectedUser); setSelectedUser(null); }} className="w-full py-2 bg-blue-50 text-blue-600 rounded text-xs font-bold border border-blue-200 hover:bg-blue-100">権限を変更</button>
+              {selectedUser.role !== "オーナー" && (
+                <button className="w-full py-2 bg-red-50 text-red-600 rounded text-xs font-bold border border-red-200 hover:bg-red-100">アカウントを無効化</button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* ロール編集モーダル */}
+    {showEditModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowEditModal(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[400px]">
+          <div className="p-4 border-b flex items-center justify-between">
+            <p className="text-sm font-bold">権限の変更</p>
+            <button onClick={() => setShowEditModal(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+          <div className="p-4 space-y-3">
+            <div className="flex items-center gap-2 text-xs"><span className="text-slate-400">対象:</span><span className="font-bold">{showEditModal.name}</span><Badge text={showEditModal.role} color={showEditModal.rColor} /></div>
+            <div>
+              <label className="text-xs text-slate-500">新しい権限</label>
+              <select className="w-full border rounded px-2 py-1.5 text-xs mt-0.5">
+                <option>管理者</option><option>スタッフ</option><option>閲覧のみ</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-slate-500">変更理由（任意）</label>
+              <textarea className="w-full border rounded px-2 py-1.5 text-xs mt-0.5 h-16" placeholder="変更理由を入力..." />
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setShowEditModal(null)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
+              <button onClick={() => setShowEditModal(null)} className="flex-1 py-2 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700">権限を更新</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
   </div>
   );
 };
@@ -2948,6 +3997,46 @@ const MerchantUserManagement = () => {
 // ─── S04: 入金確認 ───
 const MerchantPayouts = () => {
   const [payoutTab, setPayoutTab] = useState("payout");
+  const [selectedPayout, setSelectedPayout] = useState(null);
+
+  const payoutData = [
+    { date: "02/07", period: "01/28〜02/03", sales: "¥1,450,000", fee: "-¥46,400", hold: "-¥145,000", release: "+¥92,000", payout: "¥1,350,600", status: "入金済み", sColor: "green",
+      breakdown: [
+        { brand: "VISA", count: 82, amount: "¥680,000", fee: "¥21,760", rate: "3.2%" },
+        { brand: "Mastercard", count: 45, amount: "¥380,000", fee: "¥12,160", rate: "3.2%" },
+        { brand: "JCB", count: 38, amount: "¥290,000", fee: "¥9,280", rate: "3.2%" },
+        { brand: "AMEX", count: 12, amount: "¥100,000", fee: "¥3,200", rate: "3.2%" },
+      ],
+      bank: { name: "三菱UFJ銀行", branch: "渋谷支店", type: "普通", number: "****567", holder: "カ）サンプルショップ" }
+    },
+    { date: "01/31", period: "01/21〜01/27", sales: "¥1,180,000", fee: "-¥37,760", hold: "-¥118,000", release: "+¥88,000", payout: "¥1,112,240", status: "入金済み", sColor: "green",
+      breakdown: [
+        { brand: "VISA", count: 65, amount: "¥540,000", fee: "¥17,280", rate: "3.2%" },
+        { brand: "Mastercard", count: 38, amount: "¥320,000", fee: "¥10,240", rate: "3.2%" },
+        { brand: "JCB", count: 30, amount: "¥220,000", fee: "¥7,040", rate: "3.2%" },
+        { brand: "AMEX", count: 10, amount: "¥100,000", fee: "¥3,200", rate: "3.2%" },
+      ],
+      bank: { name: "三菱UFJ銀行", branch: "渋谷支店", type: "普通", number: "****567", holder: "カ）サンプルショップ" }
+    },
+    { date: "01/24", period: "01/14〜01/20", sales: "¥980,000", fee: "-¥31,360", hold: "-¥98,000", release: "+¥0", payout: "¥850,640", status: "入金済み", sColor: "green",
+      breakdown: [
+        { brand: "VISA", count: 55, amount: "¥450,000", fee: "¥14,400", rate: "3.2%" },
+        { brand: "Mastercard", count: 32, amount: "¥280,000", fee: "¥8,960", rate: "3.2%" },
+        { brand: "JCB", count: 28, amount: "¥200,000", fee: "¥6,400", rate: "3.2%" },
+        { brand: "AMEX", count: 6, amount: "¥50,000", fee: "¥1,600", rate: "3.2%" },
+      ],
+      bank: { name: "三菱UFJ銀行", branch: "渋谷支店", type: "普通", number: "****567", holder: "カ）サンプルショップ" }
+    },
+  ];
+
+  // Calendar data for this month
+  const calendarDays = Array.from({length: 28}, (_, i) => {
+    const day = i + 1;
+    const isPayout = [7, 14, 21, 28].includes(day);
+    const isToday = day === 17;
+    return { day, isPayout, isToday };
+  });
+
   return (
   <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
@@ -2966,7 +4055,7 @@ const MerchantPayouts = () => {
 
     {/* Tab */}
     <div className="flex gap-1 border-b">
-      {[{ id: "payout", label: "入金履歴" }, { id: "reserve", label: "リザーブ（デポジット）" }].map(t => (
+      {[{ id: "payout", label: "入金履歴" }, { id: "calendar", label: "入金カレンダー" }, { id: "reserve", label: "リザーブ（デポジット）" }].map(t => (
         <button key={t.id} onClick={() => setPayoutTab(t.id)} className={`text-xs px-4 py-2 border-b-2 ${payoutTab === t.id ? "border-emerald-500 text-emerald-700 font-semibold" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}
     </div>
@@ -3001,12 +4090,8 @@ const MerchantPayouts = () => {
     {/* Payout History */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
       <TableHeader cols={[{ label: "入金日", w: "w-20" }, { label: "精算期間", w: "w-32" }, { label: "総売上", w: "w-24" }, { label: "手数料", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-24" }, { label: "ステータス", w: "w-20" }, { label: "明細", w: "w-14" }]}>
-      {[
-        { date: "02/07", period: "01/28〜02/03", sales: "¥1,450,000", fee: "-¥46,400", hold: "-¥145,000", release: "+¥92,000", payout: "¥1,350,600", status: "入金済み", sColor: "green" },
-        { date: "01/31", period: "01/21〜01/27", sales: "¥1,180,000", fee: "-¥37,760", hold: "-¥118,000", release: "+¥88,000", payout: "¥1,112,240", status: "入金済み", sColor: "green" },
-        { date: "01/24", period: "01/14〜01/20", sales: "¥980,000", fee: "-¥31,360", hold: "-¥98,000", release: "+¥0", payout: "¥850,640", status: "入金済み", sColor: "green" },
-      ].map((p, i) => (
-        <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+      {payoutData.map((p, i) => (
+        <tr key={i} className={`border-b cursor-pointer hover:bg-blue-50 ${i % 2 ? "bg-slate-50" : ""}`} onClick={() => setSelectedPayout(p)}>
           <td className="px-4 py-2 whitespace-nowrap w-20 text-slate-600">{p.date}</td>
           <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{p.period}</td>
           <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-slate-600">{p.sales}</td>
@@ -3015,12 +4100,47 @@ const MerchantPayouts = () => {
           <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-emerald-600">{p.release}</td>
           <td className="px-4 py-2 whitespace-nowrap w-24 text-right font-semibold text-slate-700">{p.payout}</td>
           <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={p.status} color={p.sColor} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-14"><button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">📄</button></td>
+          <td className="px-4 py-2 whitespace-nowrap w-14"><button onClick={e => { e.stopPropagation(); setSelectedPayout(p); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">📄</button></td>
         </tr>
       ))}
       </TableHeader>
     </div>
     </>)}
+
+    {payoutTab === "calendar" && (
+    <div className="space-y-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+        <div className="flex justify-between items-center mb-3">
+          <p className="text-xs font-bold text-slate-700">📅 2026年2月 入金カレンダー</p>
+          <div className="flex gap-3 text-xs">
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-emerald-500" /> 入金日</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-500" /> 今日</span>
+          </div>
+        </div>
+        <div className="grid grid-cols-7 gap-1 text-center mb-1">
+          {["月", "火", "水", "木", "金", "土", "日"].map(d => (
+            <div key={d} className="text-xs font-bold text-slate-400 py-1">{d}</div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-1">
+          {/* Offset for Feb 2026 starting on Sunday - add empty cells */}
+          {[null, null, null, null, null, null].map((_, i) => <div key={`empty-${i}`} />)}
+          {calendarDays.map((d, i) => (
+            <div key={i} className={`text-xs p-2 rounded text-center cursor-pointer transition-colors
+              ${d.isToday ? "bg-blue-500 text-white font-bold" : d.isPayout ? "bg-emerald-100 text-emerald-700 font-semibold border border-emerald-300 hover:bg-emerald-200" : "hover:bg-slate-100 text-slate-600"}`}
+              onClick={() => d.isPayout && setSelectedPayout(payoutData[0])}
+            >
+              {d.day}
+              {d.isPayout && <div className="text-xs mt-0.5" style={{fontSize: "7px"}}>💰</div>}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="bg-slate-50 rounded border p-2 text-xs text-slate-500">
+        入金サイクル: 週次（毎週金曜日） | 精算期間: 前週月曜〜日曜 | 振込先: 三菱UFJ銀行 渋谷支店
+      </div>
+    </div>
+    )}
 
     {payoutTab === "reserve" && (
     <div className="space-y-3">
@@ -3091,6 +4211,80 @@ const MerchantPayouts = () => {
         </TableHeader>
       </div>
     </div>
+    )}
+
+    {/* ── Slide Panel: 入金詳細 ── */}
+    {selectedPayout && (
+      <div className="fixed inset-0 z-50 flex">
+        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedPayout(null)} />
+        <div className="w-[440px] bg-white shadow-xl border-l overflow-y-auto">
+          <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
+            <h3 className="text-sm font-bold text-slate-800">💰 入金明細</h3>
+            <button onClick={() => setSelectedPayout(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          </div>
+          <div className="p-5 space-y-4">
+            {/* Summary */}
+            <div className="text-center">
+              <p className="text-xs text-slate-400">入金額</p>
+              <p className="text-2xl font-bold text-slate-800">{selectedPayout.payout}</p>
+              <div className="flex items-center justify-center gap-2 mt-1">
+                <Badge text={selectedPayout.status} color={selectedPayout.sColor} />
+                <span className="text-xs text-slate-400">入金日: {selectedPayout.date}</span>
+              </div>
+            </div>
+
+            {/* Settlement Summary */}
+            <div className="bg-slate-50 rounded-lg p-3">
+              <p className="text-xs font-bold text-slate-700 mb-2">精算サマリー</p>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex justify-between"><span className="text-slate-500">精算期間</span><span className="font-semibold">{selectedPayout.period}</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">総売上</span><span className="font-semibold">{selectedPayout.sales}</span></div>
+                <div className="flex justify-between"><span className="text-rose-500">手数料</span><span className="text-rose-500">{selectedPayout.fee}</span></div>
+                <div className="flex justify-between"><span className="text-purple-500">リザーブ留保</span><span className="text-purple-500">{selectedPayout.hold}</span></div>
+                <div className="flex justify-between"><span className="text-emerald-600">リザーブ解放</span><span className="text-emerald-600">{selectedPayout.release}</span></div>
+                <div className="flex justify-between border-t pt-1.5"><span className="font-bold text-slate-700">入金額</span><span className="font-bold text-slate-800">{selectedPayout.payout}</span></div>
+              </div>
+            </div>
+
+            {/* Brand Breakdown */}
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">💳 ブランド別内訳</p>
+              <table className="w-full text-xs">
+                <thead><tr className="bg-slate-50 border-b">
+                  <th className="text-left px-2 py-1 font-semibold text-slate-600">ブランド</th>
+                  <th className="text-right px-2 py-1 font-semibold text-slate-600">件数</th>
+                  <th className="text-right px-2 py-1 font-semibold text-slate-600">金額</th>
+                  <th className="text-right px-2 py-1 font-semibold text-slate-600">手数料</th>
+                  <th className="text-right px-2 py-1 font-semibold text-slate-600">率</th>
+                </tr></thead>
+                <tbody>
+                  {selectedPayout.breakdown.map((b, i) => (
+                    <tr key={i} className="border-b"><td className="px-2 py-1">{b.brand}</td><td className="px-2 py-1 text-right">{b.count}</td><td className="px-2 py-1 text-right">{b.amount}</td><td className="px-2 py-1 text-right text-rose-500">{b.fee}</td><td className="px-2 py-1 text-right text-slate-400">{b.rate}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Bank Info */}
+            <div className="bg-blue-50 rounded border border-blue-200 p-3">
+              <p className="text-xs font-bold text-blue-700 mb-2">🏦 振込先口座</p>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div><span className="text-slate-400">銀行名: </span><span className="text-slate-700">{selectedPayout.bank.name}</span></div>
+                <div><span className="text-slate-400">支店: </span><span className="text-slate-700">{selectedPayout.bank.branch}</span></div>
+                <div><span className="text-slate-400">種別: </span><span className="text-slate-700">{selectedPayout.bank.type}</span></div>
+                <div><span className="text-slate-400">口座番号: </span><span className="text-slate-700">{selectedPayout.bank.number}</span></div>
+                <div className="col-span-2"><span className="text-slate-400">名義: </span><span className="text-slate-700">{selectedPayout.bank.holder}</span></div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2 pt-2 border-t">
+              <button className="flex-1 px-3 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">📥 明細ダウンロード</button>
+              <button onClick={() => setSelectedPayout(null)} className="px-3 py-2 bg-slate-100 text-slate-600 rounded text-xs border hover:bg-slate-200">閉じる</button>
+            </div>
+          </div>
+        </div>
+      </div>
     )}
     </div>
   );
@@ -4989,22 +6183,22 @@ const MasterTransactionMonitor = () => {
   const [refundDialog, setRefundDialog] = useState(null);
 
   const txnData = [
-    { id: "TXN-20260211-14523", merchant: "株式会社ABCマート", amount: 12800, brand: "VISA", processor: "GMO-PG", status: "成功", sColor: "green", time: "14:52:31", responseMs: 320, routing: "AI最適化", is3ds: true },
-    { id: "TXN-20260211-14522", merchant: "合同会社XYZショップ", amount: 3400, brand: "MC", processor: "三井住友カード", status: "成功", sColor: "green", time: "14:52:18", responseMs: 450, routing: "ブランドマッピング", is3ds: true },
-    { id: "TXN-20260211-14521", merchant: "株式会社ABCマート", amount: 89000, brand: "JCB", processor: "JCB直接", status: "成功", sColor: "green", time: "14:51:55", responseMs: 280, routing: "加盟店固定", is3ds: false },
-    { id: "TXN-20260211-14520", merchant: "株式会社トラベルプラス", amount: 245000, brand: "VISA", processor: "GMO-PG", status: "失敗", sColor: "red", time: "14:51:40", responseMs: 5020, routing: "AI最適化", is3ds: true, error: "タイムアウト（接続先無応答）", failover: "三井住友カードでリトライ → 成功" },
-    { id: "TXN-20260211-14519", merchant: "有限会社スタイルプラス", amount: 6500, brand: "VISA", processor: "GMO-PG", status: "成功", sColor: "green", time: "14:51:22", responseMs: 310, routing: "コスト最適化", is3ds: true },
-    { id: "TXN-20260211-14518", merchant: "株式会社ABCマート", amount: 1500, brand: "QR", processor: "PayPay", status: "成功", sColor: "green", time: "14:50:58", responseMs: 180, routing: "ブランドマッピング", is3ds: false },
-    { id: "TXN-20260211-14517", merchant: "合同会社XYZショップ", amount: 27800, brand: "AMEX", processor: "GMO-PG", status: "3DS待ち", sColor: "yellow", time: "14:50:45", responseMs: null, routing: "ブランドマッピング", is3ds: true },
-    { id: "TXN-20260211-14516", merchant: "株式会社トラベルプラス", amount: 158000, brand: "VISA", processor: "GMO-PG", status: "不正検知", sColor: "red", time: "14:50:12", responseMs: null, routing: "—", is3ds: false, error: "不正スコア 0.92（閾値 0.8超過）→ 例外キューへ" },
+    { id: "TXN-20260211-14523", merchant: "株式会社ABCマート", amount: 12800, brand: "VISA", processor: "GMO-PG", status: "成功", sColor: "green", time: "14:52:31", responseMs: 320, routing: "AI最適化", is3ds: true, userId: "USR-ABC-0451", userEmail: "tanaka.t@example.com", userName: "田中太郎" },
+    { id: "TXN-20260211-14522", merchant: "合同会社XYZショップ", amount: 3400, brand: "MC", processor: "三井住友カード", status: "成功", sColor: "green", time: "14:52:18", responseMs: 450, routing: "ブランドマッピング", is3ds: true, userId: "USR-XYZ-1120", userEmail: "sato.h@example.jp", userName: "佐藤花子" },
+    { id: "TXN-20260211-14521", merchant: "株式会社ABCマート", amount: 89000, brand: "JCB", processor: "JCB直接", status: "成功", sColor: "green", time: "14:51:55", responseMs: 280, routing: "加盟店固定", is3ds: false, userId: "USR-ABC-0892", userEmail: "suzuki.k@example.com", userName: "鈴木一郎" },
+    { id: "TXN-20260211-14520", merchant: "株式会社トラベルプラス", amount: 245000, brand: "VISA", processor: "GMO-PG", status: "失敗", sColor: "red", time: "14:51:40", responseMs: 5020, routing: "AI最適化", is3ds: true, error: "タイムアウト（接続先無応答）", failover: "三井住友カードでリトライ → 成功", userId: "USR-TRV-0033", userEmail: "yamada.a@example.co.jp", userName: "山田明" },
+    { id: "TXN-20260211-14519", merchant: "有限会社スタイルプラス", amount: 6500, brand: "VISA", processor: "GMO-PG", status: "成功", sColor: "green", time: "14:51:22", responseMs: 310, routing: "コスト最適化", is3ds: true, userId: "USR-STP-0215", userEmail: "watanabe.m@example.net", userName: "渡辺美咲" },
+    { id: "TXN-20260211-14518", merchant: "株式会社ABCマート", amount: 1500, brand: "QR", processor: "PayPay", status: "成功", sColor: "green", time: "14:50:58", responseMs: 180, routing: "ブランドマッピング", is3ds: false, userId: "USR-ABC-1340", userEmail: "ito.r@example.com", userName: "伊藤涼" },
+    { id: "TXN-20260211-14517", merchant: "合同会社XYZショップ", amount: 27800, brand: "AMEX", processor: "GMO-PG", status: "3DS待ち", sColor: "yellow", time: "14:50:45", responseMs: null, routing: "ブランドマッピング", is3ds: true, userId: "USR-XYZ-0788", userEmail: "takahashi.y@example.jp", userName: "高橋雄太" },
+    { id: "TXN-20260211-14516", merchant: "株式会社トラベルプラス", amount: 158000, brand: "VISA", processor: "GMO-PG", status: "不正検知", sColor: "red", time: "14:50:12", responseMs: null, routing: "—", is3ds: false, error: "不正スコア 0.92（閾値 0.8超過）→ 例外キューへ", userId: "USR-TRV-0091", userEmail: "unknown@tempmail.xyz", userName: "—" },
   ];
 
   const searchResults = [
-    { id: "TXN-20260210-13201", merchant: "株式会社ABCマート", amount: 45000, brand: "VISA", processor: "GMO-PG", status: "返金済", sColor: "purple", date: "2026-02-10 16:30:22", refundAmount: 45000 },
-    { id: "TXN-20260210-12888", merchant: "合同会社XYZショップ", amount: 8900, brand: "MC", processor: "三井住友カード", status: "成功", sColor: "green", date: "2026-02-10 14:12:05" },
-    { id: "TXN-20260210-12500", merchant: "株式会社トラベルプラス", amount: 320000, brand: "VISA", processor: "GMO-PG", status: "成功", sColor: "green", date: "2026-02-10 11:45:33" },
-    { id: "TXN-20260209-11200", merchant: "有限会社スタイルプラス", amount: 12500, brand: "JCB", processor: "JCB直接", status: "成功", sColor: "green", date: "2026-02-09 19:20:11" },
-    { id: "TXN-20260209-10800", merchant: "株式会社ABCマート", amount: 67000, brand: "AMEX", processor: "GMO-PG", status: "キャンセル", sColor: "gray", date: "2026-02-09 15:08:44" },
+    { id: "TXN-20260210-13201", merchant: "株式会社ABCマート", amount: 45000, brand: "VISA", processor: "GMO-PG", status: "返金済", sColor: "purple", date: "2026-02-10 16:30:22", refundAmount: 45000, userId: "USR-ABC-0451", userEmail: "tanaka.t@example.com", userName: "田中太郎" },
+    { id: "TXN-20260210-12888", merchant: "合同会社XYZショップ", amount: 8900, brand: "MC", processor: "三井住友カード", status: "成功", sColor: "green", date: "2026-02-10 14:12:05", userId: "USR-XYZ-0322", userEmail: "kobayashi.n@example.jp", userName: "小林直人" },
+    { id: "TXN-20260210-12500", merchant: "株式会社トラベルプラス", amount: 320000, brand: "VISA", processor: "GMO-PG", status: "成功", sColor: "green", date: "2026-02-10 11:45:33", userId: "USR-TRV-0150", userEmail: "nakamura.s@example.co.jp", userName: "中村翔" },
+    { id: "TXN-20260209-11200", merchant: "有限会社スタイルプラス", amount: 12500, brand: "JCB", processor: "JCB直接", status: "成功", sColor: "green", date: "2026-02-09 19:20:11", userId: "USR-STP-0087", userEmail: "yoshida.a@example.net", userName: "吉田愛" },
+    { id: "TXN-20260209-10800", merchant: "株式会社ABCマート", amount: 67000, brand: "AMEX", processor: "GMO-PG", status: "キャンセル", sColor: "gray", date: "2026-02-09 15:08:44", userId: "USR-ABC-0612", userEmail: "matsumoto.k@example.com", userName: "松本健" },
   ];
 
   const filtered = filterStatus === "all" ? txnData : txnData.filter(t => t.status === filterStatus);
@@ -5064,12 +6258,16 @@ const MasterTransactionMonitor = () => {
 
           {/* Transaction Feed */}
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "接続先", w: "w-28" }, { label: "ルーティング", w: "w-28" }, { label: "応答", w: "w-16" }, { label: "3DS", w: "w-10" }, { label: "状態", w: "w-20" }, { label: "時刻", w: "w-20" }]}>
+            <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "w-36" }, { label: "購入者", w: "w-32" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "接続先", w: "w-28" }, { label: "ルーティング", w: "w-28" }, { label: "応答", w: "w-16" }, { label: "3DS", w: "w-10" }, { label: "状態", w: "w-20" }, { label: "時刻", w: "w-20" }]}>
             {filtered.map((t, i) => (
               <tr key={t.id} className={`border-b cursor-pointer transition-colors ${selectedTxn === t.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"} ${t.status === "失敗" || t.status === "不正検知" ? "bg-rose-50" : ""}`}
                    onClick={() => setSelectedTxn(selectedTxn === t.id ? null : t.id)}>
                 <td className="px-4 py-2 whitespace-nowrap w-40 font-mono text-slate-500">{t.id}</td>
-                <td className="px-4 py-2 whitespace-nowrap text-slate-700">{t.merchant}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-36 text-slate-700">{t.merchant}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-32">
+                  <div className="text-slate-700 text-xs">{t.userName}</div>
+                  <div className="text-slate-400" style={{fontSize: "10px"}}>{t.userId}</div>
+                </td>
                 <td className="px-4 py-2 whitespace-nowrap w-24 text-right font-semibold text-slate-800">¥{t.amount.toLocaleString()}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={t.brand} color="blue" /></td>
                 <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-500">{t.processor}</td>
@@ -5095,7 +6293,7 @@ const MasterTransactionMonitor = () => {
                     <button onClick={() => setSelectedTxn(null)} className="text-xs text-slate-400 hover:text-slate-600">✕</button>
                   </div>
                 </div>
-                <div className="grid grid-cols-4 gap-3 text-xs">
+                <div className="grid grid-cols-5 gap-3 text-xs">
                   <div className="bg-white rounded-lg border border-slate-200 p-2.5">
                     <p className="font-semibold text-slate-600 mb-1">基本情報</p>
                     <div className="space-y-0.5 text-slate-500">
@@ -5103,6 +6301,15 @@ const MasterTransactionMonitor = () => {
                       <div>金額: ¥{t.amount.toLocaleString()}</div>
                       <div>ブランド: {t.brand}</div>
                       <div>カード番号: **** **** **** 1234</div>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                    <p className="font-semibold text-slate-600 mb-1">購入者情報</p>
+                    <div className="space-y-0.5 text-slate-500">
+                      <div>ユーザー名: {t.userName}</div>
+                      <div>ユーザーID: <span className="font-mono">{t.userId}</span></div>
+                      <div>メール: {t.userEmail}</div>
+                      <div>カード名義: TARO TANAKA</div>
                     </div>
                   </div>
                   <div className="bg-white rounded-lg border border-slate-200 p-2.5">
@@ -5205,6 +6412,9 @@ const MasterTransactionMonitor = () => {
               <div><label className="text-xs text-slate-400">金額（最大）</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="¥999,999" /></div>
               <div><label className="text-xs text-slate-400">開始日時</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5" defaultValue="2026-02-05" /></div>
               <div><label className="text-xs text-slate-400">終了日時</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5" defaultValue="2026-02-12" /></div>
+              <div><label className="text-xs text-slate-400">ユーザーID</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="USR-..." /></div>
+              <div><label className="text-xs text-slate-400">ユーザーメール</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="user@example.com" /></div>
+              <div><label className="text-xs text-slate-400">ユーザー名</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="氏名で検索" /></div>
               <div><label className="text-xs text-slate-400">代理店名</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="代理店名で検索" /></div>
               <div><label className="text-xs text-slate-400">チケット番号</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="TKT-..." /></div>
               <div><label className="text-xs text-slate-400">課金方法</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>通常決済</option><option>URL決済</option><option>リカーリング</option><option>分割払い</option></select></div>
@@ -5234,12 +6444,16 @@ const MasterTransactionMonitor = () => {
                 {["20","50","100"].map(n => <button key={n} className={`px-1.5 py-0.5 rounded ${n === "20" ? "bg-blue-100 text-blue-600" : "text-slate-400"}`}>{n}件</button>)}
               </div>
             </div>
-            <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "ステータス", w: "w-20" }, { label: "日時", w: "w-36" }, { label: "操作", w: "w-36" }]}>
+            <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "w-36" }, { label: "購入者", w: "w-32" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "ステータス", w: "w-20" }, { label: "日時", w: "w-36" }, { label: "操作", w: "w-36" }]}>
             {searchResults.map((t, i) => (
               <tr key={t.id} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50 cursor-pointer`}
                    onClick={() => setSearchSlide(t)}>
                 <td className="px-4 py-2 whitespace-nowrap w-40 font-mono text-slate-500">{t.id}</td>
-                <td className="px-4 py-2 whitespace-nowrap text-slate-700">{t.merchant}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-36 text-slate-700">{t.merchant}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-32">
+                  <div className="text-slate-700 text-xs">{t.userName}</div>
+                  <div className="text-slate-400" style={{fontSize: "10px"}}>{t.userEmail}</div>
+                </td>
                 <td className="px-4 py-2 whitespace-nowrap w-24 text-right font-semibold">¥{t.amount.toLocaleString()}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={t.brand} color="blue" /></td>
                 <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={t.status} color={t.sColor} /></td>
@@ -5319,6 +6533,15 @@ const MasterTransactionMonitor = () => {
                 <div className="flex justify-between"><span className="text-slate-400">ブランド</span><Badge text={searchSlide.brand} color="blue" /></div>
                 <div className="flex justify-between"><span className="text-slate-400">ステータス</span><Badge text={searchSlide.status} color={searchSlide.sColor} /></div>
                 <div className="flex justify-between"><span className="text-slate-400">日時</span><span>{searchSlide.date}</span></div>
+              </div>
+              <div className="border-t pt-3">
+                <p className="font-bold text-slate-600 mb-1">購入者情報</p>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between"><span className="text-slate-400">ユーザー名</span><span className="font-semibold">{searchSlide.userName}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400">ユーザーID</span><span className="font-mono">{searchSlide.userId}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400">メール</span><span className="text-blue-600">{searchSlide.userEmail}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400">カード名義</span><span>TARO TANAKA</span></div>
+                </div>
               </div>
               <div className="border-t pt-3">
                 <p className="font-bold text-slate-600 mb-1">返金履歴</p>
@@ -5401,7 +6624,7 @@ const MasterFraudSettings = () => {
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "ID", w: "w-20" }, { label: "ルール名", w: "w-36" }, { label: "種別", w: "w-24" }, { label: "条件", w: "flex-1" }, { label: "アクション", w: "w-36" }, { label: "優先度", w: "w-14" }, { label: "30日検知", w: "w-20" }, { label: "有効", w: "w-14" }, { label: "操作", w: "w-28" }]}>
             {fraudRules.map((r, i) => (
-              <tr key={r.id} className={`border-b ${!r.enabled ? "opacity-50" : ""} ${i % 2 ? "bg-slate-50" : ""}`}>
+              <tr key={r.id} className={`border-b hover:bg-blue-50 ${!r.enabled ? "opacity-50" : ""} ${i % 2 ? "bg-slate-50" : ""}`}>
                 <td className="px-4 py-2 whitespace-nowrap w-20 font-mono text-slate-400">{r.id}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-36 font-semibold text-slate-700">{r.name}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={r.type} color={r.type === "AI判定" ? "purple" : r.type === "速度チェック" ? "blue" : "gray"} /></td>
@@ -5914,11 +7137,43 @@ const MasterFraudSettings = () => {
 const MasterReport = () => {
   const [showReportModal, setShowReportModal] = useState(null);
   const [reportTab, setReportTab] = useState("summary");
+  const [previewReport, setPreviewReport] = useState(null);
+  const [showDeliveryLog, setShowDeliveryLog] = useState(false);
+
+  const reportTemplates = [
+    { name: "日次精算レポート", icon: "💰", desc: "日別の精算金額・件数・手数料", schedule: "毎日 9:00", formats: ["PDF", "CSV"], type: "daily" },
+    { name: "月次サマリーレポート", icon: "📊", desc: "月次の売上・トレンド・KPI", schedule: "毎月1日 9:00", formats: ["PDF", "Excel"], type: "monthly" },
+    { name: "加盟店別レポート", icon: "🏢", desc: "加盟店ごとの取引・精算・CB状況", schedule: "手動", formats: ["PDF", "CSV"], type: "merchant" },
+    { name: "接続先別パフォーマンス", icon: "🔌", desc: "接続先の成功率・レスポンス・コスト", schedule: "週次（月曜）", formats: ["PDF"], type: "processor" },
+    { name: "チャージバックレポート", icon: "🔄", desc: "CB発生状況・勝率・金額", schedule: "手動", formats: ["PDF", "CSV"], type: "chargeback" },
+    { name: "不正検知レポート", icon: "🛡️", desc: "検知件数・誤検知率・AIモデル精度", schedule: "週次（月曜）", formats: ["PDF"], type: "fraud" },
+  ];
+
+  const recentReports = [
+    { date: "02/11 09:00", name: "日次精算レポート", period: "2026-02-10", format: "PDF", ai: true, by: "自動（定期）", size: "1.2MB", pages: 8 },
+    { date: "02/10 09:00", name: "日次精算レポート", period: "2026-02-09", format: "PDF", ai: true, by: "自動（定期）", size: "1.1MB", pages: 7 },
+    { date: "02/10 14:30", name: "加盟店別レポート（ABCマート）", period: "2026年1月", format: "CSV", ai: false, by: "admin@...", size: "340KB", pages: 0 },
+    { date: "02/03 09:00", name: "接続先別パフォーマンス", period: "2026-W05", format: "PDF", ai: true, by: "自動（定期）", size: "980KB", pages: 5 },
+    { date: "02/01 09:00", name: "月次サマリーレポート", period: "2026年1月", format: "PDF", ai: true, by: "自動（定期）", size: "2.4MB", pages: 14 },
+  ];
+
+  const deliveryLogs = [
+    { date: "02/11 09:05", report: "日次精算レポート", method: "メール", recipient: "admin@company.jp", status: "成功", duration: "2.1s" },
+    { date: "02/11 09:05", report: "日次精算レポート", method: "Slack", recipient: "#finance", status: "成功", duration: "0.8s" },
+    { date: "02/10 09:04", report: "日次精算レポート", method: "メール", recipient: "admin@company.jp", status: "成功", duration: "1.9s" },
+    { date: "02/10 09:04", report: "日次精算レポート", method: "Slack", recipient: "#finance", status: "成功", duration: "0.7s" },
+    { date: "02/03 09:06", report: "接続先パフォーマンス", method: "メール", recipient: "admin@company.jp", status: "成功", duration: "3.2s" },
+    { date: "02/03 09:06", report: "接続先パフォーマンス", method: "Slack", recipient: "#ops", status: "失敗", duration: "—" },
+    { date: "02/01 09:10", report: "月次サマリー", method: "メール", recipient: "admin@company.jp", status: "成功", duration: "4.5s" },
+    { date: "02/01 09:10", report: "月次サマリー", method: "メール", recipient: "ceo@company.jp", status: "成功", duration: "4.6s" },
+  ];
+
   return (
   <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-slate-800">レポート</h2>
       <div className="flex gap-2">
+        <button onClick={() => setShowDeliveryLog(!showDeliveryLog)} className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded border border-slate-200">📨 配信ログ</button>
         <button onClick={() => setShowReportModal("generate")} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ レポート生成</button>
       </div>
     </div>
@@ -5927,21 +7182,37 @@ const MasterReport = () => {
       <KPICard label="今月の生成数" value="34件" sub="" />
       <KPICard label="定期配信設定" value="8件" sub="アクティブ" color="green" />
       <KPICard label="AI要約付き" value="12件" sub="35.3%" color="blue" />
+      <KPICard label="配信成功率" value="97.5%" sub="直近30日" color="green" />
     </div>
+
+    {/* Delivery Log Section */}
+    {showDeliveryLog && (
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+        <div className="flex justify-between items-center p-3 border-b">
+          <p className="text-xs font-bold text-slate-700">📨 配信ログ（直近）</p>
+          <button onClick={() => setShowDeliveryLog(false)} className="text-xs text-slate-400 hover:text-slate-600">✕ 閉じる</button>
+        </div>
+        <TableHeader cols={[{ label: "配信日時", w: "w-28" }, { label: "レポート名", w: "flex-1" }, { label: "方法", w: "w-16" }, { label: "宛先", w: "w-40" }, { label: "ステータス", w: "w-20" }, { label: "所要時間", w: "w-20" }]}>
+        {deliveryLogs.map((d, i) => (
+          <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+            <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400">{d.date}</td>
+            <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{d.report}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={d.method} color={d.method === "Slack" ? "purple" : "blue"} /></td>
+            <td className="px-4 py-2 whitespace-nowrap w-40 text-slate-500">{d.recipient}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={d.status} color={d.status === "成功" ? "green" : "red"} /></td>
+            <td className="px-4 py-2 whitespace-nowrap w-20 text-slate-400">{d.duration}</td>
+          </tr>
+        ))}
+        </TableHeader>
+      </div>
+    )}
 
     {/* Report Templates */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-700 mb-2">📄 レポートテンプレート</p>
+      <p className="text-xs font-bold text-slate-700 mb-2">📄 レポートテンプレート <span className="text-slate-400 font-normal">（クリックで自動入力して生成）</span></p>
       <div className="grid grid-cols-3 gap-2">
-        {[
-          { name: "日次精算レポート", icon: "💰", desc: "日別の精算金額・件数・手数料", schedule: "毎日 9:00", formats: ["PDF", "CSV"] },
-          { name: "月次サマリーレポート", icon: "📊", desc: "月次の売上・トレンド・KPI", schedule: "毎月1日 9:00", formats: ["PDF", "Excel"] },
-          { name: "加盟店別レポート", icon: "🏢", desc: "加盟店ごとの取引・精算・CB状況", schedule: "手動", formats: ["PDF", "CSV"] },
-          { name: "接続先別パフォーマンス", icon: "🔌", desc: "接続先の成功率・レスポンス・コスト", schedule: "週次（月曜）", formats: ["PDF"] },
-          { name: "チャージバックレポート", icon: "🔄", desc: "CB発生状況・勝率・金額", schedule: "手動", formats: ["PDF", "CSV"] },
-          { name: "不正検知レポート", icon: "🛡️", desc: "検知件数・誤検知率・AIモデル精度", schedule: "週次（月曜）", formats: ["PDF"] },
-        ].map((t, i) => (
-          <div key={i} className="border rounded-lg p-3 hover:bg-blue-50 cursor-pointer transition-colors">
+        {reportTemplates.map((t, i) => (
+          <div key={i} onClick={() => setShowReportModal(t.type)} className="border rounded-lg p-3 hover:bg-blue-50 hover:border-blue-300 cursor-pointer transition-colors">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-sm">{t.icon}</span>
               <span className="text-xs font-bold text-slate-700">{t.name}</span>
@@ -5968,24 +7239,18 @@ const MasterReport = () => {
         <p className="text-xs font-bold text-slate-700">📂 生成済みレポート（直近）</p>
         <button className="text-xs text-blue-600">すべて表示 →</button>
       </div>
-      <TableHeader cols={[{ label: "生成日", w: "w-28" }, { label: "レポート名", w: "flex-1" }, { label: "期間", w: "w-32" }, { label: "形式", w: "w-16" }, { label: "AI要約", w: "w-16" }, { label: "生成者", w: "w-28" }, { label: "操作", w: "w-24" }]}>
-      {[
-        { date: "02/11 09:00", name: "日次精算レポート", period: "2026-02-10", format: "PDF", ai: true, by: "自動（定期）" },
-        { date: "02/10 09:00", name: "日次精算レポート", period: "2026-02-09", format: "PDF", ai: true, by: "自動（定期）" },
-        { date: "02/10 14:30", name: "加盟店別レポート（ABCマート）", period: "2026年1月", format: "CSV", ai: false, by: "admin@..." },
-        { date: "02/03 09:00", name: "接続先別パフォーマンス", period: "2026-W05", format: "PDF", ai: true, by: "自動（定期）" },
-        { date: "02/01 09:00", name: "月次サマリーレポート", period: "2026年1月", format: "PDF", ai: true, by: "自動（定期）" },
-      ].map((r, i) => (
-        <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+      <TableHeader cols={[{ label: "生成日", w: "w-28" }, { label: "レポート名", w: "flex-1" }, { label: "期間", w: "w-32" }, { label: "形式", w: "w-16" }, { label: "AI要約", w: "w-16" }, { label: "生成者", w: "w-28" }, { label: "操作", w: "w-28" }]}>
+      {recentReports.map((r, i) => (
+        <tr key={i} className={`border-b hover:bg-blue-50 cursor-pointer ${i % 2 ? "bg-slate-50" : ""}`} onClick={() => setPreviewReport(r)}>
           <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400">{r.date}</td>
           <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{r.name}</td>
           <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{r.period}</td>
           <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.format} color="blue" /></td>
           <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r.ai ? "🤖" : "—"}</td>
           <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400">{r.by}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-24"><div className="flex gap-1">
-            <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">⬇ DL</button>
-            <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">👁</button>
+          <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1" onClick={e => e.stopPropagation()}>
+            <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">⬇ DL</button>
+            <button onClick={() => setPreviewReport(r)} className="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs hover:bg-blue-200">👁 プレビュー</button>
           </div></td>
         </tr>
       ))}
@@ -6045,29 +7310,142 @@ const MasterReport = () => {
       </div>
     </div>
 
+    {/* ── Modal: レポートプレビュー (PDF風) ── */}
+    {previewReport && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setPreviewReport(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[680px] max-h-[85vh] flex flex-col">
+          <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">📄 レポートプレビュー</h3>
+              <p className="text-xs text-slate-400 mt-0.5">{previewReport.name} — {previewReport.period}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">⬇ ダウンロード</button>
+              <button onClick={() => setPreviewReport(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto p-6 bg-slate-100">
+            {/* PDF-style preview */}
+            <div className="bg-white shadow-lg rounded border mx-auto max-w-[580px] p-8">
+              <div className="border-b pb-4 mb-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="text-base font-bold text-slate-800">{previewReport.name}</h4>
+                    <p className="text-xs text-slate-400 mt-1">対象期間: {previewReport.period}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-bold text-blue-600">AI Payment System</p>
+                    <p className="text-xs text-slate-400">生成日: {previewReport.date}</p>
+                    <p className="text-xs text-slate-400">{previewReport.pages}ページ / {previewReport.size}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Summary Section */}
+              <div className="mb-4">
+                <p className="text-xs font-bold text-slate-700 mb-2 border-b pb-1">1. サマリー</p>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { label: "取引件数", value: "12,450件", change: "+8.2%" },
+                    { label: "決済総額", value: "¥45.2M", change: "+12.1%" },
+                    { label: "成功率", value: "98.5%", change: "+0.3%" },
+                    { label: "手数料", value: "¥1.35M", change: "+11.8%" },
+                  ].map((s, i) => (
+                    <div key={i} className="bg-slate-50 rounded p-2 text-center">
+                      <p className="text-xs text-slate-400">{s.label}</p>
+                      <p className="text-sm font-bold text-slate-800">{s.value}</p>
+                      <p className="text-xs text-emerald-600">{s.change}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Chart placeholder */}
+              <div className="mb-4">
+                <p className="text-xs font-bold text-slate-700 mb-2 border-b pb-1">2. トレンド</p>
+                <div className="bg-slate-50 rounded border p-4 text-center">
+                  <div className="flex items-end justify-center gap-1 h-20">
+                    {[35, 42, 38, 50, 55, 48, 62, 58, 70, 65, 72, 78].map((v, i) => (
+                      <div key={i} className="w-6 bg-blue-400 rounded-t" style={{ height: `${v}%` }} />
+                    ))}
+                  </div>
+                  <p className="text-xs text-slate-400 mt-2">月次取引金額推移（直近12ヶ月）</p>
+                </div>
+              </div>
+
+              {/* Table preview */}
+              <div className="mb-4">
+                <p className="text-xs font-bold text-slate-700 mb-2 border-b pb-1">3. ブランド別内訳</p>
+                <table className="w-full text-xs">
+                  <thead><tr className="bg-slate-50 border-b">
+                    <th className="text-left px-2 py-1 font-semibold text-slate-600">ブランド</th>
+                    <th className="text-right px-2 py-1 font-semibold text-slate-600">件数</th>
+                    <th className="text-right px-2 py-1 font-semibold text-slate-600">金額</th>
+                    <th className="text-right px-2 py-1 font-semibold text-slate-600">構成比</th>
+                  </tr></thead>
+                  <tbody>
+                    {[
+                      { brand: "VISA", count: "5,980", amount: "¥21.6M", ratio: "47.8%" },
+                      { brand: "Mastercard", count: "3,240", amount: "¥12.8M", ratio: "28.3%" },
+                      { brand: "JCB", count: "2,100", amount: "¥7.2M", ratio: "15.9%" },
+                      { brand: "AMEX", count: "1,130", amount: "¥3.6M", ratio: "8.0%" },
+                    ].map((b, i) => (
+                      <tr key={i} className="border-b"><td className="px-2 py-1">{b.brand}</td><td className="px-2 py-1 text-right">{b.count}</td><td className="px-2 py-1 text-right">{b.amount}</td><td className="px-2 py-1 text-right">{b.ratio}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* AI Summary in preview */}
+              {previewReport.ai && (
+                <div className="bg-blue-50 rounded border border-blue-200 p-3">
+                  <p className="text-xs font-bold text-blue-700 mb-1">🤖 AI要約</p>
+                  <p className="text-xs text-slate-600 leading-relaxed">対象期間の決済は順調に推移。VISA比率が最も高く安定。チャージバック率は目標範囲内。特記事項なし。</p>
+                </div>
+              )}
+
+              <div className="mt-4 pt-3 border-t text-center">
+                <p className="text-xs text-slate-300">— {previewReport.pages > 0 ? `1 / ${previewReport.pages}` : "1 / 1"} —</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
     {/* ── Modal: レポート生成/スケジュール/カスタム ── */}
     {showReportModal && (
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowReportModal(null)} />
         <div className="relative bg-white rounded-xl shadow-2xl w-[520px]">
           <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
-            <h3 className="text-sm font-bold text-slate-800">{showReportModal === "generate" ? "📊 レポート生成" : showReportModal === "schedule" ? "📅 スケジュール追加" : "📝 新規レポート作成"}</h3>
+            <h3 className="text-sm font-bold text-slate-800">
+              {showReportModal === "generate" ? "📊 レポート生成" : showReportModal === "schedule" ? "📅 スケジュール追加" : showReportModal === "custom" ? "📝 新規レポート作成" : `📊 ${(reportTemplates.find(t => t.type === showReportModal) || {}).name || "レポート生成"}`}
+            </h3>
             <button onClick={() => setShowReportModal(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
           </div>
           <div className="p-5 space-y-4">
-            {showReportModal === "generate" && (<>
-              <div><label className="text-xs font-semibold text-slate-600">レポート種別 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>日次サマリー</option><option>月次レポート</option><option>不正検知レポート</option><option>精算レポート</option><option>加盟店別レポート</option></select></div>
+            {(showReportModal === "generate" || (!["schedule", "custom"].includes(showReportModal))) && (<>
+              <div><label className="text-xs font-semibold text-slate-600">レポート種別 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue={showReportModal !== "generate" ? showReportModal : "daily"}><option value="daily">日次サマリー</option><option value="monthly">月次レポート</option><option value="fraud">不正検知レポート</option><option value="chargeback">精算レポート</option><option value="merchant">加盟店別レポート</option><option value="processor">接続先別パフォーマンス</option></select></div>
+              {showReportModal !== "generate" && (
+                <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">
+                  💡 テンプレート「{(reportTemplates.find(t => t.type === showReportModal) || {}).name}」から自動入力しました
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="text-xs font-semibold text-slate-600">対象期間</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
                 <div><label className="text-xs font-semibold text-slate-600">〜</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
               </div>
               <div><label className="text-xs font-semibold text-slate-600">決済種別フィルタ</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>全て</option><option>URL決済のみ</option><option>URL決済を除外</option><option>リカーリングのみ</option><option>通常決済のみ</option></select></div>
               <div><label className="text-xs font-semibold text-slate-600">出力形式</label><div className="flex gap-2 mt-1">{["PDF","CSV","Excel"].map(f => <label key={f} className="flex items-center gap-1 text-xs"><input type="radio" name="format" defaultChecked={f==="PDF"} />{f}</label>)}</div></div>
+              <div className="flex items-center gap-2"><input type="checkbox" defaultChecked className="w-3 h-3" /><span className="text-xs text-slate-600">AI要約を含める</span></div>
             </>)}
             {showReportModal === "schedule" && (<>
               <div><label className="text-xs font-semibold text-slate-600">レポート種別 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>日次サマリー</option><option>週次レポート</option><option>月次レポート</option></select></div>
               <div><label className="text-xs font-semibold text-slate-600">スケジュール <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>毎日 09:00</option><option>毎週月曜 09:00</option><option>毎月1日 09:00</option></select></div>
               <div><label className="text-xs font-semibold text-slate-600">送信先メール</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="admin@company.jp" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">Slack通知</label><div className="flex items-center gap-2 mt-1"><input type="checkbox" className="w-3 h-3" /><span className="text-xs text-slate-500">Slackにも配信する</span></div></div>
             </>)}
             {showReportModal === "custom" && (<>
               <div><label className="text-xs font-semibold text-slate-600">レポート名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="カスタムレポート名" /></div>
@@ -6079,7 +7457,7 @@ const MasterReport = () => {
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
             <button onClick={() => setShowReportModal(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => setShowReportModal(null)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">{showReportModal === "generate" ? "生成する" : showReportModal === "schedule" ? "スケジュール登録" : "レポート作成"}</button>
+            <button onClick={() => setShowReportModal(null)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">{showReportModal === "schedule" ? "スケジュール登録" : showReportModal === "custom" ? "レポート作成" : "生成する"}</button>
           </div>
         </div>
       </div>
@@ -6089,14 +7467,27 @@ const MasterReport = () => {
 };
 
 // ─── S03: 売上レポート ───
-const MerchantSalesReport = () => (
+const MerchantSalesReport = () => {
+  const [period, setPeriod] = useState("thisMonth");
+  const [selectedTx, setSelectedTx] = useState(null);
+  const [showExportModal, setShowExportModal] = useState(null);
+
+  const txData = [
+    { id: "TXN-14523", time: "02/11 14:52", card: "**** 1234", brand: "VISA", amount: "¥12,800", status: "成功", sColor: "green", fee: "¥410", net: "¥12,390", tds: "認証済み", ip: "203.0.113.45" },
+    { id: "TXN-14521", time: "02/11 14:51", card: "**** 5678", brand: "JCB", amount: "¥89,000", status: "成功", sColor: "green", fee: "¥2,848", net: "¥86,152", tds: "認証済み", ip: "198.51.100.10" },
+    { id: "TXN-14518", time: "02/11 14:50", card: "—", brand: "QR", amount: "¥1,500", status: "成功", sColor: "green", fee: "¥30", net: "¥1,470", tds: "—", ip: "10.0.0.55" },
+    { id: "TXN-13801", time: "02/11 11:20", card: "**** 9012", brand: "MC", amount: "¥3,200", status: "返金済", sColor: "yellow", fee: "¥0", net: "¥0", tds: "認証済み", ip: "172.16.0.30" },
+  ];
+
+  return (
   <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-slate-800">売上レポート</h2>
       <div className="flex gap-2">
-        <select className="text-xs border rounded px-2 py-1"><option>今月（2026年2月）</option><option>先月（2026年1月）</option><option>カスタム</option></select>
-        <button className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">📥 CSV</button>
-        <button className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">📄 PDF出力</button>
+        <select className="text-xs border rounded px-2 py-1" value={period} onChange={e => setPeriod(e.target.value)}><option value="thisMonth">今月（2026年2月）</option><option value="lastMonth">先月（2026年1月）</option><option value="custom">カスタム</option></select>
+        {period === "custom" && <><input type="date" className="text-xs border rounded px-2 py-1" /><span className="text-xs text-slate-400">〜</span><input type="date" className="text-xs border rounded px-2 py-1" /></>}
+        <button onClick={() => setShowExportModal("csv")} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">📥 CSV</button>
+        <button onClick={() => setShowExportModal("pdf")} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">📄 PDF出力</button>
       </div>
     </div>
 
@@ -6182,26 +7573,115 @@ const MerchantSalesReport = () => (
         </div>
       </div>
       <TableHeader cols={[{ label: "取引ID", w: "w-36" }, { label: "日時", w: "w-32" }, { label: "カード", w: "w-28" }, { label: "ブランド", w: "w-16" }, { label: "金額", w: "w-24" }, { label: "状態", w: "w-16" }, { label: "操作", w: "w-16" }]}>
-      {[
-        { id: "TXN-14523", time: "02/11 14:52", card: "**** 1234", brand: "VISA", amount: "¥12,800", status: "成功", sColor: "green" },
-        { id: "TXN-14521", time: "02/11 14:51", card: "**** 5678", brand: "JCB", amount: "¥89,000", status: "成功", sColor: "green" },
-        { id: "TXN-14518", time: "02/11 14:50", card: "—", brand: "QR", amount: "¥1,500", status: "成功", sColor: "green" },
-        { id: "TXN-13801", time: "02/11 11:20", card: "**** 9012", brand: "MC", amount: "¥3,200", status: "返金済", sColor: "yellow" },
-      ].map((t, i) => (
-        <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
+      {txData.map((t, i) => (
+        <tr key={i} className={`border-b cursor-pointer hover:bg-blue-50 ${i % 2 ? "bg-slate-50" : ""}`} onClick={() => setSelectedTx(t)}>
           <td className="px-4 py-2 whitespace-nowrap w-36 font-mono text-slate-500">{t.id}</td>
           <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{t.time}</td>
           <td className="px-4 py-2 whitespace-nowrap w-28 font-mono text-slate-500">{t.card}</td>
           <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={t.brand} color="blue" /></td>
           <td className="px-4 py-2 whitespace-nowrap w-24 text-right font-semibold text-slate-800">{t.amount}</td>
           <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={t.status} color={t.sColor} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-16"><button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">詳細</button></td>
+          <td className="px-4 py-2 whitespace-nowrap w-16"><button onClick={e => { e.stopPropagation(); setSelectedTx(t); }} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">詳細</button></td>
         </tr>
       ))}
       </TableHeader>
     </div>
+
+    {/* ── Modal: 取引詳細 ── */}
+    {selectedTx && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setSelectedTx(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
+          <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">💳 取引詳細</h3>
+              <p className="text-xs text-slate-400 mt-0.5">{selectedTx.id}</p>
+            </div>
+            <button onClick={() => setSelectedTx(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          </div>
+          <div className="p-5 space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-xl font-bold text-slate-800">{selectedTx.amount}</span>
+              <Badge text={selectedTx.status} color={selectedTx.sColor} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "日時", value: selectedTx.time },
+                { label: "ブランド", value: selectedTx.brand },
+                { label: "カード番号", value: selectedTx.card },
+                { label: "3DS認証", value: selectedTx.tds },
+                { label: "手数料", value: selectedTx.fee },
+                { label: "入金額", value: selectedTx.net },
+                { label: "IPアドレス", value: selectedTx.ip },
+                { label: "ステータス", value: selectedTx.status },
+              ].map((item, i) => (
+                <div key={i} className="bg-slate-50 rounded p-2">
+                  <p className="text-xs text-slate-400">{item.label}</p>
+                  <p className="text-xs font-bold text-slate-700">{item.value}</p>
+                </div>
+              ))}
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">タイムライン</p>
+              <div className="space-y-1.5">
+                {[
+                  { time: selectedTx.time, event: "決済リクエスト受信", icon: "🔵" },
+                  { time: selectedTx.time, event: "3DS認証完了", icon: "🟢" },
+                  { time: selectedTx.time, event: "オーソリ承認", icon: "🟢" },
+                  { time: selectedTx.time, event: "売上確定", icon: "✅" },
+                ].map((e, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <span>{e.icon}</span>
+                    <span className="text-slate-400 w-24">{e.time}</span>
+                    <span className="text-slate-700">{e.event}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="p-4 border-t flex gap-2 justify-end">
+            <button onClick={() => setSelectedTx(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">閉じる</button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* ── Modal: CSV/PDFエクスポート ── */}
+    {showExportModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowExportModal(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+          <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
+            <h3 className="text-sm font-bold text-slate-800">{showExportModal === "csv" ? "📥 CSVエクスポート" : "📄 PDFエクスポート"}</h3>
+            <button onClick={() => setShowExportModal(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          </div>
+          <div className="p-5 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="text-xs font-semibold text-slate-600">対象期間</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">〜</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
+            </div>
+            {showExportModal === "csv" && (
+              <div>
+                <label className="text-xs font-semibold text-slate-600">出力カラム</label>
+                <div className="flex gap-2 flex-wrap mt-1">
+                  {["取引ID", "日時", "金額", "ブランド", "ステータス", "手数料", "入金額", "カード番号（マスク）"].map((c, i) => (
+                    <label key={i} className="flex items-center gap-1 text-xs"><input type="checkbox" defaultChecked className="w-3 h-3" />{c}</label>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div><label className="text-xs font-semibold text-slate-600">ブランドフィルタ</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>全ブランド</option><option>VISA</option><option>Mastercard</option><option>JCB</option><option>AMEX</option></select></div>
+          </div>
+          <div className="p-4 border-t flex gap-2 justify-end">
+            <button onClick={() => setShowExportModal(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+            <button onClick={() => setShowExportModal(null)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">{showExportModal === "csv" ? "CSVダウンロード" : "PDF生成"}</button>
+          </div>
+        </div>
+      </div>
+    )}
   </div>
-);
+  );
+};
 
 // ─── S08: アカウント設定 ───
 const MerchantAccountSettings = () => {
@@ -6472,6 +7952,7 @@ const MerchantPaymentLinks = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [showGenerated, setShowGenerated] = useState(false);
   const [tab, setTab] = useState("create");
+  const [selectedLink, setSelectedLink] = useState(null);
   const tabs = [
     { id: "create", label: "新規作成" },
     { id: "list", label: "リンク一覧" },
@@ -6521,35 +8002,35 @@ const MerchantPaymentLinks = () => {
           </div>
         </div>
       )}
-      {tab === "list" && (
+      {tab === "list" && (<>
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
           <div className="p-3 border-b flex gap-2">
             <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="商品名 / リンクIDで検索" />
             <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>有効</option><option>無効</option><option>期限切れ</option></select>
           </div>
           <TableHeader cols={[{ label: "リンクID", w: "w-24" }, { label: "商品名", w: "flex-1" }, { label: "タイプ", w: "w-16" }, { label: "金額", w: "w-20" }, { label: "利用回数", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-24" }]}>
-          {[{ id: "LNK-001", name: "プレミアムプラン", type: "固定", amt: "¥9,800", uses: "12/∞", st: "有効", stc: "green" },
-            { id: "LNK-002", name: "寄付金", type: "入力", amt: "—", uses: "45/100", st: "有効", stc: "green" },
-            { id: "LNK-003", name: "コース選択", type: "選択", amt: "選択式", uses: "3/10", st: "有効", stc: "green" },
-            { id: "LNK-004", name: "キャンペーン", type: "固定", amt: "¥1,980", uses: "100/100", st: "上限到達", stc: "yellow" }
+          {[{ id: "LNK-001", name: "プレミアムプラン", type: "固定", amt: "¥9,800", uses: "12/∞", st: "有効", stc: "green", url: "https://pay.aipayment.jp/l/prem001", created: "2026-01-10", expires: "無期限", successRate: "98.2%", totalSales: "¥117,600", recentTx: [{ date: "02/11 14:20", amount: "¥9,800", status: "成功" }, { date: "02/10 09:45", amount: "¥9,800", status: "成功" }] },
+            { id: "LNK-002", name: "寄付金", type: "入力", amt: "—", uses: "45/100", st: "有効", stc: "green", url: "https://pay.aipayment.jp/l/donate02", created: "2026-01-15", expires: "2026-06-30", successRate: "96.7%", totalSales: "¥1,230,000", recentTx: [{ date: "02/11 12:00", amount: "¥50,000", status: "成功" }, { date: "02/10 16:30", amount: "¥10,000", status: "成功" }] },
+            { id: "LNK-003", name: "コース選択", type: "選択", amt: "選択式", uses: "3/10", st: "有効", stc: "green", url: "https://pay.aipayment.jp/l/course03", created: "2026-02-01", expires: "2026-03-31", successRate: "100%", totalSales: "¥29,400", recentTx: [{ date: "02/09 10:00", amount: "¥9,800", status: "成功" }] },
+            { id: "LNK-004", name: "キャンペーン", type: "固定", amt: "¥1,980", uses: "100/100", st: "上限到達", stc: "yellow", url: "https://pay.aipayment.jp/l/camp04", created: "2026-01-20", expires: "2026-02-28", successRate: "97.0%", totalSales: "¥198,000", recentTx: [{ date: "02/08 11:00", amount: "¥1,980", status: "成功" }] }
           ].map((r, i) => (
-            <tr key={i} className="border-b hover:bg-slate-50">
+            <tr key={i} className="border-b hover:bg-blue-50 cursor-pointer" onClick={() => setSelectedLink(r)}>
               <td className="px-4 py-2 whitespace-nowrap w-24 text-blue-600 font-mono">{r.id}</td>
               <td className="px-4 py-2 whitespace-nowrap">{r.name}</td>
               <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.type} color="blue" /></td>
               <td className="px-4 py-2 whitespace-nowrap w-20">{r.amt}</td>
               <td className="px-4 py-2 whitespace-nowrap w-16">{r.uses}</td>
               <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st} color={r.stc} /></td>
-              <td className="px-4 py-2 whitespace-nowrap w-24"><div className="flex gap-1">
-                <button className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border">📋</button>
-                <button className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border">QR</button>
-                <button className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border">⏸</button>
+              <td className="px-4 py-2 whitespace-nowrap w-24" onClick={e => e.stopPropagation()}><div className="flex gap-1">
+                <button className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border hover:bg-slate-200">📋</button>
+                <button className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border hover:bg-slate-200">QR</button>
+                <button className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border hover:bg-slate-200">⏸</button>
               </div></td>
             </tr>
           ))}
           </TableHeader>
         </div>
-      )}
+      </>)}
       {tab === "stats" && (
         <div className="space-y-3">
           <div className="grid grid-cols-4 gap-3">
@@ -6599,6 +8080,83 @@ const MerchantPaymentLinks = () => {
         </div>
       )}
 
+      {/* ── Slide Panel: リンク詳細 ── */}
+      {selectedLink && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedLink(null)} />
+          <div className="w-[440px] bg-white shadow-xl border-l overflow-y-auto">
+            <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
+              <h3 className="text-sm font-bold text-slate-800">🔗 リンク詳細</h3>
+              <button onClick={() => setSelectedLink(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+            <div className="p-5 space-y-4">
+              {/* Link Info */}
+              <div className="text-center">
+                <p className="text-xs text-slate-400">{selectedLink.id}</p>
+                <p className="text-base font-bold text-slate-800 mt-1">{selectedLink.name}</p>
+                <div className="flex items-center justify-center gap-2 mt-1">
+                  <Badge text={selectedLink.type} color="blue" />
+                  <Badge text={selectedLink.st} color={selectedLink.stc} />
+                </div>
+              </div>
+
+              {/* URL & QR */}
+              <div className="bg-slate-50 rounded-lg border p-3">
+                <p className="text-xs font-bold text-slate-700 mb-1">決済リンクURL</p>
+                <div className="flex items-center gap-2">
+                  <input className="flex-1 text-xs border rounded px-2 py-1 bg-white" value={selectedLink.url} readOnly />
+                  <button className="px-2 py-1 bg-emerald-600 text-white rounded text-xs">📋</button>
+                </div>
+                <div className="mt-3 text-center">
+                  <div className="w-24 h-24 bg-white border-2 border-slate-300 rounded mx-auto flex items-center justify-center">
+                    <span className="text-3xl">📱</span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-1">QRコード</p>
+                </div>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "金額", value: selectedLink.amt },
+                  { label: "利用回数", value: selectedLink.uses },
+                  { label: "成功率", value: selectedLink.successRate },
+                  { label: "総売上", value: selectedLink.totalSales },
+                  { label: "作成日", value: selectedLink.created },
+                  { label: "有効期限", value: selectedLink.expires },
+                ].map((s, i) => (
+                  <div key={i} className="bg-slate-50 rounded p-2">
+                    <p className="text-xs text-slate-400">{s.label}</p>
+                    <p className="text-xs font-bold text-slate-700">{s.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Recent Transactions */}
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">💳 直近の取引</p>
+                <div className="space-y-1">
+                  {selectedLink.recentTx.map((tx, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs p-2 bg-slate-50 rounded border">
+                      <span className="text-slate-400">{tx.date}</span>
+                      <span className="font-semibold text-slate-700">{tx.amount}</span>
+                      <Badge text={tx.status} color="green" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 pt-2 border-t">
+                <button className="flex-1 px-3 py-2 bg-slate-100 text-slate-600 rounded text-xs border hover:bg-slate-200">✏️ 編集</button>
+                <button className="flex-1 px-3 py-2 bg-amber-50 text-amber-700 rounded text-xs border border-amber-200 hover:bg-amber-100">⏸ 一時停止</button>
+                <button className="px-3 py-2 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200 hover:bg-rose-100">🗑</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Modal: リンク生成完了 ── */}
       {showGenerated && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -6629,7 +8187,12 @@ const MerchantPaymentLinks = () => {
 const MerchantSubscriptions = () => {
   const [showCreatePlan, setShowCreatePlan] = useState(false);
   const [tab, setTab] = useState("plans");
-  const tabs = [{ id: "plans", label: "商品設定" }, { id: "users", label: "ユーザー管理" }, { id: "history", label: "決済履歴" }];
+  const [selectedSubUser, setSelectedSubUser] = useState(null);
+  const [selectedSubPlan, setSelectedSubPlan] = useState(null);
+  const [csvTab, setCsvTab] = useState("upload");
+  const [showCsvPreview, setShowCsvPreview] = useState(false);
+  const [selectedCsvBatch, setSelectedCsvBatch] = useState(null);
+  const tabs = [{ id: "plans", label: "商品設定" }, { id: "users", label: "ユーザー管理" }, { id: "history", label: "決済履歴" }, { id: "csv", label: "CSV決済" }];
   return (
     <div className="p-5 space-y-4">
       <div className="flex items-center justify-between">
@@ -6643,19 +8206,19 @@ const MerchantSubscriptions = () => {
           <button onClick={() => setShowCreatePlan(!showCreatePlan)} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-bold">+ プラン作成</button>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "プラン名", w: "flex-1" }, { label: "タイプ", w: "w-16" }, { label: "金額", w: "w-24" }, { label: "サイクル", w: "w-20" }, { label: "ユーザー数", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]}>
-            {[{ name: "月額スタンダード", type: "継続", amt: "¥2,980/月", cycle: "毎月1日", users: "342", st: "active" },
-              { name: "年間プレミアム", type: "継続", amt: "¥29,800/年", cycle: "365日", users: "89", st: "active" },
-              { name: "3回分割払い", type: "分割", amt: "¥15,000(3回)", cycle: "毎月15日", users: "56", st: "active" },
-              { name: "旧プラン", type: "継続", amt: "¥1,980/月", cycle: "毎月1日", users: "12", st: "archived" }
+            {[{ name: "月額スタンダード", type: "継続", amt: "¥2,980/月", cycle: "毎月1日", users: "342", st: "active", created: "2025-06-01", mrr: "¥1,019,160", churn: "2.1%", trial: "7日間" },
+              { name: "年間プレミアム", type: "継続", amt: "¥29,800/年", cycle: "365日", users: "89", st: "active", created: "2025-06-01", mrr: "¥221,017", churn: "0.5%", trial: "14日間" },
+              { name: "3回分割払い", type: "分割", amt: "¥15,000(3回)", cycle: "毎月15日", users: "56", st: "active", created: "2025-09-15", mrr: "¥280,000", churn: "—", trial: "なし" },
+              { name: "旧プラン", type: "継続", amt: "¥1,980/月", cycle: "毎月1日", users: "12", st: "archived", created: "2024-01-01", mrr: "¥23,760", churn: "8.3%", trial: "なし" }
             ].map((r, i) => (
-              <tr key={i} className="border-b hover:bg-slate-50">
+              <tr key={i} className="border-b hover:bg-blue-50 cursor-pointer" onClick={() => setSelectedSubPlan(r)}>
                 <td className="px-4 py-2 whitespace-nowrap font-bold">{r.name}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} /></td>
                 <td className="px-4 py-2 whitespace-nowrap w-24">{r.amt}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-20 text-slate-500">{r.cycle}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r.users}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st === "active" ? "有効" : "アーカイブ"} color={r.st === "active" ? "green" : "gray"} /></td>
-                <td className="px-4 py-2 whitespace-nowrap w-16"><button className="text-blue-600 text-xs">編集</button></td>
+                <td className="px-4 py-2 whitespace-nowrap w-16" onClick={e => e.stopPropagation()}><button onClick={() => setSelectedSubPlan(r)} className="text-blue-600 text-xs hover:underline">編集</button></td>
               </tr>
             ))}
             </TableHeader>
@@ -6670,12 +8233,12 @@ const MerchantSubscriptions = () => {
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "ユーザーID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "プラン", w: "w-28" }, { label: "カード", w: "w-16" }, { label: "次回決済", w: "w-20" }, { label: "失敗", w: "w-10" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-28" }]}>
-            {[{ uid: "USR-001", email: "user1@example.com", plan: "月額スタンダード", card: "*4242", next: "03/01", fails: "0", st: "課金中", stc: "green" },
-              { uid: "USR-002", email: "user2@example.com", plan: "3回分割払い", card: "*1234", next: "03/15", fails: "0", st: "課金中", stc: "green" },
-              { uid: "USR-003", email: "user3@example.com", plan: "月額スタンダード", card: "*5678", next: "02/23", fails: "2", st: "リトライ中", stc: "yellow" },
-              { uid: "USR-004", email: "user4@example.com", plan: "月額スタンダード", card: "*9999", next: "—", fails: "3", st: "自動停止", stc: "red" }
+            {[{ uid: "USR-001", email: "user1@example.com", plan: "月額スタンダード", card: "*4242", next: "03/01", fails: "0", st: "課金中", stc: "green", joined: "2025-08-10", total: "¥20,860", payments: [{ date: "02/01", amount: "¥2,980", status: "成功" }, { date: "01/01", amount: "¥2,980", status: "成功" }, { date: "12/01", amount: "¥2,980", status: "成功" }] },
+              { uid: "USR-002", email: "user2@example.com", plan: "3回分割払い", card: "*1234", next: "03/15", fails: "0", st: "課金中", stc: "green", joined: "2026-01-15", total: "¥10,000", payments: [{ date: "02/15", amount: "¥5,000", status: "成功" }, { date: "01/15", amount: "¥5,000", status: "成功" }] },
+              { uid: "USR-003", email: "user3@example.com", plan: "月額スタンダード", card: "*5678", next: "02/23", fails: "2", st: "リトライ中", stc: "yellow", joined: "2025-10-01", total: "¥11,920", payments: [{ date: "02/01", amount: "¥2,980", status: "失敗" }, { date: "02/11", amount: "¥2,980", status: "失敗" }, { date: "01/01", amount: "¥2,980", status: "成功" }] },
+              { uid: "USR-004", email: "user4@example.com", plan: "月額スタンダード", card: "*9999", next: "—", fails: "3", st: "自動停止", stc: "red", joined: "2025-11-15", total: "¥5,960", payments: [{ date: "02/01", amount: "¥2,980", status: "失敗" }, { date: "01/01", amount: "¥2,980", status: "成功" }, { date: "12/01", amount: "¥2,980", status: "成功" }] }
             ].map((r, i) => (
-              <tr key={i} className="border-b hover:bg-slate-50">
+              <tr key={i} className="border-b hover:bg-blue-50 cursor-pointer" onClick={() => setSelectedSubUser(r)}>
                 <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{r.uid}</td>
                 <td className="px-4 py-2 whitespace-nowrap">{r.email}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-28">{r.plan}</td>
@@ -6683,7 +8246,7 @@ const MerchantSubscriptions = () => {
                 <td className="px-4 py-2 whitespace-nowrap w-20">{r.next}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-10 text-center">{r.fails !== "0" && <span className="text-rose-600 font-bold">{r.fails}</span>}{r.fails === "0" && "—"}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st} color={r.stc} /></td>
-                <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1">{r.st === "課金中" && <><button className="px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-xs border border-amber-200">一時停止</button><button className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200">カード変更URL</button></>}{r.st === "一時停止" && <button className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded text-xs border border-emerald-200">再開</button>}{r.st === "リトライ中" && <button className="px-1.5 py-0.5 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200">永久停止</button>}</div></td>
+                <td className="px-4 py-2 whitespace-nowrap w-28" onClick={e => e.stopPropagation()}><div className="flex gap-1">{r.st === "課金中" && <><button className="px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-xs border border-amber-200">一時停止</button><button className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200">カード変更URL</button></>}{r.st === "一時停止" && <button className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded text-xs border border-emerald-200">再開</button>}{r.st === "リトライ中" && <button className="px-1.5 py-0.5 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200">永久停止</button>}</div></td>
               </tr>
             ))}
             </TableHeader>
@@ -6707,6 +8270,428 @@ const MerchantSubscriptions = () => {
               </tr>
             ))}
             </TableHeader>
+          </div>
+        </div>
+      )}
+
+      {/* ===== CSV決済タブ ===== */}
+      {tab === "csv" && (
+        <div className="space-y-3">
+          <div className="flex gap-1 border-b">
+            {[{ id: "upload", label: "CSVアップロード" }, { id: "batches", label: "決済バッチ一覧" }, { id: "format", label: "フォーマット説明" }].map(t => (
+              <button key={t.id} onClick={() => setCsvTab(t.id)} className={`px-3 py-1.5 text-xs border-b-2 ${csvTab === t.id ? "border-emerald-500 text-emerald-700 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+            ))}
+          </div>
+
+          {csvTab === "upload" && (
+            <div className="space-y-3">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs text-emerald-700">
+                <p className="font-bold mb-1">📋 CSV決済の流れ</p>
+                <div className="flex gap-4 items-center text-slate-600">
+                  <div className="flex items-center gap-1"><span className="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span><span>CSV作成・UP</span></div>
+                  <span className="text-slate-300">→</span>
+                  <div className="flex items-center gap-1"><span className="w-5 h-5 bg-slate-300 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span><span>運営側承認</span></div>
+                  <span className="text-slate-300">→</span>
+                  <div className="flex items-center gap-1"><span className="w-5 h-5 bg-slate-300 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span><span>バッチ決済実行</span></div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg border-2 border-dashed border-slate-300 p-6 text-center hover:border-emerald-400 transition-colors cursor-pointer">
+                <div className="text-3xl mb-2">📁</div>
+                <p className="text-xs font-bold text-slate-700">CSVファイルをドラッグ＆ドロップ</p>
+                <p className="text-xs text-slate-400 mt-1">または<button className="text-emerald-600 font-semibold underline ml-1">ファイルを選択</button></p>
+                <p className="text-xs text-slate-300 mt-2">対応形式: CSV (UTF-8) / 最大: 10MB / 最大行数: 10,000件</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600">決済予定日 <span className="text-rose-500">*</span></label>
+                  <input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="2026-02-20" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600">バッチ名（任意）</label>
+                  <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 2月月謝決済" />
+                </div>
+              </div>
+
+              {/* CSV Preview */}
+              <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
+                <div className="p-3 border-b flex justify-between items-center bg-slate-50">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-700">📄 プレビュー: 202602_monthly.csv</span>
+                    <Badge text="5件" color="blue" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge text="エラー 0件" color="green" />
+                    <Badge text="警告 1件" color="yellow" />
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead><tr className="bg-slate-50 border-b">
+                      <th className="px-3 py-1.5 text-left text-slate-500 font-semibold">#</th>
+                      <th className="px-3 py-1.5 text-left text-slate-500 font-semibold">paymentid</th>
+                      <th className="px-3 py-1.5 text-left text-slate-500 font-semibold">price</th>
+                      <th className="px-3 py-1.5 text-left text-slate-500 font-semibold">email</th>
+                      <th className="px-3 py-1.5 text-left text-slate-500 font-semibold">tel</th>
+                      <th className="px-3 py-1.5 text-left text-slate-500 font-semibold">productName</th>
+                      <th className="px-3 py-1.5 text-left text-slate-500 font-semibold">orderid</th>
+                      <th className="px-3 py-1.5 text-left text-slate-500 font-semibold">free1</th>
+                      <th className="px-3 py-1.5 text-left text-slate-500 font-semibold">検証</th>
+                    </tr></thead>
+                    <tbody>
+                      {[
+                        { no: 1, pid: "PAY-20260115-001", price: "9800", email: "tanaka@example.com", tel: "090-1234-5678", product: "月額会費2月分", oid: "ORD-2026-0201", free1: "田中太郎", ok: true },
+                        { no: 2, pid: "PAY-20260115-002", price: "9800", email: "sato@example.com", tel: "080-9876-5432", product: "月額会費2月分", oid: "ORD-2026-0202", free1: "佐藤花子", ok: true },
+                        { no: 3, pid: "PAY-20260115-003", price: "5000", email: "suzuki@example.com", tel: "070-1111-2222", product: "月額会費2月分（割引）", oid: "ORD-2026-0203", free1: "鈴木一郎", ok: true },
+                        { no: 4, pid: "", price: "9800", email: "yamada@example.com", tel: "090-3333-4444", product: "月額会費2月分", oid: "ORD-2026-0204", free1: "山田明", ok: true, warn: "新規: paymentidなし→新規決済として処理" },
+                        { no: 5, pid: "PAY-20260115-005", price: "12000", email: "ito@example.com", tel: "080-5555-6666", product: "月額会費2月分（上級）", oid: "ORD-2026-0205", free1: "伊藤涼", ok: true },
+                      ].map((r, i) => (
+                        <tr key={i} className={`border-b ${r.warn ? "bg-amber-50" : i % 2 ? "bg-slate-50" : ""}`}>
+                          <td className="px-3 py-1.5 text-slate-400">{r.no}</td>
+                          <td className="px-3 py-1.5 font-mono text-blue-600">{r.pid || <span className="text-amber-500 italic">—（新規）</span>}</td>
+                          <td className="px-3 py-1.5 font-semibold">¥{Number(r.price).toLocaleString()}</td>
+                          <td className="px-3 py-1.5 text-slate-500">{r.email}</td>
+                          <td className="px-3 py-1.5 text-slate-500">{r.tel}</td>
+                          <td className="px-3 py-1.5">{r.product}</td>
+                          <td className="px-3 py-1.5 font-mono text-slate-400">{r.oid}</td>
+                          <td className="px-3 py-1.5 text-slate-500">{r.free1}</td>
+                          <td className="px-3 py-1.5">{r.ok ? <Badge text={r.warn ? "警告" : "OK"} color={r.warn ? "yellow" : "green"} /> : <Badge text="エラー" color="red" />}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Warning detail */}
+                <div className="px-3 py-2 bg-amber-50 border-t border-amber-200 text-xs text-amber-700 flex items-center gap-1">
+                  <span>⚠️</span> 行4: paymentidが空のため、新規決済として処理されます。過去の決済IDがある場合は入力してください。
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <p className="text-xs text-slate-400">合計金額: <span className="font-bold text-slate-700">¥46,400</span>（5件）</p>
+                <div className="flex gap-2">
+                  <button className="px-3 py-1.5 text-xs text-slate-500 border rounded hover:bg-slate-50">テンプレートCSVをDL</button>
+                  <button onClick={() => setShowCsvPreview(true)} className="px-4 py-1.5 text-xs bg-emerald-600 text-white rounded font-bold hover:bg-emerald-700">アップロードして承認依頼</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {csvTab === "batches" && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-4 gap-3">
+                <KPICard label="承認待ち" value="1件" color="yellow" />
+                <KPICard label="承認済み（実行待ち）" value="1件" color="blue" />
+                <KPICard label="今月実行済み" value="3件" color="green" />
+                <KPICard label="今月決済総額" value="¥284,600" color="green" />
+              </div>
+              <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+                <TableHeader cols={[{ label: "バッチID", w: "w-24" }, { label: "バッチ名", w: "flex-1" }, { label: "件数", w: "w-14" }, { label: "合計金額", w: "w-24" }, { label: "決済予定日", w: "w-24" }, { label: "アップロード日", w: "w-28" }, { label: "ステータス", w: "w-20" }]}>
+                {[
+                  { id: "CSV-0045", name: "2月月謝決済", count: "42", total: "¥411,600", schedule: "2026-02-20", uploaded: "2026-02-14 10:30", st: "承認待ち", stc: "yellow", results: null },
+                  { id: "CSV-0044", name: "2月追加分", count: "8", total: "¥78,400", schedule: "2026-02-18", uploaded: "2026-02-12 14:15", st: "承認済", stc: "blue", results: null },
+                  { id: "CSV-0043", name: "1月月謝決済", count: "38", total: "¥372,400", schedule: "2026-01-20", uploaded: "2026-01-14 09:45", st: "完了", stc: "green", results: { success: 36, fail: 2, total: "¥352,800" } },
+                  { id: "CSV-0042", name: "1月追加分", count: "5", total: "¥49,000", schedule: "2026-01-15", uploaded: "2026-01-10 11:20", st: "完了", stc: "green", results: { success: 5, fail: 0, total: "¥49,000" } },
+                  { id: "CSV-0041", name: "12月月謝決済", count: "35", total: "¥343,000", schedule: "2025-12-20", uploaded: "2025-12-14 10:00", st: "完了", stc: "green", results: { success: 34, fail: 1, total: "¥333,200" } },
+                ].map((r, i) => (
+                  <tr key={i} className="border-b hover:bg-blue-50 cursor-pointer" onClick={() => setSelectedCsvBatch(r)}>
+                    <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{r.id}</td>
+                    <td className="px-4 py-2 whitespace-nowrap font-semibold">{r.name}</td>
+                    <td className="px-4 py-2 whitespace-nowrap w-14 text-center">{r.count}</td>
+                    <td className="px-4 py-2 whitespace-nowrap w-24 font-semibold">{r.total}</td>
+                    <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-500">{r.schedule}</td>
+                    <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400">{r.uploaded}</td>
+                    <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={r.st} color={r.stc} /></td>
+                  </tr>
+                ))}
+                </TableHeader>
+              </div>
+            </div>
+          )}
+
+          {csvTab === "format" && (
+            <div className="space-y-3">
+              <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 space-y-3">
+                <p className="text-xs font-bold text-slate-800">📋 CSVフォーマット仕様</p>
+                <div className="bg-slate-800 rounded-lg p-3 font-mono text-xs text-emerald-400 overflow-x-auto">
+                  paymentid,price,email,tel,productName,orderid,free1,free2,free3
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead><tr className="bg-slate-50 border-b">
+                      <th className="px-3 py-1.5 text-left text-slate-500 w-28">カラム名</th>
+                      <th className="px-3 py-1.5 text-left text-slate-500 w-14">必須</th>
+                      <th className="px-3 py-1.5 text-left text-slate-500 w-16">型</th>
+                      <th className="px-3 py-1.5 text-left text-slate-500">説明</th>
+                    </tr></thead>
+                    <tbody>
+                      {[
+                        { col: "paymentid", req: "条件付", type: "文字列", desc: "過去の決済ID。継続決済時は前回のIDを指定。空の場合は新規決済として処理され、新しいIDが振られる" },
+                        { col: "price", req: "必須", type: "数値", desc: "決済金額（税込）。整数のみ、小数点不可" },
+                        { col: "email", req: "必須", type: "文字列", desc: "購入者メールアドレス。決済通知の送信先" },
+                        { col: "tel", req: "任意", type: "文字列", desc: "購入者電話番号。ハイフン有無どちらも可" },
+                        { col: "productName", req: "必須", type: "文字列", desc: "商品名。決済明細・通知に表示される" },
+                        { col: "orderid", req: "任意", type: "文字列", desc: "加盟店側の注文ID。管理用の任意文字列" },
+                        { col: "free1", req: "任意", type: "文字列", desc: "自由項目1（例: 会員名）" },
+                        { col: "free2", req: "任意", type: "文字列", desc: "自由項目2（例: 会員番号）" },
+                        { col: "free3", req: "任意", type: "文字列", desc: "自由項目3（例: 備考）" },
+                      ].map((r, i) => (
+                        <tr key={i} className="border-b">
+                          <td className="px-3 py-1.5 font-mono font-bold text-blue-700">{r.col}</td>
+                          <td className="px-3 py-1.5"><Badge text={r.req} color={r.req === "必須" ? "red" : r.req === "条件付" ? "yellow" : "gray"} /></td>
+                          <td className="px-3 py-1.5 text-slate-500">{r.type}</td>
+                          <td className="px-3 py-1.5 text-slate-600">{r.desc}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs space-y-2">
+                <p className="font-bold text-blue-700">💡 CSV決済の仕組み</p>
+                <ul className="space-y-1 text-blue-600">
+                  <li>• <span className="font-semibold">paymentid</span>に過去の決済IDを入力すると、そのカード情報を利用して継続決済を行います</li>
+                  <li>• CSV決済で新しい決済が成功すると、<span className="font-semibold">新しい決済ID</span>が振られます</li>
+                  <li>• CSVに含めなければ決済されないため、<span className="font-semibold">休会対応</span>が簡単にできます</li>
+                  <li>• 金額を変更すれば<span className="font-semibold">変動する月謝</span>にも対応可能です</li>
+                  <li>• 文字コードは<span className="font-semibold">UTF-8</span>を使用してください</li>
+                </ul>
+              </div>
+              <div className="flex gap-2">
+                <button className="px-3 py-1.5 text-xs bg-slate-100 text-slate-600 rounded border hover:bg-slate-200">📥 テンプレートCSVをダウンロード</button>
+                <button className="px-3 py-1.5 text-xs bg-slate-100 text-slate-600 rounded border hover:bg-slate-200">📥 サンプルCSV（記入例）をダウンロード</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── CSV アップロード確認モーダル ── */}
+      {showCsvPreview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowCsvPreview(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
+            <div className="p-4 border-b bg-emerald-50 rounded-t-xl">
+              <h3 className="text-sm font-bold text-slate-800">📤 CSV決済 承認依頼の確認</h3>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="bg-slate-50 rounded-lg border p-3 space-y-1.5 text-xs">
+                <div className="flex justify-between"><span className="text-slate-400">ファイル名</span><span className="font-mono">202602_monthly.csv</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">決済件数</span><span className="font-bold">5件</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">合計金額</span><span className="font-bold text-emerald-600">¥46,400</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">決済予定日</span><span>2026-02-20</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">バッチ名</span><span>2月月謝決済</span></div>
+              </div>
+              <div className="bg-amber-50 border border-amber-200 rounded p-2 text-xs text-amber-700">
+                <p className="font-bold">⚠️ アップロード後の流れ</p>
+                <p className="mt-1">運営側で内容を確認・承認した後、決済予定日にバッチ処理で自動決済されます。承認前であれば取り消し可能です。</p>
+              </div>
+            </div>
+            <div className="p-4 border-t flex gap-2 justify-end">
+              <button onClick={() => setShowCsvPreview(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => { setShowCsvPreview(false); setCsvTab("batches"); }} className="px-4 py-2 text-xs bg-emerald-600 text-white rounded font-semibold hover:bg-emerald-700">承認依頼を送信</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── CSV バッチ詳細スライドパネル ── */}
+      {selectedCsvBatch && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedCsvBatch(null)} />
+          <div className="w-[440px] bg-white shadow-xl border-l overflow-y-auto">
+            <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
+              <h3 className="text-sm font-bold text-slate-800">📦 CSVバッチ詳細</h3>
+              <button onClick={() => setSelectedCsvBatch(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="flex items-center gap-2 justify-center">
+                <span className="font-mono text-sm font-bold text-slate-800">{selectedCsvBatch.id}</span>
+                <Badge text={selectedCsvBatch.st} color={selectedCsvBatch.stc} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "バッチ名", value: selectedCsvBatch.name },
+                  { label: "決済件数", value: `${selectedCsvBatch.count}件` },
+                  { label: "合計金額", value: selectedCsvBatch.total },
+                  { label: "決済予定日", value: selectedCsvBatch.schedule },
+                  { label: "アップロード日", value: selectedCsvBatch.uploaded },
+                  { label: "ステータス", value: selectedCsvBatch.st },
+                ].map((s, i) => (
+                  <div key={i} className="bg-slate-50 rounded p-2">
+                    <p className="text-xs text-slate-400">{s.label}</p>
+                    <p className="text-xs font-bold text-slate-700">{s.value}</p>
+                  </div>
+                ))}
+              </div>
+              {selectedCsvBatch.results && (
+                <div className="bg-emerald-50 rounded border border-emerald-200 p-3">
+                  <p className="text-xs font-bold text-emerald-700 mb-2">📊 実行結果</p>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="text-center"><p className="text-slate-400">成功</p><p className="text-lg font-bold text-emerald-600">{selectedCsvBatch.results.success}</p></div>
+                    <div className="text-center"><p className="text-slate-400">失敗</p><p className="text-lg font-bold text-rose-600">{selectedCsvBatch.results.fail}</p></div>
+                    <div className="text-center"><p className="text-slate-400">決済額</p><p className="text-lg font-bold text-slate-700">{selectedCsvBatch.results.total}</p></div>
+                  </div>
+                </div>
+              )}
+              {/* Timeline */}
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">📋 処理タイムライン</p>
+                <div className="space-y-2">
+                  {[
+                    { date: selectedCsvBatch.uploaded, event: "CSVアップロード", icon: "📤" },
+                    ...(selectedCsvBatch.st !== "承認待ち" ? [{ date: selectedCsvBatch.uploaded.split(" ")[0] + " 15:00", event: "運営側承認", icon: "✅" }] : []),
+                    ...(selectedCsvBatch.st === "完了" ? [{ date: selectedCsvBatch.schedule + " 02:00", event: "バッチ決済実行・完了", icon: "💳" }] : []),
+                  ].map((e, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs">
+                      <span>{e.icon}</span>
+                      <span className="w-28 text-slate-400">{e.date}</span>
+                      <span className="text-slate-700">{e.event}</span>
+                    </div>
+                  ))}
+                  {selectedCsvBatch.st === "承認待ち" && (
+                    <div className="flex items-center gap-2 text-xs text-amber-600">
+                      <span>⏳</span><span className="w-28">—</span><span>承認待ち中...</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-2 pt-2 border-t">
+                <button className="flex-1 px-3 py-2 bg-slate-50 text-slate-600 rounded text-xs border hover:bg-slate-100">📥 CSVダウンロード</button>
+                {selectedCsvBatch.results && <button className="flex-1 px-3 py-2 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200 hover:bg-blue-100">📊 結果CSVダウンロード</button>}
+                {selectedCsvBatch.st === "承認待ち" && <button className="flex-1 px-3 py-2 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200 hover:bg-rose-100">取り消し</button>}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Slide Panel: ユーザー詳細 ── */}
+      {selectedSubUser && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedSubUser(null)} />
+          <div className="w-[420px] bg-white shadow-xl border-l overflow-y-auto">
+            <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
+              <h3 className="text-sm font-bold text-slate-800">👤 ユーザー詳細</h3>
+              <button onClick={() => setSelectedSubUser(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="text-center">
+                <p className="text-xs text-slate-400">{selectedSubUser.uid}</p>
+                <p className="text-sm font-bold text-slate-800 mt-1">{selectedSubUser.email}</p>
+                <div className="flex items-center justify-center gap-2 mt-1">
+                  <Badge text={selectedSubUser.plan} color="blue" />
+                  <Badge text={selectedSubUser.st} color={selectedSubUser.stc} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "登録日", value: selectedSubUser.joined },
+                  { label: "カード", value: selectedSubUser.card },
+                  { label: "次回決済", value: selectedSubUser.next },
+                  { label: "失敗回数", value: selectedSubUser.fails },
+                  { label: "累計支払額", value: selectedSubUser.total },
+                  { label: "ステータス", value: selectedSubUser.st },
+                ].map((s, i) => (
+                  <div key={i} className="bg-slate-50 rounded p-2">
+                    <p className="text-xs text-slate-400">{s.label}</p>
+                    <p className="text-xs font-bold text-slate-700">{s.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Lifecycle Timeline */}
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">📋 ライフサイクル</p>
+                <div className="space-y-2">
+                  {[
+                    { date: selectedSubUser.joined, event: "プラン登録", icon: "🟢" },
+                    ...selectedSubUser.payments.map(p => ({
+                      date: p.date, event: `決済 ${p.amount} ${p.status}`, icon: p.status === "成功" ? "✅" : "❌"
+                    })),
+                  ].map((e, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs">
+                      <span>{e.icon}</span>
+                      <span className="w-20 text-slate-400">{e.date}</span>
+                      <span className="text-slate-700">{e.event}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2 border-t">
+                {selectedSubUser.st === "課金中" && <button className="flex-1 px-3 py-2 bg-amber-50 text-amber-700 rounded text-xs border border-amber-200 font-semibold hover:bg-amber-100">⏸ 一時停止</button>}
+                {selectedSubUser.st === "リトライ中" && <button className="flex-1 px-3 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">🔄 手動リトライ</button>}
+                {selectedSubUser.st === "自動停止" && <button className="flex-1 px-3 py-2 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700">♻️ 再開</button>}
+                <button className="px-3 py-2 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200 hover:bg-blue-100">💳 カード変更URL発行</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Slide Panel: プラン詳細 ── */}
+      {selectedSubPlan && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedSubPlan(null)} />
+          <div className="w-[420px] bg-white shadow-xl border-l overflow-y-auto">
+            <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
+              <h3 className="text-sm font-bold text-slate-800">📦 プラン詳細</h3>
+              <button onClick={() => setSelectedSubPlan(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="text-center">
+                <p className="text-base font-bold text-slate-800">{selectedSubPlan.name}</p>
+                <div className="flex items-center justify-center gap-2 mt-1">
+                  <Badge text={selectedSubPlan.type} color={selectedSubPlan.type === "継続" ? "blue" : "purple"} />
+                  <Badge text={selectedSubPlan.st === "active" ? "有効" : "アーカイブ"} color={selectedSubPlan.st === "active" ? "green" : "gray"} />
+                </div>
+                <p className="text-xl font-bold text-emerald-600 mt-2">{selectedSubPlan.amt}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "課金サイクル", value: selectedSubPlan.cycle },
+                  { label: "ユーザー数", value: `${selectedSubPlan.users}名` },
+                  { label: "MRR", value: selectedSubPlan.mrr },
+                  { label: "解約率", value: selectedSubPlan.churn },
+                  { label: "トライアル", value: selectedSubPlan.trial },
+                  { label: "作成日", value: selectedSubPlan.created },
+                ].map((s, i) => (
+                  <div key={i} className="bg-slate-50 rounded p-2">
+                    <p className="text-xs text-slate-400">{s.label}</p>
+                    <p className="text-xs font-bold text-slate-700">{s.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* User Count Chart */}
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">📈 ユーザー数推移</p>
+                <div className="flex items-end gap-1 h-16 bg-slate-50 rounded p-2">
+                  {[280, 295, 305, 310, 318, 325, 330, 335, 338, 340, 342, 342].map((v, i) => (
+                    <div key={i} className="flex-1 bg-emerald-400 rounded-t" style={{ height: `${((v - 270) / 72) * 100}%` }} />
+                  ))}
+                </div>
+                <p className="text-xs text-slate-400 text-center mt-1">直近12ヶ月</p>
+              </div>
+
+              {/* Revenue */}
+              <div className="bg-emerald-50 rounded border border-emerald-200 p-3">
+                <p className="text-xs font-bold text-emerald-700 mb-1">💰 収益サマリー</p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div><span className="text-slate-500">月間収益: </span><span className="font-bold text-slate-700">{selectedSubPlan.mrr}</span></div>
+                  <div><span className="text-slate-500">年間見込: </span><span className="font-bold text-slate-700">¥{(parseInt(selectedSubPlan.mrr.replace(/[^0-9]/g, '')) * 12 / 1000).toFixed(0)}K</span></div>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2 border-t">
+                <button className="flex-1 px-3 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">✏️ プラン編集</button>
+                {selectedSubPlan.st === "active" && <button className="px-3 py-2 bg-amber-50 text-amber-700 rounded text-xs border border-amber-200 hover:bg-amber-100">📦 アーカイブ</button>}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -6746,11 +8731,28 @@ const MerchantSubscriptions = () => {
 // ─── M14: リカーリング管理 ───
 const MasterRecurring = () => {
   const [tab, setTab] = useState("overview");
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showForceStop, setShowForceStop] = useState(null);
+  const [csvApprovalTab, setCsvApprovalTab] = useState("pending");
+  const [selectedCsvApproval, setSelectedCsvApproval] = useState(null);
+  const [showApprovalConfirm, setShowApprovalConfirm] = useState(null);
   const tabs = [
     { id: "overview", label: "概況" },
     { id: "plans", label: "プラン検索" },
     { id: "users", label: "ユーザー検索" },
+    { id: "csv", label: "CSV決済管理" },
     { id: "logs", label: "バッチログ" },
+  ];
+  const planDetails = [
+    { id: "PLN-001", m: "ABC商事", s: "ECサイトA", name: "月額スタンダード", type: "継続", amt: "¥0→¥2,980/月", users: "342/400", st: "有効", created: "2025-06-01", trial: "14日", retry: 3, revenue: "¥1,019,160/月", churn: "3.2%", chart: [310, 318, 325, 330, 335, 342] },
+    { id: "PLN-002", m: "XYZ物産", s: "ストア", name: "年間プレミアム", type: "継続", amt: "¥29,800/年", users: "89/120", st: "有効", created: "2025-09-15", trial: "30日", retry: 5, revenue: "¥2,652,200/年", churn: "1.8%", chart: [72, 76, 80, 84, 87, 89] },
+    { id: "PLN-003", m: "ABC商事", s: "ECサイトA", name: "3回分割払い", type: "分割", amt: "¥15,000(3回)", users: "56/—", st: "有効", created: "2025-11-01", trial: "-", retry: 3, revenue: "¥840,000", churn: "-", chart: [30, 35, 40, 45, 50, 56] },
+  ];
+  const userData = [
+    { id: "U-5521", email: "t***@gmail.com", m: "ABC商事", plan: "月額スタンダード", st: "課金中", stc: "green", next: "2026-03-01", fail: "0", created: "2025-08-15", total: "¥20,860", txCount: 7, history: [{ date: "2026-02-01", amt: "¥2,980", st: "成功" }, { date: "2026-01-01", amt: "¥2,980", st: "成功" }, { date: "2025-12-01", amt: "¥2,980", st: "成功" }] },
+    { id: "U-3302", email: "s***@yahoo.co.jp", m: "XYZ物産", plan: "年間プレミアム", st: "リトライ中", stc: "yellow", next: "2026-02-23", fail: "1", created: "2025-09-20", total: "¥29,800", txCount: 1, history: [{ date: "2026-02-15", amt: "¥29,800", st: "失敗" }, { date: "2025-09-20", amt: "¥29,800", st: "成功" }] },
+    { id: "U-1108", email: "k***@icloud.com", m: "ABC商事", plan: "月額スタンダード", st: "自動停止", stc: "red", next: "—", fail: "3", created: "2025-06-10", total: "¥23,840", txCount: 8, history: [{ date: "2026-02-01", amt: "¥2,980", st: "失敗" }, { date: "2026-01-15", amt: "¥2,980", st: "失敗" }, { date: "2026-01-01", amt: "¥2,980", st: "失敗" }] },
   ];
   return (
     <div className="p-5 space-y-4">
@@ -6805,11 +8807,8 @@ const MasterRecurring = () => {
             <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs">検索</button>
           </div>
           <TableHeader cols={[{ label: "プランID", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "サイト", w: "w-20" }, { label: "プラン名", w: "flex-1" }, { label: "タイプ", w: "w-14" }, { label: "金額", w: "w-24" }, { label: "ユーザー", w: "w-16" }, { label: "状態", w: "w-14" }]}>
-          {[{ id: "PLN-001", m: "ABC商事", s: "ECサイトA", name: "月額スタンダード", type: "継続", amt: "¥0→¥2,980/月", users: "342/400", st: "有効" },
-            { id: "PLN-002", m: "XYZ物産", s: "ストア", name: "年間プレミアム", type: "継続", amt: "¥29,800/年", users: "89/120", st: "有効" },
-            { id: "PLN-003", m: "ABC商事", s: "ECサイトA", name: "3回分割払い", type: "分割", amt: "¥15,000(3回)", users: "56/—", st: "有効" }
-          ].map((r, i) => (
-            <tr key={i} className="border-b hover:bg-slate-50">
+          {planDetails.map((r, i) => (
+            <tr key={i} onClick={() => setSelectedPlan(r)} className="border-b hover:bg-blue-50 cursor-pointer">
               <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{r.id}</td><td className="px-4 py-2 whitespace-nowrap w-24">{r.m}</td><td className="px-4 py-2 whitespace-nowrap w-20 text-slate-500">{r.s}</td><td className="px-4 py-2 whitespace-nowrap font-bold">{r.name}</td><td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} /></td><td className="px-4 py-2 whitespace-nowrap w-24 text-xs">{r.amt}</td><td className="px-4 py-2 whitespace-nowrap w-16">{r.users}</td><td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={r.st} color="green" /></td>
             </tr>
           ))}
@@ -6824,31 +8823,310 @@ const MasterRecurring = () => {
             <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs">検索</button>
           </div>
           <TableHeader cols={[{ label: "ユーザーID", w: "w-20" }, { label: "メール", w: "w-32" }, { label: "加盟店", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "状態", w: "w-16" }, { label: "次回決済", w: "w-20" }, { label: "失敗", w: "w-10" }, { label: "操作", w: "w-20" }]}>
-          {[{ id: "U-5521", email: "t***@gmail.com", m: "ABC商事", plan: "月額スタンダード", st: "課金中", stc: "green", next: "2026-03-01", fail: "0" },
-            { id: "U-3302", email: "s***@yahoo.co.jp", m: "XYZ物産", plan: "年間プレミアム", st: "リトライ中", stc: "yellow", next: "2026-02-23", fail: "1" },
-            { id: "U-1108", email: "k***@icloud.com", m: "ABC商事", plan: "月額スタンダード", st: "自動停止", stc: "red", next: "—", fail: "3" }
-          ].map((r, i) => (
-            <tr key={i} className="border-b hover:bg-slate-50">
-              <td className="px-4 py-2 whitespace-nowrap w-20 font-mono">{r.id}</td><td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{r.email}</td><td className="px-4 py-2 whitespace-nowrap w-24">{r.m}</td><td className="px-4 py-2 whitespace-nowrap">{r.plan}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st} color={r.stc} /></td><td className="px-4 py-2 whitespace-nowrap w-20 text-slate-400">{r.next}</td><td className="px-4 py-2 whitespace-nowrap w-10 text-center">{r.fail !== "0" ? <span className="text-rose-600 font-bold">{r.fail}</span> : "0"}</td>
-              <td className="px-4 py-2 whitespace-nowrap w-20"><div className="flex gap-1"><button className="text-blue-600 text-xs">詳細</button><button className="text-rose-500 text-xs">強制停止</button></div></td>
+          {userData.map((r, i) => (
+            <tr key={i} className="border-b hover:bg-blue-50 cursor-pointer">
+              <td onClick={() => setSelectedUser(r)} className="px-4 py-2 whitespace-nowrap w-20 font-mono text-blue-600">{r.id}</td><td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{r.email}</td><td className="px-4 py-2 whitespace-nowrap w-24">{r.m}</td><td className="px-4 py-2 whitespace-nowrap">{r.plan}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st} color={r.stc} /></td><td className="px-4 py-2 whitespace-nowrap w-20 text-slate-400">{r.next}</td><td className="px-4 py-2 whitespace-nowrap w-10 text-center">{r.fail !== "0" ? <span className="text-rose-600 font-bold">{r.fail}</span> : "0"}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-20"><div className="flex gap-1"><button onClick={() => setSelectedUser(r)} className="text-blue-600 text-xs">詳細</button>{r.st !== "自動停止" && <button onClick={() => setShowForceStop(r)} className="text-rose-500 text-xs">強制停止</button>}</div></td>
             </tr>
           ))}
           </TableHeader>
         </div>
       )}
+      {/* ===== CSV決済管理タブ ===== */}
+      {tab === "csv" && (
+        <div className="space-y-3">
+          <div className="flex gap-1 border-b">
+            {[{ id: "pending", label: "承認待ち", count: 2 }, { id: "approved", label: "承認済（実行待ち）", count: 1 }, { id: "completed", label: "実行完了", count: null }, { id: "all", label: "全て", count: null }].map(t => (
+              <button key={t.id} onClick={() => setCsvApprovalTab(t.id)} className={`px-3 py-1.5 text-xs border-b-2 ${csvApprovalTab === t.id ? "border-blue-500 text-blue-700 font-bold" : "border-transparent text-slate-400"}`}>
+                {t.label}{t.count !== null && <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${csvApprovalTab === t.id ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-400"}`}>{t.count}</span>}
+              </button>
+            ))}
+          </div>
+
+          {/* KPIs */}
+          <div className="grid grid-cols-5 gap-3">
+            <KPICard label="承認待ち" value="2件" sub="¥490,000" color="yellow" />
+            <KPICard label="承認済み" value="1件" sub="¥78,400" color="blue" />
+            <KPICard label="今月実行" value="3件" sub="¥735,200" color="green" />
+            <KPICard label="今月成功率" value="97.4%" sub="75/77件" color="green" />
+            <KPICard label="今月失敗" value="2件" sub="要確認" color="red" />
+          </div>
+
+          {/* CSV Batch Table */}
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+            <div className="p-3 border-b flex gap-2">
+              <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="加盟店名 / バッチIDで検索" />
+              <input type="date" className="border rounded px-2 py-1 text-xs" defaultValue="2026-02-01" />
+              <span className="text-xs text-slate-400 self-center">〜</span>
+              <input type="date" className="border rounded px-2 py-1 text-xs" defaultValue="2026-02-28" />
+              <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs">検索</button>
+            </div>
+            <TableHeader cols={[{ label: "バッチID", w: "w-24" }, { label: "加盟店", w: "w-28" }, { label: "バッチ名", w: "flex-1" }, { label: "件数", w: "w-14" }, { label: "合計金額", w: "w-24" }, { label: "決済予定日", w: "w-24" }, { label: "アップロード日", w: "w-28" }, { label: "ステータス", w: "w-20" }, { label: "操作", w: "w-28" }]}>
+            {[
+              { id: "CSV-0045", merchant: "株式会社ABCマート", name: "2月月謝決済", count: "42", total: "¥411,600", schedule: "2026-02-20", uploaded: "2026-02-14 10:30", st: "承認待ち", stc: "yellow" },
+              { id: "CSV-0046", merchant: "合同会社XYZショップ", name: "2月会費一括", count: "8", total: "¥78,400", schedule: "2026-02-22", uploaded: "2026-02-15 09:00", st: "承認待ち", stc: "yellow" },
+              { id: "CSV-0044", merchant: "株式会社ABCマート", name: "2月追加分", count: "8", total: "¥78,400", schedule: "2026-02-18", uploaded: "2026-02-12 14:15", st: "承認済", stc: "blue" },
+              { id: "CSV-0043", merchant: "株式会社ABCマート", name: "1月月謝決済", count: "38", total: "¥372,400", schedule: "2026-01-20", uploaded: "2026-01-14 09:45", st: "完了", stc: "green" },
+              { id: "CSV-0042", merchant: "合同会社XYZショップ", name: "1月会費一括", count: "5", total: "¥49,000", schedule: "2026-01-15", uploaded: "2026-01-10 11:20", st: "完了", stc: "green" },
+            ].filter(r => csvApprovalTab === "all" || (csvApprovalTab === "pending" && r.st === "承認待ち") || (csvApprovalTab === "approved" && r.st === "承認済") || (csvApprovalTab === "completed" && r.st === "完了")).map((r, i) => (
+              <tr key={i} className={`border-b hover:bg-blue-50 cursor-pointer ${r.st === "承認待ち" ? "bg-amber-50" : ""}`} onClick={() => setSelectedCsvApproval(r)}>
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{r.id}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-28">{r.merchant}</td>
+                <td className="px-4 py-2 whitespace-nowrap font-semibold">{r.name}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-14 text-center">{r.count}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-semibold">{r.total}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-500">{r.schedule}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400">{r.uploaded}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={r.st} color={r.stc} /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-28" onClick={e => e.stopPropagation()}>
+                  {r.st === "承認待ち" && (
+                    <div className="flex gap-1">
+                      <button onClick={() => setShowApprovalConfirm({ ...r, action: "approve" })} className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs border border-emerald-200 hover:bg-emerald-200">承認</button>
+                      <button onClick={() => setShowApprovalConfirm({ ...r, action: "reject" })} className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs border border-rose-200 hover:bg-rose-200">却下</button>
+                    </div>
+                  )}
+                  {r.st === "承認済" && <span className="text-xs text-blue-500">実行待ち</span>}
+                  {r.st === "完了" && <button className="text-xs text-blue-600 hover:underline">結果</button>}
+                </td>
+              </tr>
+            ))}
+            </TableHeader>
+          </div>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 text-xs text-blue-700 flex items-center gap-2">
+            <span>💡</span>
+            <span>CSV決済の流れ: 加盟店がCSVアップロード → <span className="font-bold">マスター側で承認</span> → 決済予定日にバッチで自動決済処理</span>
+          </div>
+        </div>
+      )}
+
+      {/* CSV承認/却下 確認モーダル */}
+      {showApprovalConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowApprovalConfirm(null)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
+            <div className={`p-4 border-b rounded-t-xl ${showApprovalConfirm.action === "approve" ? "bg-emerald-50" : "bg-rose-50"}`}>
+              <h3 className="text-sm font-bold text-slate-800">{showApprovalConfirm.action === "approve" ? "✅ CSV決済バッチの承認" : "❌ CSV決済バッチの却下"}</h3>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="bg-slate-50 rounded-lg border p-3 space-y-1.5 text-xs">
+                <div className="flex justify-between"><span className="text-slate-400">バッチID</span><span className="font-mono">{showApprovalConfirm.id}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">加盟店</span><span className="font-semibold">{showApprovalConfirm.merchant}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">バッチ名</span><span>{showApprovalConfirm.name}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">決済件数</span><span className="font-bold">{showApprovalConfirm.count}件</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">合計金額</span><span className="font-bold text-emerald-600">{showApprovalConfirm.total}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">決済予定日</span><span>{showApprovalConfirm.schedule}</span></div>
+              </div>
+              {showApprovalConfirm.action === "approve" ? (
+                <div className="bg-emerald-50 border border-emerald-200 rounded p-2 text-xs text-emerald-700">
+                  <p className="font-bold">承認すると:</p>
+                  <p className="mt-1">決済予定日（{showApprovalConfirm.schedule}）にバッチ処理で自動的に{showApprovalConfirm.count}件の決済が実行されます。</p>
+                </div>
+              ) : (
+                <div>
+                  <label className="text-xs font-semibold text-slate-600">却下理由 <span className="text-rose-500">*</span></label>
+                  <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                    <option>CSVフォーマットエラー</option>
+                    <option>金額に不整合あり</option>
+                    <option>対象ユーザーに問題あり</option>
+                    <option>加盟店側の確認が必要</option>
+                    <option>その他</option>
+                  </select>
+                  <textarea className="w-full text-xs border rounded p-2 h-16 mt-2" placeholder="詳細コメント（加盟店に通知されます）" />
+                </div>
+              )}
+            </div>
+            <div className="p-4 border-t flex gap-2 justify-end">
+              <button onClick={() => setShowApprovalConfirm(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => setShowApprovalConfirm(null)} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showApprovalConfirm.action === "approve" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"}`}>
+                {showApprovalConfirm.action === "approve" ? "承認する" : "却下する"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CSV詳細スライドパネル */}
+      {selectedCsvApproval && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedCsvApproval(null)} />
+          <div className="w-[480px] bg-white shadow-xl border-l overflow-y-auto">
+            <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
+              <h3 className="text-sm font-bold text-slate-800">📦 CSV決済バッチ詳細</h3>
+              <button onClick={() => setSelectedCsvApproval(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="flex items-center gap-2 justify-center">
+                <span className="font-mono text-sm font-bold text-slate-800">{selectedCsvApproval.id}</span>
+                <Badge text={selectedCsvApproval.st} color={selectedCsvApproval.stc} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "加盟店", value: selectedCsvApproval.merchant },
+                  { label: "バッチ名", value: selectedCsvApproval.name },
+                  { label: "決済件数", value: `${selectedCsvApproval.count}件` },
+                  { label: "合計金額", value: selectedCsvApproval.total },
+                  { label: "決済予定日", value: selectedCsvApproval.schedule },
+                  { label: "アップロード日", value: selectedCsvApproval.uploaded },
+                ].map((s, i) => (
+                  <div key={i} className="bg-slate-50 rounded p-2">
+                    <p className="text-xs text-slate-400">{s.label}</p>
+                    <p className="text-xs font-bold text-slate-700">{s.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* CSV Content Preview */}
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">📄 CSVプレビュー（先頭5件）</p>
+                <div className="overflow-x-auto border rounded">
+                  <table className="w-full text-xs">
+                    <thead><tr className="bg-slate-50 border-b">
+                      <th className="px-2 py-1 text-left text-slate-500">paymentid</th>
+                      <th className="px-2 py-1 text-left text-slate-500">price</th>
+                      <th className="px-2 py-1 text-left text-slate-500">email</th>
+                      <th className="px-2 py-1 text-left text-slate-500">productName</th>
+                      <th className="px-2 py-1 text-left text-slate-500">free1</th>
+                    </tr></thead>
+                    <tbody>
+                      {[
+                        ["PAY-001", "9,800", "tanaka@ex...", "月額会費", "田中太郎"],
+                        ["PAY-002", "9,800", "sato@ex...", "月額会費", "佐藤花子"],
+                        ["PAY-003", "5,000", "suzuki@ex...", "月額会費(割引)", "鈴木一郎"],
+                        ["", "9,800", "yamada@ex...", "月額会費", "山田明"],
+                        ["PAY-005", "12,000", "ito@ex...", "月額会費(上級)", "伊藤涼"],
+                      ].map((r, i) => (
+                        <tr key={i} className={`border-b ${!r[0] ? "bg-amber-50" : ""}`}>
+                          <td className="px-2 py-1 font-mono text-blue-600">{r[0] || <span className="text-amber-500">新規</span>}</td>
+                          <td className="px-2 py-1">¥{r[1]}</td>
+                          <td className="px-2 py-1 text-slate-500">{r[2]}</td>
+                          <td className="px-2 py-1">{r[3]}</td>
+                          <td className="px-2 py-1 text-slate-500">{r[4]}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-xs text-slate-400 mt-1">全{selectedCsvApproval.count}件中 5件を表示</p>
+              </div>
+
+              {selectedCsvApproval.st === "承認待ち" && (
+                <div className="flex gap-2 pt-2 border-t">
+                  <button onClick={() => { setShowApprovalConfirm({ ...selectedCsvApproval, action: "approve" }); setSelectedCsvApproval(null); }} className="flex-1 px-3 py-2 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700">✅ 承認する</button>
+                  <button onClick={() => { setShowApprovalConfirm({ ...selectedCsvApproval, action: "reject" }); setSelectedCsvApproval(null); }} className="flex-1 px-3 py-2 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200 hover:bg-rose-100">❌ 却下する</button>
+                </div>
+              )}
+              <button className="w-full px-3 py-2 bg-slate-50 text-slate-600 rounded text-xs border hover:bg-slate-100">📥 元CSVダウンロード</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {tab === "logs" && (
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-          <TableHeader cols={[{ label: "実行日時", w: "w-32" }, { label: "バッチID", w: "w-20" }, { label: "処理件数", w: "w-16" }, { label: "成功", w: "w-14" }, { label: "失敗", w: "w-14" }, { label: "リトライ", w: "w-14" }, { label: "処理時間", w: "w-14" }, { label: "状態", w: "w-16" }, { label: "", w: "w-10" }]}>
-          {[["2026-02-13 02:00:05", "B-4521", "423", "411", "12", "8", "4.2s", "完了"],
-            ["2026-02-12 02:00:03", "B-4520", "398", "391", "7", "5", "3.8s", "完了"],
-            ["2026-02-11 02:00:04", "B-4519", "412", "406", "6", "4", "3.9s", "完了"],
-            ["2026-02-10 02:00:02", "B-4518", "389", "385", "4", "3", "3.5s", "完了"]
+          <TableHeader cols={[{ label: "実行日時", w: "w-32" }, { label: "バッチID", w: "w-20" }, { label: "種別", w: "w-16" }, { label: "処理件数", w: "w-16" }, { label: "成功", w: "w-14" }, { label: "失敗", w: "w-14" }, { label: "リトライ", w: "w-14" }, { label: "処理時間", w: "w-14" }, { label: "状態", w: "w-16" }, { label: "", w: "w-10" }]}>
+          {[["2026-02-13 02:00:05", "B-4521", "リカーリング", "423", "411", "12", "8", "4.2s", "完了"],
+            ["2026-02-12 02:00:03", "B-4520", "リカーリング", "398", "391", "7", "5", "3.8s", "完了"],
+            ["2026-02-11 14:00:02", "CSV-0043", "CSV決済", "38", "36", "2", "0", "2.1s", "完了"],
+            ["2026-02-11 02:00:04", "B-4519", "リカーリング", "412", "406", "6", "4", "3.9s", "完了"],
+            ["2026-02-10 02:00:02", "B-4518", "リカーリング", "389", "385", "4", "3", "3.5s", "完了"]
           ].map((r, i) => (
             <tr key={i} className="border-b hover:bg-slate-50">
-              <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-20 font-mono">{r[1]}</td><td className="px-4 py-2 whitespace-nowrap w-16">{r[2]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-emerald-600">{r[3]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-rose-600">{r[4]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-amber-600">{r[5]}</td><td className="px-4 py-2 whitespace-nowrap w-14">{r[6]}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r[7]} color="green" /></td><td className="px-4 py-2 whitespace-nowrap w-10"><button className="text-blue-600 text-xs">詳細</button></td>
+              <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-20 font-mono">{r[1]}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r[2]} color={r[2] === "CSV決済" ? "purple" : "blue"} /></td><td className="px-4 py-2 whitespace-nowrap w-16">{r[3]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-emerald-600">{r[4]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-rose-600">{r[5]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-amber-600">{r[6]}</td><td className="px-4 py-2 whitespace-nowrap w-14">{r[7]}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r[8]} color="green" /></td><td className="px-4 py-2 whitespace-nowrap w-10"><button className="text-blue-600 text-xs">詳細</button></td>
             </tr>
           ))}
           </TableHeader>
+        </div>
+      )}
+
+      {/* プラン詳細スライドパネル */}
+      {selectedPlan && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedPlan(null)} />
+          <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+            <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
+              <p className="text-sm font-bold">{selectedPlan.name}</p>
+              <button onClick={() => setSelectedPlan(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div className="flex items-center gap-2"><Badge text={selectedPlan.type} color={selectedPlan.type === "継続" ? "blue" : "purple"} /><Badge text={selectedPlan.st} color="green" /><span className="text-xs text-slate-400">{selectedPlan.id}</span></div>
+              <div className="grid grid-cols-2 gap-2">
+                {[["加盟店", selectedPlan.m], ["サイト", selectedPlan.s], ["金額", selectedPlan.amt], ["作成日", selectedPlan.created], ["トライアル", selectedPlan.trial], ["リトライ回数", `${selectedPlan.retry}回`]].map(([l, v], i) => (
+                  <div key={i} className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">{l}</p><p className="text-xs font-bold">{v}</p></div>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-blue-50 rounded p-2 text-center border border-blue-200"><p className="text-xs text-slate-400">ユーザー数</p><p className="text-lg font-bold text-blue-600">{selectedPlan.users}</p></div>
+                <div className="bg-emerald-50 rounded p-2 text-center border border-emerald-200"><p className="text-xs text-slate-400">月間収益</p><p className="text-lg font-bold text-emerald-600">{selectedPlan.revenue}</p></div>
+              </div>
+              {selectedPlan.churn !== "-" && <div className="flex text-xs"><span className="text-slate-400">解約率:</span><span className="ml-1 font-bold text-amber-600">{selectedPlan.churn}</span></div>}
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">ユーザー数推移（6ヶ月）</p>
+                <div className="flex items-end gap-2 h-16 px-2">
+                  {selectedPlan.chart.map((v, i) => {
+                    const max = Math.max(...selectedPlan.chart);
+                    return (<div key={i} className="flex-1 flex flex-col items-center"><div className={`w-full rounded-t ${i === 5 ? "bg-blue-500" : "bg-blue-200"}`} style={{ height: `${(v / max) * 100}%` }} /><p className="text-xs text-slate-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p></div>);
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ユーザー詳細スライドパネル */}
+      {selectedUser && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedUser(null)} />
+          <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+            <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
+              <p className="text-sm font-bold">{selectedUser.id}</p>
+              <button onClick={() => setSelectedUser(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div className="flex items-center gap-2"><Badge text={selectedUser.st} color={selectedUser.stc} /></div>
+              <div className="grid grid-cols-2 gap-2">
+                {[["メール", selectedUser.email], ["加盟店", selectedUser.m], ["プラン", selectedUser.plan], ["登録日", selectedUser.created], ["累計課金額", selectedUser.total], ["課金回数", `${selectedUser.txCount}回`], ["次回決済", selectedUser.next], ["失敗回数", selectedUser.fail]].map(([l, v], i) => (
+                  <div key={i} className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">{l}</p><p className="text-xs font-bold">{v}</p></div>
+                ))}
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">決済履歴</p>
+                {selectedUser.history.map((h, i) => (
+                  <div key={i} className="flex text-xs py-1.5 border-b items-center"><span className="w-24 text-slate-400">{h.date}</span><span className="flex-1 font-bold">{h.amt}</span><Badge text={h.st} color={h.st === "成功" ? "green" : "red"} /></div>
+                ))}
+              </div>
+              <div className="space-y-2 pt-2 border-t">
+                {selectedUser.st === "リトライ中" && <button className="w-full py-2 bg-blue-50 text-blue-600 rounded text-xs font-bold border border-blue-200">🔄 手動リトライ</button>}
+                {selectedUser.st !== "自動停止" && <button onClick={() => { setShowForceStop(selectedUser); setSelectedUser(null); }} className="w-full py-2 bg-red-50 text-red-600 rounded text-xs font-bold border border-red-200">⛔ 強制停止</button>}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 強制停止確認モーダル */}
+      {showForceStop && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowForceStop(null)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[400px]">
+            <div className="p-4 border-b"><p className="text-sm font-bold text-red-600">⚠️ サブスクリプション強制停止</p></div>
+            <div className="p-4 space-y-3">
+              <div className="bg-red-50 border border-red-200 rounded p-3 text-xs text-red-700">
+                <p className="font-bold">この操作は取り消せません</p>
+                <p className="mt-1">ユーザー {showForceStop.id} のサブスクリプションを即座に停止します。次回以降の課金は行われません。</p>
+              </div>
+              <div className="space-y-1 text-xs">
+                {[["ユーザーID", showForceStop.id], ["メール", showForceStop.email], ["プラン", showForceStop.plan]].map(([l, v], i) => (
+                  <div key={i} className="flex border-b pb-1"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
+                ))}
+              </div>
+              <div><label className="text-xs text-slate-500">停止理由</label><select className="w-full border rounded px-2 py-1.5 text-xs mt-0.5"><option>顧客の要望</option><option>支払い不能</option><option>不正利用の疑い</option><option>その他</option></select></div>
+              <div className="flex gap-2">
+                <button onClick={() => setShowForceStop(null)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
+                <button onClick={() => setShowForceStop(null)} className="flex-1 py-2 bg-red-500 text-white rounded text-xs font-bold">停止する</button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -6859,7 +9137,13 @@ const MasterRecurring = () => {
 const MasterAgents = () => {
   const [showAddAgent, setShowAddAgent] = useState(false);
   const [tab, setTab] = useState("list");
+  const [selectedAgent, setSelectedAgent] = useState(null);
   const tabs = [{ id: "list", label: "代理店一覧" }, { id: "register", label: "代理店登録" }, { id: "conditions", label: "フィー設定" }, { id: "commissions", label: "報酬管理" }];
+  const agentData = [
+    { code: "AG-001", name: "デジタルパートナーズ", rep: "田中太郎", merchants: "23", rate: "5.0%", st: "active", email: "info@digital-partners.jp", tel: "03-1234-5678", created: "2024-06-01", totalRevenue: "¥25,680,000", monthlyRevenue: "¥2,260,000", topMerchants: ["ECサイトA (¥5.2M)", "ファッションEC (¥3.8M)", "フード通販 (¥2.1M)"], chart: [1800, 1920, 2010, 2080, 2150, 2260] },
+    { code: "AG-002", name: "ウェブコンサル合同会社", rep: "佐藤花子", merchants: "12", rate: "4.5%", st: "active", email: "info@webconsul.jp", tel: "03-9876-5432", created: "2025-01-15", totalRevenue: "¥8,120,000", monthlyRevenue: "¥832,500", topMerchants: ["雑貨ストア (¥2.1M)", "テクノショップ (¥1.5M)"], chart: [680, 720, 750, 790, 810, 832] },
+    { code: "AG-003", name: "ITソリューションズ", rep: "鈴木一郎", merchants: "8", rate: "5.0%", st: "active", email: "info@it-solutions.jp", tel: "03-5555-1234", created: "2025-06-01", totalRevenue: "¥3,650,000", monthlyRevenue: "¥415,000", topMerchants: ["SaaSプロダクト (¥1.8M)"], chart: [320, 350, 370, 390, 400, 415] },
+  ];
   return (
     <div className="p-5 space-y-4">
       <div className="flex items-center justify-between">
@@ -6872,11 +9156,8 @@ const MasterAgents = () => {
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
           <div className="p-3 border-b"><input className="border rounded px-2 py-1 text-xs w-full" placeholder="代理店名 / コードで検索" /></div>
           <TableHeader cols={[{ label: "コード", w: "w-20" }, { label: "代理店名", w: "flex-1" }, { label: "代表者", w: "w-20" }, { label: "紹介加盟店数", w: "w-20" }, { label: "紹介料率", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]}>
-          {[{ code: "AG-001", name: "デジタルパートナーズ", rep: "田中太郎", merchants: "23", rate: "5.0%", st: "active" },
-            { code: "AG-002", name: "ウェブコンサル合同会社", rep: "佐藤花子", merchants: "12", rate: "4.5%", st: "active" },
-            { code: "AG-003", name: "ITソリューションズ", rep: "鈴木一郎", merchants: "8", rate: "5.0%", st: "active" }
-          ].map((r, i) => (
-            <tr key={i} className="border-b hover:bg-slate-50">
+          {agentData.map((r, i) => (
+            <tr key={i} onClick={() => setSelectedAgent(r)} className="border-b hover:bg-blue-50 cursor-pointer">
               <td className="px-4 py-2 whitespace-nowrap w-20 font-mono">{r.code}</td>
               <td className="px-4 py-2 whitespace-nowrap font-bold">{r.name}</td>
               <td className="px-4 py-2 whitespace-nowrap w-20">{r.rep}</td>
@@ -7010,22 +9291,97 @@ const MasterAgents = () => {
           </div>
         </div>
       )}
+
+      {/* 代理店詳細スライドパネル */}
+      {selectedAgent && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedAgent(null)} />
+          <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+            <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
+              <p className="text-sm font-bold">{selectedAgent.name}</p>
+              <button onClick={() => setSelectedAgent(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div className="flex items-center gap-2"><Badge text="有効" color="green" /><span className="text-xs text-slate-400">{selectedAgent.code}</span></div>
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">基本情報</p>
+                {[["代理店名", selectedAgent.name], ["代表者", selectedAgent.rep], ["メール", selectedAgent.email], ["電話", selectedAgent.tel], ["契約日", selectedAgent.created], ["料率", selectedAgent.rate]].map(([l, v], i) => (
+                  <div key={i} className="flex text-xs py-1 border-b"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-orange-50 rounded p-2 text-center border border-orange-200"><p className="text-xs text-slate-400">紹介加盟店</p><p className="text-lg font-bold text-orange-600">{selectedAgent.merchants}社</p></div>
+                <div className="bg-emerald-50 rounded p-2 text-center border border-emerald-200"><p className="text-xs text-slate-400">今月の報酬</p><p className="text-lg font-bold text-emerald-600">{selectedAgent.monthlyRevenue}</p></div>
+              </div>
+              <div className="flex text-xs"><span className="text-slate-400">累計報酬:</span><span className="ml-1 font-bold">{selectedAgent.totalRevenue}</span></div>
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">月次報酬推移</p>
+                <div className="flex items-end gap-2 h-16 px-2">
+                  {selectedAgent.chart.map((v, i) => {
+                    const max = Math.max(...selectedAgent.chart);
+                    return (<div key={i} className="flex-1 flex flex-col items-center"><div className={`w-full rounded-t ${i === 5 ? "bg-orange-500" : "bg-orange-200"}`} style={{ height: `${(v / max) * 100}%` }} /><p className="text-xs text-slate-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p></div>);
+                  })}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">トップ紹介加盟店</p>
+                {selectedAgent.topMerchants.map((m, i) => (
+                  <div key={i} className="flex items-center text-xs py-1 border-b last:border-0"><span className="w-5 text-slate-400">{i + 1}.</span><span className="flex-1">{m}</span></div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 // ─── D01: 代理店ダッシュボード ───
-const AgentDashboard = () => (
+const AgentDashboard = () => {
+  const [period, setPeriod] = useState("今月");
+  const [showDetail, setShowDetail] = useState(null);
+  const kpiDetails = {
+    "紹介加盟店（稼働中）": { value: "23社", details: [{ label: "EC物販", value: "12社" }, { label: "デジタルコンテンツ", value: "5社" }, { label: "サービス業", value: "4社" }, { label: "その他", value: "2社" }], chart: [18, 19, 20, 21, 22, 23] },
+    "今月の取引総額": { value: "¥45.2M", details: [{ label: "VISA/MC", value: "¥32.1M" }, { label: "JCB", value: "¥8.5M" }, { label: "QR/コンビニ", value: "¥4.6M" }], chart: [38, 40, 42, 41, 43, 45.2] },
+    "今月の報酬見込み": { value: "¥2,260,000", details: [{ label: "VISA/MC手数料", value: "¥1,605,000" }, { label: "JCB手数料", value: "¥425,000" }, { label: "その他", value: "¥230,000" }], chart: [1800, 1920, 2010, 2080, 2150, 2260] },
+    "先月の報酬確定額": { value: "¥2,105,000", details: [{ label: "基本報酬", value: "¥1,950,000" }, { label: "ボーナス", value: "¥155,000" }], chart: [1700, 1850, 1900, 1980, 2050, 2105] },
+  };
+  const notifications = [
+    { type: "info", icon: "📋", text: "「太郎合同会社」の審査が完了し、承認されました", time: "2時間前" },
+    { type: "alert", icon: "⚠️", text: "「ECサイトA」のチャージバック率が閾値に近づいています", time: "5時間前" },
+    { type: "success", icon: "💰", text: "1月分の報酬が振り込まれました（¥2,105,000）", time: "1日前" },
+  ];
+  return (
   <div className="p-5 space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-sm font-bold text-slate-800">代理店ダッシュボード</h2>
+      <div className="flex items-center gap-2">
+        <div className="flex bg-slate-100 rounded-lg p-0.5">
+          {["今日", "今週", "今月"].map(p => (
+            <button key={p} onClick={() => setPeriod(p)} className={`text-xs px-3 py-1 rounded ${period === p ? "bg-white shadow-sm text-orange-600 font-semibold" : "text-slate-500"}`}>{p}</button>
+          ))}
+        </div>
+        <span className="text-xs text-slate-400">デジタルパートナーズ</span>
+      </div>
     </div>
+
+    {/* AIインサイト */}
+    <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border border-orange-200 p-3">
+      <div className="flex items-center gap-2 mb-1">
+        <span>🤖</span><span className="text-xs font-bold text-orange-700">AI 分析</span><span className="text-xs text-slate-400">毎日更新</span>
+      </div>
+      <p className="text-xs text-slate-700">今月の紹介加盟店の取引総額は前月比+8.3%の¥45.2M。上位3加盟店で全体の62%を占めています。新規紹介の「太郎合同会社」が審査通過すれば、来月の報酬は+¥120,000の見込みです。</p>
+    </div>
+
     <div className="grid grid-cols-4 gap-3">
-      <KPICard label="紹介加盟店（稼働中）" value="23社" color="green" />
-      <KPICard label="今月の取引総額" value="¥45.2M" trend={8.3} color="green" />
-      <KPICard label="今月の報酬見込み" value="¥2,260,000" color="green" />
-      <KPICard label="先月の報酬確定額" value="¥2,105,000" sub="支払済" color="blue" />
+      {Object.entries(kpiDetails).map(([label, d]) => (
+        <div key={label} onClick={() => setShowDetail(label)} className="cursor-pointer hover:ring-2 hover:ring-orange-200 rounded-lg transition-all">
+          <KPICard label={label} value={d.value} trend={label === "今月の取引総額" ? 8.3 : undefined} sub={label === "先月の報酬確定額" ? "支払済" : undefined} color={label === "先月の報酬確定額" ? "blue" : "green"} />
+        </div>
+      ))}
     </div>
+
     <div className="grid grid-cols-2 gap-3">
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
         <p className="text-xs font-bold mb-2">加盟店ステータス</p>
@@ -7040,84 +9396,324 @@ const AgentDashboard = () => (
         <div className="flex items-end gap-2 h-24 px-2">
           {[60, 72, 68, 85, 90, 95].map((h, i) => (
             <div key={i} className="flex-1 flex flex-col items-center">
-              <div className="w-full bg-orange-400 rounded-t" style={{ height: `${h}%` }} />
+              <p className="text-xs text-slate-500 mb-0.5">{["¥1.8M", "¥1.9M", "¥2.0M", "¥2.1M", "¥2.2M", "¥2.3M"][i]}</p>
+              <div className={`w-full rounded-t ${i === 5 ? "bg-orange-500" : "bg-orange-300"}`} style={{ height: `${h}%` }} />
               <p className="text-xs text-slate-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
             </div>
           ))}
         </div>
       </div>
     </div>
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold mb-2">最新の紹介加盟店</p>
-      {[["ネットショップ太郎", "2026-02-10", "審査中", "yellow"], ["ファッションEC123", "2026-01-25", "稼働中", "green"], ["フード通販ABC", "2026-01-15", "稼働中", "green"]].map((r, i) => (
-        <div key={i} className="flex items-center py-2 border-b text-xs last:border-0">
-          <div className="flex-1 font-bold">{r[0]}</div>
-          <div className="w-24 text-slate-400">{r[1]}</div>
-          <Badge text={r[2]} color={r[3]} />
-        </div>
-      ))}
+
+    <div className="grid grid-cols-2 gap-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+        <p className="text-xs font-bold mb-2">最新の紹介加盟店</p>
+        {[["ネットショップ太郎", "2026-02-10", "審査中", "yellow"], ["ファッションEC123", "2026-01-25", "稼働中", "green"], ["フード通販ABC", "2026-01-15", "稼働中", "green"], ["テクノストアX", "2025-12-20", "稼働中", "green"]].map((r, i) => (
+          <div key={i} className="flex items-center py-2 border-b text-xs last:border-0">
+            <div className="flex-1 font-bold">{r[0]}</div>
+            <div className="w-24 text-slate-400">{r[1]}</div>
+            <Badge text={r[2]} color={r[3]} />
+          </div>
+        ))}
+      </div>
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+        <p className="text-xs font-bold mb-2">🔔 通知</p>
+        {notifications.map((n, i) => (
+          <div key={i} className={`flex items-start gap-2 py-2 border-b text-xs last:border-0 ${n.type === "alert" ? "bg-amber-50 -mx-3 px-3" : ""}`}>
+            <span>{n.icon}</span>
+            <div className="flex-1">
+              <p className="text-slate-700">{n.text}</p>
+              <p className="text-slate-400 mt-0.5">{n.time}</p>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
+
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <p className="text-xs font-bold mb-2">⚡ クイックアクション</p>
+      <div className="flex gap-2">
+        {[["📝 新規紹介", "orange"], ["📊 実績レポート", "blue"], ["👥 加盟店一覧", "emerald"], ["⚙️ アカウント設定", "slate"]].map(([label, color], i) => (
+          <button key={i} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100`}>{label}</button>
+        ))}
+      </div>
+    </div>
+
+    {/* KPIドリルダウンモーダル */}
+    {showDetail && kpiDetails[showDetail] && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowDetail(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+          <div className="p-4 border-b flex items-center justify-between">
+            <p className="text-sm font-bold">{showDetail}</p>
+            <button onClick={() => setShowDetail(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+          <div className="p-4 space-y-4">
+            <div className="text-center py-2">
+              <p className="text-2xl font-bold text-slate-800">{kpiDetails[showDetail].value}</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">月次推移</p>
+              <div className="flex items-end gap-2 h-16 px-2">
+                {kpiDetails[showDetail].chart.map((v, i) => {
+                  const max = Math.max(...kpiDetails[showDetail].chart);
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center">
+                      <div className={`w-full rounded-t ${i === 5 ? "bg-orange-500" : "bg-orange-200"}`} style={{ height: `${max > 0 ? (v / max) * 100 : 0}%` }} />
+                      <p className="text-xs text-slate-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">内訳</p>
+              {kpiDetails[showDetail].details.map((d, i) => (
+                <div key={i} className="flex text-xs border-b py-1.5"><span className="flex-1 text-slate-600">{d.label}</span><span className="font-bold">{d.value}</span></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
   </div>
-);
+  );
+};
 
 // ─── D02: 加盟店一覧 ───
-const AgentMerchants = () => (
+const AgentMerchants = () => {
+  const [selectedMerchant, setSelectedMerchant] = useState(null);
+  const merchants = [
+    { name: "ECサイトA", corp: "ABC商事", status: "稼働中", sc: "green", vol: "¥5,200,000", date: "2025-06-01", rate: "5.0%", txn: 1240, success: "98.2%", commission: "¥260,000", contact: "abc@example.com" },
+    { name: "オンラインストアB", corp: "XYZ物産", status: "稼働中", sc: "green", vol: "¥3,100,000", date: "2025-08-15", rate: "5.0%", txn: 780, success: "97.8%", commission: "¥155,000", contact: "xyz@example.com" },
+    { name: "ネットショップ太郎", corp: "太郎合同会社", status: "審査中", sc: "yellow", vol: "—", date: "2026-02-10", rate: "5.0%", txn: 0, success: "—", commission: "—", contact: "taro@example.com" },
+  ];
+  return (
   <div className="p-5 space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-sm font-bold text-slate-800">加盟店一覧（自分の紹介のみ）</h2>
+      <button className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200">📥 CSV出力</button>
     </div>
-    <div className="flex gap-2"><input className="border rounded px-2 py-1 text-xs flex-1" placeholder="加盟店名で検索" /><select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option></select></div>
+    <div className="grid grid-cols-3 gap-3">
+      <KPICard label="紹介加盟店数" value="3社" sub="稼働中 2社" color="blue" />
+      <KPICard label="月間合計取引額" value="¥8,300,000" trend={4.5} color="blue" />
+      <KPICard label="今月の報酬見込" value="¥415,000" sub="" color="green" />
+    </div>
+    <div className="flex gap-2"><input className="border rounded px-2 py-1 text-xs flex-1" placeholder="加盟店名で検索" /><select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>稼働中</option><option>審査中</option><option>停止中</option></select></div>
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-      <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "法人名", w: "w-28" }, { label: "ステータス", w: "w-16" }, { label: "月間取引額", w: "w-24" }, { label: "紹介日", w: "w-20" }, { label: "適用料率", w: "w-16" }]}>
-      {[["ECサイトA", "ABC商事", "稼働中", "green", "¥5,200,000", "2025-06-01", "5.0%"],
-        ["オンラインストアB", "XYZ物産", "稼働中", "green", "¥3,100,000", "2025-08-15", "5.0%"],
-        ["ネットショップ太郎", "太郎合同会社", "審査中", "yellow", "—", "2026-02-10", "5.0%"]
-      ].map((r, i) => (
-        <tr key={i} className="border-b hover:bg-slate-50">
-          <td className="px-4 py-2 whitespace-nowrap font-bold">{r[0]}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-500">{r[1]}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r[2]} color={r[3]} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-24">{r[4]}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-20 text-slate-400">{r[5]}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-16">{r[6]}</td>
+      <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "法人名", w: "w-28" }, { label: "ステータス", w: "w-16" }, { label: "月間取引額", w: "w-24" }, { label: "取引数", w: "w-16" }, { label: "紹介日", w: "w-20" }, { label: "適用料率", w: "w-16" }]}>
+      {merchants.map((r, i) => (
+        <tr key={i} onClick={() => setSelectedMerchant(r)} className="border-b hover:bg-blue-50 cursor-pointer">
+          <td className="px-4 py-2 whitespace-nowrap font-bold text-blue-600">{r.name}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-500">{r.corp}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.status} color={r.sc} /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-24">{r.vol}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r.txn > 0 ? `${r.txn}件` : "—"}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-20 text-slate-400">{r.date}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-16">{r.rate}</td>
         </tr>
       ))}
       </TableHeader>
     </div>
+
+    {/* 加盟店詳細スライドパネル */}
+    {selectedMerchant && (
+      <div className="fixed inset-0 z-50 flex">
+        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedMerchant(null)} />
+        <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+          <div className="p-4 border-b bg-blue-50 flex justify-between items-center">
+            <h3 className="text-sm font-bold text-slate-800">{selectedMerchant.name}</h3>
+            <button onClick={() => setSelectedMerchant(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          </div>
+          <div className="p-5 space-y-4">
+            <div>
+              <p className="text-xs text-slate-400 mb-1">基本情報</p>
+              <div className="space-y-1.5">
+                {[["法人名", selectedMerchant.corp], ["ステータス", selectedMerchant.status], ["紹介日", selectedMerchant.date], ["適用料率", selectedMerchant.rate], ["連絡先", selectedMerchant.contact]].map(([l, v], i) => (
+                  <div key={i} className="flex text-xs"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
+                ))}
+              </div>
+            </div>
+            <div className="border-t pt-3">
+              <p className="text-xs text-slate-400 mb-1">月次パフォーマンス</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-blue-50 rounded p-2 text-center"><p className="text-xs text-slate-400">取引額</p><p className="text-sm font-bold text-blue-700">{selectedMerchant.vol}</p></div>
+                <div className="bg-emerald-50 rounded p-2 text-center"><p className="text-xs text-slate-400">報酬</p><p className="text-sm font-bold text-emerald-700">{selectedMerchant.commission}</p></div>
+                <div className="bg-slate-50 rounded p-2 text-center"><p className="text-xs text-slate-400">取引数</p><p className="text-sm font-bold">{selectedMerchant.txn > 0 ? `${selectedMerchant.txn}件` : "—"}</p></div>
+                <div className="bg-slate-50 rounded p-2 text-center"><p className="text-xs text-slate-400">成功率</p><p className="text-sm font-bold">{selectedMerchant.success}</p></div>
+              </div>
+            </div>
+            {selectedMerchant.txn > 0 && (<div className="border-t pt-3">
+              <p className="text-xs text-slate-400 mb-2">月次推移（6ヶ月）</p>
+              <div className="flex items-end gap-1 h-20 px-1">
+                {[65, 72, 68, 80, 75, 85].map((h, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center">
+                    <div className="w-full bg-blue-400 rounded-t" style={{ height: `${h}%` }} />
+                    <p className="text-xs text-slate-400 mt-0.5">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
+                  </div>
+                ))}
+              </div>
+            </div>)}
+            {selectedMerchant.txn > 0 && (<div className="border-t pt-3">
+              <p className="text-xs text-slate-400 mb-2">直近取引（5件）</p>
+              {[
+                { time: "02/11 14:23", amt: "¥12,800", st: "成功", stc: "green" },
+                { time: "02/11 13:55", amt: "¥5,500", st: "成功", stc: "green" },
+                { time: "02/10 19:12", amt: "¥8,900", st: "成功", stc: "green" },
+                { time: "02/10 15:30", amt: "¥3,200", st: "返金済", stc: "yellow" },
+                { time: "02/09 11:45", amt: "¥22,000", st: "成功", stc: "green" },
+              ].map((t, i) => (
+                <div key={i} className="flex items-center py-1 text-xs border-b last:border-0">
+                  <span className="w-24 text-slate-400">{t.time}</span>
+                  <span className="w-20 font-bold">{t.amt}</span>
+                  <Badge text={t.st} color={t.stc} />
+                </div>
+              ))}
+            </div>)}
+          </div>
+        </div>
+      </div>
+    )}
   </div>
-);
+  );
+};
 
 // ─── D03: 報告書 ───
-const AgentReports = () => (
+const AgentReports = () => {
+  const [selectedReport, setSelectedReport] = useState(null);
+  const reports = [
+    { month: "2026年2月", merchants: "23社", volume: "¥45,200,000", commission: "¥2,260,000", status: "pending", label: "未確認", breakdown: [{ name: "ECサイトA", vol: "¥5,200,000", com: "¥260,000" }, { name: "オンラインストアB", vol: "¥3,100,000", com: "¥155,000" }, { name: "ファッションEC", vol: "¥4,800,000", com: "¥240,000" }] },
+    { month: "2026年1月", merchants: "22社", volume: "¥42,100,000", commission: "¥2,105,000", status: "paid", label: "支払済", breakdown: [{ name: "ECサイトA", vol: "¥4,900,000", com: "¥245,000" }, { name: "オンラインストアB", vol: "¥2,800,000", com: "¥140,000" }, { name: "ファッションEC", vol: "¥4,500,000", com: "¥225,000" }] },
+    { month: "2025年12月", merchants: "21社", volume: "¥38,500,000", commission: "¥1,925,000", status: "paid", label: "支払済", breakdown: [{ name: "ECサイトA", vol: "¥4,200,000", com: "¥210,000" }, { name: "オンラインストアB", vol: "¥2,500,000", com: "¥125,000" }, { name: "ファッションEC", vol: "¥4,100,000", com: "¥205,000" }] },
+  ];
+  return (
   <div className="p-5 space-y-4">
     <div className="flex items-center justify-between">
-      <h2 className="text-sm font-bold text-slate-800">報告書</h2>
+      <h2 className="text-sm font-bold text-slate-800">実績レポート</h2>
+    </div>
+    <div className="grid grid-cols-3 gap-3">
+      <KPICard label="年間報酬合計" value="¥24,580,000" sub="2025年度" color="blue" />
+      <KPICard label="月平均報酬" value="¥2,048,000" trend={6.2} color="green" />
+      <KPICard label="トップ加盟店" value="ECサイトA" sub="¥260,000/月" color="blue" />
+    </div>
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <p className="text-xs font-bold text-slate-700 mb-2">月次報酬推移</p>
+      <div className="flex items-end gap-1 h-24 px-1">
+        {[{ m: "9月", v: 1750 }, { m: "10月", v: 1820 }, { m: "11月", v: 1900 }, { m: "12月", v: 1925 }, { m: "1月", v: 2105 }, { m: "2月", v: 2260 }].map((d, i) => (
+          <div key={i} className="flex-1 flex flex-col items-center">
+            <p className="text-xs font-bold text-emerald-700 mb-0.5">¥{(d.v / 10).toFixed(0)}万</p>
+            <div className="w-full bg-emerald-400 rounded-t" style={{ height: `${(d.v / 2500) * 100}%` }} />
+            <p className="text-xs text-slate-400 mt-1">{d.m}</p>
+          </div>
+        ))}
+      </div>
     </div>
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
       <TableHeader cols={[{ label: "対象月", w: "w-20" }, { label: "対象加盟店", w: "w-16" }, { label: "取引総額", w: "w-24" }, { label: "報酬額", w: "w-24" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-32" }]}>
-      {[["2026年2月", "23社", "¥45,200,000", "¥2,260,000", "pending", "未確認"],
-        ["2026年1月", "22社", "¥42,100,000", "¥2,105,000", "paid", "支払済"],
-        ["2025年12月", "21社", "¥38,500,000", "¥1,925,000", "paid", "支払済"]
-      ].map((r, i) => (
-        <tr key={i} className="border-b hover:bg-slate-50">
-          <td className="px-4 py-2 whitespace-nowrap w-20 font-bold">{r[0]}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r[1]}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-24">{r[2]}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-24 font-bold text-emerald-700">{r[3]}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r[5]} color={r[4] === "paid" ? "green" : "yellow"} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-32"><div className="flex gap-1"><button className="px-2 py-0.5 bg-slate-100 rounded text-xs border">📄 PDF</button><button className="px-2 py-0.5 bg-slate-100 rounded text-xs border">📥 CSV</button><button className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200">詳細</button></div></td>
+      {reports.map((r, i) => (
+        <tr key={i} className="border-b hover:bg-blue-50">
+          <td className="px-4 py-2 whitespace-nowrap w-20 font-bold">{r.month}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r.merchants}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24">{r.volume}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24 font-bold text-emerald-700">{r.commission}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.label} color={r.status === "paid" ? "green" : "yellow"} /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-32"><div className="flex gap-1"><button className="px-2 py-0.5 bg-slate-100 rounded text-xs border">📄 PDF</button><button className="px-2 py-0.5 bg-slate-100 rounded text-xs border">📥 CSV</button><button onClick={() => setSelectedReport(r)} className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200">詳細</button></div></td>
         </tr>
       ))}
       </TableHeader>
     </div>
+
+    {/* レポート詳細スライドパネル */}
+    {selectedReport && (
+      <div className="fixed inset-0 z-50 flex">
+        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedReport(null)} />
+        <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+          <div className="p-4 border-b bg-blue-50 flex justify-between items-center">
+            <h3 className="text-sm font-bold text-slate-800">{selectedReport.month} レポート</h3>
+            <button onClick={() => setSelectedReport(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          </div>
+          <div className="p-5 space-y-4">
+            <div>
+              <p className="text-xs text-slate-400 mb-1">サマリー</p>
+              <div className="space-y-1.5">
+                {[["対象月", selectedReport.month], ["対象加盟店", selectedReport.merchants], ["取引総額", selectedReport.volume], ["報酬額", selectedReport.commission], ["ステータス", selectedReport.label]].map(([l, v], i) => (
+                  <div key={i} className="flex text-xs"><span className="w-24 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
+                ))}
+              </div>
+            </div>
+            <div className="border-t pt-3">
+              <p className="text-xs text-slate-400 mb-2">加盟店別内訳（TOP3）</p>
+              {selectedReport.breakdown.map((b, i) => (
+                <div key={i} className="flex items-center text-xs py-1.5 border-b last:border-0">
+                  <span className="flex-1 font-bold">{b.name}</span>
+                  <span className="w-24 text-slate-500 text-right">{b.vol}</span>
+                  <span className="w-20 text-right font-bold text-emerald-700">{b.com}</span>
+                </div>
+              ))}
+            </div>
+            <div className="border-t pt-3">
+              <p className="text-xs text-slate-400 mb-1">報酬計算</p>
+              <div className="bg-slate-50 rounded p-3 text-xs space-y-1">
+                <div className="flex justify-between"><span>取引総額</span><span className="font-bold">{selectedReport.volume}</span></div>
+                <div className="flex justify-between"><span>適用料率</span><span className="font-bold">5.0%</span></div>
+                <div className="flex justify-between border-t pt-1 mt-1"><span className="font-bold">報酬額</span><span className="font-bold text-emerald-700">{selectedReport.commission}</span></div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button className="flex-1 py-1.5 bg-slate-100 text-slate-600 rounded text-xs border font-bold">📄 PDF出力</button>
+              <button className="flex-1 py-1.5 bg-slate-100 text-slate-600 rounded text-xs border font-bold">📥 CSV出力</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
   </div>
-);
+  );
+};
 
 // ─── D04: 申込紹介 ───
-const AgentReferral = () => (
+const AgentReferral = () => {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [selectedReferral, setSelectedReferral] = useState(null);
+  const referralHistory = [
+    { name: "太郎合同会社", date: "2026-02-10", status: "審査中", sc: "yellow", corp: "太郎合同会社", rep: "太郎一郎", email: "taro@example.com", tel: "03-1111-2222", url: "https://taro-shop.jp", sales: "¥5,000,000", industry: "EC物販", steps: [
+      { label: "紹介申請", date: "2026-02-10", done: true },
+      { label: "運営確認", date: "2026-02-11", done: true },
+      { label: "URL送付", date: "2026-02-12", done: true },
+      { label: "本申込", date: "2026-02-13", done: false },
+      { label: "審査", date: "-", done: false },
+      { label: "承認", date: "-", done: false }
+    ]},
+    { name: "DEFサービス", date: "2026-01-20", status: "承認済", sc: "green", corp: "DEFサービス株式会社", rep: "佐藤花子", email: "def@example.com", tel: "03-3333-4444", url: "https://def-service.jp", sales: "¥8,000,000", industry: "サービス業", steps: [
+      { label: "紹介申請", date: "2026-01-20", done: true },
+      { label: "運営確認", date: "2026-01-21", done: true },
+      { label: "URL送付", date: "2026-01-22", done: true },
+      { label: "本申込", date: "2026-01-25", done: true },
+      { label: "審査", date: "2026-01-28", done: true },
+      { label: "承認", date: "2026-02-01", done: true }
+    ]},
+    { name: "GHIマーケット", date: "2025-12-05", status: "否認", sc: "red", corp: "GHI株式会社", rep: "鈴木太郎", email: "ghi@example.com", tel: "03-5555-6666", url: "https://ghi-market.jp", sales: "¥2,000,000", industry: "デジタルコンテンツ", steps: [
+      { label: "紹介申請", date: "2025-12-05", done: true },
+      { label: "運営確認", date: "2025-12-06", done: true },
+      { label: "URL送付", date: "2025-12-07", done: true },
+      { label: "本申込", date: "2025-12-10", done: true },
+      { label: "審査", date: "2025-12-15", done: true },
+      { label: "否決", date: "2025-12-18", done: true }
+    ]}
+  ];
+  return (
   <div className="p-5 space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-sm font-bold text-slate-800">申込紹介</h2>
+      <div className="flex items-center gap-2 text-xs text-slate-400">
+        <span>紹介総数: <span className="font-bold text-slate-700">12件</span></span>
+        <span>承認率: <span className="font-bold text-emerald-600">75%</span></span>
+      </div>
+    </div>
+    <div className="grid grid-cols-3 gap-3">
+      <KPICard label="累計紹介数" value="12件" sub="今月2件" color="orange" />
+      <KPICard label="承認済み" value="9件" sub="承認率 75%" color="green" />
+      <KPICard label="見込み報酬" value="¥180,000/月" sub="承認後の月額報酬" color="blue" />
     </div>
     <div className="grid grid-cols-2 gap-4">
       <div className="bg-white rounded-lg border p-4 space-y-3">
@@ -7127,16 +9723,17 @@ const AgentReferral = () => (
         ))}
         <div><label className="text-xs text-slate-500">業種</label><select className="w-full border rounded px-2 py-1.5 text-xs mt-0.5"><option>選択してください</option><option>EC物販</option><option>デジタルコンテンツ</option><option>サービス業</option></select></div>
         <div><label className="text-xs text-slate-500">備考</label><textarea className="w-full border rounded px-2 py-1.5 text-xs mt-0.5 h-12" /></div>
-        <button className="w-full py-2 bg-orange-500 text-white rounded text-xs font-bold hover:bg-orange-600">紹介申請を送信</button>
+        <button onClick={() => setShowConfirm(true)} className="w-full py-2 bg-orange-500 text-white rounded text-xs font-bold hover:bg-orange-600">紹介申請を送信</button>
       </div>
       <div className="space-y-3">
         <p className="text-xs font-bold">申請履歴</p>
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
-          {[["太郎合同会社", "2026-02-10", "審査中", "yellow"], ["DEFサービス", "2026-01-20", "承認済", "green"], ["GHIマーケット", "2025-12-05", "否認", "red"]].map((r, i) => (
-            <div key={i} className="flex items-center px-4 py-2 text-xs border-b whitespace-nowrap">
-              <div className="flex-1 font-bold">{r[0]}</div>
-              <div className="w-20 text-slate-400">{r[1]}</div>
-              <Badge text={r[2]} color={r[3]} />
+          {referralHistory.map((r, i) => (
+            <div key={i} onClick={() => setSelectedReferral(r)} className="flex items-center px-4 py-2.5 text-xs border-b whitespace-nowrap cursor-pointer hover:bg-slate-50">
+              <div className="flex-1 font-bold">{r.name}</div>
+              <div className="w-20 text-slate-400">{r.date}</div>
+              <Badge text={r.status} color={r.sc} />
+              <span className="ml-2 text-slate-300">›</span>
             </div>
           ))}
         </div>
@@ -7144,14 +9741,113 @@ const AgentReferral = () => (
           <p className="font-bold">紹介フロー</p>
           <p className="mt-1">① 紹介申請 → ② 運営確認 → ③ 加盟店にP01 URLを送信 → ④ 正式申込 → ⑤ 審査 → ⑥ 承認後自動紐付け</p>
         </div>
+        <div className="bg-orange-50 border border-orange-200 rounded p-3 text-xs text-orange-700">
+          <p className="font-bold">📊 紹介のポイント</p>
+          <p className="mt-1">月間予想売上が高い加盟店ほど審査が通りやすい傾向があります。サイトURLは正確に入力してください。</p>
+        </div>
       </div>
     </div>
+
+    {/* 送信確認モーダル */}
+    {showConfirm && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowConfirm(false)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[420px] max-h-[80vh] overflow-y-auto">
+          <div className="p-4 border-b flex items-center justify-between">
+            <p className="text-sm font-bold">紹介申請の確認</p>
+            <button onClick={() => setShowConfirm(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+          <div className="p-4 space-y-3">
+            <div className="bg-amber-50 border border-amber-200 rounded p-3 text-xs text-amber-700">
+              <p className="font-bold">⚠️ 送信前にご確認ください</p>
+              <p className="mt-1">紹介申請は送信後の取り消しはできません。入力内容を再度ご確認ください。</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-slate-700">入力内容サマリー</p>
+              {[["法人名", "（入力値）"], ["代表者名", "（入力値）"], ["担当者メール", "（入力値）"], ["サイトURL", "（入力値）"], ["月間予想売上", "（入力値）"], ["業種", "（選択値）"]].map(([l, v], i) => (
+                <div key={i} className="flex text-xs border-b pb-1"><span className="w-28 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setShowConfirm(false)} className="flex-1 py-2 border rounded text-xs">戻って修正</button>
+              <button onClick={() => setShowConfirm(false)} className="flex-1 py-2 bg-orange-500 text-white rounded text-xs font-bold hover:bg-orange-600">申請を送信</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* 紹介ステータスタイムライン スライドパネル */}
+    {selectedReferral && (
+      <div className="fixed inset-0 z-50 flex">
+        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedReferral(null)} />
+        <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+          <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
+            <p className="text-sm font-bold">{selectedReferral.name}</p>
+            <button onClick={() => setSelectedReferral(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+          <div className="p-4 space-y-4">
+            {/* ステータス */}
+            <div className="flex items-center gap-2">
+              <Badge text={selectedReferral.status} color={selectedReferral.sc} />
+              <span className="text-xs text-slate-400">申請日: {selectedReferral.date}</span>
+            </div>
+
+            {/* 基本情報 */}
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">基本情報</p>
+              <div className="space-y-1.5">
+                {[["法人名", selectedReferral.corp], ["代表者", selectedReferral.rep], ["メール", selectedReferral.email], ["電話", selectedReferral.tel], ["サイトURL", selectedReferral.url], ["月間予想売上", selectedReferral.sales], ["業種", selectedReferral.industry]].map(([l, v], i) => (
+                  <div key={i} className="flex text-xs"><span className="w-24 text-slate-400">{l}</span><span className="font-bold text-slate-700">{v}</span></div>
+                ))}
+              </div>
+            </div>
+
+            {/* ステータスタイムライン */}
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-3">審査タイムライン</p>
+              <div className="space-y-0">
+                {selectedReferral.steps.map((step, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <div className="flex flex-col items-center">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step.done ? (step.label === "否決" ? "bg-red-500 text-white" : "bg-emerald-500 text-white") : "bg-slate-200 text-slate-400"}`}>{step.done ? "✓" : i + 1}</div>
+                      {i < selectedReferral.steps.length - 1 && <div className={`w-0.5 h-6 ${step.done ? "bg-emerald-300" : "bg-slate-200"}`} />}
+                    </div>
+                    <div className="pb-4">
+                      <p className={`text-xs font-bold ${step.done ? "text-slate-700" : "text-slate-400"}`}>{step.label}</p>
+                      <p className="text-xs text-slate-400">{step.date}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* アクション */}
+            {selectedReferral.status === "審査中" && (
+              <div className="bg-amber-50 border border-amber-200 rounded p-3 text-xs text-amber-700">
+                <p className="font-bold">📋 現在審査中</p>
+                <p className="mt-1">運営による審査が進行中です。結果は通常1〜3営業日で通知されます。</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
   </div>
-);
+  );
+};
 
 // ─── D05: 代理店アカウント設定 ───
 const AgentAccountSettings = () => {
   const [showInviteD05, setShowInviteD05] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showMfaModal, setShowMfaModal] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState(null);
+  const [pwStrength, setPwStrength] = useState(0);
+  const staffList = [
+    { name: "田中太郎", role: "admin", last: "2026-02-13", email: "tanaka@digital-partners.jp", created: "2024-06-01", mfa: true, logs: [{ action: "ログイン", time: "2026-02-13 09:15" }, { action: "紹介申請送信", time: "2026-02-12 16:00" }] },
+    { name: "田中次郎", role: "viewer", last: "2026-02-10", email: "jiro@digital-partners.jp", created: "2025-03-15", mfa: false, logs: [{ action: "ログイン", time: "2026-02-10 10:30" }, { action: "レポート閲覧", time: "2026-02-10 10:35" }] },
+  ];
   return (
   <div className="p-5 space-y-4">
     <div className="flex items-center justify-between">
@@ -7160,29 +9856,69 @@ const AgentAccountSettings = () => {
     <div className="grid grid-cols-3 gap-4">
       <div className="bg-white rounded-lg border p-4 space-y-2">
         <p className="text-xs font-bold">代理店情報（閲覧のみ）</p>
-        {[["代理店コード", "AG-001"], ["代理店名", "デジタルパートナーズ"], ["代表者", "田中太郎"], ["メール", "info@digital-partners.jp"], ["電話", "03-1234-5678"]].map(([l, v], i) => (
+        {[["代理店コード", "AG-001"], ["代理店名", "デジタルパートナーズ"], ["代表者", "田中太郎"], ["メール", "info@digital-partners.jp"], ["電話", "03-1234-5678"], ["契約日", "2024-06-01"], ["契約種別", "スタンダード"]].map(([l, v], i) => (
           <div key={i} className="flex text-xs"><span className="w-24 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
         ))}
         <p className="text-xs text-slate-400 mt-2">※ 変更は運営にお問い合わせください</p>
       </div>
       <div className="bg-white rounded-lg border p-4 space-y-2">
-        <p className="text-xs font-bold">スタッフ管理</p>
-        {[["田中太郎", "admin", "2026-02-13"], ["田中次郎", "viewer", "2026-02-10"]].map(([n, r, d], i) => (
-          <div key={i} className="flex items-center text-xs border-b py-1.5"><span className="flex-1">{n}</span><Badge text={r} color={r === "admin" ? "blue" : "gray"} /><span className="w-20 text-slate-400 text-right">{d}</span></div>
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-bold">スタッフ管理</p>
+          <span className="text-xs text-slate-400">{staffList.length}名</span>
+        </div>
+        {staffList.map((s, i) => (
+          <div key={i} onClick={() => setSelectedStaff(s)} className="flex items-center text-xs border-b py-1.5 cursor-pointer hover:bg-slate-50 rounded">
+            <span className="flex-1 font-bold">{s.name}</span>
+            <Badge text={s.role} color={s.role === "admin" ? "blue" : "gray"} />
+            <span className="w-20 text-slate-400 text-right">{s.last}</span>
+            <span className="ml-1 text-slate-300">›</span>
+          </div>
         ))}
         <button onClick={() => setShowInviteD05(true)} className="w-full py-1.5 bg-orange-50 text-orange-600 rounded text-xs border border-orange-200 mt-2">+ スタッフを招待</button>
       </div>
       <div className="bg-white rounded-lg border p-4 space-y-2">
         <p className="text-xs font-bold">セキュリティ</p>
-        <button className="w-full py-1.5 bg-slate-50 rounded text-xs border">🔑 パスワード変更</button>
-        <button className="w-full py-1.5 bg-slate-50 rounded text-xs border">📱 MFA設定</button>
+        <button onClick={() => setShowPasswordModal(true)} className="w-full py-1.5 bg-slate-50 rounded text-xs border hover:bg-slate-100">🔑 パスワード変更</button>
+        <button onClick={() => setShowMfaModal(true)} className="w-full py-1.5 bg-slate-50 rounded text-xs border hover:bg-slate-100">📱 MFA設定</button>
         <div className="mt-2"><p className="text-xs text-slate-400 mb-1">最近のログイン</p>
-          {[["2026-02-13 09:15", "103.xx.xx.xx"], ["2026-02-12 14:30", "103.xx.xx.xx"]].map(([d, ip], i) => (
-            <div key={i} className="flex text-xs text-slate-500 py-0.5"><span className="flex-1">{d}</span><span>{ip}</span></div>
+          {[["2026-02-13 09:15", "103.xx.xx.xx", "Chrome"], ["2026-02-12 14:30", "103.xx.xx.xx", "Chrome"], ["2026-02-11 10:00", "192.xx.xx.xx", "Safari"]].map(([d, ip, br], i) => (
+            <div key={i} className="flex text-xs text-slate-500 py-0.5"><span className="flex-1">{d}</span><span className="w-14">{br}</span><span>{ip}</span></div>
           ))}
         </div>
       </div>
     </div>
+
+    {/* スタッフ詳細インライン展開 */}
+    {selectedStaff && (
+      <div className="bg-white rounded-lg border border-blue-200 shadow-sm p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-lg">👤</div>
+            <div>
+              <p className="text-sm font-bold">{selectedStaff.name}</p>
+              <p className="text-xs text-slate-400">{selectedStaff.email}</p>
+            </div>
+          </div>
+          <button onClick={() => setSelectedStaff(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+        </div>
+        <div className="grid grid-cols-4 gap-3 mb-3">
+          <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">権限</p><Badge text={selectedStaff.role} color={selectedStaff.role === "admin" ? "blue" : "gray"} /></div>
+          <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">MFA</p><p className="text-xs font-bold">{selectedStaff.mfa ? "有効 ✅" : "無効 ❌"}</p></div>
+          <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">登録日</p><p className="text-xs font-bold">{selectedStaff.created}</p></div>
+          <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">最終ログイン</p><p className="text-xs font-bold">{selectedStaff.last}</p></div>
+        </div>
+        <div>
+          <p className="text-xs font-bold text-slate-700 mb-2">最近の操作</p>
+          {selectedStaff.logs.map((log, i) => (
+            <div key={i} className="flex text-xs py-1 border-b last:border-0"><span className="flex-1">{log.action}</span><span className="text-slate-400">{log.time}</span></div>
+          ))}
+        </div>
+        <div className="flex gap-2 mt-3">
+          <button className="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded border border-blue-200">権限変更</button>
+          {selectedStaff.role !== "admin" && <button className="text-xs px-3 py-1.5 bg-red-50 text-red-600 rounded border border-red-200">削除</button>}
+        </div>
+      </div>
+    )}
 
     {/* ── Modal: スタッフ招待 ── */}
     {showInviteD05 && (
@@ -7204,6 +9940,81 @@ const AgentAccountSettings = () => {
         </div>
       </div>
     )}
+
+    {/* パスワード変更モーダル */}
+    {showPasswordModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowPasswordModal(false)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[400px]">
+          <div className="p-4 border-b flex items-center justify-between">
+            <p className="text-sm font-bold">🔑 パスワード変更</p>
+            <button onClick={() => setShowPasswordModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+          <div className="p-4 space-y-3">
+            <div><label className="text-xs text-slate-500">現在のパスワード</label><input type="password" className="w-full border rounded px-2 py-1.5 text-xs mt-0.5" /></div>
+            <div><label className="text-xs text-slate-500">新しいパスワード</label><input type="password" onChange={e => setPwStrength(Math.min(4, Math.floor(e.target.value.length / 3)))} className="w-full border rounded px-2 py-1.5 text-xs mt-0.5" />
+              <div className="flex gap-1 mt-1">
+                {[0,1,2,3].map(i => (
+                  <div key={i} className={`flex-1 h-1 rounded ${i < pwStrength ? (pwStrength <= 1 ? "bg-red-400" : pwStrength <= 2 ? "bg-amber-400" : pwStrength <= 3 ? "bg-blue-400" : "bg-emerald-400") : "bg-slate-200"}`} />
+                ))}
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">{["", "弱い", "普通", "強い", "非常に強い"][pwStrength]}</p>
+            </div>
+            <div><label className="text-xs text-slate-500">新しいパスワード（確認）</label><input type="password" className="w-full border rounded px-2 py-1.5 text-xs mt-0.5" /></div>
+            <div className="bg-slate-50 rounded p-2 text-xs text-slate-500">
+              <p className="font-bold mb-1">パスワード要件:</p>
+              <ul className="space-y-0.5 ml-2">
+                <li>• 8文字以上</li><li>• 大文字・小文字を含む</li><li>• 数字を含む</li><li>• 記号を含む</li>
+              </ul>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setShowPasswordModal(false)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
+              <button onClick={() => setShowPasswordModal(false)} className="flex-1 py-2 bg-orange-500 text-white rounded text-xs font-bold hover:bg-orange-600">パスワードを変更</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* MFA設定モーダル */}
+    {showMfaModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowMfaModal(false)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
+          <div className="p-4 border-b flex items-center justify-between">
+            <p className="text-sm font-bold">📱 二要素認証（MFA）設定</p>
+            <button onClick={() => setShowMfaModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+          <div className="p-4 space-y-4">
+            <div className="text-center">
+              <div className="w-40 h-40 mx-auto bg-slate-100 rounded-lg flex items-center justify-center text-slate-400 border-2 border-dashed">
+                <div className="text-center"><p className="text-3xl mb-1">📱</p><p className="text-xs">QRコード</p></div>
+              </div>
+              <p className="text-xs text-slate-500 mt-2">Google AuthenticatorまたはAuthyでスキャンしてください</p>
+            </div>
+            <div>
+              <label className="text-xs text-slate-500">手動入力キー:</label>
+              <div className="flex items-center gap-1 mt-1">
+                <p className="text-xs font-mono bg-slate-50 rounded p-1.5 flex-1 tracking-wider">JBSWY3DPEHPK3PXP</p>
+                <button className="text-xs text-blue-600 px-2">📋</button>
+              </div>
+            </div>
+            <div>
+              <label className="text-xs text-slate-500">認証コードを入力して有効化:</label>
+              <input className="w-full border rounded px-2 py-1.5 text-xs mt-0.5 text-center tracking-widest font-mono" placeholder="000000" maxLength={6} />
+            </div>
+            <div className="bg-amber-50 border border-amber-200 rounded p-3 text-xs text-amber-700">
+              <p className="font-bold">バックアップコード</p>
+              <p className="mt-1">MFA設定後、バックアップコードが発行されます。安全な場所に保管してください。デバイス紛失時に使用します。</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setShowMfaModal(false)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
+              <button onClick={() => setShowMfaModal(false)} className="flex-1 py-2 bg-orange-500 text-white rounded text-xs font-bold hover:bg-orange-600">MFAを有効化</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
     </div>
   );
 };
@@ -7212,6 +10023,7 @@ const AgentAccountSettings = () => {
 const MasterCustomers = () => {
   const [tab, setTab] = useState("search");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [showM16CsvExport, setShowM16CsvExport] = useState(false);
   const tabs = [{ id: "search", label: "顧客検索" }, { id: "analysis", label: "顧客分析" }, { id: "cards", label: "カード情報管理" }];
   const customers = [
     { id: "CUS-00001", email: "t***@example.com", card: "VISA *4242", merchant: "ABC商事", txn: 47, ltv: "¥892,600", last: "02/13 14:22", sub: "課金中", risk: "low", segment: "ロイヤル", pqId: "PQ-10234", recCount: 2, cardSave: "保存" },
@@ -7226,6 +10038,7 @@ const MasterCustomers = () => {
     <div className="p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-slate-800">顧客管理</h2>
+        <button onClick={() => setShowM16CsvExport(true)} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">📥 CSVエクスポート</button>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
         <button key={t.id} onClick={() => { setTab(t.id); setSelectedCustomer(null); }} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-blue-500 text-blue-700 bg-blue-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
@@ -7508,6 +10321,44 @@ const MasterCustomers = () => {
           </div>
         </div>
       )}
+
+      {/* ── Modal: CSVエクスポート ── */}
+      {showM16CsvExport && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowM16CsvExport(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[460px]">
+            <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-sm font-bold text-slate-800">📥 顧客データCSVエクスポート</h3>
+              <button onClick={() => setShowM16CsvExport(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-slate-600">セグメント</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>全顧客</option><option>ロイヤル</option><option>リピーター</option><option>初回</option></select></div>
+                <div><label className="text-xs font-semibold text-slate-600">リスクレベル</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>全て</option><option>低</option><option>中</option><option>高</option></select></div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-600">出力カラム</label>
+                <div className="flex gap-2 flex-wrap mt-1">
+                  {["顧客ID", "メール", "カード（マスク）", "加盟店", "取引回数", "LTV", "リスク", "セグメント", "PQ ID", "RC紐付数", "サブスク"].map((c, i) => (
+                    <label key={i} className="flex items-center gap-1 text-xs"><input type="checkbox" defaultChecked className="w-3 h-3" />{c}</label>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-slate-600">最終取引日（開始）</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
+                <div><label className="text-xs font-semibold text-slate-600">最終取引日（終了）</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
+              </div>
+              <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">
+                💡 推定出力件数: 約15,420件 / ファイルサイズ: 約1.2MB
+              </div>
+            </div>
+            <div className="p-4 border-t flex gap-2 justify-end">
+              <button onClick={() => setShowM16CsvExport(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => setShowM16CsvExport(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">CSVダウンロード</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -7516,6 +10367,7 @@ const MasterCustomers = () => {
 const MerchantCustomers = () => {
   const [tab, setTab] = useState("list");
   const [detail, setDetail] = useState(null);
+  const [showCsvExport, setShowCsvExport] = useState(false);
   const tabs = [{ id: "list", label: "顧客一覧" }, { id: "analysis", label: "顧客分析" }];
   const customers = [
     { id: "CUS-00001", email: "t***@example.com", card: "VISA *4242", txn: 47, ltv: "¥892,600", repeat: "ロイヤル", sub: "課金中", last: "02/13 14:22", tags: ["VIP"] },
@@ -7531,6 +10383,7 @@ const MerchantCustomers = () => {
         <h2 className="text-sm font-bold text-slate-800">顧客管理</h2>
         <div className="flex items-center gap-2">
           <select className="border rounded px-2 py-1 text-xs"><option>🏢 ECサイトA</option><option>全サイト合算</option></select>
+          <button onClick={() => setShowCsvExport(true)} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">📥 CSV</button>
         </div>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
@@ -7694,6 +10547,78 @@ const MerchantCustomers = () => {
               ))}
             </div>
           </div>
+
+          {/* Cohort Analysis */}
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <p className="text-xs font-bold mb-2">📊 コホート分析（月次リテンション）</p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead><tr className="bg-slate-50 border-b">
+                  <th className="text-left px-2 py-1 font-semibold text-slate-600">登録月</th>
+                  <th className="text-center px-2 py-1 font-semibold text-slate-600">新規</th>
+                  {["1M", "2M", "3M", "4M", "5M", "6M"].map(m => <th key={m} className="text-center px-2 py-1 font-semibold text-slate-600">{m}</th>)}
+                </tr></thead>
+                <tbody>
+                  {[
+                    { month: "2025年9月", new: 320, rates: [68, 52, 45, 38, 35, 33] },
+                    { month: "2025年10月", new: 285, rates: [72, 55, 48, 42, 38, null] },
+                    { month: "2025年11月", new: 310, rates: [70, 54, 46, 40, null, null] },
+                    { month: "2025年12月", new: 350, rates: [75, 58, 50, null, null, null] },
+                    { month: "2026年1月", new: 290, rates: [71, 55, null, null, null, null] },
+                    { month: "2026年2月", new: 187, rates: [null, null, null, null, null, null] },
+                  ].map((c, i) => (
+                    <tr key={i} className="border-b">
+                      <td className="px-2 py-1 font-semibold text-slate-700">{c.month}</td>
+                      <td className="px-2 py-1 text-center font-bold">{c.new}</td>
+                      {c.rates.map((r, j) => (
+                        <td key={j} className="px-2 py-1 text-center">
+                          {r !== null ? (
+                            <span className={`px-1.5 py-0.5 rounded text-xs ${r >= 60 ? "bg-emerald-100 text-emerald-700" : r >= 40 ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>{r}%</span>
+                          ) : <span className="text-slate-200">—</span>}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-xs text-slate-400 mt-2">※ 各月のリテンション率（初月取引後にN月目に再取引があった割合）</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: CSVエクスポート ── */}
+      {showCsvExport && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowCsvExport(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+            <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-sm font-bold text-slate-800">📥 顧客データCSVエクスポート</h3>
+              <button onClick={() => setShowCsvExport(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div><label className="text-xs font-semibold text-slate-600">セグメント</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>全顧客</option><option>ロイヤル</option><option>リピーター</option><option>初回</option><option>休眠</option></select></div>
+              <div>
+                <label className="text-xs font-semibold text-slate-600">出力カラム</label>
+                <div className="flex gap-2 flex-wrap mt-1">
+                  {["顧客ID", "メール", "カード（マスク）", "取引回数", "LTV", "セグメント", "サブスク状態", "最終取引日", "タグ"].map((c, i) => (
+                    <label key={i} className="flex items-center gap-1 text-xs"><input type="checkbox" defaultChecked className="w-3 h-3" />{c}</label>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-slate-600">最終取引日（開始）</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
+                <div><label className="text-xs font-semibold text-slate-600">最終取引日（終了）</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
+              </div>
+              <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">
+                💡 推定出力件数: 約3,420件 / ファイルサイズ: 約240KB
+              </div>
+            </div>
+            <div className="p-4 border-t flex gap-2 justify-end">
+              <button onClick={() => setShowCsvExport(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => setShowCsvExport(false)} className="px-4 py-2 text-xs bg-emerald-600 text-white rounded font-semibold hover:bg-emerald-700">CSVダウンロード</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -7709,7 +10634,7 @@ const PaymentPage = () => {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold text-slate-800">決済ページ</h2>
           <div className="flex gap-1">
-            {[{ id: "input", label: "入力" }, { id: "processing", label: "処理中" }, { id: "complete", label: "完了" }, { id: "error", label: "エラー" }, { id: "link_error", label: "リンク無効" }].map(s => (
+            {[{ id: "input", label: "入力" }, { id: "3ds", label: "3DS認証" }, { id: "processing", label: "処理中" }, { id: "complete", label: "完了" }, { id: "error", label: "エラー" }, { id: "link_error", label: "リンク無効" }].map(s => (
               <button key={s.id} onClick={() => setScreen(s.id)} className={`px-2 py-0.5 rounded text-xs ${screen === s.id ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"}`}>{s.label}</button>
             ))}
           </div>
@@ -7732,7 +10657,7 @@ const PaymentPage = () => {
                 <div><label className="text-xs text-slate-500">セキュリティコード</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="CVC" /></div>
               </div>
               <div><label className="text-xs text-slate-500">カード名義</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="TARO YAMADA" /></div>
-              <button onClick={() => setScreen("processing")} className="w-full py-3.5 bg-blue-600 text-white rounded-xl text-base font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:shadow-xl transition-all duration-200 mt-3">💳 ¥9,800 を支払う</button>
+              <button onClick={() => setScreen("3ds")} className="w-full py-3.5 bg-blue-600 text-white rounded-xl text-base font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:shadow-xl transition-all duration-200 mt-3">💳 ¥9,800 を支払う</button>
               <div className="flex items-center justify-center gap-3 text-xs text-slate-400 pt-2">
                 <span>🔒 SSL暗号化通信</span><span>|</span><span>PCI DSS準拠</span>
               </div>
@@ -7740,6 +10665,44 @@ const PaymentPage = () => {
                 {["VISA", "MC", "JCB", "AMEX"].map(b => (
                   <span key={b} className="text-xs px-1.5 py-0.5 bg-slate-100 rounded border border-slate-200">{b}</span>
                 ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {screen === "3ds" && (
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
+            <div className="bg-slate-900 text-white px-6 py-5">
+              <div className="flex items-center gap-2"><span className="text-lg">🔒</span><span className="text-sm font-bold">3Dセキュア認証</span></div>
+            </div>
+            <div className="px-6 py-6">
+              <div className="border-2 border-blue-200 rounded-lg p-5 bg-blue-50/50">
+                <div className="text-center mb-4">
+                  <div className="w-16 h-10 bg-blue-600 rounded mx-auto flex items-center justify-center text-white text-xs font-bold">VISA</div>
+                  <p className="text-sm font-bold text-slate-800 mt-3">本人認証サービス</p>
+                  <p className="text-xs text-slate-500 mt-1">Verified by VISA</p>
+                </div>
+                <div className="bg-white rounded border p-3 space-y-3">
+                  <div className="text-xs">
+                    <p className="text-slate-400">加盟店名</p>
+                    <p className="font-semibold text-slate-700">〇〇ショップ</p>
+                  </div>
+                  <div className="text-xs">
+                    <p className="text-slate-400">お支払い金額</p>
+                    <p className="font-bold text-slate-800">¥9,800</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-500">ワンタイムパスワード</label>
+                    <input className="w-full border rounded-lg px-3 py-2 text-sm mt-0.5 text-center tracking-widest" placeholder="● ● ● ● ● ●" maxLength={6} />
+                    <p className="text-xs text-slate-400 mt-1">ご登録の携帯番号にSMSで送信しました</p>
+                  </div>
+                  <button onClick={() => setScreen("processing")} className="w-full py-2.5 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700">認証する</button>
+                  <button onClick={() => setScreen("input")} className="w-full py-2 bg-slate-100 text-slate-500 rounded-lg text-xs">キャンセル</button>
+                </div>
+              </div>
+              <div className="mt-4 flex gap-2 justify-center">
+                <button onClick={() => setScreen("processing")} className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded text-xs">→ 認証成功</button>
+                <button onClick={() => setScreen("error")} className="px-3 py-1 bg-rose-100 text-rose-700 rounded text-xs">→ 認証失敗</button>
               </div>
             </div>
           </div>
