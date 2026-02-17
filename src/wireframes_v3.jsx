@@ -220,6 +220,36 @@ const MasterDashboard = () => {
       <p className="text-xs text-slate-700">本日の取引は順調です。取引量は前日比+8%、決済成功率99.2%。不正検知で2件を自動ブロック済み。例外キューに審査保留3件あり（うち1件は2時間超過）。対応をお願いします。</p>
     </div>
 
+    {/* お知らせ欄 */}
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span>📢</span>
+          <p className="text-xs font-bold text-slate-600">お知らせ</p>
+          <Badge text="管理者向け" color="purple" />
+        </div>
+        <span className="text-xs text-blue-600 cursor-pointer hover:underline" onClick={() => {}}>すべて見る →</span>
+      </div>
+      <div className="space-y-1.5">
+        {[
+          { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: "🔧", target: "全体" },
+          { date: "02/16", title: "Worldpay接続 レート改定のお知らせ（3月適用）", type: "重要", tColor: "red", icon: "💳", target: "管理者" },
+          { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: "🚀", target: "全体" },
+          { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: "⚠️", target: "全体" },
+          { date: "02/12", title: "3Dセキュア2.0 完全移行のお知らせ", type: "お知らせ", tColor: "default", icon: "📌", target: "全体" },
+          { date: "02/10", title: "代理店向け報酬計算ロジック変更について", type: "重要", tColor: "red", icon: "🤝", target: "管理者" },
+        ].map((n, i) => (
+          <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-blue-50 ${i === 0 ? "border-amber-300 bg-amber-50" : i === 1 ? "border-rose-200 bg-rose-50/50" : "border-slate-200"}`}>
+            <span>{n.icon}</span>
+            <span className="w-12 text-slate-400 shrink-0">{n.date}</span>
+            <Badge text={n.type} color={n.tColor} />
+            <span className="px-1.5 py-0.5 bg-slate-100 rounded text-xs text-slate-500">{n.target}</span>
+            <span className={`flex-1 ${i <= 1 ? "font-semibold" : ""} ${i === 0 ? "text-amber-800" : i === 1 ? "text-rose-700" : "text-slate-700"}`}>{n.title}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
     {/* KPIs + Period Toggle */}
     <div className="space-y-2">
       <div className="flex justify-end">
@@ -376,16 +406,51 @@ const MasterExceptionQueue = () => {
   const [queueFilter, setQueueFilter] = useState("all");
   const [checkedItems, setCheckedItems] = useState([]);
   const [showBatchConfirm, setShowBatchConfirm] = useState(null);
+  const [selectedQueueId, setSelectedQueueId] = useState("#1024");
 
   const toggleCheck = (id) => setCheckedItems(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   const toggleAll = (ids) => setCheckedItems(prev => prev.length === ids.length ? [] : ids);
 
   const queueItems = [
-    { id: "#5521", type: "不正検知", target: "¥89,000 / カード決済 / 山本商店", ai: "ブロック推薦", aiColor: "red", time: "30分", timeColor: "gray", locked: false },
-    { id: "#1025", type: "審査保留", target: "合同会社テストショップ / 雑貨EC", ai: "承認推薦", aiColor: "green", time: "15分", timeColor: "gray", locked: true, lockedBy: "田中" },
-    { id: "#5518", type: "URL巡回", target: "sample-shop.jp / 商品ページ変更検知", ai: "要確認", aiColor: "yellow", time: "1時間", timeColor: "yellow", locked: false },
-    { id: "#5515", type: "精算", target: "Univa Pay cast / バッチ#B-0210 / エラー3件", ai: "再実行推薦", aiColor: "blue", time: "2時間", timeColor: "red", locked: false },
+    { id: "#1024", type: "審査保留", target: "株式会社サンプルEC / アパレルEC", ai: "承認推薦", aiColor: "green", time: "2時間12分", timeColor: "red", locked: false,
+      detail: { badge: "審査保留", company: "株式会社サンプルEC", staleTime: "2時間12分", receivedAt: "2026-02-11 12:20",
+        aiLabel: "承認を推薦", aiIcon: "✅", aiConf: "82%", aiColor: "text-emerald-700",
+        risk: "中リスク (スコア: 58/100)", riskColor: "text-amber-600", riskSub: "業種: アパレルEC / 月商予測: ¥3M",
+        aiSummary: "法人設立3年、財務状況は安定。サイト内容に問題なし。反社チェッククリア。唯一の懸念点は取扱商品カテゴリが「高額アパレル」で返品率が業界平均より高い可能性あり。",
+        data: [["法人名", "株式会社サンプルEC"], ["設立", "2023年4月"], ["資本金", "¥10M"], ["代表", "山田 太郎"], ["業種", "アパレルEC"], ["URL", "sample-ec.jp ✅"], ["反社チェック", "✅ クリア"], ["決算書", "✅ 解析済み"]],
+      }},
+    { id: "#5521", type: "不正検知", target: "¥89,000 / カード決済 / 山本商店", ai: "ブロック推薦", aiColor: "red", time: "30分", timeColor: "gray", locked: false,
+      detail: { badge: "不正検知", company: "山本商店", staleTime: "30分", receivedAt: "2026-02-11 14:02",
+        aiLabel: "ブロックを推薦", aiIcon: "🚫", aiConf: "94%", aiColor: "text-rose-700",
+        risk: "高リスク (スコア: 89/100)", riskColor: "text-rose-600", riskSub: "取引金額: ¥89,000 / VISA / 3Dセキュア未通過",
+        aiSummary: "過去30日間で同一カード番号から異なる加盟店で5件の取引あり。IPアドレスが海外VPN経由。カード発行国と利用国不一致。短時間での連続決済パターンに該当。",
+        data: [["取引ID", "TXN-20260211-14502"], ["加盟店", "山本商店"], ["金額", "¥89,000"], ["ブランド", "VISA"], ["カード発行国", "US"], ["利用国", "JP（VPN経由）"], ["不正スコア", "0.89"], ["3DS", "未通過"]],
+      }},
+    { id: "#1025", type: "審査保留", target: "合同会社テストショップ / 雑貨EC", ai: "承認推薦", aiColor: "green", time: "15分", timeColor: "gray", locked: true, lockedBy: "田中",
+      detail: { badge: "審査保留", company: "合同会社テストショップ", staleTime: "15分", receivedAt: "2026-02-11 14:17",
+        aiLabel: "承認を推薦", aiIcon: "✅", aiConf: "91%", aiColor: "text-emerald-700",
+        risk: "低リスク (スコア: 25/100)", riskColor: "text-emerald-600", riskSub: "業種: 雑貨EC / 月商予測: ¥1.5M",
+        aiSummary: "法人設立5年、財務健全。過去の取引実績あり（別PSP経由）。サイト内容は適正。代表者の信用情報も問題なし。",
+        data: [["法人名", "合同会社テストショップ"], ["設立", "2021年8月"], ["資本金", "¥5M"], ["代表", "佐藤 花子"], ["業種", "雑貨EC"], ["URL", "test-shop.jp ✅"], ["反社チェック", "✅ クリア"], ["決算書", "✅ 解析済み"]],
+      }},
+    { id: "#5518", type: "URL巡回", target: "sample-shop.jp / 商品ページ変更検知", ai: "要確認", aiColor: "yellow", time: "1時間", timeColor: "yellow", locked: false,
+      detail: { badge: "URL巡回", company: "sample-shop.jp", staleTime: "1時間", receivedAt: "2026-02-11 13:32",
+        aiLabel: "要確認", aiIcon: "⚠️", aiConf: "65%", aiColor: "text-amber-700",
+        risk: "中リスク (スコア: 52/100)", riskColor: "text-amber-600", riskSub: "商品ページの内容変更検知",
+        aiSummary: "定期巡回で商品ページの大幅変更を検知。新たに「サプリメント」カテゴリが追加されており、申告業種（雑貨）との乖離の可能性あり。薬機法関連の表記チェックが必要。",
+        data: [["サイトURL", "sample-shop.jp"], ["変更検知日時", "2026-02-11 13:30"], ["変更種別", "商品カテゴリ追加"], ["新カテゴリ", "サプリメント"], ["申告業種", "雑貨EC"], ["前回巡回", "2026-02-04"], ["変更箇所数", "12ページ"], ["AI判定", "業種乖離の可能性"]],
+      }},
+    { id: "#5515", type: "精算", target: "Univa Pay cast / バッチ#B-0210 / エラー3件", ai: "再実行推薦", aiColor: "blue", time: "2時間", timeColor: "red", locked: false,
+      detail: { badge: "精算", company: "Univa Pay cast バッチ#B-0210", staleTime: "2時間", receivedAt: "2026-02-11 12:32",
+        aiLabel: "再実行を推薦", aiIcon: "🔄", aiConf: "88%", aiColor: "text-blue-700",
+        risk: "低リスク (スコア: 15/100)", riskColor: "text-emerald-600", riskSub: "精算バッチのタイムアウトエラー",
+        aiSummary: "バッチ#B-0210の精算処理で3件のタイムアウトエラー。原因はプロセッサー側の一時的な遅延と推定。同時間帯の他のバッチは正常完了。再実行で解決する可能性が高い。",
+        data: [["バッチID", "B-0210"], ["接続先", "Univa Pay cast"], ["エラー件数", "3件"], ["エラー種別", "タイムアウト"], ["正常件数", "147件"], ["総額", "¥8,520,000"], ["エラー金額", "¥312,000"], ["推薦アクション", "再実行"]],
+      }},
   ];
+
+  const selectedItem = queueItems.find(q => q.id === selectedQueueId) || queueItems[0];
+  const d = selectedItem.detail;
 
   return (
   <div className="p-5 space-y-4">
@@ -418,16 +483,16 @@ const MasterExceptionQueue = () => {
       )}
     </div>
 
-    {/* Detail card */}
+    {/* Detail card — 選択中のキューアイテム詳細 */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
-      <div className="p-3 border-b bg-amber-50">
+      <div className={`p-3 border-b ${d.badge === "不正検知" ? "bg-rose-50" : d.badge === "精算" ? "bg-blue-50" : d.badge === "URL巡回" ? "bg-purple-50" : "bg-amber-50"}`}>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <Badge text="審査保留" color="yellow" />
-            <span className="text-sm font-bold text-slate-800">#1024 - 株式会社サンプルEC</span>
-            <Badge text="⚠️ 滞留 2時間12分" color="red" />
+            <Badge text={d.badge} color={d.badge === "不正検知" ? "red" : d.badge === "精算" ? "blue" : d.badge === "URL巡回" ? "purple" : "yellow"} />
+            <span className="text-sm font-bold text-slate-800">{selectedItem.id} - {d.company}</span>
+            {parseInt(d.staleTime) >= 60 || d.staleTime.includes("時間") ? <Badge text={`⚠️ 滞留 ${d.staleTime}`} color="red" /> : <Badge text={`滞留 ${d.staleTime}`} color="gray" />}
           </div>
-          <span className="text-xs text-slate-400">受付: 2026-02-11 12:20</span>
+          <span className="text-xs text-slate-400">受付: {d.receivedAt}</span>
         </div>
       </div>
 
@@ -436,42 +501,49 @@ const MasterExceptionQueue = () => {
           <div>
             <p className="text-xs text-slate-400 mb-1">AI推薦判定</p>
             <div className="flex items-center gap-2">
-              <span className="text-lg">✅</span>
+              <span className="text-lg">{d.aiIcon}</span>
               <div>
-                <p className="text-sm font-bold text-emerald-700">承認を推薦</p>
-                <p className="text-xs text-slate-500">信頼度: 82%</p>
+                <p className={`text-sm font-bold ${d.aiColor}`}>{d.aiLabel}</p>
+                <p className="text-xs text-slate-500">信頼度: {d.aiConf}</p>
               </div>
             </div>
           </div>
           <div>
             <p className="text-xs text-slate-400 mb-1">リスクレベル</p>
-            <p className="text-sm font-bold text-amber-600">中リスク (スコア: 58/100)</p>
-            <p className="text-xs text-slate-500">業種: アパレルEC / 月商予測: ¥3M</p>
+            <p className={`text-sm font-bold ${d.riskColor}`}>{d.risk}</p>
+            <p className="text-xs text-slate-500">{d.riskSub}</p>
           </div>
           <div>
             <p className="text-xs text-slate-400 mb-1">AI分析サマリー</p>
-            <p className="text-xs text-slate-600">法人設立3年、財務状況は安定。サイト内容に問題なし。反社チェッククリア。唯一の懸念点は取扱商品カテゴリが「高額アパレル」で返品率が業界平均より高い可能性あり。</p>
+            <p className="text-xs text-slate-600">{d.aiSummary}</p>
           </div>
         </div>
 
         <div className="bg-slate-50 rounded p-2 mb-3">
           <p className="text-xs font-bold text-slate-600 mb-1">AIが収集した主要データ</p>
           <div className="grid grid-cols-4 gap-2 text-xs">
-            <div><span className="text-slate-400">法人名:</span> 株式会社サンプルEC</div>
-            <div><span className="text-slate-400">設立:</span> 2023年4月</div>
-            <div><span className="text-slate-400">資本金:</span> ¥10M</div>
-            <div><span className="text-slate-400">代表:</span> 山田 太郎</div>
-            <div><span className="text-slate-400">業種:</span> アパレルEC</div>
-            <div><span className="text-slate-400">URL:</span> sample-ec.jp ✅</div>
-            <div><span className="text-slate-400">反社チェック:</span> ✅ クリア</div>
-            <div><span className="text-slate-400">決算書:</span> ✅ 解析済み</div>
+            {d.data.map(([label, value], di) => (
+              <div key={di}><span className="text-slate-400">{label}:</span> {value}</div>
+            ))}
           </div>
         </div>
 
         <div className="flex gap-2 justify-end">
-          <button className="px-4 py-2 bg-rose-100 text-rose-700 rounded text-xs font-semibold hover:bg-rose-200">拒否</button>
-          <button className="px-4 py-2 bg-amber-100 text-amber-700 rounded text-xs font-semibold hover:bg-amber-200">差戻し</button>
-          <button className="px-4 py-2 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700">✓ 承認</button>
+          {d.badge === "不正検知" ? (<>
+            <button className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded text-xs font-semibold hover:bg-emerald-200">✓ 正常と判定</button>
+            <button className="px-4 py-2 bg-rose-600 text-white rounded text-xs font-semibold hover:bg-rose-700">🚫 ブロック確定</button>
+          </>) : d.badge === "精算" ? (<>
+            <button className="px-4 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">スキップ</button>
+            <button className="px-4 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">🔄 再実行</button>
+          </>) : d.badge === "URL巡回" ? (<>
+            <button className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded text-xs font-semibold hover:bg-emerald-200">問題なし</button>
+            <button className="px-4 py-2 bg-amber-100 text-amber-700 rounded text-xs font-semibold hover:bg-amber-200">加盟店に確認</button>
+            <button className="px-4 py-2 bg-rose-600 text-white rounded text-xs font-semibold hover:bg-rose-700">停止</button>
+          </>) : (<>
+            <button className="px-4 py-2 bg-rose-100 text-rose-700 rounded text-xs font-semibold hover:bg-rose-200">拒否</button>
+            <button className="px-4 py-2 bg-amber-100 text-amber-700 rounded text-xs font-semibold hover:bg-amber-200">差戻し</button>
+            <button className="px-4 py-2 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700">✓ 承認</button>
+          </>)}
         </div>
       </div>
     </div>
@@ -484,17 +556,24 @@ const MasterExceptionQueue = () => {
         <td colSpan="6" className="px-4 py-1 text-xs text-slate-400">{checkedItems.length > 0 ? `${checkedItems.length}件選択中` : "全選択"}</td>
       </tr>
       {queueItems.map((item, i) => (
-        <tr key={i} className={`border-b ${item.locked ? "bg-orange-50" : checkedItems.includes(item.id) ? "bg-blue-50" : i % 2 ? "bg-slate-50" : ""}`}>
-          <td className="px-4 py-2 whitespace-nowrap w-8"><input type="checkbox" className="w-3.5 h-3.5" checked={checkedItems.includes(item.id)} onChange={() => toggleCheck(item.id)} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-16 font-mono text-slate-600"><div className="flex items-center gap-1">{item.locked && <span title={`${item.lockedBy}さんが対応中`}>🔒</span>}{item.id}</div></td>
-          <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={item.type} color="yellow" /></td>
+        <tr key={i} onClick={() => setSelectedQueueId(item.id)} className={`border-b cursor-pointer transition-colors ${selectedQueueId === item.id ? "bg-blue-100 border-l-2 border-l-blue-500" : item.locked ? "bg-orange-50 hover:bg-orange-100" : checkedItems.includes(item.id) ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-slate-100"}`}>
+          <td className="px-4 py-2 whitespace-nowrap w-8" onClick={(e) => e.stopPropagation()}><input type="checkbox" className="w-3.5 h-3.5" checked={checkedItems.includes(item.id)} onChange={() => toggleCheck(item.id)} /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-16 font-mono text-slate-600"><div className="flex items-center gap-1">{item.locked && <span title={`${item.lockedBy}さんが対応中`}>🔒</span>}{selectedQueueId === item.id ? <span className="font-bold text-blue-700">{item.id}</span> : item.id}</div></td>
+          <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={item.type} color={item.type === "不正検知" ? "red" : item.type === "精算" ? "blue" : item.type === "URL巡回" ? "purple" : "yellow"} /></td>
           <td className="px-4 py-2 whitespace-nowrap text-slate-700">{item.target}</td>
           <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={item.ai} color={item.aiColor} /></td>
           <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={item.time} color={item.timeColor} /></td>
           <td className="px-4 py-2 whitespace-nowrap w-32"><div className="flex gap-1">
-            <button className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs hover:bg-emerald-200">承認</button>
-            <button className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs hover:bg-rose-200">拒否</button>
-            <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">詳細</button>
+            {item.type === "不正検知" ? (<>
+              <button className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs hover:bg-emerald-200">正常</button>
+              <button className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs hover:bg-rose-200">ブロック</button>
+            </>) : item.type === "精算" ? (<>
+              <button className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">再実行</button>
+              <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">スキップ</button>
+            </>) : (<>
+              <button className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs hover:bg-emerald-200">承認</button>
+              <button className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs hover:bg-rose-200">拒否</button>
+            </>)}
           </div></td>
         </tr>
       ))}
@@ -887,73 +966,163 @@ const MasterMerchants = () => {
                 <td className="px-4 py-2 whitespace-nowrap w-14"><button onClick={(e) => { e.stopPropagation(); setSlidePanel(m); }} className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">詳細</button></td>
               </tr>
 
-              {/* ── Expanded: 接続先審査状況パネル ── */}
+              {/* ── Expanded: サイト→接続先→各条件 階層パネル ── */}
               {isExpanded && (
                 <tr><td colSpan={10} className="p-0"><div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
                   <div className="flex justify-between items-center mb-2">
-                    <p className="text-xs font-bold text-slate-700">🔌 接続先審査状況 — {m.name}</p>
+                    <p className="text-xs font-bold text-slate-700">🏢 サイト・接続先一覧 — {m.name}（{m.sites.length}サイト / {m.processors.length}接続先）</p>
                     <button onClick={() => setShowProcApply(true)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">+ 接続先審査を追加申請</button>
                   </div>
 
-                  {/* Processor Stage Diagram */}
-                  <div className="bg-white rounded-lg border border-slate-200 p-3 mb-2">
-                    <p className="text-xs text-slate-400 mb-2">接続先拡大フロー（段階的に審査追加）</p>
-                    <div className="flex items-center gap-1">
-                      {m.processors.map((proc, pi) => {
-                        const st = PROC_STATUS[proc.status] || { label: proc.status, color: "gray" };
-                        return (
-                          <div key={pi} className="flex items-center gap-1">
-                            <div className={`rounded border px-2.5 py-1.5 text-xs ${
-                              proc.status === "approved" ? "bg-emerald-50 border-emerald-300" :
-                              proc.status === "reviewing" ? "bg-blue-50 border-blue-300 animate-pulse" :
-                              proc.status === "suspended" ? "bg-rose-50 border-rose-300" :
-                              "bg-slate-50 border-slate-200"
-                            }`}>
-                              <div className="font-semibold text-slate-700">{proc.name}</div>
-                              <div className="text-slate-400">{proc.brands}</div>
-                              <div className={`${st.textClass || "text-slate-600"} font-semibold mt-0.5`}>{st.label}</div>
+                  {/* ── サイト別展開 ── */}
+                  {m.sites.map((site, si) => {
+                    const siteApproved = site.processors.filter(p => p.status === "approved").length;
+                    return (
+                      <div key={si} className="bg-white rounded-lg border border-slate-200 mb-2 last:mb-0 overflow-hidden">
+                        {/* サイトヘッダー */}
+                        <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 border-b">
+                          <span className="text-sm">🌐</span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-slate-700">{site.siteName}</span>
+                              <span className="text-xs font-mono text-slate-400">{site.siteId}</span>
+                              <Badge text={`${siteApproved}/${site.processors.length} 接続`} color={siteApproved === site.processors.length ? "green" : "blue"} />
                             </div>
-                            {pi < m.processors.length - 1 && <span className="text-slate-300 text-xs">→</span>}
+                            <div className="flex items-center gap-3 mt-0.5">
+                              <span className="text-xs text-blue-500 truncate max-w-[200px]">{site.url}</span>
+                              {site.agentName && <span className="text-xs text-slate-400">代理店: {site.agentName}</span>}
+                            </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Processor Detail Table */}
-                  <div className="bg-white rounded-lg border border-slate-200">
-                    <div className="flex bg-slate-50 border-b text-xs font-semibold text-slate-500 px-4 py-1.5">
-                      <div className="w-36">接続先</div>
-                      <div className="w-28">対応ブランド</div>
-                      <div className="w-24">審査状況</div>
-                      <div className="w-24">承認日</div>
-                      <div className="w-24">累計取引</div>
-                      <div className="w-20">ルーティング</div>
-                      <div className="flex-1">操作</div>
-                    </div>
-                    {m.processors.map((proc, pi) => {
-                      const st = PROC_STATUS[proc.status] || { label: proc.status, color: "gray" };
-                      return (
-                        <div key={pi} className="flex items-center px-4 py-1.5 text-xs border-b whitespace-nowrap last:border-0">
-                          <div className="w-36 font-semibold text-slate-700">{proc.name}</div>
-                          <div className="w-28 text-slate-500">{proc.brands}</div>
-                          <div className="w-24"><Badge text={st.label} color={st.color} /></div>
-                          <div className="w-24 text-slate-400">{proc.since || "—"}</div>
-                          <div className="w-24 text-slate-600">{proc.txnCount > 0 ? proc.txnCount.toLocaleString() + "件" : "—"}</div>
-                          <div className="w-20">
-                            {proc.status === "approved" ? <span className="text-emerald-600 font-semibold">有効</span> :
-                             proc.status === "reviewing" ? <span className="text-blue-500">審査通過後</span> :
-                             <span className="text-slate-400">—</span>}
-                          </div>
-                          <div className="flex-1 flex gap-1">
-                            {proc.status === "approved" && <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">詳細</button>}
-                            {proc.status === "reviewing" && <button className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">審査状況確認</button>}
-                            {proc.status === "pending" && <button className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-xs">審査申請</button>}
-                          </div>
+                          <button className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">+ 接続先追加</button>
                         </div>
-                      );
-                    })}
-                  </div>
+
+                        {/* サイト内の接続先一覧 */}
+                        {site.processors.map((proc, pi) => {
+                          const st = PROC_STATUS[proc.status] || { label: proc.status, color: "gray" };
+                          const pInfo = processorList.find(p => p.name === proc.name);
+                          const isCard = pInfo && pInfo.type !== "WEBマネー";
+                          return (
+                            <div key={pi} className={`border-b last:border-0 ${proc.status === "suspended" ? "bg-rose-50/30" : ""}`}>
+                              {/* 接続先サマリー行 */}
+                              <div className="flex items-center px-4 py-2 text-xs">
+                                <div className="w-8 text-center">
+                                  {proc.status === "approved" ? "✅" : proc.status === "reviewing" ? "🔄" : proc.status === "suspended" ? "⛔" : "⏳"}
+                                </div>
+                                <div className="w-36 font-semibold text-slate-700">{proc.name}</div>
+                                <div className="w-24 text-slate-500">{proc.brands}</div>
+                                <div className="w-24"><Badge text={st.label} color={st.color} /></div>
+                                <div className="w-20 text-slate-400">{proc.since || "—"}</div>
+                                <div className="w-20 text-slate-600">{proc.txnCount > 0 ? proc.txnCount.toLocaleString() + "件" : "—"}</div>
+                                <div className="w-20 font-mono text-slate-400 text-xs">{proc.mid || "—"}</div>
+                                <div className="flex-1 flex gap-1 justify-end">
+                                  {proc.status === "approved" && <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">詳細</button>}
+                                  {proc.status === "reviewing" && <button className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">審査確認</button>}
+                                  {proc.status === "pending" && <button className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-xs">審査申請</button>}
+                                </div>
+                              </div>
+
+                              {/* 各条件（承認済みの場合のみ詳細表示） */}
+                              {proc.status === "approved" && pInfo && (
+                                <div className="px-4 pb-3 ml-8 mr-4">
+                                  <div className="bg-slate-50 rounded-lg border border-slate-200 p-3 space-y-2">
+                                    {/* ブランド別手数料 */}
+                                    <div>
+                                      <p className="text-xs text-slate-400 mb-1">ブランド別手数料率</p>
+                                      <div className="flex gap-2 flex-wrap">
+                                        {isCard ? (
+                                          ["visa", "master", "jcb", "amex", "diners"].filter(b => pInfo.fees[b] && pInfo.fees[b] !== "-").map(brand => {
+                                            const def = pInfo.fees[brand];
+                                            const ovr = proc.feeOverride && proc.feeOverride[brand];
+                                            return (
+                                              <div key={brand} className={`px-2 py-1 rounded border text-xs ${ovr ? "bg-amber-50 border-amber-300" : "bg-white border-slate-200"}`}>
+                                                <span className="text-slate-400 uppercase">{brand}: </span>
+                                                <span className={`font-semibold ${ovr ? "text-amber-700" : "text-slate-700"}`}>{ovr || def}</span>
+                                                {ovr && <span className="text-slate-400 ml-1 line-through">{def}</span>}
+                                              </div>
+                                            );
+                                          })
+                                        ) : (
+                                          <div className={`px-2 py-1 rounded border text-xs ${proc.feeOverride?.webmoney ? "bg-amber-50 border-amber-300" : "bg-white border-slate-200"}`}>
+                                            <span className="text-slate-400">WEBマネー: </span>
+                                            <span className={`font-semibold ${proc.feeOverride?.webmoney ? "text-amber-700" : "text-slate-700"}`}>{proc.feeOverride?.webmoney || pInfo.fees?.webmoney || pInfo.fees?.visa || "-"}</span>
+                                            {proc.feeOverride?.webmoney && <span className="text-slate-400 ml-1 line-through">{pInfo.fees?.webmoney || pInfo.fees?.visa || "-"}</span>}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {/* TR手数料・デポジット・制限 */}
+                                    <div className="grid grid-cols-3 gap-3 text-xs">
+                                      {/* TR手数料 */}
+                                      <div>
+                                        <p className="text-slate-400 mb-1">TR手数料</p>
+                                        <div className="space-y-0.5">
+                                          <div className="flex justify-between"><span className="text-slate-500">成功:</span><span className="font-semibold">{pInfo.trFees.success}</span></div>
+                                          <div className="flex justify-between"><span className="text-slate-500">失敗:</span><span className="font-semibold">{pInfo.trFees.fail}</span></div>
+                                          <div className="flex justify-between"><span className="text-slate-500">CB:</span><span className="font-semibold">{pInfo.trFees.cb}</span></div>
+                                          <div className="flex justify-between"><span className="text-slate-500">返金:</span><span className="font-semibold">{pInfo.trFees.refund}</span></div>
+                                        </div>
+                                      </div>
+
+                                      {/* デポジット */}
+                                      <div>
+                                        <p className="text-slate-400 mb-1">デポジット・留保</p>
+                                        <div className="space-y-0.5">
+                                          {(() => {
+                                            const depRate = proc.depositOverride?.rate || pInfo.deposit.rate;
+                                            const depPeriod = proc.depositOverride?.period || pInfo.deposit.period;
+                                            const hasOvr = proc.depositOverride?.rate || proc.depositOverride?.period;
+                                            return (<>
+                                              <div className="flex justify-between"><span className="text-slate-500">留保率:</span><span className={`font-semibold ${hasOvr ? "text-amber-700" : ""}`}>{depRate}</span></div>
+                                              <div className="flex justify-between"><span className="text-slate-500">期間:</span><span className={`font-semibold ${hasOvr ? "text-amber-700" : ""}`}>{depPeriod}</span></div>
+                                              <div className="flex justify-between"><span className="text-slate-500">種別:</span><span className="font-semibold">{pInfo.deposit.type}</span></div>
+                                            </>);
+                                          })()}
+                                        </div>
+                                      </div>
+
+                                      {/* 取引制限 */}
+                                      <div>
+                                        <p className="text-slate-400 mb-1">取引制限</p>
+                                        <div className="space-y-0.5">
+                                          {(() => {
+                                            const trMax = proc.limitOverride?.trMax || pInfo.limits.trMax;
+                                            const monthly = proc.limitOverride?.monthly || pInfo.limits.monthlyMax;
+                                            const count = proc.limitOverride?.count || pInfo.limits.countLimit;
+                                            const hasOvr = proc.limitOverride?.trMax || proc.limitOverride?.monthly || proc.limitOverride?.count;
+                                            return (<>
+                                              <div className="flex justify-between"><span className="text-slate-500">1件上限:</span><span className={`font-semibold ${proc.limitOverride?.trMax ? "text-amber-700" : ""}`}>{trMax}</span></div>
+                                              <div className="flex justify-between"><span className="text-slate-500">月間:</span><span className={`font-semibold ${proc.limitOverride?.monthly ? "text-amber-700" : ""}`}>{monthly}</span></div>
+                                              <div className="flex justify-between"><span className="text-slate-500">回数:</span><span className={`font-semibold ${proc.limitOverride?.count ? "text-amber-700" : ""}`}>{count}</span></div>
+                                            </>);
+                                          })()}
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* 入金サイクル */}
+                                    <div className="flex items-center gap-4 text-xs pt-1 border-t border-slate-200">
+                                      <span className="text-slate-400">入金:</span>
+                                      <span className={`font-semibold ${proc.settlementOverride ? "text-amber-700" : "text-slate-700"}`}>{proc.settlementOverride || pInfo.settlement.cycle}</span>
+                                      {proc.settlementOverride && <span className="text-slate-400 text-xs">（デフォルト: {pInfo.settlement.cycle}）</span>}
+                                    </div>
+
+                                    {/* オーバーライド注記 */}
+                                    {(proc.feeOverride || proc.depositOverride || proc.limitOverride || proc.settlementOverride) && (
+                                      <div className="text-xs text-amber-600 flex items-center gap-1 pt-1">
+                                        <span>⚠️</span>
+                                        <span>黄色の値は加盟店別にオーバーライドされた個別条件です</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
 
                   {/* AI Suggestion */}
                   {m.processors.filter(p => p.status === "approved").length === 1 && m.salesNum > 1000000 && (
@@ -6686,7 +6855,8 @@ const MasterTransactionMonitor = () => {
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "w-36" }, { label: "購入者", w: "w-32" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "接続先", w: "w-28" }, { label: "ルーティング", w: "w-28" }, { label: "応答", w: "w-16" }, { label: "3DS", w: "w-10" }, { label: "状態", w: "w-20" }, { label: "時刻", w: "w-20" }]}>
             {filtered.map((t, i) => (
-              <tr key={t.id} className={`border-b cursor-pointer transition-colors ${selectedTxn === t.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"} ${t.status === "失敗" || t.status === "不正検知" ? "bg-rose-50" : ""}`}
+              <React.Fragment key={t.id}>
+              <tr className={`border-b cursor-pointer transition-colors ${selectedTxn === t.id ? "bg-blue-100 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"} ${t.status === "失敗" || t.status === "不正検知" ? "bg-rose-50" : ""}`}
                    onClick={() => setSelectedTxn(selectedTxn === t.id ? null : t.id)}>
                 <td className="px-4 py-2 whitespace-nowrap w-40 font-mono text-slate-500">{t.id}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-36 text-slate-700">{t.merchant}</td>
@@ -6703,71 +6873,67 @@ const MasterTransactionMonitor = () => {
                 <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={t.status} color={t.sColor} /></td>
                 <td className="px-4 py-2 whitespace-nowrap w-20 text-slate-400 font-mono">{t.time}</td>
               </tr>
+              {/* アコーディオン詳細 */}
+              {selectedTxn === t.id && (
+                <tr><td colSpan={11} className="p-0">
+                  <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                    <div className="flex justify-between items-center mb-2">
+                      <p className="text-xs font-bold text-slate-700">🔍 取引詳細 — {t.id}</p>
+                      <span className="text-xs text-blue-600 cursor-pointer hover:underline">注文検索で詳細を確認 →</span>
+                    </div>
+                    <div className="grid grid-cols-5 gap-3 text-xs">
+                      <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                        <p className="font-semibold text-slate-600 mb-1">基本情報</p>
+                        <div className="space-y-0.5 text-slate-500">
+                          <div>加盟店: {t.merchant}</div>
+                          <div>金額: ¥{t.amount.toLocaleString()}</div>
+                          <div>ブランド: {t.brand}</div>
+                          <div>カード番号: **** **** **** 1234</div>
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                        <p className="font-semibold text-slate-600 mb-1">購入者情報</p>
+                        <div className="space-y-0.5 text-slate-500">
+                          <div>ユーザー名: {t.userName}</div>
+                          <div>ユーザーID: <span className="font-mono">{t.userId}</span></div>
+                          <div>メール: {t.userEmail}</div>
+                          <div>カード名義: TARO TANAKA</div>
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                        <p className="font-semibold text-slate-600 mb-1">ルーティング判定</p>
+                        <div className="space-y-0.5 text-slate-500">
+                          <div>判定理由: {t.routing}</div>
+                          <div>選択接続先: {t.processor}</div>
+                          <div>候補: Univa Pay cast, Worldpay, TCMS</div>
+                          <div>判定時間: 3ms</div>
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                        <p className="font-semibold text-slate-600 mb-1">3Dセキュア</p>
+                        <div className="space-y-0.5 text-slate-500">
+                          <div>3DS: {t.is3ds ? "適用済み（v2.0）" : "未適用"}</div>
+                          <div>認証結果: {t.is3ds ? "成功" : "—"}</div>
+                          <div>ECI: {t.is3ds ? "05" : "—"}</div>
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                        <p className="font-semibold text-slate-600 mb-1">接続先レスポンス</p>
+                        <div className="space-y-0.5 text-slate-500">
+                          <div>レスポンスタイム: {t.responseMs ? t.responseMs + "ms" : "—"}</div>
+                          <div>コード: {t.status === "成功" ? "00（正常完了）" : t.error ? "TO（タイムアウト）" : "—"}</div>
+                          {t.error && <div className="text-rose-600">{t.error}</div>}
+                          {t.failover && <div className="text-emerald-600">{t.failover}</div>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td></tr>
+              )}
+              </React.Fragment>
             ))}
             </TableHeader>
           </div>
-
-          {/* Expanded Detail */}
-          {selectedTxn && (() => {
-            const t = txnData.find(x => x.id === selectedTxn);
-            return (
-              <div className="bg-blue-50 rounded-lg border border-blue-200 p-3">
-                <div className="flex justify-between items-center mb-2">
-                  <p className="text-xs font-bold text-slate-700">🔍 取引詳細 — {t.id}</p>
-                  <div className="flex gap-2">
-                    <span className="text-xs text-blue-600">注文検索で詳細を確認 →</span>
-                    <button onClick={() => setSelectedTxn(null)} className="text-xs text-slate-400 hover:text-slate-600">✕</button>
-                  </div>
-                </div>
-                <div className="grid grid-cols-5 gap-3 text-xs">
-                  <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                    <p className="font-semibold text-slate-600 mb-1">基本情報</p>
-                    <div className="space-y-0.5 text-slate-500">
-                      <div>加盟店: {t.merchant}</div>
-                      <div>金額: ¥{t.amount.toLocaleString()}</div>
-                      <div>ブランド: {t.brand}</div>
-                      <div>カード番号: **** **** **** 1234</div>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                    <p className="font-semibold text-slate-600 mb-1">購入者情報</p>
-                    <div className="space-y-0.5 text-slate-500">
-                      <div>ユーザー名: {t.userName}</div>
-                      <div>ユーザーID: <span className="font-mono">{t.userId}</span></div>
-                      <div>メール: {t.userEmail}</div>
-                      <div>カード名義: TARO TANAKA</div>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                    <p className="font-semibold text-slate-600 mb-1">ルーティング判定</p>
-                    <div className="space-y-0.5 text-slate-500">
-                      <div>判定理由: {t.routing}</div>
-                      <div>選択接続先: {t.processor}</div>
-                      <div>候補: Univa Pay cast, Worldpay, TCMS</div>
-                      <div>判定時間: 3ms</div>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                    <p className="font-semibold text-slate-600 mb-1">3Dセキュア</p>
-                    <div className="space-y-0.5 text-slate-500">
-                      <div>3DS: {t.is3ds ? "適用済み（v2.0）" : "未適用"}</div>
-                      <div>認証結果: {t.is3ds ? "成功" : "—"}</div>
-                      <div>ECI: {t.is3ds ? "05" : "—"}</div>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                    <p className="font-semibold text-slate-600 mb-1">接続先レスポンス</p>
-                    <div className="space-y-0.5 text-slate-500">
-                      <div>レスポンスタイム: {t.responseMs ? t.responseMs + "ms" : "—"}</div>
-                      <div>コード: {t.status === "成功" ? "00（正常完了）" : t.error ? "TO（タイムアウト）" : "—"}</div>
-                      {t.error && <div className="text-rose-600">{t.error}</div>}
-                      {t.failover && <div className="text-emerald-600">{t.failover}</div>}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
 
           {/* Stats Row */}
           <div className="grid grid-cols-3 gap-3">
@@ -6830,6 +6996,7 @@ const MasterTransactionMonitor = () => {
 // ─── M03b: 注文検索 ───
 const MasterOrderSearch = () => {
   const [searchSlide, setSearchSlide] = useState(null);
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [refundDialog, setRefundDialog] = useState(null);
 
   const searchResults = [
@@ -6895,7 +7062,8 @@ const MasterOrderSearch = () => {
         </div>
         <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "w-36" }, { label: "購入者", w: "w-32" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "ステータス", w: "w-20" }, { label: "日時", w: "w-36" }, { label: "操作", w: "w-36" }]}>
         {searchResults.map((t, i) => (
-          <tr key={t.id} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50 cursor-pointer`} onClick={() => setSearchSlide(t)}>
+          <React.Fragment key={t.id}>
+          <tr className={`border-b cursor-pointer transition-colors ${expandedOrderId === t.id ? "bg-blue-100 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"}`} onClick={() => setExpandedOrderId(expandedOrderId === t.id ? null : t.id)}>
             <td className="px-4 py-2 whitespace-nowrap w-40 font-mono text-slate-500">{t.id}</td>
             <td className="px-4 py-2 whitespace-nowrap w-36 text-slate-700">{t.merchant}</td>
             <td className="px-4 py-2 whitespace-nowrap w-32">
@@ -6915,6 +7083,61 @@ const MasterOrderSearch = () => {
               {t.status === "キャンセル" && <span className="text-xs text-slate-400">キャンセル済</span>}
             </div></td>
           </tr>
+          {/* アコーディオン詳細 */}
+          {expandedOrderId === t.id && (
+            <tr><td colSpan={8} className="p-0">
+              <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-xs font-bold text-slate-700">🔍 注文詳細 — {t.id}</p>
+                  <Badge text={t.status} color={t.sColor} />
+                </div>
+                <div className="grid grid-cols-4 gap-3 text-xs">
+                  <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                    <p className="font-semibold text-slate-600 mb-1">取引情報</p>
+                    <div className="space-y-0.5 text-slate-500">
+                      <div>取引ID: <span className="font-mono">{t.id}</span></div>
+                      <div>加盟店: {t.merchant}</div>
+                      <div>金額: <span className="font-bold text-slate-800">¥{t.amount.toLocaleString()}</span></div>
+                      <div>ブランド: {t.brand}</div>
+                      <div>接続先: {t.processor}</div>
+                      <div>日時: {t.date}</div>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                    <p className="font-semibold text-slate-600 mb-1">購入者情報</p>
+                    <div className="space-y-0.5 text-slate-500">
+                      <div>ユーザー名: {t.userName}</div>
+                      <div>ユーザーID: <span className="font-mono">{t.userId}</span></div>
+                      <div>メール: {t.userEmail}</div>
+                      <div>カード番号: **** **** **** {t.id.slice(-4)}</div>
+                      <div>カード名義: {t.userName.toUpperCase().replace(/[^\x00-\x7F]/g, "") || "TANAKA TARO"}</div>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                    <p className="font-semibold text-slate-600 mb-1">決済詳細</p>
+                    <div className="space-y-0.5 text-slate-500">
+                      <div>3DS: 適用済み（v2.0）</div>
+                      <div>認証結果: 成功</div>
+                      <div>ECI: 05</div>
+                      <div>レスポンス: 320ms</div>
+                      <div>ルーティング: AI最適化</div>
+                      {t.status === "返金済" && <div className="text-purple-600 font-semibold">返金額: ¥{t.refundAmount?.toLocaleString()}</div>}
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                    <p className="font-semibold text-slate-600 mb-1">処理ログ</p>
+                    <div className="space-y-1 text-slate-500">
+                      <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />{t.date.split(" ")[1]} 受付</div>
+                      <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />{t.date.split(" ")[1]} 3DS認証</div>
+                      <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />{t.date.split(" ")[1]} オーソリ</div>
+                      <div className="flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full shrink-0 ${t.status === "成功" ? "bg-emerald-500" : t.status === "返金済" ? "bg-purple-500" : "bg-slate-400"}`} />{t.date.split(" ")[1]} {t.status === "成功" ? "売上確定" : t.status === "返金済" ? "返金処理" : t.status}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td></tr>
+          )}
+          </React.Fragment>
         ))}
         </TableHeader>
       </div>
@@ -9803,6 +10026,32 @@ const AgentDashboard = () => {
           ))}
         </div>
         <span className="text-xs text-slate-400">デジタルパートナーズ</span>
+      </div>
+    </div>
+
+    {/* お知らせ欄 */}
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span>📢</span>
+          <p className="text-xs font-bold text-slate-600">お知らせ</p>
+        </div>
+        <span className="text-xs text-orange-600 cursor-pointer hover:underline">すべて見る →</span>
+      </div>
+      <div className="space-y-1.5">
+        {[
+          { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: "🔧" },
+          { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: "🚀" },
+          { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: "⚠️" },
+          { date: "02/10", title: "代理店向け報酬計算ロジック変更について", type: "重要", tColor: "red", icon: "🤝" },
+        ].map((n, i) => (
+          <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-orange-50 ${i === 0 ? "border-amber-300 bg-amber-50" : i === 3 ? "border-rose-200 bg-rose-50/50" : "border-slate-200"}`}>
+            <span>{n.icon}</span>
+            <span className="w-12 text-slate-400 shrink-0">{n.date}</span>
+            <Badge text={n.type} color={n.tColor} />
+            <span className={`flex-1 ${i === 0 ? "text-amber-800 font-semibold" : i === 3 ? "text-rose-700 font-semibold" : "text-slate-700"}`}>{n.title}</span>
+          </div>
+        ))}
       </div>
     </div>
 
