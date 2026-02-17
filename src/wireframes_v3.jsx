@@ -3082,6 +3082,7 @@ const MasterSystemSettings = () => {
   const [sysTab, setSysTab] = useState(0);
   const [showAddProcessor, setShowAddProcessor] = useState(false);
   const [selectedSysProc, setSelectedSysProc] = useState(null);
+  const [editingSysProc, setEditingSysProc] = useState(null);
   return (
   <div className="p-5 space-y-4">
     <h2 className="text-sm font-bold text-slate-800">システム設定</h2>
@@ -3226,16 +3227,41 @@ const MasterSystemSettings = () => {
                 <button className="px-2 py-1 bg-blue-50 text-blue-600 rounded text-xs" onClick={(e) => e.stopPropagation()}>テスト</button>
               </div></td>
             </tr>
-            {/* 接続先条件詳細パネル（クリック展開） */}
+            {/* 接続先条件詳細パネル（クリック展開・admin以上編集可） */}
             {selectedSysProc === p.id && (() => {
               const isCard = p.type !== "WEBマネー";
+              const isEditing = editingSysProc === p.id;
+              const editInput = (val, w = "w-20") => isEditing
+                ? <input defaultValue={val} className={`${w} text-xs border border-blue-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400`} onClick={(e) => e.stopPropagation()} />
+                : <span className="font-semibold">{val}</span>;
+              const editInputCenter = (val, w = "w-16") => isEditing
+                ? <input defaultValue={val} className={`${w} text-xs border border-blue-300 rounded px-1.5 py-0.5 bg-white text-center focus:outline-none focus:ring-1 focus:ring-blue-400`} onClick={(e) => e.stopPropagation()} />
+                : <p className={`text-xs font-bold ${val !== "-" ? "text-blue-700" : "text-slate-300"}`}>{val}</p>;
               return (
               <tr><td colSpan={7} className="p-0">
-                <div className="bg-blue-50 border-x border-b border-blue-200 p-3 space-y-3">
+                <div className={`${isEditing ? "bg-amber-50 border-x border-b border-amber-300" : "bg-blue-50 border-x border-b border-blue-200"} p-3 space-y-3`}>
                   <div className="flex justify-between items-center">
-                    <p className="text-xs font-bold text-slate-700">🔌 {p.name} — 条件詳細</p>
-                    <button onClick={(e) => { e.stopPropagation(); setSelectedSysProc(null); }} className="text-xs text-slate-400 hover:text-slate-600">✕ 閉じる</button>
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs font-bold text-slate-700">🔌 {p.name} — 条件詳細</p>
+                      {isEditing && <Badge text="編集中" color="amber" />}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {isEditing ? (
+                        <>
+                          <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(null); }} className="px-2.5 py-1 text-xs text-slate-500 border border-slate-300 rounded hover:bg-slate-100">キャンセル</button>
+                          <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(null); }} className="px-2.5 py-1 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">💾 保存</button>
+                        </>
+                      ) : (
+                        <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(p.id); }} className="px-2.5 py-1 text-xs bg-amber-500 text-white rounded font-semibold hover:bg-amber-600">✏️ 編集（admin）</button>
+                      )}
+                      <button onClick={(e) => { e.stopPropagation(); setSelectedSysProc(null); setEditingSysProc(null); }} className="text-xs text-slate-400 hover:text-slate-600">✕ 閉じる</button>
+                    </div>
                   </div>
+                  {isEditing && (
+                    <div className="bg-amber-100 border border-amber-300 rounded p-2 text-xs text-amber-800">
+                      ⚠️ admin以上の権限で編集中です。変更は保存後に全加盟店のデフォルト値に反映されます。
+                    </div>
+                  )}
                   <div className="grid grid-cols-2 gap-3">
                     {/* 左列: 手数料 */}
                     <div className="space-y-2">
@@ -3246,14 +3272,14 @@ const MasterSystemSettings = () => {
                             {[{b:"VISA",k:"visa"},{b:"MC",k:"master"},{b:"JCB",k:"jcb"},{b:"AMEX",k:"amex"},{b:"Diners",k:"diners"}].map(({b,k}) => (
                               <div key={k} className={`rounded border p-1.5 text-center ${p.fees[k] !== "-" ? "bg-blue-50 border-blue-200" : "bg-slate-50 border-slate-200"}`}>
                                 <p className="text-xs text-slate-400">{b}</p>
-                                <p className={`text-xs font-bold ${p.fees[k] !== "-" ? "text-blue-700" : "text-slate-300"}`}>{p.fees[k]}</p>
+                                {editInputCenter(p.fees[k])}
                               </div>
                             ))}
                           </div>
                         ) : (
                           <div className="bg-blue-50 rounded border border-blue-200 p-2 text-center">
                             <p className="text-xs text-slate-400">WEBマネー手数料</p>
-                            <p className="text-sm font-bold text-blue-700">{p.fees.webmoney}</p>
+                            {isEditing ? <input defaultValue={p.fees.webmoney} className="w-20 text-sm border border-blue-300 rounded px-1.5 py-0.5 bg-white text-center font-bold focus:outline-none focus:ring-1 focus:ring-blue-400 mx-auto block" onClick={(e) => e.stopPropagation()} /> : <p className="text-sm font-bold text-blue-700">{p.fees.webmoney}</p>}
                           </div>
                         )}
                       </div>
@@ -3264,7 +3290,7 @@ const MasterSystemSettings = () => {
                           {[{l:"TR(成功)",v:p.trFees.success},{l:"TR(失敗)",v:p.trFees.fail},{l:"CB手数料",v:p.trFees.cb},{l:"返金",v:p.trFees.refund},{l:"3DS",v:p.trFees.tds},{l:"CB取消",v:p.trFees.cbCancel}].map(({l,v}) => (
                             <div key={l} className="bg-slate-50 rounded border border-slate-200 p-1.5">
                               <p className="text-xs text-slate-400">{l}</p>
-                              <p className={`text-xs font-bold ${v !== "-" ? "text-slate-700" : "text-slate-300"}`}>{v}</p>
+                              {isEditing ? <input defaultValue={v} className="w-full text-xs border border-blue-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 mt-0.5" onClick={(e) => e.stopPropagation()} /> : <p className={`text-xs font-bold ${v !== "-" ? "text-slate-700" : "text-slate-300"}`}>{v}</p>}
                             </div>
                           ))}
                         </div>
@@ -3278,15 +3304,15 @@ const MasterSystemSettings = () => {
                         <div className="grid grid-cols-2 gap-2">
                           <div className="bg-purple-50 rounded border border-purple-200 p-2 space-y-1 text-xs">
                             <p className="font-semibold text-purple-700 mb-0.5">留保条件</p>
-                            <div className="flex justify-between"><span className="text-slate-400">留保率</span><span className="font-semibold">{p.deposit.rate}</span></div>
-                            <div className="flex justify-between"><span className="text-slate-400">期間</span><span className="font-semibold">{p.deposit.period}</span></div>
-                            <div className="flex justify-between"><span className="text-slate-400">タイプ</span><span className="font-semibold">{p.deposit.type}</span></div>
+                            <div className="flex justify-between items-center"><span className="text-slate-400">留保率</span>{editInput(p.deposit.rate)}</div>
+                            <div className="flex justify-between items-center"><span className="text-slate-400">期間</span>{editInput(p.deposit.period)}</div>
+                            <div className="flex justify-between items-center"><span className="text-slate-400">タイプ</span>{isEditing ? <select defaultValue={p.deposit.type} className="w-28 text-xs border border-blue-300 rounded px-1 py-0.5 bg-white" onClick={(e) => e.stopPropagation()}><option>ローリングリザーブ</option><option>固定リザーブ</option><option>なし</option></select> : <span className="font-semibold">{p.deposit.type}</span>}</div>
                           </div>
                           <div className="bg-amber-50 rounded border border-amber-200 p-2 space-y-1 text-xs">
                             <p className="font-semibold text-amber-700 mb-0.5">取引制限</p>
-                            <div className="flex justify-between"><span className="text-slate-400">TR上限</span><span className="font-semibold">{p.limits.trMax}</span></div>
-                            <div className="flex justify-between"><span className="text-slate-400">月間上限</span><span className="font-semibold">{p.limits.monthlyMax}</span></div>
-                            <div className="flex justify-between"><span className="text-slate-400">回数</span><span className="font-semibold">{p.limits.countLimit}</span></div>
+                            <div className="flex justify-between items-center"><span className="text-slate-400">TR上限</span>{editInput(p.limits.trMax)}</div>
+                            <div className="flex justify-between items-center"><span className="text-slate-400">月間上限</span>{editInput(p.limits.monthlyMax)}</div>
+                            <div className="flex justify-between items-center"><span className="text-slate-400">回数</span>{editInput(p.limits.countLimit)}</div>
                           </div>
                         </div>
                       </div>
@@ -3295,25 +3321,25 @@ const MasterSystemSettings = () => {
                         <div className="grid grid-cols-2 gap-2">
                           <div className="bg-emerald-50 rounded border border-emerald-200 p-2 space-y-1 text-xs">
                             <p className="font-semibold text-emerald-700 mb-0.5">固定費</p>
-                            <div className="flex justify-between"><span className="text-slate-400">初期</span><span className="font-semibold">{p.fixedCost.initial}</span></div>
-                            <div className="flex justify-between"><span className="text-slate-400">月額</span><span className="font-semibold">{p.fixedCost.monthly}</span></div>
+                            <div className="flex justify-between items-center"><span className="text-slate-400">初期</span>{editInput(p.fixedCost.initial)}</div>
+                            <div className="flex justify-between items-center"><span className="text-slate-400">月額</span>{editInput(p.fixedCost.monthly)}</div>
                           </div>
                           <div className="bg-blue-50 rounded border border-blue-200 p-2 space-y-1 text-xs">
                             <p className="font-semibold text-blue-700 mb-0.5">入金情報</p>
-                            <div className="flex justify-between"><span className="text-slate-400">口座</span><span className="font-semibold">{p.settlement.account}</span></div>
+                            <div className="flex justify-between items-center"><span className="text-slate-400">口座</span>{isEditing ? <select defaultValue={p.settlement.account} className="w-28 text-xs border border-blue-300 rounded px-1 py-0.5 bg-white" onClick={(e) => e.stopPropagation()}><option>日本口座（円）</option><option>海外口座（USD）</option><option>海外口座（EUR）</option></select> : <span className="font-semibold">{p.settlement.account}</span>}</div>
                           </div>
                         </div>
                         <div className="mt-1.5 bg-slate-50 rounded border border-slate-200 p-1.5 text-xs">
-                          <span className="text-slate-400">入金サイクル: </span><span className="font-semibold text-slate-700">{p.settlement.cycle}</span>
+                          <span className="text-slate-400">入金サイクル: </span>{isEditing ? <input defaultValue={p.settlement.cycle} className="w-full text-xs border border-blue-300 rounded px-1.5 py-0.5 bg-white mt-0.5 focus:outline-none focus:ring-1 focus:ring-blue-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold text-slate-700">{p.settlement.cycle}</span>}
                         </div>
                       </div>
                       {isCard && (
                       <div className="bg-white rounded-lg border border-slate-200 p-2.5">
                         <p className="text-xs font-bold text-slate-600 mb-1">🚫 制限事項</p>
-                        <div className="grid grid-cols-3 gap-1 text-xs">
-                          <div><span className="text-slate-400">CVV: </span><span className="font-semibold">{p.restrictions.cvv}</span></div>
-                          <div><span className="text-slate-400">NG: </span><span className="font-semibold">{p.restrictions.ngGenre}</span></div>
-                          <div><span className="text-slate-400">USD: </span><span className="font-semibold">{p.restrictions.usd ? "対応" : "非対応"}</span></div>
+                        <div className="space-y-1 text-xs">
+                          <div className="flex items-center gap-1"><span className="text-slate-400 w-10">CVV:</span>{isEditing ? <input defaultValue={p.restrictions.cvv} className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold">{p.restrictions.cvv}</span>}</div>
+                          <div className="flex items-center gap-1"><span className="text-slate-400 w-10">NG:</span>{isEditing ? <input defaultValue={p.restrictions.ngGenre} className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold">{p.restrictions.ngGenre}</span>}</div>
+                          <div className="flex items-center gap-1"><span className="text-slate-400 w-10">USD:</span>{isEditing ? <select defaultValue={p.restrictions.usd ? "対応" : "非対応"} className="text-xs border border-blue-300 rounded px-1 py-0.5 bg-white" onClick={(e) => e.stopPropagation()}><option>対応</option><option>非対応</option></select> : <span className="font-semibold">{p.restrictions.usd ? "対応" : "非対応"}</span>}</div>
                         </div>
                       </div>
                       )}
