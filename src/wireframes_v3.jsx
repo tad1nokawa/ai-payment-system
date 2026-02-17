@@ -3769,9 +3769,11 @@ const MasterMerchantApplications = () => {
 
 // ─── M08: 精算・入金 ───
 const MasterSettlement = () => {
+  const toast = useToast();
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [selectedPayout, setSelectedPayout] = useState(null);
   const [showBatchConfirm, setShowBatchConfirm] = useState(false);
+  const [actionConfirm, setActionConfirm] = useState(null);
   const batchData = [
     { date: "2026-02-11", status: "完了", count: "248件", amount: "¥8.2M", errors: 0, color: "green", logs: [{ time: "02:00:00", msg: "バッチ開始", st: "ok" }, { time: "02:01:15", msg: "売上集計完了 (248件)", st: "ok" }, { time: "02:02:30", msg: "手数料計算完了", st: "ok" }, { time: "02:03:45", msg: "入金データ生成", st: "ok" }, { time: "02:04:12", msg: "バッチ完了", st: "ok" }] },
     { date: "2026-02-10", status: "完了", count: "312件", amount: "¥10.5M", errors: 1, color: "green", logs: [{ time: "02:00:00", msg: "バッチ開始", st: "ok" }, { time: "02:01:30", msg: "売上集計完了 (312件)", st: "ok" }, { time: "02:02:45", msg: "手数料計算完了", st: "ok" }, { time: "02:03:10", msg: "M-019: 口座情報エラー", st: "error" }, { time: "02:04:00", msg: "バッチ完了（エラー1件）", st: "warn" }] },
@@ -3836,9 +3838,9 @@ const MasterSettlement = () => {
           </div>
           <p className="text-xs text-rose-600 mb-2">エラー: {e.error}</p>
           <div className="flex gap-2">
-            <button className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">加盟店に連絡</button>
-            <button className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs">手動で再実行</button>
-            <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">例外キューに送る</button>
+            <button onClick={() => toast(`${e.merchant} に連絡メールを送信しました`, "info")} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">加盟店に連絡</button>
+            <button onClick={() => setActionConfirm({ title: "手動再実行", description: `${e.id} の精算を手動で再実行します。`, type: "info", onConfirm: () => toast(`${e.id} の再実行を開始しました`, "success") })} className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs">手動で再実行</button>
+            <button onClick={() => toast(`${e.id} を例外キューに送りました`, "info")} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">例外キューに送る</button>
           </div>
         </div>
       ))}
@@ -3868,7 +3870,7 @@ const MasterSettlement = () => {
         </div>
         <select className="text-xs border rounded px-2 py-1 bg-white"><option>全接続先</option><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option><option>ONTHELINE</option><option>Asiabill</option></select>
         <select className="text-xs border rounded px-2 py-1 bg-white"><option>全種別</option><option>留保</option><option>解放</option></select>
-        <button className="text-xs bg-purple-600 text-white px-3 py-1 rounded">検索</button>
+        <button onClick={() => toast("検索を実行しました", "info")} className="text-xs bg-purple-600 text-white px-3 py-1 rounded">検索</button>
       </div>
       {/* Reserve per Merchant */}
       <div className="bg-white rounded border mt-2">
@@ -3897,7 +3899,7 @@ const MasterSettlement = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-slate-600">加盟店別 精算内訳</p>
-        <button className="text-xs text-blue-600 hover:underline">全加盟店を表示 →</button>
+        <button onClick={() => toast("全加盟店の精算内訳を表示しました", "info")} className="text-xs text-blue-600 hover:underline">全加盟店を表示 →</button>
       </div>
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
         <TableHeader cols={[{ label: "加盟店", w: "flex-1" }, { label: "決済高", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "CB差引", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-28" }]}>
@@ -3943,7 +3945,7 @@ const MasterSettlement = () => {
         <p className="text-xs font-bold text-orange-700">🤝 代理店精算（決済手数料からの差引）</p>
         <div className="flex gap-2">
           <select className="text-xs border rounded px-2 py-1 bg-white"><option>2026年2月</option><option>2026年1月</option></select>
-          <button className="text-xs bg-orange-600 text-white px-3 py-1 rounded font-semibold">代理店精算を実行</button>
+          <button onClick={() => setActionConfirm({ title: "代理店精算実行", description: "全代理店の精算処理を実行します。", warning: "実行後は取消できません。", type: "warning", onConfirm: () => toast("代理店精算を実行しました", "success") })} className="text-xs bg-orange-600 text-white px-3 py-1 rounded font-semibold">代理店精算を実行</button>
         </div>
       </div>
       <div className="grid grid-cols-3 gap-3 mb-3">
@@ -3971,7 +3973,7 @@ const MasterSettlement = () => {
             <td className="px-4 py-2 w-56 text-xs text-slate-500">{r.breakdown}</td>
             <td className="px-4 py-2 whitespace-nowrap w-24 font-bold text-orange-700">{r.total}</td>
             <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.status === "pending" ? "未払い" : "支払済"} color={r.status === "pending" ? "yellow" : "green"} /></td>
-            <td className="px-4 py-2 whitespace-nowrap w-16">{r.status === "pending" && <button className="text-emerald-600 text-xs font-semibold">支払実行</button>}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-16">{r.status === "pending" && <button onClick={() => setActionConfirm({ title: "代理店支払実行", description: `${r.agent} に ${r.total} を支払います。`, type: "approve", onConfirm: () => toast(`${r.agent} への支払いを実行しました`, "success") })} className="text-emerald-600 text-xs font-semibold">支払実行</button>}</td>
           </tr>
         ))}
         </TableHeader>
@@ -4008,7 +4010,7 @@ const MasterSettlement = () => {
               </div>
             )}
             {selectedBatch.errors > 0 && (
-              <button className="w-full py-2 bg-emerald-50 text-emerald-600 rounded text-xs font-bold border border-emerald-200 hover:bg-emerald-100">🔄 エラー分を再実行</button>
+              <button onClick={() => { toast(`エラー${selectedBatch.errors}件の再実行を開始しました`, "success"); }} className="w-full py-2 bg-emerald-50 text-emerald-600 rounded text-xs font-bold border border-emerald-200 hover:bg-emerald-100">🔄 エラー分を再実行</button>
             )}
           </div>
         </div>
@@ -4053,11 +4055,13 @@ const MasterSettlement = () => {
               </div>
             </div>
             <div><p className="text-xs font-bold text-slate-700 mb-1">振込先口座</p><p className="text-xs text-slate-600 bg-slate-50 rounded p-2">{selectedPayout.bank}</p></div>
-            <button className="w-full py-2 bg-blue-50 text-blue-600 rounded text-xs font-bold border border-blue-200">📥 明細をダウンロード</button>
+            <button onClick={() => toast("入金明細をダウンロードしました", "success")} className="w-full py-2 bg-blue-50 text-blue-600 rounded text-xs font-bold border border-blue-200">📥 明細をダウンロード</button>
           </div>
         </div>
       </div>
     )}
+
+    <ConfirmDialog config={actionConfirm} onClose={() => setActionConfirm(null)} />
 
     {/* バッチ実行確認モーダル */}
     {showBatchConfirm && (
@@ -4084,7 +4088,7 @@ const MasterSettlement = () => {
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowBatchConfirm(false)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
-              <button onClick={() => setShowBatchConfirm(false)} className="flex-1 py-2 bg-emerald-600 text-white rounded text-xs font-bold hover:bg-emerald-700">バッチを実行</button>
+              <button onClick={() => { setShowBatchConfirm(false); toast("精算バッチの実行を開始しました", "success"); }} className="flex-1 py-2 bg-emerald-600 text-white rounded text-xs font-bold hover:bg-emerald-700">バッチを実行</button>
             </div>
           </div>
         </div>
@@ -5412,7 +5416,7 @@ const MerchantPayouts = () => {
         <input type="date" className="text-xs border rounded px-2 py-1" />
         <span className="text-xs text-slate-400">〜</span>
         <input type="date" className="text-xs border rounded px-2 py-1" />
-        <button className="text-xs bg-purple-600 text-white px-3 py-1 rounded">検索</button>
+        <button onClick={() => toast("検索を実行しました", "info")} className="text-xs bg-purple-600 text-white px-3 py-1 rounded">検索</button>
       </div>
 
       {/* Reserve Transaction History */}
@@ -6154,11 +6158,13 @@ const AgentApplicationForm = () => {
 
 // ─── M10: ルーティング ───
 const MasterRouting = () => {
+  const toast = useToast();
   const [selectedMerchant, setSelectedMerchant] = useState("M-001");
   const [merchantSearch, setMerchantSearch] = useState("");
   const [showMerchantDropdown, setShowMerchantDropdown] = useState(false);
   const [showAddRouteRule, setShowAddRouteRule] = useState(false);
   const [routeTab, setRouteTab] = useState("config");
+  const [actionConfirm, setActionConfirm] = useState(null);
   const currentMerchant = merchantData.find(m => m.id === selectedMerchant);
   const filteredMerchants = merchantData.filter(m => m.status === "有効").filter(m =>
     merchantSearch === "" || m.name.toLowerCase().includes(merchantSearch.toLowerCase()) || m.id.toLowerCase().includes(merchantSearch.toLowerCase())
@@ -6218,8 +6224,8 @@ const MasterRouting = () => {
               ⚠️ <strong>影響範囲:</strong> 対象サイト 3件 / 影響取引 約 1,200件/日。変更は即時反映されます。
             </div>
             <div className="flex gap-2">
-              <button className="text-xs bg-blue-600 text-white px-4 py-2 rounded font-semibold">一括変更を実行</button>
-              <button className="text-xs bg-slate-100 text-slate-600 px-4 py-2 rounded border">プレビュー</button>
+              <button onClick={() => setActionConfirm({ title: "一括変更実行", description: "選択したルーティング変更を一括実行します。", warning: "対象サイト 3件 / 影響取引 約 1,200件/日。変更は即時反映されます。", type: "warning", onConfirm: () => toast("ルーティング一括変更を実行しました", "success") })} className="text-xs bg-blue-600 text-white px-4 py-2 rounded font-semibold">一括変更を実行</button>
+              <button onClick={() => toast("プレビューを表示しました", "info")} className="text-xs bg-slate-100 text-slate-600 px-4 py-2 rounded border">プレビュー</button>
             </div>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
@@ -6245,7 +6251,7 @@ const MasterRouting = () => {
                     <td className="p-2 text-slate-600">{h.count}</td>
                     <td className="p-2 text-slate-700">{h.detail}</td>
                     <td className="p-2 text-slate-600">{h.user}</td>
-                    <td className="p-2 text-center"><button className="text-amber-600 hover:underline text-xs">戻す</button></td>
+                    <td className="p-2 text-center"><button onClick={() => setActionConfirm({ title: "ルーティング変更を戻す", description: `${h.date} の変更「${h.detail}」を元に戻します。`, type: "warning", onConfirm: () => toast("ルーティング変更を元に戻しました", "success") })} className="text-amber-600 hover:underline text-xs">戻す</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -6489,7 +6495,7 @@ const MasterRouting = () => {
               <span className="text-slate-400 flex-1 truncate">{f.trigger}</span>
               {f.costDiff !== "-" && <span className={`px-1.5 py-0.5 rounded text-xs font-semibold ${parseFloat(f.costDiff) > 0 ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600"}`}>FB時 {f.costDiff}</span>}
               <Badge text={f.status} color={f.sColor} />
-              <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded">編集</button>
+              <button onClick={() => toast(`${f.name} の編集モードを開きました`, "info")} className="px-2 py-1 bg-slate-100 text-slate-600 rounded">編集</button>
             </div>
           ))}
         </div>
@@ -6499,7 +6505,7 @@ const MasterRouting = () => {
       <div className="bg-amber-50 rounded-lg border border-amber-300 p-3">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs font-bold text-amber-800">🧪 ルール変更シミュレーション</p>
-          <button className="text-xs bg-amber-600 text-white px-3 py-1 rounded font-semibold">過去30日データで実行</button>
+          <button onClick={() => toast("ルーティングシミュレーションを開始しました（過去30日データ）", "info")} className="text-xs bg-amber-600 text-white px-3 py-1 rounded font-semibold">過去30日データで実行</button>
         </div>
         <p className="text-xs text-amber-700 mb-2">ルール変更前に、過去取引データでの影響を確認できます。</p>
         <div className="bg-white rounded-lg border border-slate-200 p-2.5 grid grid-cols-4 gap-2 text-xs">
@@ -6596,11 +6602,12 @@ const MasterRouting = () => {
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowAddRouteRule(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setShowAddRouteRule(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">ルールを作成</button>
+              <button onClick={() => { setShowAddRouteRule(false); toast("ルーティングルールを作成しました", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">ルールを作成</button>
             </div>
           </div>
         </div>
       )}
+      <ConfirmDialog config={actionConfirm} onClose={() => setActionConfirm(null)} />
       </>)}
     </div>
   );
