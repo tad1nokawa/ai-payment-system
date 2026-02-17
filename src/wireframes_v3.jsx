@@ -978,110 +978,153 @@ const MasterMerchants = () => {
                             {s.settings.testMode && <Badge text="テストモード" color="purple" />}
                           </div>
                           <div className="flex gap-1">
-                            <button className="px-2 py-0.5 bg-blue-600 text-white rounded text-xs">編集</button>
-                            <button className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-xs border border-amber-200">停止</button>
-                            <button className="px-2 py-0.5 bg-white text-slate-600 rounded text-xs border">トークン再発行</button>
+                            <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold">💾 保存</button>
+                            <button className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs border border-amber-200">⏸ 停止</button>
+                            <button className="px-2 py-1 bg-white text-slate-600 rounded text-xs border">🔑 トークン再発行</button>
+                            <button className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200">🗑 削除</button>
                           </div>
                         </div>
 
-                        {/* ── 5カラム詳細 ── */}
-                        <div className="grid grid-cols-5 gap-3 text-xs">
-                          {/* カラム1: サイト基本情報 */}
+                        {/* ── 4カラム編集フォーム ── */}
+                        <div className="grid grid-cols-4 gap-3 text-xs">
+                          {/* カラム1: サイト基本情報（編集可能） */}
                           <div className="bg-white rounded-lg border border-slate-200 p-2.5">
                             <p className="font-semibold text-slate-600 mb-1.5">🌐 サイト基本情報</p>
-                            <div className="space-y-1 text-slate-500">
-                              <div>加盟店: <span className="font-semibold text-slate-700">{s.merchantName}</span> <span className="text-slate-400 font-mono">({s.merchantId})</span></div>
-                              <div>URL: <span className="text-blue-600 font-mono break-all">{s.url}</span></div>
-                              <div>代理店: {s.agentId ? <span className="text-orange-600 font-semibold">{s.agentName} ({s.agentId})</span> : <span className="text-slate-300">紐付なし</span>}</div>
-                              <div>作成日: {s.settings.created || "—"}</div>
-                              <div>最終取引: {s.settings.lastTxn || "—"}</div>
-                              <div>通知先: <span className="font-mono text-slate-600">{s.settings.notifyEmail || "—"}</span></div>
+                            <div className="space-y-1.5">
+                              <div><label className="text-slate-400">加盟店</label><div className="font-semibold text-slate-700">{s.merchantName} <span className="text-slate-400 font-mono">({s.merchantId})</span></div></div>
+                              <div><label className="text-slate-400">サイト名</label><input type="text" defaultValue={s.siteName} className="w-full border rounded px-2 py-1 text-xs mt-0.5" /></div>
+                              <div><label className="text-slate-400">サイトURL</label><input type="text" defaultValue={s.url} className="w-full border rounded px-2 py-1 text-xs font-mono mt-0.5" /></div>
+                              <div><label className="text-slate-400">代理店</label>
+                                <select defaultValue={s.agentId || ""} className="w-full border rounded px-2 py-1 text-xs mt-0.5">
+                                  <option value="">紐付なし</option>
+                                  <option value="AG-001">AG-001 デジタルパートナーズ</option>
+                                  <option value="AG-002">AG-002 ウェブコンサル合同会社</option>
+                                  <option value="AG-003">AG-003 ITソリューションズ</option>
+                                </select>
+                              </div>
+                              <div><label className="text-slate-400">通知先メール</label><input type="email" defaultValue={s.settings.notifyEmail || ""} className="w-full border rounded px-2 py-1 text-xs font-mono mt-0.5" placeholder="admin@example.com" /></div>
+                              <div className="flex justify-between pt-1 text-slate-400">
+                                <span>作成日: {s.settings.created || "—"}</span>
+                                <span>最終取引: {s.settings.lastTxn || "—"}</span>
+                              </div>
                             </div>
                           </div>
 
-                          {/* カラム2: 決済設定 */}
+                          {/* カラム2: 決済設定（編集可能） */}
                           <div className="bg-white rounded-lg border border-slate-200 p-2.5">
                             <p className="font-semibold text-slate-600 mb-1.5">💳 決済設定</p>
-                            <div className="space-y-1">
-                              <div className="flex justify-between"><span className="text-slate-400">3DS認証</span><span className={`font-semibold ${s.settings.tds ? "text-emerald-600" : "text-slate-300"}`}>{s.settings.tds ? `有効 (${s.settings.tdsMode})` : "無効"}</span></div>
-                              <div className="flex justify-between"><span className="text-slate-400">リカーリング</span><span className={`font-semibold ${s.settings.rec ? "text-emerald-600" : "text-slate-300"}`}>{s.settings.rec ? `有効 (最大${s.settings.recMax}回)` : "無効"}</span></div>
-                              <div className="flex justify-between"><span className="text-slate-400">CVV必須</span><span className={`font-semibold ${s.settings.cvvRequired ? "text-emerald-600" : "text-amber-600"}`}>{s.settings.cvvRequired ? "必須" : "任意"}</span></div>
-                              <div className="flex justify-between"><span className="text-slate-400">トークン決済</span><span>{s.settings.tokenize ? "✅" : "—"}</span></div>
-                              <div className="flex justify-between"><span className="text-slate-400">LINK決済</span><span>{s.settings.linkPay ? "✅" : "—"}</span></div>
-                              <div className="flex justify-between"><span className="text-slate-400">API決済</span><span>{s.settings.apiPay ? "✅" : "—"}</span></div>
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <span className="text-slate-400">3DS認証</span>
+                                <div className="flex items-center gap-1">
+                                  <label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" defaultChecked={s.settings.tds} className="sr-only peer" /><div className="w-7 h-4 bg-slate-200 peer-checked:bg-emerald-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-3" /></label>
+                                  <select defaultValue={s.settings.tdsMode || "全件"} className="border rounded px-1 py-0.5 text-xs w-16">
+                                    <option>全件</option><option>条件付き</option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-slate-400">リカーリング</span>
+                                <div className="flex items-center gap-1">
+                                  <label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" defaultChecked={s.settings.rec} className="sr-only peer" /><div className="w-7 h-4 bg-slate-200 peer-checked:bg-emerald-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-3" /></label>
+                                  <span className="text-slate-400">最大</span>
+                                  <input type="number" defaultValue={s.settings.recMax} className="border rounded px-1 py-0.5 text-xs w-10 text-center" min="0" max="99" />
+                                  <span className="text-slate-400">回</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-slate-400">CVV</span>
+                                <select defaultValue={s.settings.cvvRequired ? "required" : "optional"} className="border rounded px-1 py-0.5 text-xs">
+                                  <option value="required">必須</option><option value="optional">任意</option>
+                                </select>
+                              </div>
+                              <div className="border-t border-dashed pt-1.5 mt-1">
+                                <p className="text-slate-400 mb-1">決済方式</p>
+                                <div className="space-y-1">
+                                  {[["トークン決済", s.settings.tokenize], ["LINK決済", s.settings.linkPay], ["API決済", s.settings.apiPay]].map(([label, val], ci) => (
+                                    <label key={ci} className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" defaultChecked={val} className="w-3 h-3 rounded" /><span className="text-slate-600">{label}</span></label>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="border-t border-dashed pt-1.5 mt-1">
+                                <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" defaultChecked={s.settings.testMode} className="w-3 h-3 rounded" /><span className="text-purple-600 font-semibold">テストモード</span></label>
+                              </div>
                             </div>
                           </div>
 
-                          {/* カラム3: セキュリティ・API */}
+                          {/* カラム3: セキュリティ・API（編集可能） */}
                           <div className="bg-white rounded-lg border border-slate-200 p-2.5">
                             <p className="font-semibold text-slate-600 mb-1.5">🔒 セキュリティ・API</p>
-                            <div className="space-y-1">
-                              <div className="flex justify-between"><span className="text-slate-400">IP制限</span><span className={`font-semibold ${s.settings.ipRestrict ? "text-emerald-600" : "text-slate-300"}`}>{s.settings.ipRestrict ? `有効 (${s.settings.ipList.length}件)` : "無効"}</span></div>
-                              {s.settings.ipRestrict && s.settings.ipList.length > 0 && (
-                                <div className="bg-slate-50 rounded p-1 mt-0.5">
-                                  {s.settings.ipList.map((ip, ii) => <div key={ii} className="font-mono text-slate-600">{ip}</div>)}
-                                </div>
-                              )}
-                              <div className="mt-1.5">
-                                <span className="text-slate-400">コールバックURL:</span>
-                                <div className="font-mono text-blue-600 break-all mt-0.5">{s.settings.callbackUrl || <span className="text-slate-300">未設定</span>}</div>
-                              </div>
-                              <div className="mt-1">
-                                <span className="text-slate-400">Webhook URL:</span>
-                                <div className="font-mono text-blue-600 break-all mt-0.5">{s.settings.webhookUrl || <span className="text-slate-300">未設定</span>}</div>
-                              </div>
-                              <div className="mt-1.5">
-                                <span className="text-slate-400">認証トークン:</span>
-                                <div className="font-mono text-slate-500 bg-slate-50 rounded px-1 py-0.5 mt-0.5">{s.settings.authToken ? s.settings.authToken.substring(0, 12) + "••••••" : "—"}</div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* カラム4: パフォーマンス */}
-                          <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                            <p className="font-semibold text-slate-600 mb-1.5">📊 パフォーマンス</p>
                             <div className="space-y-1.5">
-                              <div className="bg-blue-50 rounded p-1.5 text-center border border-blue-200">
-                                <p className="text-slate-400">月間処理額</p>
-                                <p className="text-sm font-bold text-blue-700">{s.settings.monthlyVol || "—"}</p>
+                              <div className="flex items-center justify-between">
+                                <span className="text-slate-400">IP制限</span>
+                                <label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" defaultChecked={s.settings.ipRestrict} className="sr-only peer" /><div className="w-7 h-4 bg-slate-200 peer-checked:bg-emerald-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-3" /></label>
                               </div>
-                              <div className="bg-emerald-50 rounded p-1.5 text-center border border-emerald-200">
-                                <p className="text-slate-400">成功率</p>
-                                <p className="text-sm font-bold text-emerald-700">{s.settings.successRate || "—"}</p>
+                              <div>
+                                <label className="text-slate-400">許可IP (改行区切り)</label>
+                                <textarea defaultValue={s.settings.ipList.join("\n")} rows={2} className="w-full border rounded px-2 py-1 text-xs font-mono mt-0.5 resize-none" placeholder="203.0.113.0/24" />
                               </div>
-                              <div className="bg-slate-50 rounded p-1.5 text-center border border-slate-200">
-                                <p className="text-slate-400">総取引件数</p>
-                                <p className="text-sm font-bold text-slate-700">{s.totalTxn.toLocaleString()}</p>
+                              <div>
+                                <label className="text-slate-400">コールバックURL</label>
+                                <input type="url" defaultValue={s.settings.callbackUrl} className="w-full border rounded px-2 py-1 text-xs font-mono mt-0.5" placeholder="https://example.com/callback" />
                               </div>
-                              <div className="text-slate-400">対応ブランド:
-                                <div className="flex flex-wrap gap-1 mt-0.5">{s.allBrands.map((b, bi) => <span key={bi} className="bg-slate-100 text-slate-600 px-1 py-0.5 rounded text-xs">{b}</span>)}</div>
+                              <div>
+                                <label className="text-slate-400">Webhook URL</label>
+                                <input type="url" defaultValue={s.settings.webhookUrl} className="w-full border rounded px-2 py-1 text-xs font-mono mt-0.5" placeholder="https://example.com/webhook" />
+                              </div>
+                              <div>
+                                <label className="text-slate-400">認証トークン</label>
+                                <div className="flex gap-1 mt-0.5">
+                                  <input type="text" value={s.settings.authToken ? s.settings.authToken.substring(0, 12) + "••••••" : "—"} readOnly className="flex-1 border rounded px-2 py-1 text-xs font-mono bg-slate-50 text-slate-500" />
+                                  <button className="px-1.5 py-1 bg-slate-100 text-slate-500 rounded text-xs border hover:bg-slate-200">📋</button>
+                                </div>
                               </div>
                             </div>
                           </div>
 
-                          {/* カラム5: 接続先一覧 */}
-                          <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                            <p className="font-semibold text-slate-600 mb-1.5">🔌 接続先 ({s.processors.length})</p>
-                            <div className="space-y-1">
-                              {s.processors.map((proc, pi) => {
-                                const ps = PROC_STATUS[proc.status] || PROC_STATUS.pending;
-                                return (
-                                <div key={pi} className={`rounded p-1.5 border ${proc.status === "approved" ? "bg-emerald-50 border-emerald-200" : proc.status === "suspended" ? "bg-rose-50 border-rose-200" : "bg-slate-50 border-slate-200"}`}>
-                                  <div className="flex justify-between items-center">
-                                    <span className="font-semibold text-slate-700">{proc.name}</span>
-                                    <span className={`text-xs ${ps.textClass}`}>{ps.label}</span>
-                                  </div>
-                                  <div className="text-slate-400 mt-0.5">{proc.brands}</div>
-                                  {proc.mid && <div className="font-mono text-slate-500 mt-0.5">MID: {proc.mid}</div>}
-                                  {proc.txnCount > 0 && <div className="text-slate-400">取引: {proc.txnCount.toLocaleString()}件</div>}
-                                  {proc.feeOverride && (
-                                    <div className="mt-0.5 flex flex-wrap gap-1">
-                                      {Object.entries(proc.feeOverride).map(([k, v]) => <span key={k} className="bg-amber-100 text-amber-700 px-1 rounded text-xs">{k.toUpperCase()} {v}</span>)}
-                                    </div>
-                                  )}
+                          {/* カラム4: パフォーマンス + 接続先 */}
+                          <div className="space-y-3">
+                            <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                              <p className="font-semibold text-slate-600 mb-1.5">📊 パフォーマンス</p>
+                              <div className="grid grid-cols-3 gap-1.5">
+                                <div className="bg-blue-50 rounded p-1 text-center border border-blue-200">
+                                  <p className="text-slate-400" style={{fontSize:"9px"}}>月間処理額</p>
+                                  <p className="text-xs font-bold text-blue-700">{s.settings.monthlyVol || "—"}</p>
                                 </div>
-                                );
-                              })}
+                                <div className="bg-emerald-50 rounded p-1 text-center border border-emerald-200">
+                                  <p className="text-slate-400" style={{fontSize:"9px"}}>成功率</p>
+                                  <p className="text-xs font-bold text-emerald-700">{s.settings.successRate || "—"}</p>
+                                </div>
+                                <div className="bg-slate-50 rounded p-1 text-center border border-slate-200">
+                                  <p className="text-slate-400" style={{fontSize:"9px"}}>総取引</p>
+                                  <p className="text-xs font-bold text-slate-700">{s.totalTxn.toLocaleString()}</p>
+                                </div>
+                              </div>
+                              <div className="mt-1.5 text-slate-400">ブランド:
+                                <span className="ml-1">{s.allBrands.map((b, bi) => <span key={bi} className="bg-slate-100 text-slate-600 px-1 py-0.5 rounded text-xs mr-0.5">{b}</span>)}</span>
+                              </div>
+                            </div>
+                            <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                              <p className="font-semibold text-slate-600 mb-1.5">🔌 接続先 ({s.processors.length})</p>
+                              <div className="space-y-1">
+                                {s.processors.map((proc, pi) => {
+                                  const ps = PROC_STATUS[proc.status] || PROC_STATUS.pending;
+                                  return (
+                                  <div key={pi} className={`rounded p-1.5 border ${proc.status === "approved" ? "bg-emerald-50 border-emerald-200" : proc.status === "suspended" ? "bg-rose-50 border-rose-200" : "bg-slate-50 border-slate-200"}`}>
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-semibold text-slate-700">{proc.name}</span>
+                                      <span className={`text-xs ${ps.textClass}`}>{ps.label}</span>
+                                    </div>
+                                    <div className="text-slate-400">{proc.brands}{proc.mid && <span className="ml-1 font-mono text-slate-500">MID:{proc.mid}</span>}</div>
+                                    {proc.feeOverride && (
+                                      <div className="mt-0.5 flex flex-wrap gap-0.5">
+                                        {Object.entries(proc.feeOverride).map(([k, v]) => <span key={k} className="bg-amber-100 text-amber-700 px-1 rounded" style={{fontSize:"9px"}}>{k.toUpperCase()} {v}</span>)}
+                                      </div>
+                                    )}
+                                  </div>
+                                  );
+                                })}
+                              </div>
                             </div>
                           </div>
                         </div>
