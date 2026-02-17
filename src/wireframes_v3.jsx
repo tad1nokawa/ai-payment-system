@@ -116,8 +116,8 @@ const MasterDashboard = () => {
   const [expandedQueue, setExpandedQueue] = useState(null);
   const [chatOpen, setChatOpen] = useState(true);
   const kpiDrillData = {
-    "取引量": { value: "1,247件", details: [{ label: "VISA", value: "486件" }, { label: "Mastercard", value: "312件" }, { label: "JCB", value: "198件" }, { label: "AMEX", value: "89件" }, { label: "QR決済", value: "102件" }, { label: "コンビニ", value: "60件" }] },
-    "売上": { value: "¥16.2M", details: [{ label: "カード決済", value: "¥14.8M" }, { label: "QR決済", value: "¥0.9M" }, { label: "コンビニ", value: "¥0.5M" }] },
+    "取引量": { value: "1,247件", details: [{ label: "VISA", value: "486件" }, { label: "Mastercard", value: "312件" }, { label: "JCB", value: "198件" }, { label: "AMEX", value: "89件" }, { label: "WEBマネー", value: "162件" }] },
+    "売上": { value: "¥16.2M", details: [{ label: "カード決済", value: "¥14.8M" }, { label: "WEBマネー", value: "¥1.4M" }] },
     "決済成功率": { value: "99.2%", details: [{ label: "VISA", value: "99.5%" }, { label: "Mastercard", value: "99.1%" }, { label: "JCB", value: "98.8%" }, { label: "AMEX", value: "99.7%" }] },
   };
 
@@ -309,10 +309,12 @@ const MasterDashboard = () => {
       <p className="text-xs font-bold text-slate-600 mb-2">接続先ヘルス</p>
       <div className="flex gap-3">
         {[
-          { name: "三井住友カード", status: "healthy", rate: "99.5%", ms: "120ms", tag: null },
-          { name: "GMO-PG", status: "healthy", rate: "99.1%", ms: "95ms", tag: null },
-          { name: "JCB直接", status: "maintenance", rate: "-", ms: "-", tag: "メンテナンス" },
-          { name: "PayPay", status: "healthy", rate: "99.8%", ms: "80ms", tag: null },
+          { name: "Univa Pay cast", status: "healthy", rate: "99.5%", ms: "120ms", tag: null },
+          { name: "楽天銀行", status: "healthy", rate: "99.1%", ms: "95ms", tag: null },
+          { name: "TCMS", status: "maintenance", rate: "-", ms: "-", tag: "メンテナンス" },
+          { name: "Worldpay", status: "healthy", rate: "99.3%", ms: "110ms", tag: null },
+          { name: "ビットキャッシュ", status: "healthy", rate: "99.8%", ms: "80ms", tag: null },
+          { name: "ペイディ", status: "healthy", rate: "99.9%", ms: "75ms", tag: null },
         ].map((p, i) => (
           <div key={i} className="flex-1 bg-slate-50 rounded p-2 flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${
@@ -382,7 +384,7 @@ const MasterExceptionQueue = () => {
     { id: "#5521", type: "不正検知", target: "¥89,000 / カード決済 / 山本商店", ai: "ブロック推薦", aiColor: "red", time: "30分", timeColor: "gray", locked: false },
     { id: "#1025", type: "審査保留", target: "合同会社テストショップ / 雑貨EC", ai: "承認推薦", aiColor: "green", time: "15分", timeColor: "gray", locked: true, lockedBy: "田中" },
     { id: "#5518", type: "URL巡回", target: "sample-shop.jp / 商品ページ変更検知", ai: "要確認", aiColor: "yellow", time: "1時間", timeColor: "yellow", locked: false },
-    { id: "#5515", type: "精算", target: "GMO-PG / バッチ#B-0210 / エラー3件", ai: "再実行推薦", aiColor: "blue", time: "2時間", timeColor: "red", locked: false },
+    { id: "#5515", type: "精算", target: "Univa Pay cast / バッチ#B-0210 / エラー3件", ai: "再実行推薦", aiColor: "blue", time: "2時間", timeColor: "red", locked: false },
   ];
 
   return (
@@ -547,47 +549,124 @@ const MasterExceptionQueue = () => {
 
 const merchantData = [
   { id: "M-001", name: "株式会社ABCマート", status: "有効", sColor: "green", risk: "低", rColor: "green", salesNum: 12500000, sales: "¥12.5M", cbNum: 0.01, cb: "0.01%", successNum: 99.5, success: "99.5%", feeNum: 3.2, fee: "3.2%", riskOrder: 1,
-    processors: [
-      { name: "三井住友カード", brands: "VISA/MC", status: "approved", since: "2025-04", txnCount: 12400 },
-      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "approved", since: "2025-04", txnCount: 8200 },
-      { name: "JCB直接", brands: "JCB", status: "approved", since: "2025-08", txnCount: 3100 },
-      { name: "PayPay", brands: "QR", status: "approved", since: "2025-10", txnCount: 1200 },
-    ]},
+    sites: [
+      { siteId: "S-001-01", siteName: "本店ECサイト", url: "https://abc-mart.example.com", agentId: "AG-001", agentName: "株式会社メディアパートナーズ",
+        processors: [
+          { name: "Univa Pay cast", brands: "VISA/MC", status: "approved", since: "2025-04", txnCount: 8200, mid: "UPC-ABC-001",
+            feeOverride: { visa: "3.20%", master: "3.20%" }, depositOverride: { rate: "5%", period: "120日" }, limitOverride: { trMax: "¥300,000", monthly: "¥50,000,000", count: "3回/日、7回/月" }, settlementOverride: "15日締め末払い / 末締め翌15日払い" },
+          { name: "楽天銀行", brands: "VISA/MC", status: "approved", since: "2025-04", txnCount: 5600, mid: "RKT-ABC-001",
+            feeOverride: { visa: "2.50%", master: "2.50%" }, depositOverride: { rate: "5%", period: "120日" }, limitOverride: { trMax: "¥500,000" }, settlementOverride: null },
+          { name: "TCMS", brands: "VISA/MC/JCB", status: "approved", since: "2025-08", txnCount: 2100, mid: "TCMS-ABC-001",
+            feeOverride: { visa: "3.50%", master: "3.50%", jcb: "3.40%" }, depositOverride: null, limitOverride: { trMax: "¥200,000" }, settlementOverride: null },
+          { name: "ビットキャッシュ", brands: "WEBマネー", status: "approved", since: "2025-11", txnCount: 900, mid: "BC-ABC-001",
+            feeOverride: { webmoney: "4.5%" }, depositOverride: null, limitOverride: null, settlementOverride: null },
+        ]},
+      { siteId: "S-001-02", siteName: "会員限定ショップ", url: "https://members.abc-mart.example.com", agentId: "AG-001", agentName: "株式会社メディアパートナーズ",
+        processors: [
+          { name: "Worldpay", brands: "VISA/MC/AMEX", status: "approved", since: "2025-10", txnCount: 2800, mid: "WP-ABC-002",
+            feeOverride: { visa: "3.20%", master: "3.35%" }, depositOverride: { rate: "10%", period: "180日" }, limitOverride: null, settlementOverride: null },
+          { name: "ペイディ", brands: "WEBマネー", status: "approved", since: "2025-12", txnCount: 600, mid: "PD-ABC-002",
+            feeOverride: { webmoney: "3.2%" }, depositOverride: null, limitOverride: null, settlementOverride: null },
+        ]},
+    ],
+    // 後方互換: 全サイトのprocessorsを統合した配列
+    get processors() { return this.sites.flatMap(s => s.processors); },
+  },
   { id: "M-002", name: "合同会社XYZショップ", status: "有効", sColor: "green", risk: "低", rColor: "green", salesNum: 5800000, sales: "¥5.8M", cbNum: 0.02, cb: "0.02%", successNum: 99.1, success: "99.1%", feeNum: 3.5, fee: "3.5%", riskOrder: 1,
-    processors: [
-      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "approved", since: "2025-06", txnCount: 5400 },
-      { name: "三井住友カード", brands: "VISA/MC", status: "reviewing", since: null, txnCount: 0 },
-      { name: "PayPay", brands: "QR", status: "pending", since: null, txnCount: 0 },
-    ]},
+    sites: [
+      { siteId: "S-002-01", siteName: "メインショップ", url: "https://xyz-shop.example.com", agentId: "AG-002", agentName: "合同会社デジタルエージェント",
+        processors: [
+          { name: "Simpletransact", brands: "VISA/MC", status: "approved", since: "2025-06", txnCount: 5400, mid: "ST-XYZ-001",
+            feeOverride: { visa: "4.00%", master: "4.00%" }, depositOverride: null, limitOverride: { trMax: "¥500,000" }, settlementOverride: null },
+          { name: "Univa Pay cast", brands: "VISA/MC", status: "reviewing", since: null, txnCount: 0, mid: null,
+            feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
+          { name: "Gマネー", brands: "WEBマネー", status: "pending", since: null, txnCount: 0, mid: null,
+            feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
+        ]},
+    ],
+    get processors() { return this.sites.flatMap(s => s.processors); },
+  },
   { id: "M-003", name: "株式会社サンプルEC", status: "審査中", sColor: "yellow", risk: "中", rColor: "yellow", salesNum: 0, sales: "-", cbNum: 0, cb: "-", successNum: 0, success: "-", feeNum: 3.6, fee: "3.6%", riskOrder: 2,
-    processors: [
-      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "reviewing", since: null, txnCount: 0 },
-    ]},
+    sites: [
+      { siteId: "S-003-01", siteName: "サンプルECショップ", url: "https://sample-ec.example.com", agentId: null, agentName: null,
+        processors: [
+          { name: "TCMS", brands: "VISA/MC/JCB", status: "reviewing", since: null, txnCount: 0, mid: null,
+            feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
+        ]},
+    ],
+    get processors() { return this.sites.flatMap(s => s.processors); },
+  },
   { id: "M-004", name: "有限会社テスト商事", status: "有効", sColor: "green", risk: "中", rColor: "yellow", salesNum: 2100000, sales: "¥2.1M", cbNum: 0.15, cb: "0.15%", successNum: 98.8, success: "98.8%", feeNum: 3.8, fee: "3.8%", riskOrder: 2,
-    processors: [
-      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "approved", since: "2025-09", txnCount: 2800 },
-    ]},
+    sites: [
+      { siteId: "S-004-01", siteName: "テスト商事オンライン", url: "https://test-shoji.example.com", agentId: "AG-001", agentName: "株式会社メディアパートナーズ",
+        processors: [
+          { name: "楽天銀行", brands: "VISA/MC", status: "approved", since: "2025-09", txnCount: 2800, mid: "RKT-TST-001",
+            feeOverride: { visa: "2.80%", master: "2.80%" }, depositOverride: { rate: "10%", period: "180日" }, limitOverride: { trMax: "¥300,000", count: "3回/日、7回/月" }, settlementOverride: null },
+          { name: "ネットライドキャッシュ", brands: "WEBマネー", status: "approved", since: "2025-11", txnCount: 450, mid: "NRC-TST-001",
+            feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
+        ]},
+    ],
+    get processors() { return this.sites.flatMap(s => s.processors); },
+  },
   { id: "M-005", name: "株式会社グレー産業", status: "停止中", sColor: "red", risk: "高", rColor: "red", salesNum: 0, sales: "¥0", cbNum: 1.2, cb: "1.2%", successNum: 95.2, success: "95.2%", feeNum: 4.5, fee: "4.5%", riskOrder: 3,
-    processors: [
-      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "suspended", since: "2025-07", txnCount: 1500 },
-    ]},
+    sites: [
+      { siteId: "S-005-01", siteName: "グレーサービス", url: "https://grey-industry.example.com", agentId: null, agentName: null,
+        processors: [
+          { name: "Simpletransact", brands: "VISA/MC", status: "suspended", since: "2025-07", txnCount: 1500, mid: "ST-GRY-001",
+            feeOverride: { visa: "4.80%", master: "4.80%" }, depositOverride: { rate: "10%", period: "180日" }, limitOverride: { trMax: "¥100,000", count: "2回/日、5回/月" }, settlementOverride: null },
+        ]},
+    ],
+    get processors() { return this.sites.flatMap(s => s.processors); },
+  },
   { id: "M-006", name: "株式会社トラベルプラス", status: "有効", sColor: "green", risk: "低", rColor: "green", salesNum: 8200000, sales: "¥8.2M", cbNum: 0.03, cb: "0.03%", successNum: 99.3, success: "99.3%", feeNum: 3.3, fee: "3.3%", riskOrder: 1,
-    processors: [
-      { name: "三井住友カード", brands: "VISA/MC", status: "approved", since: "2025-03", txnCount: 9800 },
-      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "approved", since: "2025-03", txnCount: 6200 },
-      { name: "JCB直接", brands: "JCB", status: "approved", since: "2025-07", txnCount: 2100 },
-      { name: "PayPay", brands: "QR", status: "approved", since: "2025-09", txnCount: 800 },
-      { name: "AMEX直接", brands: "AMEX", status: "reviewing", since: null, txnCount: 0 },
-    ]},
+    sites: [
+      { siteId: "S-006-01", siteName: "国内旅行サイト", url: "https://travel-plus.example.com", agentId: "AG-002", agentName: "合同会社デジタルエージェント",
+        processors: [
+          { name: "Univa Pay cast", brands: "VISA/MC", status: "approved", since: "2025-03", txnCount: 6500, mid: "UPC-TRV-001",
+            feeOverride: { visa: "3.30%", master: "3.30%" }, depositOverride: { rate: "10%", period: "180日" }, limitOverride: { trMax: "¥500,000", monthly: "¥100,000,000" }, settlementOverride: "15日締め末払い / 末締め翌15日払い" },
+          { name: "ONTHELINE", brands: "JCB", status: "approved", since: "2025-07", txnCount: 2100, mid: "OTL-TRV-001",
+            feeOverride: { jcb: "3.30%" }, depositOverride: { rate: "5%", period: "180日" }, limitOverride: null, settlementOverride: null },
+          { name: "スマートピット", brands: "WEBマネー", status: "approved", since: "2025-09", txnCount: 800, mid: "SMP-TRV-001",
+            feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
+        ]},
+      { siteId: "S-006-02", siteName: "海外旅行サイト", url: "https://overseas.travel-plus.example.com", agentId: "AG-002", agentName: "合同会社デジタルエージェント",
+        processors: [
+          { name: "Worldpay", brands: "VISA/MC/AMEX", status: "approved", since: "2025-03", txnCount: 6200, mid: "WP-TRV-002",
+            feeOverride: { visa: "3.20%", master: "3.35%" }, depositOverride: { rate: "10%", period: "180日" }, limitOverride: null, settlementOverride: null },
+          { name: "Asiabill", brands: "AMEX/Diners", status: "reviewing", since: null, txnCount: 0, mid: null,
+            feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
+          { name: "セキュリティマネー", brands: "WEBマネー", status: "approved", since: "2025-10", txnCount: 450, mid: "SCM-TRV-002",
+            feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
+        ]},
+    ],
+    get processors() { return this.sites.flatMap(s => s.processors); },
+  },
   { id: "M-007", name: "合同会社デジタルワークス", status: "有効", sColor: "green", risk: "低", rColor: "green", salesNum: 3400000, sales: "¥3.4M", cbNum: 0.01, cb: "0.01%", successNum: 99.7, success: "99.7%", feeNum: 3.4, fee: "3.4%", riskOrder: 1,
-    processors: [
-      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "approved", since: "2025-11", txnCount: 1800 },
-      { name: "三井住友カード", brands: "VISA/MC", status: "pending", since: null, txnCount: 0 },
-    ]},
+    sites: [
+      { siteId: "S-007-01", siteName: "デジタルコンテンツ販売", url: "https://digi-works.example.com", agentId: "AG-003", agentName: "有限会社テックブリッジ",
+        processors: [
+          { name: "TCMS", brands: "VISA/MC/JCB", status: "approved", since: "2025-11", txnCount: 1800, mid: "TCMS-DW-001",
+            feeOverride: { visa: "3.60%", master: "3.60%", jcb: "3.40%" }, depositOverride: null, limitOverride: { trMax: "¥200,000" }, settlementOverride: null },
+          { name: "楽天銀行", brands: "VISA/MC", status: "pending", since: null, txnCount: 0, mid: null,
+            feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
+          { name: "ビットキャッシュ", brands: "WEBマネー", status: "approved", since: "2025-12", txnCount: 350, mid: "BC-DW-001",
+            feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
+        ]},
+    ],
+    get processors() { return this.sites.flatMap(s => s.processors); },
+  },
   { id: "M-008", name: "株式会社フレッシュフーズ", status: "有効", sColor: "green", risk: "中", rColor: "yellow", salesNum: 1500000, sales: "¥1.5M", cbNum: 0.08, cb: "0.08%", successNum: 99.0, success: "99.0%", feeNum: 3.7, fee: "3.7%", riskOrder: 2,
-    processors: [
-      { name: "GMO-PG", brands: "VISA/MC/JCB", status: "approved", since: "2025-12", txnCount: 900 },
-    ]},
+    sites: [
+      { siteId: "S-008-01", siteName: "オーガニック食品EC", url: "https://fresh-foods.example.com", agentId: null, agentName: null,
+        processors: [
+          { name: "Simpletransact", brands: "VISA/MC", status: "approved", since: "2025-12", txnCount: 900, mid: "ST-FF-001",
+            feeOverride: { visa: "4.20%", master: "4.20%" }, depositOverride: null, limitOverride: { trMax: "¥200,000" }, settlementOverride: null },
+          { name: "ニーハオペイ", brands: "WEBマネー", status: "approved", since: "2026-01", txnCount: 120, mid: "NHP-FF-001",
+            feeOverride: null, depositOverride: null, limitOverride: null, settlementOverride: null },
+        ]},
+    ],
+    get processors() { return this.sites.flatMap(s => s.processors); },
+  },
 ];
 
 const PROC_STATUS = {
@@ -879,7 +958,7 @@ const MasterMerchants = () => {
                   {/* AI Suggestion */}
                   {m.processors.filter(p => p.status === "approved").length === 1 && m.salesNum > 1000000 && (
                     <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded border border-blue-200 p-2 mt-2">
-                      <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI提案:</span> 月間売上{m.sales}の実績があります。接続先を追加すると、フェイルオーバーやコスト最適化のルーティングが可能になります。三井住友カード直接接続の審査を推薦します。</p>
+                      <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI提案:</span> 月間売上{m.sales}の実績があります。接続先を追加すると、フェイルオーバーやコスト最適化のルーティングが可能になります。Worldpay接続の審査を推薦します。</p>
                     </div>
                   )}
                   {m.processors.filter(p => p.status === "approved").length >= 3 && (
@@ -944,33 +1023,79 @@ const MasterMerchants = () => {
                   <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200"><span className="text-slate-400">手数料</span><p className="font-bold">{slidePanel.fee}</p></div>
                 </div>
               </div>
-              {/* 接続先状況 */}
+              {/* サイト別接続先状況 */}
               <div className="border-t pt-3">
-                <p className="text-xs font-bold text-slate-600 mb-2">接続先状況</p>
-                <div className="space-y-1">
-                  {slidePanel.processors.map((p, i) => {
-                    const st = PROC_STATUS[p.status];
-                    return <div key={i} className="flex justify-between text-xs"><span>{p.name}</span><Badge text={st.label} color={st.color} /></div>;
-                  })}
-                </div>
+                <p className="text-xs font-bold text-slate-600 mb-2">🌐 サイト別 接続先・手数料一覧</p>
+                {(slidePanel.sites || []).map((site, si) => (
+                  <div key={si} className="mb-3 bg-slate-50 rounded-lg border border-slate-200 p-2">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-mono text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">{site.siteId}</span>
+                      <span className="text-xs font-semibold text-slate-700">{site.siteName}</span>
+                      {site.agentName && <span className="text-xs text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">代理店: {site.agentName}</span>}
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs">
+                        <thead><tr className="bg-slate-100 text-slate-500">
+                          <th className="px-2 py-1 text-left font-semibold">接続先</th>
+                          <th className="px-2 py-1 text-center font-semibold">状態</th>
+                          <th className="px-2 py-1 text-center font-semibold">MID</th>
+                          <th className="px-2 py-1 text-center font-semibold">VISA</th>
+                          <th className="px-2 py-1 text-center font-semibold">MC</th>
+                          <th className="px-2 py-1 text-center font-semibold">JCB</th>
+                          <th className="px-2 py-1 text-center font-semibold">デポ</th>
+                          <th className="px-2 py-1 text-center font-semibold">入金</th>
+                        </tr></thead>
+                        <tbody>
+                        {site.processors.map((mp, pi) => {
+                          const st = PROC_STATUS[mp.status];
+                          const procDef = processorList.find(x => x.name === mp.name);
+                          const isWM = procDef?.type === "WEBマネー";
+                          return (
+                            <tr key={pi} className="border-b last:border-0">
+                              <td className="px-2 py-1 font-semibold text-slate-700">{mp.name}</td>
+                              <td className="px-2 py-1 text-center"><Badge text={st.label} color={st.color} /></td>
+                              <td className="px-2 py-1 text-center font-mono text-slate-500">{mp.mid || "—"}</td>
+                              {isWM ? (
+                                <td colSpan={3} className={`px-2 py-1 text-center font-semibold ${mp.feeOverride?.webmoney ? "text-amber-600" : "text-blue-700"}`}>{mp.feeOverride?.webmoney || procDef?.fees?.webmoney || "-"}</td>
+                              ) : (<>
+                                <td className={`px-2 py-1 text-center font-semibold ${mp.feeOverride?.visa ? "text-amber-600" : "text-slate-600"}`}>{mp.feeOverride?.visa || procDef?.fees?.visa || "-"}</td>
+                                <td className={`px-2 py-1 text-center font-semibold ${mp.feeOverride?.master ? "text-amber-600" : "text-slate-600"}`}>{mp.feeOverride?.master || procDef?.fees?.master || "-"}</td>
+                                <td className={`px-2 py-1 text-center font-semibold ${mp.feeOverride?.jcb ? "text-amber-600" : "text-slate-600"}`}>{mp.feeOverride?.jcb || procDef?.fees?.jcb || "-"}</td>
+                              </>)}
+                              <td className={`px-2 py-1 text-center ${mp.depositOverride?.rate ? "text-amber-600 font-semibold" : "text-slate-500"}`}>{mp.depositOverride?.rate || procDef?.deposit?.rate || "-"}</td>
+                              <td className="px-2 py-1 text-center text-slate-500 truncate max-w-[120px]">{mp.settlementOverride || procDef?.settlement?.cycle || "-"}</td>
+                            </tr>
+                          );
+                        })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+                <p className="text-xs text-amber-600">※ オレンジ = デフォルトからのオーバーライド値</p>
               </div>
-              {/* リザーブ設定 */}
+              {/* リザーブ設定（サイト・接続先別自動表示） */}
               <div className="border-t pt-3">
                 <p className="text-xs font-bold text-purple-700 mb-2">🔒 リザーブ（デポジット）設定</p>
                 <div className="space-y-2">
-                  {[
-                    { proc: "GMO-PG", rate: "10%", period: "180日", balance: "¥420,000" },
-                    { proc: "三井住友カード", rate: "5%", period: "90日", balance: "¥200,000" },
-                  ].map((r, i) => (
+                  {(slidePanel.sites || []).flatMap(site =>
+                    site.processors.filter(mp => mp.status === "approved").map(mp => {
+                      const procDef = processorList.find(x => x.name === mp.name);
+                      const rate = mp.depositOverride?.rate || procDef?.deposit?.rate || "-";
+                      const period = mp.depositOverride?.period || procDef?.deposit?.period || "-";
+                      if (rate === "-") return null;
+                      return { proc: mp.name, siteId: site.siteId, rate, period, balance: `¥${Math.floor(mp.txnCount * 150 * parseFloat(rate) / 100).toLocaleString()}` };
+                    })
+                  ).filter(Boolean).map((r, i) => (
                     <div key={i} className="bg-purple-50 rounded border border-purple-200 p-2 text-xs">
                       <div className="flex justify-between items-center mb-1">
-                        <span className="font-semibold text-slate-700">{r.proc}</span>
+                        <span className="font-semibold text-slate-700">{r.proc} <span className="text-slate-400 font-normal">({r.siteId})</span></span>
                         <Badge text={`${r.rate} / ${r.period}`} color="purple" />
                       </div>
                       <div className="flex gap-3">
                         <div><span className="text-slate-400">リザーブ率:</span> <input className="w-14 border rounded px-1 py-0.5 text-center" defaultValue={r.rate} /></div>
-                        <div><span className="text-slate-400">期間:</span> <select className="border rounded px-1 py-0.5"><option>90日</option><option selected={r.period==="180日"}>180日</option><option>365日</option></select></div>
-                        <div className="flex-1 text-right"><span className="text-slate-400">残高:</span> <span className="font-bold text-purple-700">{r.balance}</span></div>
+                        <div><span className="text-slate-400">期間:</span> <select className="border rounded px-1 py-0.5"><option>90日</option><option>120日</option><option selected={r.period==="180日"}>180日</option><option>365日</option></select></div>
+                        <div className="flex-1 text-right"><span className="text-slate-400">概算残高:</span> <span className="font-bold text-purple-700">{r.balance}</span></div>
                       </div>
                     </div>
                   ))}
@@ -1088,7 +1213,7 @@ const MasterMerchants = () => {
             <div className="p-5 space-y-4">
               <div>
                 <label className="text-xs font-semibold text-slate-600">接続先 <span className="text-rose-500">*</span></label>
-                <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>選択してください</option><option>GMO-PG</option><option>三井住友カード</option><option>JCB直接</option><option>PayPay</option></select>
+                <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>選択してください</option><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option><option>ONTHELINE</option><option>Asiabill</option><option>ビットキャッシュ</option><option>スマートピット</option><option>ネットライドキャッシュ</option><option>セキュリティマネー</option><option>Gマネー</option><option>ペイディ</option><option>ニーハオペイ</option></select>
               </div>
               <div>
                 <label className="text-xs font-semibold text-slate-600">申請理由</label>
@@ -1374,8 +1499,7 @@ const MerchantDashboard = () => {
   const kpiData = {
     "今月の売上": { value: "¥12.5M", trend: 18, details: [
       { label: "カード決済", value: "¥9.75M", pct: "89%" },
-      { label: "QR決済", value: "¥875K", pct: "8%" },
-      { label: "コンビニ", value: "¥375K", pct: "3%" }
+      { label: "WEBマネー", value: "¥1.25M", pct: "11%" }
     ], chart: [8.2, 9.1, 10.5, 11.2, 10.8, 12.5] },
     "今日の売上": { value: "¥412K", trend: 15, details: [
       { label: "0-6時", value: "¥28K", pct: "7%" },
@@ -1391,8 +1515,7 @@ const MerchantDashboard = () => {
     ], chart: [99.1, 99.3, 99.2, 99.5, 99.4, 99.5] },
     "平均単価": { value: "¥8,200", trend: 3, details: [
       { label: "カード決済", value: "¥9,500", pct: "" },
-      { label: "QR決済", value: "¥3,800", pct: "" },
-      { label: "コンビニ", value: "¥2,100", pct: "" }
+      { label: "WEBマネー", value: "¥4,500", pct: "" }
     ], chart: [7800, 7900, 8100, 8000, 8150, 8200] }
   };
   const recentTx = [
@@ -1434,7 +1557,7 @@ const MerchantDashboard = () => {
       <div className="flex items-center gap-2 mb-1">
         <span>🤖</span><span className="text-xs font-bold text-emerald-700">AI インサイト</span><span className="text-xs text-slate-400">毎日更新</span>
       </div>
-      <p className="text-xs text-slate-700">昨日の売上は¥412,000で前週比+15%。カード決済が78%を占めています。決済成功率は99.5%と安定。特異なパターンはありません。コンビニ決済の導入で、カート離脱率を約8%改善できる可能性があります。</p>
+      <p className="text-xs text-slate-700">昨日の売上は¥412,000で前週比+15%。カード決済が78%を占めています。決済成功率は99.5%と安定。特異なパターンはありません。WEBマネーの導入で、カート離脱率を約8%改善できる可能性があります。</p>
     </div>
 
     <div className="flex gap-3">
@@ -1455,7 +1578,7 @@ const MerchantDashboard = () => {
       <div className="w-56 bg-white rounded-lg border border-slate-200 shadow-sm p-3">
         <p className="text-xs font-bold text-slate-600 mb-2">決済手段分布</p>
         <div className="space-y-2">
-          {[{ name: "クレジットカード", pct: 89, color: "bg-blue-500" }, { name: "QR決済", pct: 8, color: "bg-purple-500" }, { name: "コンビニ", pct: 3, color: "bg-orange-500" }].map((m, i) => (
+          {[{ name: "クレジットカード", pct: 89, color: "bg-blue-500" }, { name: "WEBマネー", pct: 11, color: "bg-purple-500" }].map((m, i) => (
             <div key={i}>
               <div className="flex justify-between text-xs"><span className="text-slate-600">{m.name}</span><span className="font-semibold">{m.pct}%</span></div>
               <div className="w-full h-1.5 bg-slate-100 rounded-full mt-0.5"><div className={`h-full ${m.color} rounded-full`} style={{ width: `${m.pct}%` }} /></div>
@@ -1557,7 +1680,7 @@ const MerchantTransactions = () => {
     { id: "pay_7e2c3d4a", time: "2026-02-11 14:18", amount: "¥5,500", rawAmt: 5500, status: "成功", sColor: "green", method: "Mastercard", card: "****8888", order: "ORD-20260211-002", threeD: "認証済", fee: "¥165", net: "¥5,335", customer: "s***@gmail.com" },
     { id: "pay_6d1b5e9f", time: "2026-02-11 14:12", amount: "¥89,000", rawAmt: 89000, status: "ブロック", sColor: "red", method: "VISA", card: "****1234", order: "ORD-20260211-003", threeD: "未実施", fee: "—", net: "—", customer: "k***@company.jp" },
     { id: "pay_5c4a6f8e", time: "2026-02-11 13:55", amount: "¥3,200", rawAmt: 3200, status: "返金済", sColor: "yellow", method: "JCB", card: "****5678", order: "ORD-20260210-045", threeD: "認証済", fee: "¥96", net: "¥0", customer: "h***@yahoo.co.jp" },
-    { id: "pay_4b3d7g2h", time: "2026-02-11 13:42", amount: "¥15,600", rawAmt: 15600, status: "成功", sColor: "green", method: "PayPay", card: "-", order: "ORD-20260211-004", threeD: "—", fee: "¥468", net: "¥15,132", customer: "m***@icloud.com" },
+    { id: "pay_4b3d7g2h", time: "2026-02-11 13:42", amount: "¥15,600", rawAmt: 15600, status: "成功", sColor: "green", method: "ペイディ", card: "-", order: "ORD-20260211-004", threeD: "—", fee: "¥546", net: "¥15,054", customer: "m***@icloud.com" },
   ];
   return (
   <div className="p-5 space-y-4">
@@ -2410,12 +2533,12 @@ const MasterMerchantApplications = () => {
                 <div>
                   <p className="text-xs font-semibold text-slate-600 mb-1">初期接続先の選択:</p>
                   <select className="w-full border rounded p-2 text-xs">
-                    <option>GMO-PG（推奨 — 審査最速 平均7日）</option>
-                    <option>三井住友カード（審査 平均14日）</option>
-                    <option>JCB直接（審査 平均21日）</option>
-                    <option>PayPay（審査 平均5日）</option>
+                    <option>Simpletransact（推奨 — 審査最速 平均7日）</option>
+                    <option>Univa Pay cast（審査 平均10日）</option>
+                    <option>楽天銀行（審査 平均12日）</option>
+                    <option>TCMS（審査 平均21日）</option>
                   </select>
-                  <p className="text-xs text-slate-400 mt-1">💡 AIの推薦: GMO-PGを初期接続先として開始し、取引実績を積んだ後に直接接続を追加するのが最速です。</p>
+                  <p className="text-xs text-slate-400 mt-1">💡 AIの推薦: Simpletransactを初期接続先として開始し、取引実績を積んだ後に直接接続を追加するのが最速です。</p>
                 </div>
               )}
               {appConfirmDialog.type !== "reject" && appConfirmDialog.type !== "start_proc_review" && (
@@ -2521,7 +2644,7 @@ const MasterMerchantApplications = () => {
                     "接続先管理画面の「審査フロー管理」タブに案件が追加される",
                     "以降の審査進捗は「🔌 接続先管理」画面で管理"
                   ],
-                  processorName: "GMO-PG（AI推薦）",
+                  processorName: "Simpletransact（AI推薦）",
                   confirmLabel: "🔌 接続先審査を開始"
                 })} className="px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700 shadow-sm ring-2 ring-purple-300 ring-offset-1">🔌 接続先審査を開始</button>
                 <span className="text-xs text-slate-400 ml-1">→ 接続先管理画面に審査案件が作成されます</span>
@@ -2595,7 +2718,7 @@ const MasterMerchantApplications = () => {
                 <div><span className="text-slate-400">承認者:</span> admin@aipaymentsys.com</div>
                 <div><span className="text-slate-400">AI判定:</span> <span className="text-emerald-600 font-semibold">承認推薦（信頼度92%）</span></div>
                 {selectedAppData.procStatus === "接続先審査中" && (
-                  <div><span className="text-slate-400">初期接続先:</span> <span className="text-blue-600 font-semibold">GMO-PG（審査中 — 3日経過）</span></div>
+                  <div><span className="text-slate-400">初期接続先:</span> <span className="text-blue-600 font-semibold">Simpletransact（審査中 — 3日経過）</span></div>
                 )}
               </div>
             </div>
@@ -2726,7 +2849,7 @@ const MasterSettlement = () => {
           <span className="text-xs text-slate-400 pl-2">🔍</span>
           <input className="text-xs px-2 py-1 w-48 outline-none" placeholder="加盟店ID・名前で検索" />
         </div>
-        <select className="text-xs border rounded px-2 py-1 bg-white"><option>全接続先</option><option>GMO-PG</option><option>三井住友カード</option></select>
+        <select className="text-xs border rounded px-2 py-1 bg-white"><option>全接続先</option><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option><option>ONTHELINE</option><option>Asiabill</option></select>
         <select className="text-xs border rounded px-2 py-1 bg-white"><option>全種別</option><option>留保</option><option>解放</option></select>
         <button className="text-xs bg-purple-600 text-white px-3 py-1 rounded">検索</button>
       </div>
@@ -2734,10 +2857,10 @@ const MasterSettlement = () => {
       <div className="bg-white rounded border mt-2">
         <TableHeader cols={[{ label: "加盟店", w: "flex-1" }, { label: "接続先", w: "w-28" }, { label: "リザーブ率", w: "w-20" }, { label: "期間", w: "w-16" }, { label: "残高", w: "w-24" }, { label: "次回解放", w: "w-24" }, { label: "解放予定日", w: "w-24" }]}>
         {[
-          { m: "ABCマート", proc: "GMO-PG", rate: "10%", period: "180日", bal: "¥420,000", next: "¥120,000", date: "2026-03-07" },
-          { m: "ABCマート", proc: "三井住友", rate: "5%", period: "90日", bal: "¥200,000", next: "¥60,000", date: "2026-03-07" },
-          { m: "XYZショップ", proc: "GMO-PG", rate: "10%", period: "180日", bal: "¥185,000", next: "¥92,000", date: "2026-03-14" },
-          { m: "トラベルプラス", proc: "GMO-PG", rate: "15%", period: "180日", bal: "¥510,000", next: "¥340,000", date: "2026-03-07" },
+          { m: "ABCマート", proc: "Univa Pay cast", rate: "10%", period: "180日", bal: "¥420,000", next: "¥120,000", date: "2026-03-07" },
+          { m: "ABCマート", proc: "楽天銀行", rate: "5%", period: "90日", bal: "¥200,000", next: "¥60,000", date: "2026-03-07" },
+          { m: "XYZショップ", proc: "Simpletransact", rate: "10%", period: "180日", bal: "¥185,000", next: "¥92,000", date: "2026-03-14" },
+          { m: "トラベルプラス", proc: "Worldpay", rate: "15%", period: "180日", bal: "¥510,000", next: "¥340,000", date: "2026-03-07" },
         ].map((r, i) => (
           <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
             <td className="px-4 py-1.5 whitespace-nowrap font-semibold text-slate-700">{r.m}</td>
@@ -2896,6 +3019,22 @@ const MasterSettlement = () => {
                 <div key={i} className="flex text-xs py-1 border-b"><span className="w-14">{b.name}</span><span className="flex-1 text-slate-500">{b.amt}</span><span className="text-rose-500">-{b.fee}</span></div>
               ))}
             </div>
+            {/* 接続先別手数料ブレイクダウン */}
+            <div><p className="text-xs font-bold text-slate-700 mb-2">📊 接続先別 TR/CB手数料</p>
+              <div className="bg-slate-50 rounded border border-slate-200 p-2 space-y-1 text-xs">
+                {[
+                  { proc: "Univa Pay cast", trCount: 85, trFee: "30円", cbCount: 0, cbFee: "3,000円" },
+                  { proc: "楽天銀行", trCount: 62, trFee: "10円", cbCount: 0, cbFee: "1,300円" },
+                  { proc: "TCMS", trCount: 28, trFee: "20円", cbCount: 0, cbFee: "-" },
+                ].map((t, i) => (
+                  <div key={i} className="flex items-center py-1 border-b last:border-0">
+                    <span className="w-28 font-semibold text-slate-700">{t.proc}</span>
+                    <span className="flex-1 text-slate-500">TR: {t.trCount}件 × {t.trFee} = ¥{(t.trCount * parseInt(t.trFee)).toLocaleString()}</span>
+                    <span className="text-slate-400">CB: {t.cbCount}件</span>
+                  </div>
+                ))}
+              </div>
+            </div>
             <div><p className="text-xs font-bold text-slate-700 mb-1">振込先口座</p><p className="text-xs text-slate-600 bg-slate-50 rounded p-2">{selectedPayout.bank}</p></div>
             <button className="w-full py-2 bg-blue-50 text-blue-600 rounded text-xs font-bold border border-blue-200">📥 明細をダウンロード</button>
           </div>
@@ -2959,9 +3098,8 @@ const MasterSystemSettings = () => {
       <p className="text-xs font-bold text-slate-600 mb-3">有効な決済手段</p>
       <div className="space-y-2">
         {[
-          { name: "クレジットカード（VISA / MC / JCB / AMEX）", status: true, processor: "三井住友カード / GMO-PG", fee: "3.0% 〜 3.6%" },
-          { name: "QRコード決済（PayPay）", status: true, processor: "PayPay直接", fee: "1.98%" },
-          { name: "コンビニ決済", status: true, processor: "GMO-PG", fee: "¥200/件" },
+          { name: "クレジットカード（VISA / MC / JCB / AMEX）", status: true, processor: "Univa Pay cast / 楽天銀行 / Worldpay 他", fee: "3.0% 〜 3.6%" },
+          { name: "WEBマネー（ビットキャッシュ / ペイディ 他7種）", status: true, processor: "各サービス直接", fee: "3.5% 〜 5.0%" },
           { name: "Apple Pay / Google Pay", status: false, processor: "未設定", fee: "-" },
         ].map((m, i) => (
           <div key={i} className="flex items-center gap-3 p-2 rounded border text-xs">
@@ -2984,33 +3122,44 @@ const MasterSystemSettings = () => {
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead><tr className="bg-slate-50 text-slate-500">
-            <th className="px-3 py-2 text-left font-semibold">決済種別</th>
-            <th className="px-3 py-2 text-left font-semibold">ブランド</th>
-            <th className="px-3 py-2 text-center font-semibold">基本手数料率</th>
-            <th className="px-3 py-2 text-center font-semibold">3Dセキュア</th>
-            <th className="px-3 py-2 text-center font-semibold">通貨</th>
-            <th className="px-3 py-2 text-center font-semibold">最小金額</th>
-            <th className="px-3 py-2 text-center font-semibold">最大金額</th>
-            <th className="px-3 py-2 text-center font-semibold">有効</th>
+            <th className="px-2 py-2 text-left font-semibold">決済種別</th>
+            <th className="px-2 py-2 text-left font-semibold">ブランド</th>
+            <th className="px-2 py-2 text-center font-semibold">基本手数料率</th>
+            <th className="px-2 py-2 text-center font-semibold">TR(成功)</th>
+            <th className="px-2 py-2 text-center font-semibold">CB手数料</th>
+            <th className="px-2 py-2 text-center font-semibold">デポジット</th>
+            <th className="px-2 py-2 text-center font-semibold">3DS</th>
+            <th className="px-2 py-2 text-center font-semibold">通貨</th>
+            <th className="px-2 py-2 text-center font-semibold">最小</th>
+            <th className="px-2 py-2 text-center font-semibold">最大</th>
+            <th className="px-2 py-2 text-center font-semibold">有効</th>
           </tr></thead>
           <tbody>
           {[
-            { type: "クレジット", brand: "VISA", fee: "3.0%", tds: "必須", currency: "JPY", min: "¥100", max: "¥999,999", active: true },
-            { type: "クレジット", brand: "Mastercard", fee: "3.0%", tds: "必須", currency: "JPY", min: "¥100", max: "¥999,999", active: true },
-            { type: "クレジット", brand: "JCB", fee: "3.25%", tds: "必須", currency: "JPY", min: "¥100", max: "¥500,000", active: true },
-            { type: "クレジット", brand: "AMEX", fee: "3.6%", tds: "推奨", currency: "JPY", min: "¥100", max: "¥999,999", active: true },
-            { type: "QR決済", brand: "PayPay", fee: "1.98%", tds: "-", currency: "JPY", min: "¥1", max: "¥500,000", active: true },
-            { type: "コンビニ", brand: "全コンビニ", fee: "¥200/件", tds: "-", currency: "JPY", min: "¥500", max: "¥300,000", active: true },
+            { type: "クレジット", brand: "VISA", fee: "3.0%", tr: "11〜30円", cb: "1,200〜3,000円", depo: "5〜10%", tds: "必須", currency: "JPY", min: "¥100", max: "¥999,999", active: true },
+            { type: "クレジット", brand: "Mastercard", fee: "3.0%", tr: "11〜30円", cb: "1,200〜3,000円", depo: "5〜10%", tds: "必須", currency: "JPY", min: "¥100", max: "¥999,999", active: true },
+            { type: "クレジット", brand: "JCB", fee: "3.25%", tr: "20円", cb: "-", depo: "-", tds: "必須", currency: "JPY", min: "¥100", max: "¥500,000", active: true },
+            { type: "クレジット", brand: "AMEX", fee: "2.95%", tr: "-", cb: "-", depo: "10%", tds: "推奨", currency: "JPY", min: "¥100", max: "¥999,999", active: true },
+            { type: "WEBマネー", brand: "ビットキャッシュ", fee: "5.0%", tr: "-", cb: "-", depo: "-", tds: "-", currency: "JPY", min: "¥500", max: "¥200,000", active: true },
+            { type: "WEBマネー", brand: "スマートピット", fee: "¥300/件", tr: "-", cb: "-", depo: "-", tds: "-", currency: "JPY", min: "¥1,000", max: "¥300,000", active: true },
+            { type: "WEBマネー", brand: "ネットライドキャッシュ", fee: "5.0%", tr: "-", cb: "-", depo: "-", tds: "-", currency: "JPY", min: "¥500", max: "¥100,000", active: true },
+            { type: "WEBマネー", brand: "セキュリティマネー", fee: "5.0%", tr: "-", cb: "-", depo: "-", tds: "-", currency: "JPY", min: "¥500", max: "¥100,000", active: true },
+            { type: "WEBマネー", brand: "Gマネー", fee: "4.5%", tr: "-", cb: "-", depo: "-", tds: "-", currency: "JPY", min: "¥500", max: "¥150,000", active: true },
+            { type: "WEBマネー", brand: "ペイディ", fee: "3.5%", tr: "-", cb: "-", depo: "-", tds: "-", currency: "JPY", min: "¥100", max: "¥500,000", active: true },
+            { type: "WEBマネー", brand: "ニーハオペイ", fee: "4.0%", tr: "-", cb: "-", depo: "-", tds: "-", currency: "JPY", min: "¥1,000", max: "¥200,000", active: true },
           ].map((r, i) => (
             <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
-              <td className="px-3 py-2 text-slate-600">{r.type}</td>
-              <td className="px-3 py-2 font-semibold text-slate-700">{r.brand}</td>
-              <td className="px-3 py-2 text-center font-semibold text-blue-700">{r.fee}</td>
-              <td className="px-3 py-2 text-center"><Badge text={r.tds} color={r.tds === "必須" ? "blue" : r.tds === "推奨" ? "green" : "gray"} /></td>
-              <td className="px-3 py-2 text-center text-slate-500">{r.currency}</td>
-              <td className="px-3 py-2 text-center text-slate-500">{r.min}</td>
-              <td className="px-3 py-2 text-center text-slate-500">{r.max}</td>
-              <td className="px-3 py-2 text-center">{r.active ? <span className="text-emerald-500">●</span> : <span className="text-slate-300">●</span>}</td>
+              <td className="px-2 py-2 text-slate-600">{r.type}</td>
+              <td className="px-2 py-2 font-semibold text-slate-700">{r.brand}</td>
+              <td className="px-2 py-2 text-center font-semibold text-blue-700">{r.fee}</td>
+              <td className="px-2 py-2 text-center text-slate-500">{r.tr}</td>
+              <td className="px-2 py-2 text-center text-slate-500">{r.cb}</td>
+              <td className="px-2 py-2 text-center text-slate-500">{r.depo}</td>
+              <td className="px-2 py-2 text-center"><Badge text={r.tds} color={r.tds === "必須" ? "blue" : r.tds === "推奨" ? "green" : "gray"} /></td>
+              <td className="px-2 py-2 text-center text-slate-500">{r.currency}</td>
+              <td className="px-2 py-2 text-center text-slate-500">{r.min}</td>
+              <td className="px-2 py-2 text-center text-slate-500">{r.max}</td>
+              <td className="px-2 py-2 text-center">{r.active ? <span className="text-emerald-500">●</span> : <span className="text-slate-300">●</span>}</td>
             </tr>
           ))}
           </tbody>
@@ -3031,7 +3180,7 @@ const MasterSystemSettings = () => {
         <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 mb-3 space-y-3">
           <div className="flex justify-between items-center"><p className="text-xs font-bold text-blue-700">🔗 新規接続先追加</p><button onClick={() => setShowAddProcessor(false)} className="text-slate-400 text-sm">✕</button></div>
           <div className="grid grid-cols-2 gap-2">
-            <div><label className="text-xs text-slate-500">プロセッサー名 *</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>GMO-PG</option><option>三井住友カード</option><option>PayPay</option><option>Stripe</option><option>Square</option><option>Adyen</option></select></div>
+            <div><label className="text-xs text-slate-500">プロセッサー名 *</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option><option>ONTHELINE</option><option>Asiabill</option><option>ビットキャッシュ</option><option>スマートピット</option><option>ネットライドキャッシュ</option><option>セキュリティマネー</option><option>Gマネー</option><option>ペイディ</option><option>ニーハオペイ</option></select></div>
             <div><label className="text-xs text-slate-500">接続タイプ *</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>API</option><option>リダイレクト</option><option>SDK</option></select></div>
             <div><label className="text-xs text-slate-500">API エンドポイント *</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="https://api.example.com/v1" /></div>
             <div><label className="text-xs text-slate-500">環境 *</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>本番</option><option>テスト</option></select></div>
@@ -3059,11 +3208,12 @@ const MasterSystemSettings = () => {
           </tr></thead>
           <tbody>
           {[
-            { name: "GMO-PG", type: "API v2", env: "本番", status: "稼働中", statusColor: "green", lastPing: "2s前", latency: "120ms", successRate: "99.97%" },
-            { name: "三井住友カード", type: "API v1", env: "本番", status: "稼働中", statusColor: "green", lastPing: "5s前", latency: "85ms", successRate: "99.99%" },
-            { name: "PayPay", type: "API v2", env: "本番", status: "稼働中", statusColor: "green", lastPing: "3s前", latency: "95ms", successRate: "99.95%" },
-            { name: "GMO-PG (テスト)", type: "API v2", env: "テスト", status: "稼働中", statusColor: "blue", lastPing: "10s前", latency: "145ms", successRate: "99.80%" },
-            { name: "Stripe", type: "API v3", env: "テスト", status: "未接続", statusColor: "gray", lastPing: "-", latency: "-", successRate: "-" },
+            { name: "Univa Pay cast", type: "API v2", env: "本番", status: "稼働中", statusColor: "green", lastPing: "2s前", latency: "120ms", successRate: "99.97%" },
+            { name: "楽天銀行", type: "API v1", env: "本番", status: "稼働中", statusColor: "green", lastPing: "5s前", latency: "85ms", successRate: "99.99%" },
+            { name: "Worldpay", type: "API v3", env: "本番", status: "稼働中", statusColor: "green", lastPing: "3s前", latency: "110ms", successRate: "99.93%" },
+            { name: "TCMS", type: "専用v2", env: "本番", status: "稼働中", statusColor: "green", lastPing: "4s前", latency: "95ms", successRate: "99.90%" },
+            { name: "ペイディ", type: "API v1", env: "本番", status: "稼働中", statusColor: "green", lastPing: "6s前", latency: "75ms", successRate: "99.95%" },
+            { name: "Univa Pay cast (テスト)", type: "API v2", env: "テスト", status: "稼働中", statusColor: "blue", lastPing: "10s前", latency: "145ms", successRate: "99.80%" },
           ].map((p, i) => (
             <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
               <td className="px-3 py-2 font-semibold text-slate-700">{p.name}</td>
@@ -3092,11 +3242,11 @@ const MasterSystemSettings = () => {
       </div>
       <div className="space-y-2">
         {[
-          { rule: "VISA / MC → 三井住友カード（優先）→ GMO-PG（フォールバック）", priority: 1, active: true },
-          { rule: "JCB → GMO-PG（単独）", priority: 2, active: true },
-          { rule: "AMEX → GMO-PG（単独）", priority: 3, active: true },
-          { rule: "PayPay → PayPay API（直接）", priority: 4, active: true },
-          { rule: "コンビニ → GMO-PG コンビニ決済API", priority: 5, active: true },
+          { rule: "VISA → Univa Pay cast（優先）→ Worldpay（フォールバック）", priority: 1, active: true },
+          { rule: "MC → 楽天銀行（優先）→ Simpletransact（フォールバック）", priority: 2, active: true },
+          { rule: "JCB → TCMS（優先）→ ONTHELINE（フォールバック）", priority: 3, active: true },
+          { rule: "AMEX → Asiabill（単独）", priority: 4, active: true },
+          { rule: "WEBマネー → 各サービス直接（固定ルーティング）", priority: 5, active: true },
         ].map((r, i) => (
           <div key={i} className="flex items-center gap-3 p-2 rounded border text-xs">
             <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">{r.priority}</span>
@@ -3115,9 +3265,9 @@ const MasterSystemSettings = () => {
       <p className="text-xs font-bold text-slate-600 mb-3">接続先ヘルスモニター（直近24時間）</p>
       <div className="grid grid-cols-3 gap-3">
         {[
-          { name: "GMO-PG", uptime: "99.97%", incidents: 0, avgLatency: "120ms" },
-          { name: "三井住友カード", uptime: "99.99%", incidents: 0, avgLatency: "85ms" },
-          { name: "PayPay", uptime: "99.95%", incidents: 1, avgLatency: "95ms" },
+          { name: "Univa Pay cast", uptime: "99.97%", incidents: 0, avgLatency: "120ms" },
+          { name: "楽天銀行", uptime: "99.99%", incidents: 0, avgLatency: "85ms" },
+          { name: "Worldpay", uptime: "99.93%", incidents: 1, avgLatency: "110ms" },
         ].map((h, i) => (
           <div key={i} className="bg-slate-50 rounded-lg p-3 border">
             <div className="flex justify-between items-center mb-2">
@@ -3334,12 +3484,14 @@ const MasterSystemSettings = () => {
         </tr></thead>
         <tbody>
         {[
-          { service: "GMO-PG", type: "ショップID", value: "tshop000xxxxx", env: "本番", updated: "2026-01-15" },
-          { service: "GMO-PG", type: "ショップパス", value: "••••••••••", env: "本番", updated: "2026-01-15" },
-          { service: "三井住友カード", type: "マーチャントID", value: "mid_smbc_xxxx", env: "本番", updated: "2025-12-20" },
-          { service: "三井住友カード", type: "APIシークレット", value: "••••••••••", env: "本番", updated: "2025-12-20" },
-          { service: "PayPay", type: "API Key", value: "ppk_xxxxxxxxxxxx", env: "本番", updated: "2026-02-01" },
-          { service: "PayPay", type: "API Secret", value: "••••••••••", env: "本番", updated: "2026-02-01" },
+          { service: "Univa Pay cast", type: "マーチャントID", value: "mid_univa_xxxx", env: "本番", updated: "2026-01-15" },
+          { service: "Univa Pay cast", type: "APIシークレット", value: "••••••••••", env: "本番", updated: "2026-01-15" },
+          { service: "楽天銀行", type: "ショップID", value: "rb_shop_xxxx", env: "本番", updated: "2025-12-20" },
+          { service: "楽天銀行", type: "APIシークレット", value: "••••••••••", env: "本番", updated: "2025-12-20" },
+          { service: "Worldpay", type: "API Key", value: "wp_xxxxxxxxxxxx", env: "本番", updated: "2026-02-01" },
+          { service: "Worldpay", type: "API Secret", value: "••••••••••", env: "本番", updated: "2026-02-01" },
+          { service: "ペイディ", type: "API Key", value: "paidy_xxxxxxxxxxxx", env: "本番", updated: "2026-02-01" },
+          { service: "ペイディ", type: "API Secret", value: "••••••••••", env: "本番", updated: "2026-02-01" },
         ].map((k, i) => (
           <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
             <td className="px-3 py-2 font-semibold text-slate-700">{k.service}</td>
@@ -4101,8 +4253,8 @@ const MerchantPayouts = () => {
         <p className="text-xs font-bold text-slate-700 mb-2">適用中のリザーブ条件</p>
         <div className="space-y-1">
           {[
-            { proc: "GMO-PG", rate: "10%", period: "180日", balance: "¥420,000", next: "¥120,000（3月解放）" },
-            { proc: "三井住友カード", rate: "5%", period: "90日", balance: "¥200,000", next: "¥60,000（3月解放）" },
+            { proc: "Univa Pay cast", rate: "10%", period: "180日", balance: "¥420,000", next: "¥120,000（3月解放）" },
+            { proc: "楽天銀行", rate: "5%", period: "90日", balance: "¥200,000", next: "¥60,000（3月解放）" },
           ].map((c, i) => (
             <div key={i} className="flex items-center gap-3 p-2 rounded border text-xs">
               <span className="w-32 font-semibold text-slate-700">{c.proc}</span>
@@ -4127,11 +4279,11 @@ const MerchantPayouts = () => {
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
         <TableHeader cols={[{ label: "日付", w: "w-24" }, { label: "種別", w: "w-16" }, { label: "接続先", w: "w-32" }, { label: "対象精算", w: "w-32" }, { label: "金額", w: "w-24" }, { label: "残高", w: "w-24" }]}>
         {[
-          { date: "2026-02-07", type: "留保", tColor: "purple", proc: "GMO-PG", target: "01/28〜02/03精算分", amount: "-¥145,000", balance: "¥620,000" },
-          { date: "2026-02-07", type: "解放", tColor: "green", proc: "三井住友カード", target: "2025年8月留保分", amount: "+¥60,000", balance: "¥475,000" },
-          { date: "2026-01-31", type: "留保", tColor: "purple", proc: "GMO-PG", target: "01/21〜01/27精算分", amount: "-¥118,000", balance: "¥535,000" },
-          { date: "2026-01-31", type: "留保", tColor: "purple", proc: "三井住友カード", target: "01/21〜01/27精算分", amount: "-¥59,000", balance: "¥653,000" },
-          { date: "2026-01-24", type: "解放", tColor: "green", proc: "GMO-PG", target: "2025年7月留保分", amount: "+¥92,000", balance: "¥712,000" },
+          { date: "2026-02-07", type: "留保", tColor: "purple", proc: "Univa Pay cast", target: "01/28〜02/03精算分", amount: "-¥145,000", balance: "¥620,000" },
+          { date: "2026-02-07", type: "解放", tColor: "green", proc: "楽天銀行", target: "2025年8月留保分", amount: "+¥60,000", balance: "¥475,000" },
+          { date: "2026-01-31", type: "留保", tColor: "purple", proc: "Univa Pay cast", target: "01/21〜01/27精算分", amount: "-¥118,000", balance: "¥535,000" },
+          { date: "2026-01-31", type: "留保", tColor: "purple", proc: "楽天銀行", target: "01/21〜01/27精算分", amount: "-¥59,000", balance: "¥653,000" },
+          { date: "2026-01-24", type: "解放", tColor: "green", proc: "Worldpay", target: "2025年7月留保分", amount: "+¥92,000", balance: "¥712,000" },
         ].map((r, i) => (
           <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
             <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-500">{r.date}</td>
@@ -4432,8 +4584,7 @@ const MerchantApplicationForm = () => {
                   { name: "VISA / Mastercard", icon: "💳", desc: "手数料 3.0%〜", checked: true },
                   { name: "JCB", icon: "💳", desc: "手数料 3.3%〜", checked: true },
                   { name: "American Express", icon: "💳", desc: "手数料 3.5%〜", checked: false },
-                  { name: "コンビニ決済", icon: "🏪", desc: "¥200/件", checked: false },
-                  { name: "QRコード（PayPay）", icon: "📱", desc: "手数料 1.98%", checked: true },
+                  { name: "WEBマネー（7種）", icon: "💰", desc: "手数料 3.5%〜5.0%", checked: false },
                 ].map((m, i) => (
                   <label key={i} className={`flex items-center gap-2 text-xs p-2.5 rounded border cursor-pointer transition-all ${m.checked ? "bg-blue-50 border-blue-300" : "bg-white border-slate-200 hover:border-slate-300"}`}>
                     <input type="checkbox" defaultChecked={m.checked} className="w-3.5 h-3.5" />
@@ -4587,7 +4738,7 @@ const MerchantApplicationForm = () => {
                   <button onClick={() => setStep(2)} className="text-xs text-blue-600 hover:underline">編集</button>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
-                  <div><span className="text-slate-400">決済手段:</span> VISA / MC / JCB / PayPay</div>
+                  <div><span className="text-slate-400">決済手段:</span> VISA / MC / JCB / WEBマネー</div>
                   <div><span className="text-slate-400">入金サイクル:</span> 月末締め / 翌月末払い</div>
                   <div><span className="text-slate-400">銀行:</span> 三菱UFJ銀行 渋谷支店</div>
                   <div><span className="text-slate-400">口座:</span> 普通 1234567 カ）テックショップ</div>
@@ -4915,9 +5066,9 @@ const MasterRouting = () => {
                 {["VISA", "Mastercard", "JCB", "AMEX", "Diners"].map((b, i) => (
                   <tr key={i} className="border-b">
                     <td className="p-2 font-semibold text-slate-700">{b}</td>
-                    <td className="p-2"><select className="w-full text-xs border rounded px-2 py-1.5"><option>GMO-PG</option><option>三井住友カード</option><option>JCB直接</option><option>Adyen</option><option>変更なし</option></select></td>
+                    <td className="p-2"><select className="w-full text-xs border rounded px-2 py-1.5"><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option><option>変更なし</option></select></td>
                     <td className="p-2 text-center text-slate-400">→</td>
-                    <td className="p-2"><select className="w-full text-xs border rounded px-2 py-1.5"><option>変更なし</option><option>GMO-PG</option><option>三井住友カード</option><option>JCB直接</option><option>Adyen</option></select></td>
+                    <td className="p-2"><select className="w-full text-xs border rounded px-2 py-1.5"><option>変更なし</option><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option></select></td>
                   </tr>
                 ))}
               </tbody>
@@ -4943,9 +5094,9 @@ const MasterRouting = () => {
               </tr></thead>
               <tbody>
                 {[
-                  { date: "02/15 14:00", type: "通常", count: "5件", detail: "VISA: GMO-PG → 三井住友カード", user: "田中太郎" },
-                  { date: "02/10 11:00", type: "リカーリング", count: "3件", detail: "JCB: JCB直接 → GMO-PG", user: "佐藤花子" },
-                  { date: "01/28 09:30", type: "通常", count: "12件", detail: "全ブランド: Adyen → GMO-PG（障害対応）", user: "田中太郎" },
+                  { date: "02/15 14:00", type: "通常", count: "5件", detail: "VISA: Worldpay → Univa Pay cast", user: "田中太郎" },
+                  { date: "02/10 11:00", type: "リカーリング", count: "3件", detail: "JCB: ONTHELINE → TCMS", user: "佐藤花子" },
+                  { date: "01/28 09:30", type: "通常", count: "12件", detail: "全ブランド: Asiabill → Univa Pay cast（障害対応）", user: "田中太郎" },
                 ].map((h, i) => (
                   <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
                     <td className="p-2 text-slate-400 font-mono">{h.date}</td>
@@ -5138,11 +5289,13 @@ const MasterRouting = () => {
             <p className="text-xs text-slate-500 mb-1">接続先別トラフィック分布</p>
             <div className="space-y-1.5">
               {[
-                { name: "GMO-PG", pct: 45, count: "3,928件", color: "bg-blue-500" },
-                { name: "三井住友カード", pct: 30, count: "2,619件", color: "bg-emerald-500" },
-                { name: "JCB直接", pct: 12, count: "1,047件", color: "bg-purple-500" },
-                { name: "PayPay", pct: 10, count: "873件", color: "bg-orange-500" },
-                { name: "その他", pct: 3, count: "262件", color: "bg-slate-400" },
+                { name: "Univa Pay cast", pct: 28, count: "2,444件", color: "bg-blue-500" },
+                { name: "楽天銀行", pct: 22, count: "1,920件", color: "bg-emerald-500" },
+                { name: "TCMS", pct: 15, count: "1,309件", color: "bg-purple-500" },
+                { name: "Worldpay", pct: 12, count: "1,047件", color: "bg-cyan-500" },
+                { name: "ペイディ", pct: 8, count: "698件", color: "bg-orange-500" },
+                { name: "ビットキャッシュ", pct: 6, count: "524件", color: "bg-amber-500" },
+                { name: "その他", pct: 9, count: "787件", color: "bg-slate-400" },
               ].map((p, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs">
                   <span className="w-28 text-slate-600">{p.name}</span>
@@ -5180,17 +5333,20 @@ const MasterRouting = () => {
         <p className="text-xs font-bold text-slate-700 mb-2">⚡ フェイルオーバー / カスケード設定</p>
         <div className="space-y-2">
           {[
-            { primary: "三井住友カード", secondary: "GMO-PG", tertiary: "—", trigger: "HTTP 5xx / タイムアウト 10秒", retries: 2, status: "稼働中", sColor: "green" },
-            { primary: "JCB直接", secondary: "GMO-PG (JCB)", tertiary: "—", trigger: "HTTP 5xx / タイムアウト 10秒", retries: 1, status: "稼働中", sColor: "green" },
-            { primary: "PayPay", secondary: "—", tertiary: "—", trigger: "—", retries: 0, status: "単独（切替不可）", sColor: "gray" },
+            { primary: "Univa Pay cast", pFee: "V3.55%", secondary: "Worldpay", sFee: "V3.42%", tertiary: "—", trigger: "HTTP 5xx / タイムアウト 10秒", retries: 2, status: "稼働中", sColor: "green", costDiff: "+0.13%" },
+            { primary: "楽天銀行", pFee: "V2.65%", secondary: "Simpletransact", sFee: "V4.45%", tertiary: "—", trigger: "HTTP 5xx / タイムアウト 10秒", retries: 2, status: "稼働中", sColor: "green", costDiff: "-1.80%" },
+            { primary: "TCMS", pFee: "J3.60%", secondary: "ONTHELINE", sFee: "J3.50%", tertiary: "—", trigger: "HTTP 5xx / タイムアウト 10秒", retries: 1, status: "稼働中", sColor: "green", costDiff: "+0.10%" },
+            { primary: "Asiabill", pFee: "A2.95%", secondary: "—", sFee: "-", tertiary: "—", trigger: "—", retries: 0, status: "単独（切替不可）", sColor: "gray", costDiff: "-" },
           ].map((f, i) => (
-            <div key={i} className="flex items-center gap-3 p-2 rounded border text-xs">
+            <div key={i} className="flex items-center gap-2 p-2 rounded border text-xs">
               <div className="flex items-center gap-1">
                 <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-semibold">{f.primary}</span>
-                {f.secondary !== "—" && <><span className="text-slate-300">→</span><span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">{f.secondary}</span></>}
+                <span className="text-blue-500 text-xs">{f.pFee}</span>
+                {f.secondary !== "—" && <><span className="text-slate-300">→</span><span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">{f.secondary}</span><span className="text-slate-400 text-xs">{f.sFee}</span></>}
                 {f.tertiary !== "—" && <><span className="text-slate-300">→</span><span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded">{f.tertiary}</span></>}
               </div>
-              <span className="text-slate-400 flex-1">{f.trigger}</span>
+              <span className="text-slate-400 flex-1 truncate">{f.trigger}</span>
+              {f.costDiff !== "-" && <span className={`px-1.5 py-0.5 rounded text-xs font-semibold ${parseFloat(f.costDiff) > 0 ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600"}`}>FB時 {f.costDiff}</span>}
               <Badge text={f.status} color={f.sColor} />
               <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded">編集</button>
             </div>
@@ -5206,7 +5362,7 @@ const MasterRouting = () => {
         </div>
         <p className="text-xs text-amber-700 mb-2">ルール変更前に、過去取引データでの影響を確認できます。</p>
         <div className="bg-white rounded-lg border border-slate-200 p-2.5 grid grid-cols-4 gap-2 text-xs">
-          <div className="text-center"><span className="text-slate-400">接続先振り分け変更</span><p className="font-bold text-blue-700">GMO-PG +12% / 三井住友 -12%</p></div>
+          <div className="text-center"><span className="text-slate-400">接続先振り分け変更</span><p className="font-bold text-blue-700">Univa Pay cast +12% / 楽天銀行 -12%</p></div>
           <div className="text-center"><span className="text-slate-400">コスト差分</span><p className="font-bold text-emerald-700">-¥23,400/月</p></div>
           <div className="text-center"><span className="text-slate-400">成功率変化</span><p className="font-bold text-emerald-700">98.2% → 98.5%</p></div>
           <div className="text-center"><span className="text-slate-400">影響加盟店</span><p className="font-bold text-slate-700">5社</p></div>
@@ -5221,10 +5377,13 @@ const MasterRouting = () => {
         </div>
         <div className="space-y-1.5">
           {[
-            { name: "三井住友カード", status: false },
-            { name: "GMO-PG", status: false },
-            { name: "JCB直接", status: false },
-            { name: "PayPay", status: true },
+            { name: "Univa Pay cast", status: false },
+            { name: "楽天銀行", status: false },
+            { name: "TCMS", status: false },
+            { name: "Worldpay", status: false },
+            { name: "Simpletransact", status: false },
+            { name: "ONTHELINE", status: false },
+            { name: "Asiabill", status: true },
           ].map((p, i) => (
             <div key={i} className={`flex items-center gap-3 p-2 rounded border text-xs ${p.status ? "bg-blue-50 border-blue-200" : ""}`}>
               <div className={`w-8 h-5 rounded-full relative cursor-pointer ${p.status ? "bg-blue-500" : "bg-slate-300"}`}>
@@ -5246,10 +5405,10 @@ const MasterRouting = () => {
         </div>
         <TableHeader cols={[{ label: "日時", w: "w-28" }, { label: "取引ID", w: "w-36" }, { label: "加盟店", w: "w-32" }, { label: "ブランド", w: "w-16" }, { label: "AI判定", w: "flex-1" }, { label: "選択", w: "w-24" }, { label: "結果", w: "w-16" }, { label: "F/O", w: "w-12" }]}>
         {[
-          { time: "14:52:31", txn: "TXN-14523", merchant: "ABCマート", brand: "VISA", ai: "GMO(92) > 三井住友(78) > JCB(65)", selected: "GMO-PG", result: "成功", fo: "—" },
-          { time: "14:51:40", txn: "TXN-14520", merchant: "トラベルプラス", brand: "VISA", ai: "GMO(88)", selected: "GMO-PG", result: "失敗", fo: "→三井" },
-          { time: "14:51:22", txn: "TXN-14519", merchant: "スタイルプラス", brand: "VISA", ai: "GMO(85) > 三井住友(72)", selected: "GMO-PG", result: "成功", fo: "—" },
-          { time: "14:50:58", txn: "TXN-14518", merchant: "ABCマート", brand: "QR", ai: "PayPay(固定)", selected: "PayPay", result: "成功", fo: "—" },
+          { time: "14:52:31", txn: "TXN-14523", merchant: "ABCマート", brand: "VISA", ai: "Univa(92) > Worldpay(78) > TCMS(65)", selected: "Univa Pay cast", result: "成功", fo: "—" },
+          { time: "14:51:40", txn: "TXN-14520", merchant: "トラベルプラス", brand: "VISA", ai: "Univa(88)", selected: "Univa Pay cast", result: "失敗", fo: "→Worldpay" },
+          { time: "14:51:22", txn: "TXN-14519", merchant: "スタイルプラス", brand: "MC", ai: "楽天(85) > Simple(72)", selected: "楽天銀行", result: "成功", fo: "—" },
+          { time: "14:50:58", txn: "TXN-14518", merchant: "ABCマート", brand: "WEB", ai: "ペイディ(固定)", selected: "ペイディ", result: "成功", fo: "—" },
         ].map((l, i) => (
           <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
             <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400 font-mono">{l.time}</td>
@@ -5275,10 +5434,10 @@ const MasterRouting = () => {
               <button onClick={() => setShowAddRouteRule(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
             </div>
             <div className="p-5 space-y-4">
-              <div><label className="text-xs font-semibold text-slate-600">ルール名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 高額取引はGMO-PG優先" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">ルール名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 高額取引はUniva Pay cast優先" /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="text-xs font-semibold text-slate-600">条件タイプ <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>金額範囲</option><option>ブランド</option><option>加盟店</option><option>時間帯</option><option>地域</option></select></div>
-                <div><label className="text-xs font-semibold text-slate-600">優先接続先 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>GMO-PG</option><option>三井住友カード</option><option>JCB直接</option><option>PayPay</option></select></div>
+                <div><label className="text-xs font-semibold text-slate-600">優先接続先 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option><option>ONTHELINE</option><option>Asiabill</option></select></div>
               </div>
               <div className="bg-slate-50 rounded-lg border border-slate-200 p-3 space-y-2">
                 <p className="text-xs font-bold text-slate-600">条件詳細</p>
@@ -5290,7 +5449,7 @@ const MasterRouting = () => {
                 <button className="text-xs text-blue-600 hover:underline">+ AND条件を追加</button>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-xs font-semibold text-slate-600">フォールバック先</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>自動（AI判定）</option><option>三井住友カード</option><option>JCB直接</option></select></div>
+                <div><label className="text-xs font-semibold text-slate-600">フォールバック先</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>自動（AI判定）</option><option>Worldpay</option><option>Simpletransact</option><option>ONTHELINE</option></select></div>
                 <div><label className="text-xs font-semibold text-slate-600">優先度</label><input type="number" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="5" min="1" max="99" /></div>
               </div>
             </div>
@@ -5308,21 +5467,142 @@ const MasterRouting = () => {
 
 // ─── M09: 接続先管理 ───
 const processorList = [
-  { id: "PROC-001", name: "三井住友カード", type: "アクワイアラー直接", brands: ["VISA","MC"], protocol: "専用プロトコル", status: "稼働中", sColor: "green", uptime: "99.95%", merchants: 3, reviewing: 1, avgReviewDays: 14 },
-  { id: "PROC-002", name: "GMO-PG", type: "カードプロセッサー", brands: ["VISA","MC","JCB","AMEX"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.91%", merchants: 7, reviewing: 1, avgReviewDays: 7 },
-  { id: "PROC-003", name: "JCB直接", type: "アクワイアラー直接", brands: ["JCB"], protocol: "専用プロトコル", status: "稼働中", sColor: "green", uptime: "99.93%", merchants: 2, reviewing: 0, avgReviewDays: 21 },
-  { id: "PROC-004", name: "PayPay", type: "QR決済事業者", brands: ["QR"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.98%", merchants: 2, reviewing: 0, avgReviewDays: 5 },
-  { id: "PROC-005", name: "AMEX直接", type: "アクワイアラー直接", brands: ["AMEX"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.90%", merchants: 0, reviewing: 1, avgReviewDays: 30 },
+  { id: "PROC-001", name: "Univa Pay cast", type: "カードプロセッサー", brands: ["VISA","MC"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.95%", merchants: 5, reviewing: 1, avgReviewDays: 10,
+    fees: { visa: "3.55%", master: "3.55%", jcb: "3.80%", amex: "3.80%", diners: "3.80%" },
+    trFees: { success: "30円", fail: "30円", cb: "3,000円", refund: "100円", tds: "4円/件", cbCancel: "-" },
+    fixedCost: { initial: "¥0", monthly: "¥0" },
+    deposit: { rate: "10%", period: "180日", type: "ローリングリザーブ" },
+    limits: { trMax: "-", monthlyMax: "-", countLimit: "-" },
+    settlement: { cycle: "金曜締め翌翌々月曜 / 15日締め末払い・末締め翌15日払い", account: "日本口座（円）" },
+    restrictions: { cvv: "なし（LINK決済/APIスピード決済のみ）", ngGenre: "FX、ギャンブル、アダルト", usd: false },
+  },
+  { id: "PROC-002", name: "楽天銀行", type: "カードプロセッサー", brands: ["VISA","MC"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.91%", merchants: 4, reviewing: 1, avgReviewDays: 12,
+    fees: { visa: "2.65%", master: "2.65%", jcb: "3.00%", amex: "3.00%", diners: "3.00%" },
+    trFees: { success: "10円", fail: "-", cb: "1,300円", refund: "-", tds: "-", cbCancel: "-" },
+    fixedCost: { initial: "¥0", monthly: "¥500" },
+    deposit: { rate: "5%", period: "120日", type: "ローリングリザーブ" },
+    limits: { trMax: "¥500,000", monthlyMax: "-", countLimit: "-" },
+    settlement: { cycle: "楽天口座保有: 毎日締め毎日払い / 非保有: 月末締め翌営業日払い", account: "日本口座（円）" },
+    restrictions: { cvv: "必須", ngGenre: "薬品、児ポル、FX、ギャンブル", usd: false },
+  },
+  { id: "PROC-003", name: "Worldpay", type: "カードプロセッサー", brands: ["VISA","MC","AMEX"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.93%", merchants: 3, reviewing: 0, avgReviewDays: 14,
+    fees: { visa: "3.42%", master: "3.59%", jcb: "-", amex: "-", diners: "-" },
+    trFees: { success: "11円", fail: "11円", cb: "1,200円", refund: "500円", tds: "1円/件", cbCancel: "-" },
+    fixedCost: { initial: "¥300,000", monthly: "¥30,000" },
+    deposit: { rate: "10%", period: "180日", type: "ローリングリザーブ" },
+    limits: { trMax: "-", monthlyMax: "-", countLimit: "-" },
+    settlement: { cycle: "毎日締め T+3（決済日の3営業日後）", account: "日本口座（円）" },
+    restrictions: { cvv: "-", ngGenre: "FX、ギャンブル、アダルト", usd: false },
+  },
+  { id: "PROC-004", name: "TCMS", type: "アクワイアラー直接", brands: ["VISA","MC","JCB"], protocol: "専用プロトコル", status: "稼働中", sColor: "green", uptime: "99.90%", merchants: 3, reviewing: 1, avgReviewDays: 21,
+    fees: { visa: "3.80%", master: "3.80%", jcb: "3.60%", amex: "-", diners: "3.30%" },
+    trFees: { success: "20円", fail: "-", cb: "-", refund: "-", tds: "1円/件", cbCancel: "-" },
+    fixedCost: { initial: "-", monthly: "-" },
+    deposit: { rate: "-", period: "-", type: "-" },
+    limits: { trMax: "¥200,000", monthlyMax: "-", countLimit: "-" },
+    settlement: { cycle: "-", account: "日本口座（円）" },
+    restrictions: { cvv: "-", ngGenre: "-", usd: false },
+  },
+  { id: "PROC-005", name: "Simpletransact", type: "カードプロセッサー", brands: ["VISA","MC"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.88%", merchants: 2, reviewing: 0, avgReviewDays: 7,
+    fees: { visa: "4.45%", master: "4.45%", jcb: "4.10%", amex: "-", diners: "-" },
+    trFees: { success: "0.35USD", fail: "0.35USD", cb: "45USD", refund: "2USD", tds: "-", cbCancel: "-" },
+    fixedCost: { initial: "-", monthly: "100USD" },
+    deposit: { rate: "-", period: "-", type: "-" },
+    limits: { trMax: "¥1,000,000", monthlyMax: "-", countLimit: "-" },
+    settlement: { cycle: "T+14（決済日の14営業日後）/ 毎週", account: "日本口座（円）" },
+    restrictions: { cvv: "必須", ngGenre: "薬品、児ポル、FX、ギャンブル", usd: true },
+  },
+  { id: "PROC-006", name: "ONTHELINE", type: "アクワイアラー直接", brands: ["JCB"], protocol: "専用プロトコル", status: "稼働中", sColor: "green", uptime: "99.92%", merchants: 2, reviewing: 0, avgReviewDays: 18,
+    fees: { visa: "-", master: "-", jcb: "3.50%", amex: "-", diners: "-" },
+    trFees: { success: "-", fail: "-", cb: "-", refund: "-", tds: "-", cbCancel: "-" },
+    fixedCost: { initial: "-", monthly: "-" },
+    deposit: { rate: "5%", period: "180日", type: "ローリングリザーブ" },
+    limits: { trMax: "-", monthlyMax: "-", countLimit: "-" },
+    settlement: { cycle: "-", account: "日本口座（円）" },
+    restrictions: { cvv: "-", ngGenre: "-", usd: false },
+  },
+  { id: "PROC-007", name: "Asiabill", type: "カードプロセッサー", brands: ["AMEX","Diners"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.85%", merchants: 1, reviewing: 1, avgReviewDays: 25,
+    fees: { visa: "-", master: "-", jcb: "-", amex: "2.95%", diners: "3.30%" },
+    trFees: { success: "-", fail: "-", cb: "-", refund: "-", tds: "-", cbCancel: "-" },
+    fixedCost: { initial: "-", monthly: "-" },
+    deposit: { rate: "10%", period: "180日", type: "ローリングリザーブ" },
+    limits: { trMax: "-", monthlyMax: "-", countLimit: "-" },
+    settlement: { cycle: "-", account: "日本口座（円）" },
+    restrictions: { cvv: "-", ngGenre: "-", usd: true },
+  },
+  { id: "WEBM-001", name: "ビットキャッシュ", type: "WEBマネー", brands: ["WEBマネー"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.80%", merchants: 4, reviewing: 0, avgReviewDays: 5,
+    fees: { webmoney: "5.0%" },
+    trFees: { success: "-", fail: "-", cb: "-", refund: "-", tds: "-", cbCancel: "-" },
+    fixedCost: { initial: "-", monthly: "-" },
+    deposit: { rate: "-", period: "-", type: "-" },
+    limits: { trMax: "¥200,000", monthlyMax: "-", countLimit: "-" },
+    settlement: { cycle: "月末締め 翌月末払い", account: "日本口座（円）" },
+    restrictions: { cvv: "-", ngGenre: "-", usd: false },
+  },
+  { id: "WEBM-002", name: "スマートピット", type: "WEBマネー", brands: ["WEBマネー"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.75%", merchants: 3, reviewing: 0, avgReviewDays: 5,
+    fees: { webmoney: "¥300/件" },
+    trFees: { success: "-", fail: "-", cb: "-", refund: "-", tds: "-", cbCancel: "-" },
+    fixedCost: { initial: "-", monthly: "-" },
+    deposit: { rate: "-", period: "-", type: "-" },
+    limits: { trMax: "¥300,000", monthlyMax: "-", countLimit: "-" },
+    settlement: { cycle: "月末締め 翌月末払い", account: "日本口座（円）" },
+    restrictions: { cvv: "-", ngGenre: "-", usd: false },
+  },
+  { id: "WEBM-003", name: "ネットライドキャッシュ", type: "WEBマネー", brands: ["WEBマネー"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.82%", merchants: 2, reviewing: 0, avgReviewDays: 5,
+    fees: { webmoney: "5.0%" },
+    trFees: { success: "-", fail: "-", cb: "-", refund: "-", tds: "-", cbCancel: "-" },
+    fixedCost: { initial: "-", monthly: "-" },
+    deposit: { rate: "-", period: "-", type: "-" },
+    limits: { trMax: "¥100,000", monthlyMax: "-", countLimit: "-" },
+    settlement: { cycle: "月末締め 翌月末払い", account: "日本口座（円）" },
+    restrictions: { cvv: "-", ngGenre: "-", usd: false },
+  },
+  { id: "WEBM-004", name: "セキュリティマネー", type: "WEBマネー", brands: ["WEBマネー"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.78%", merchants: 2, reviewing: 0, avgReviewDays: 5,
+    fees: { webmoney: "5.0%" },
+    trFees: { success: "-", fail: "-", cb: "-", refund: "-", tds: "-", cbCancel: "-" },
+    fixedCost: { initial: "-", monthly: "-" },
+    deposit: { rate: "-", period: "-", type: "-" },
+    limits: { trMax: "¥100,000", monthlyMax: "-", countLimit: "-" },
+    settlement: { cycle: "月末締め 翌月末払い", account: "日本口座（円）" },
+    restrictions: { cvv: "-", ngGenre: "-", usd: false },
+  },
+  { id: "WEBM-005", name: "Gマネー", type: "WEBマネー", brands: ["WEBマネー"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.70%", merchants: 1, reviewing: 0, avgReviewDays: 5,
+    fees: { webmoney: "4.5%" },
+    trFees: { success: "-", fail: "-", cb: "-", refund: "-", tds: "-", cbCancel: "-" },
+    fixedCost: { initial: "-", monthly: "-" },
+    deposit: { rate: "-", period: "-", type: "-" },
+    limits: { trMax: "¥150,000", monthlyMax: "-", countLimit: "-" },
+    settlement: { cycle: "月末締め 翌月末払い", account: "日本口座（円）" },
+    restrictions: { cvv: "-", ngGenre: "-", usd: false },
+  },
+  { id: "WEBM-006", name: "ペイディ", type: "WEBマネー", brands: ["WEBマネー"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.90%", merchants: 3, reviewing: 0, avgReviewDays: 5,
+    fees: { webmoney: "3.5%" },
+    trFees: { success: "-", fail: "-", cb: "-", refund: "-", tds: "-", cbCancel: "-" },
+    fixedCost: { initial: "-", monthly: "-" },
+    deposit: { rate: "-", period: "-", type: "-" },
+    limits: { trMax: "¥500,000", monthlyMax: "-", countLimit: "-" },
+    settlement: { cycle: "月末締め 翌月末払い", account: "日本口座（円）" },
+    restrictions: { cvv: "-", ngGenre: "-", usd: false },
+  },
+  { id: "WEBM-007", name: "ニーハオペイ", type: "WEBマネー", brands: ["WEBマネー"], protocol: "REST API", status: "稼働中", sColor: "green", uptime: "99.72%", merchants: 1, reviewing: 0, avgReviewDays: 5,
+    fees: { webmoney: "4.0%" },
+    trFees: { success: "-", fail: "-", cb: "-", refund: "-", tds: "-", cbCancel: "-" },
+    fixedCost: { initial: "-", monthly: "-" },
+    deposit: { rate: "-", period: "-", type: "-" },
+    limits: { trMax: "¥200,000", monthlyMax: "-", countLimit: "-" },
+    settlement: { cycle: "月末締め 翌月末払い", account: "日本口座（円）" },
+    restrictions: { cvv: "-", ngGenre: "-", usd: false },
+  },
 ];
 
 const reviewFlowData = [
   {
-    merchantId: "M-002", merchantName: "合同会社XYZショップ", processorId: "PROC-001", processorName: "三井住友カード",
+    merchantId: "M-002", merchantName: "合同会社XYZショップ", processorId: "PROC-001", processorName: "Univa Pay cast",
     status: "reviewing", appliedAt: "2026-01-28", currentStep: 3, totalSteps: 7,
     timeline: [
       { step: "審査申請", date: "01/28", status: "done", note: "自動申請" },
       { step: "書類送付", date: "01/28", status: "done", note: "申込データから自動生成" },
-      { step: "接続先審査中", date: "01/29〜", status: "active", note: "三井住友カード側で審査中" },
+      { step: "接続先審査中", date: "01/29〜", status: "active", note: "Univa Pay cast側で審査中" },
       { step: "追加書類対応", date: "—", status: "pending", note: "" },
       { step: "条件確定", date: "—", status: "pending", note: "手数料率・入金サイクル等" },
       { step: "契約書送付", date: "—", status: "pending", note: "条件を反映した契約書を加盟店に送付" },
@@ -5339,7 +5619,7 @@ const reviewFlowData = [
     additionalRequests: [],
   },
   {
-    merchantId: "M-006", merchantName: "株式会社トラベルプラス", processorId: "PROC-005", processorName: "AMEX直接",
+    merchantId: "M-006", merchantName: "株式会社トラベルプラス", processorId: "PROC-007", processorName: "Asiabill",
     status: "additional_docs", appliedAt: "2026-01-15", currentStep: 4, totalSteps: 7,
     timeline: [
       { step: "審査申請", date: "01/15", status: "done", note: "手動申請" },
@@ -5360,17 +5640,17 @@ const reviewFlowData = [
       { name: "過去6ヶ月のCB実績レポート", type: "追加要求", format: "—", size: "—", date: "—", status: "waiting", auto: false },
     ],
     additionalRequests: [
-      { date: "02/06", from: "AMEX審査部", items: ["旅行業登録証の写し", "過去6ヶ月のチャージバック実績レポート"], deadline: "02/13", status: "対応中" },
+      { date: "02/06", from: "Asiabill審査部", items: ["旅行業登録証の写し", "過去6ヶ月のチャージバック実績レポート"], deadline: "02/13", status: "対応中" },
     ],
   },
 ];
 
 const approvedHistory = [
-  { merchantName: "株式会社ABCマート", processorName: "PayPay", approvedAt: "2025-10-18", reviewDays: 4, docs: 5 },
-  { merchantName: "株式会社ABCマート", processorName: "JCB直接", approvedAt: "2025-08-22", reviewDays: 18, docs: 6 },
-  { merchantName: "株式会社トラベルプラス", processorName: "JCB直接", approvedAt: "2025-07-10", reviewDays: 16, docs: 7 },
-  { merchantName: "合同会社XYZショップ", processorName: "GMO-PG", approvedAt: "2025-06-05", reviewDays: 5, docs: 5 },
-  { merchantName: "株式会社ABCマート", processorName: "GMO-PG", approvedAt: "2025-04-12", reviewDays: 6, docs: 5 },
+  { merchantName: "株式会社ABCマート", processorName: "ビットキャッシュ", approvedAt: "2025-10-18", reviewDays: 4, docs: 5 },
+  { merchantName: "株式会社ABCマート", processorName: "TCMS", approvedAt: "2025-08-22", reviewDays: 18, docs: 6 },
+  { merchantName: "株式会社トラベルプラス", processorName: "ONTHELINE", approvedAt: "2025-07-10", reviewDays: 16, docs: 7 },
+  { merchantName: "合同会社XYZショップ", processorName: "Simpletransact", approvedAt: "2025-06-05", reviewDays: 5, docs: 5 },
+  { merchantName: "株式会社ABCマート", processorName: "Univa Pay cast", approvedAt: "2025-04-12", reviewDays: 6, docs: 5 },
 ];
 
 const MasterProcessors = () => {
@@ -5435,34 +5715,141 @@ const MasterProcessors = () => {
           {selectedProc && (() => {
             const p = processorList.find(x => x.id === selectedProc);
             const linkedMerchants = merchantData.filter(m => m.processors.some(mp => mp.name === p.name));
+            const isCard = p.type !== "WEBマネー";
             return (
-              <div className="bg-blue-50 rounded-lg border border-blue-200 p-3">
-                <div className="flex justify-between items-center mb-2">
-                  <p className="text-xs font-bold text-slate-700">🔌 {p.name} — 加盟店接続状況</p>
+              <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 space-y-3">
+                <div className="flex justify-between items-center">
+                  <p className="text-xs font-bold text-slate-700">🔌 {p.name} — 接続先詳細</p>
                   <button onClick={() => setSelectedProc(null)} className="text-xs text-slate-400 hover:text-slate-600">✕ 閉じる</button>
                 </div>
-                <div className="bg-white rounded-lg border border-slate-200">
-                  <div className="flex bg-slate-50 border-b text-xs font-semibold text-slate-500 px-3 py-1.5">
-                    <div className="w-24">加盟店ID</div><div className="flex-1">加盟店名</div><div className="w-24">審査状況</div><div className="w-24">承認日</div><div className="w-24">累計取引</div><div className="w-20">書類</div>
-                  </div>
-                  {linkedMerchants.map((m) => {
-                    const mp = m.processors.find(x => x.name === p.name);
-                    const st = PROC_STATUS[mp.status];
-                    return (
-                      <div key={m.id} className="flex items-center px-4 py-1.5 text-xs border-b whitespace-nowrap last:border-0">
-                        <div className="w-24 font-mono text-slate-500">{m.id}</div>
-                        <div className="flex-1 text-slate-700">{m.name}</div>
-                        <div className="w-24"><Badge text={st.label} color={st.color} /></div>
-                        <div className="w-24 text-slate-400">{mp.since || "—"}</div>
-                        <div className="w-24 text-slate-600">{mp.txnCount > 0 ? mp.txnCount.toLocaleString() + "件" : "—"}</div>
-                        <div className="w-20">
-                          {mp.status === "approved" ? <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">📄 DL</button> :
-                           mp.status === "reviewing" ? <button className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">📋 管理</button> :
-                           <span className="text-slate-300">—</span>}
+
+                {/* 3-A: ブランド別手数料マトリクス */}
+                <div className="bg-white rounded-lg border border-slate-200 p-3">
+                  <p className="text-xs font-bold text-slate-600 mb-2">💰 ブランド別原価手数料率（デフォルト）</p>
+                  {isCard ? (
+                    <div className="grid grid-cols-5 gap-2">
+                      {[{b:"VISA",k:"visa"},{b:"MC",k:"master"},{b:"JCB",k:"jcb"},{b:"AMEX",k:"amex"},{b:"Diners",k:"diners"}].map(({b,k}) => (
+                        <div key={k} className={`rounded-lg border p-2 text-center ${p.fees[k] !== "-" ? "bg-blue-50 border-blue-200" : "bg-slate-50 border-slate-200"}`}>
+                          <p className="text-xs text-slate-400 mb-0.5">{b}</p>
+                          <p className={`text-sm font-bold ${p.fees[k] !== "-" ? "text-blue-700" : "text-slate-300"}`}>{p.fees[k]}</p>
                         </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="bg-blue-50 rounded-lg border border-blue-200 p-2 text-center">
+                      <p className="text-xs text-slate-400 mb-0.5">WEBマネー手数料</p>
+                      <p className="text-lg font-bold text-blue-700">{p.fees.webmoney}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3-B: トランザクション手数料ブレイクダウン */}
+                {isCard && (
+                <div className="bg-white rounded-lg border border-slate-200 p-3">
+                  <p className="text-xs font-bold text-slate-600 mb-2">📊 トランザクション手数料</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[{l:"TR(成功)",v:p.trFees.success,c:"emerald"},{l:"TR(失敗)",v:p.trFees.fail,c:"amber"},{l:"CB手数料",v:p.trFees.cb,c:"rose"},
+                      {l:"返金手数料",v:p.trFees.refund,c:"purple"},{l:"3DS認証料",v:p.trFees.tds,c:"blue"},{l:"CB取消",v:p.trFees.cbCancel,c:"slate"}
+                    ].map(({l,v,c}) => (
+                      <div key={l} className="bg-slate-50 rounded border border-slate-200 p-2">
+                        <p className="text-xs text-slate-400">{l}</p>
+                        <p className={`text-xs font-bold ${v !== "-" ? `text-${c}-700` : "text-slate-300"}`}>{v}</p>
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
+                </div>
+                )}
+
+                {/* 3-C: 制限・条件 */}
+                <div className="bg-white rounded-lg border border-slate-200 p-3">
+                  <p className="text-xs font-bold text-slate-600 mb-2">⚙️ 条件・制限</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs font-semibold text-purple-700 mb-1">🔒 デポジット（留保）</p>
+                      <div className="bg-purple-50 rounded border border-purple-200 p-2 space-y-1 text-xs">
+                        <div className="flex justify-between"><span className="text-slate-400">留保率</span><span className="font-semibold">{p.deposit.rate}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-400">期間</span><span className="font-semibold">{p.deposit.period}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-400">タイプ</span><span className="font-semibold">{p.deposit.type}</span></div>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-amber-700 mb-1">📏 取引制限</p>
+                      <div className="bg-amber-50 rounded border border-amber-200 p-2 space-y-1 text-xs">
+                        <div className="flex justify-between"><span className="text-slate-400">TR上限額</span><span className="font-semibold">{p.limits.trMax}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-400">月間上限</span><span className="font-semibold">{p.limits.monthlyMax}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-400">回数制限</span><span className="font-semibold">{p.limits.countLimit}</span></div>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-emerald-700 mb-1">💵 固定費</p>
+                      <div className="bg-emerald-50 rounded border border-emerald-200 p-2 space-y-1 text-xs">
+                        <div className="flex justify-between"><span className="text-slate-400">初期費用</span><span className="font-semibold">{p.fixedCost.initial}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-400">月額費用</span><span className="font-semibold">{p.fixedCost.monthly}</span></div>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-blue-700 mb-1">🏦 入金情報</p>
+                      <div className="bg-blue-50 rounded border border-blue-200 p-2 space-y-1 text-xs">
+                        <div className="flex justify-between"><span className="text-slate-400">入金サイクル</span><span className="font-semibold text-right flex-1 ml-2">{p.settlement.cycle}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-400">口座</span><span className="font-semibold">{p.settlement.account}</span></div>
+                      </div>
+                    </div>
+                  </div>
+                  {isCard && (
+                    <div className="mt-2 bg-slate-50 rounded border border-slate-200 p-2">
+                      <p className="text-xs font-semibold text-slate-600 mb-1">🚫 制限事項</p>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div><span className="text-slate-400">CVV: </span><span className="font-semibold">{p.restrictions.cvv}</span></div>
+                        <div><span className="text-slate-400">NGジャンル: </span><span className="font-semibold">{p.restrictions.ngGenre}</span></div>
+                        <div><span className="text-slate-400">USD決済: </span><span className="font-semibold">{p.restrictions.usd ? "対応" : "非対応"}</span></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3-E: サイト別加盟店接続一覧 */}
+                <div className="bg-white rounded-lg border border-slate-200 p-3">
+                  <p className="text-xs font-bold text-slate-600 mb-2">🏪 接続加盟店・サイト一覧</p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead><tr className="bg-slate-50 text-slate-500 border-b">
+                        <th className="px-2 py-1.5 text-left font-semibold">加盟店</th>
+                        <th className="px-2 py-1.5 text-left font-semibold">サイトID</th>
+                        <th className="px-2 py-1.5 text-left font-semibold">サイト名</th>
+                        <th className="px-2 py-1.5 text-center font-semibold">MID</th>
+                        <th className="px-2 py-1.5 text-center font-semibold">状態</th>
+                        {isCard && <th className="px-2 py-1.5 text-center font-semibold">VISA</th>}
+                        {isCard && <th className="px-2 py-1.5 text-center font-semibold">MC</th>}
+                        {!isCard && <th className="px-2 py-1.5 text-center font-semibold">手数料</th>}
+                        <th className="px-2 py-1.5 text-center font-semibold">デポ</th>
+                        <th className="px-2 py-1.5 text-center font-semibold">累計TX</th>
+                      </tr></thead>
+                      <tbody>
+                      {linkedMerchants.flatMap((m) =>
+                        (m.sites || []).filter(s => s.processors.some(sp => sp.name === p.name)).map((site) => {
+                          const mp = site.processors.find(x => x.name === p.name);
+                          const st = PROC_STATUS[mp.status];
+                          const hasOverride = mp.feeOverride && Object.values(mp.feeOverride).some(v => v);
+                          return (
+                            <tr key={`${m.id}-${site.siteId}`} className="border-b hover:bg-blue-50">
+                              <td className="px-2 py-1.5 font-semibold text-slate-700">{m.name}</td>
+                              <td className="px-2 py-1.5 font-mono text-slate-500">{site.siteId}</td>
+                              <td className="px-2 py-1.5 text-slate-600">{site.siteName}</td>
+                              <td className="px-2 py-1.5 text-center font-mono text-slate-500">{mp.mid || "—"}</td>
+                              <td className="px-2 py-1.5 text-center"><Badge text={st.label} color={st.color} /></td>
+                              {isCard && <td className={`px-2 py-1.5 text-center font-semibold ${hasOverride && mp.feeOverride?.visa ? "text-amber-600 bg-amber-50" : "text-slate-500"}`}>{mp.feeOverride?.visa || p.fees.visa}</td>}
+                              {isCard && <td className={`px-2 py-1.5 text-center font-semibold ${hasOverride && mp.feeOverride?.master ? "text-amber-600 bg-amber-50" : "text-slate-500"}`}>{mp.feeOverride?.master || p.fees.master}</td>}
+                              {!isCard && <td className={`px-2 py-1.5 text-center font-semibold ${hasOverride && mp.feeOverride?.webmoney ? "text-amber-600 bg-amber-50" : "text-slate-500"}`}>{mp.feeOverride?.webmoney || p.fees.webmoney}</td>}
+                              <td className={`px-2 py-1.5 text-center ${mp.depositOverride?.rate ? "text-amber-600 bg-amber-50 font-semibold" : "text-slate-500"}`}>{mp.depositOverride?.rate || p.deposit.rate}</td>
+                              <td className="px-2 py-1.5 text-center text-slate-600">{mp.txnCount > 0 ? mp.txnCount.toLocaleString() + "件" : "—"}</td>
+                            </tr>
+                          );
+                        })
+                      )}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="text-xs text-amber-600 mt-1">※ オレンジ背景はデフォルトからのオーバーライド値</p>
                 </div>
               </div>
             );
@@ -5479,7 +5866,7 @@ const MasterProcessors = () => {
               <span className="text-sm">⚠️</span>
               <span className="text-xs font-bold text-amber-800">追加書類要求あり（対応期限: 2026-02-13）</span>
             </div>
-            <p className="text-xs text-amber-700">AMEX直接 → 株式会社トラベルプラス: 旅行業登録証の写し、過去6ヶ月のCB実績レポート が要求されています。</p>
+            <p className="text-xs text-amber-700">Asiabill → 株式会社トラベルプラス: 旅行業登録証の写し、過去6ヶ月のCB実績レポート が要求されています。</p>
           </div>
 
           {/* Confirmation Dialog */}
@@ -5549,68 +5936,47 @@ const MasterProcessors = () => {
                     <div className="space-y-2">
                       <p className="text-xs font-semibold text-slate-600">接続先から提示された条件:</p>
                       <div className="bg-slate-50 rounded-lg border border-slate-200 p-3 space-y-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="text-xs text-slate-500 block mb-0.5">VISA 手数料率 (%)</label>
-                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 3.25" defaultValue="3.25" />
-                          </div>
-                          <div>
-                            <label className="text-xs text-slate-500 block mb-0.5">Mastercard 手数料率 (%)</label>
-                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 3.25" defaultValue="3.25" />
-                          </div>
-                          <div>
-                            <label className="text-xs text-slate-500 block mb-0.5">JCB 手数料率 (%)</label>
-                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 3.50" defaultValue="3.50" />
-                          </div>
-                          <div>
-                            <label className="text-xs text-slate-500 block mb-0.5">AMEX 手数料率 (%)</label>
-                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 3.80" defaultValue="" />
-                          </div>
+                        <p className="text-xs font-semibold text-blue-700">💰 ブランド別手数料率</p>
+                        <div className="grid grid-cols-5 gap-2">
+                          <div><label className="text-xs text-slate-500 block mb-0.5">VISA (%)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="3.25" defaultValue="3.25" /></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">MC (%)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="3.25" defaultValue="3.25" /></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">JCB (%)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="3.50" defaultValue="3.50" /></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">AMEX (%)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="" defaultValue="" /></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">Diners (%)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="" defaultValue="" /></div>
                         </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="text-xs text-slate-500 block mb-0.5">トランザクション費 (円/件)</label>
-                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 10" defaultValue="10" />
-                          </div>
-                          <div>
-                            <label className="text-xs text-slate-500 block mb-0.5">月額固定費 (円)</label>
-                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 0" defaultValue="0" />
-                          </div>
+                        <p className="text-xs font-semibold text-emerald-700 mt-2">📊 トランザクション手数料</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div><label className="text-xs text-slate-500 block mb-0.5">TR(成功) (円/件)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 30" defaultValue="30" /></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">TR(失敗) (円/件)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 30" defaultValue="30" /></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">3DS認証料 (円/件)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 4" defaultValue="4" /></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">CB手数料 (円/件)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 3000" defaultValue="3000" /></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">返金手数料 (円/件)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 100" defaultValue="100" /></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">月額固定費 (円)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 0" defaultValue="0" /></div>
                         </div>
+                        <p className="text-xs font-semibold text-purple-700 mt-2">🔒 デポジット・制限</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div><label className="text-xs text-slate-500 block mb-0.5">デポジット率 (%)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 10" defaultValue="10" /></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">デポジット期間</label>
+                            <select className="w-full border rounded p-1.5 text-xs"><option>90日</option><option>120日</option><option selected>180日</option><option>365日</option></select></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">TR上限額 (円/件)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 500000" defaultValue="500000" /></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">月間上限額 (円)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 50000000" defaultValue="" /></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">回数制限</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 3回/日、7回/月" defaultValue="" /></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">CVV要否</label>
+                            <select className="w-full border rounded p-1.5 text-xs"><option>必須</option><option>任意</option><option>不要</option></select></div>
+                        </div>
+                        <p className="text-xs font-semibold text-blue-700 mt-2">🏦 入金情報</p>
                         <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="text-xs text-slate-500 block mb-0.5">入金サイクル</label>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">入金サイクル</label>
                             <select className="w-full border rounded p-1.5 text-xs">
-                              <option>月末締め / 翌月末払い</option>
-                              <option>月末締め / 翌々月5日払い</option>
-                              <option>15日・月末締め / 翌月15日・月末払い</option>
-                              <option>週次入金（毎週金曜日）</option>
+                              <option>月末締め / 翌月末払い</option><option>15日・月末締め / 翌月15日・月末払い</option>
+                              <option>毎日締め T+3</option><option>T+14 / 毎週</option><option>週次入金（毎週金曜日）</option>
                               <option>その他（備考欄に記載）</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="text-xs text-slate-500 block mb-0.5">初回入金留保期間</label>
-                            <select className="w-full border rounded p-1.5 text-xs">
-                              <option>なし</option>
-                              <option>初月留保（翌月から通常サイクル）</option>
-                              <option>初回2ヶ月留保</option>
-                            </select>
-                          </div>
+                            </select></div>
+                          <div><label className="text-xs text-slate-500 block mb-0.5">初回入金留保期間</label>
+                            <select className="w-full border rounded p-1.5 text-xs"><option>なし</option><option>初月留保</option><option>初回2ヶ月留保</option></select></div>
                         </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="text-xs text-slate-500 block mb-0.5">チャージバック手数料 (円/件)</label>
-                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 1500" defaultValue="1500" />
-                          </div>
-                          <div>
-                            <label className="text-xs text-slate-500 block mb-0.5">取引上限額 (円/件)</label>
-                            <input className="w-full border rounded p-1.5 text-xs" placeholder="例: 500000" defaultValue="500000" />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="text-xs text-slate-500 block mb-0.5">特記事項・個別条件</label>
-                          <textarea className="w-full border rounded p-1.5 text-xs h-14" placeholder="接続先から提示された個別条件があれば記載（例: 初年度は手数料0.25%割引、3Dセキュア必須、月間上限3000万円 等）" />
-                        </div>
+                        <div><label className="text-xs text-slate-500 block mb-0.5">特記事項・個別条件</label>
+                          <textarea className="w-full border rounded p-1.5 text-xs h-14" placeholder="接続先から提示された個別条件があれば記載（例: 初年度は手数料0.25%割引、CB率0.7%以下厳守、NGジャンル: FX/ギャンブル 等）" /></div>
                       </div>
                       <div className="bg-blue-50 rounded border border-blue-200 p-2">
                         <p className="text-xs text-blue-600">💡 ここで登録した条件は以下に自動反映されます:</p>
@@ -5904,11 +6270,11 @@ const MasterProcessors = () => {
             <p className="text-xs font-bold text-slate-700 mb-2">📝 操作ログ（直近の審査フロー操作）</p>
             <div className="space-y-1">
               {[
-                { time: "02/11 10:32", user: "admin@aipaymentsys.com", action: "書類送付", target: "XYZショップ → 三井住友カード", detail: "審査資料6件を送付" },
-                { time: "02/06 14:15", user: "admin@aipaymentsys.com", action: "追加書類要求を登録", target: "トラベルプラス → AMEX直接", detail: "旅行業登録証、CB実績レポート" },
-                { time: "02/05 09:40", user: "reviewer01@aipaymentsys.com", action: "一次審査通過を記録", target: "トラベルプラス → AMEX直接", detail: "" },
-                { time: "01/28 11:20", user: "admin@aipaymentsys.com", action: "審査申請を実行", target: "XYZショップ → 三井住友カード", detail: "申請書を自動生成" },
-                { time: "01/15 09:05", user: "admin@aipaymentsys.com", action: "審査申請を実行", target: "トラベルプラス → AMEX直接", detail: "手動申請" },
+                { time: "02/11 10:32", user: "admin@aipaymentsys.com", action: "書類送付", target: "XYZショップ → Univa Pay cast", detail: "審査資料6件を送付" },
+                { time: "02/06 14:15", user: "admin@aipaymentsys.com", action: "追加書類要求を登録", target: "トラベルプラス → Asiabill", detail: "旅行業登録証、CB実績レポート" },
+                { time: "02/05 09:40", user: "reviewer01@aipaymentsys.com", action: "一次審査通過を記録", target: "トラベルプラス → Asiabill", detail: "" },
+                { time: "01/28 11:20", user: "admin@aipaymentsys.com", action: "審査申請を実行", target: "XYZショップ → Univa Pay cast", detail: "申請書を自動生成" },
+                { time: "01/15 09:05", user: "admin@aipaymentsys.com", action: "審査申請を実行", target: "トラベルプラス → Asiabill", detail: "手動申請" },
               ].map((log, i) => (
                 <div key={i} className="flex items-center gap-3 text-xs py-1 border-b last:border-0">
                   <span className="w-24 text-slate-400 font-mono">{log.time}</span>
@@ -5930,7 +6296,7 @@ const MasterProcessors = () => {
             <KPICard label="審査通過（累計）" value="12件" sub="全接続先合計" color="green" />
             <KPICard label="審査却下（累計）" value="1件" sub="" color="red" />
             <KPICard label="平均審査日数" value="12日" sub="却下除く" />
-            <KPICard label="最短審査" value="4日" sub="PayPay" color="green" />
+            <KPICard label="最短審査" value="4日" sub="Simpletransact" color="green" />
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
@@ -5953,8 +6319,8 @@ const MasterProcessors = () => {
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-3">
             <p className="text-xs font-bold text-blue-700 mb-1">🤖 AI分析: 審査傾向</p>
             <div className="grid grid-cols-3 gap-3 text-xs text-slate-600">
-              <div>GMO-PGは審査が最速（平均7日）で、カードプロセッサー経由のため審査基準が比較的緩やか。新規加盟店の初期接続先として最適。</div>
-              <div>アクワイアラー直接接続（三井住友/JCB/AMEX）は審査が厳格（14〜30日）。取引実績が十分に蓄積された加盟店に推薦。</div>
+              <div>Simpletransactは審査が最速（平均7日）で、カードプロセッサー経由のため審査基準が比較的緩やか。新規加盟店の初期接続先として最適。</div>
+              <div>アクワイアラー直接接続（TCMS/ONTHELINE/Asiabill）は審査が厳格（18〜25日）。取引実績が十分に蓄積された加盟店に推薦。</div>
               <div>追加書類要求は直接接続の審査で45%の確率で発生。事前に業界固有の許認可証を準備しておくと審査期間を短縮できます。</div>
             </div>
           </div>
@@ -6080,7 +6446,7 @@ const MasterProcessors = () => {
               <button onClick={() => setShowAddProc(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
             </div>
             <div className="p-5 space-y-4">
-              <div><label className="text-xs font-semibold text-slate-600">接続先名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: GMO-PG" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">接続先名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: Univa Pay cast" /></div>
               <div><label className="text-xs font-semibold text-slate-600">接続種別 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>アクワイアラ</option><option>PSP（決済代行）</option><option>ウォレット</option></select></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="text-xs font-semibold text-slate-600">対応ブランド <span className="text-rose-500">*</span></label>
@@ -6113,14 +6479,14 @@ const MasterTransactionMonitor = () => {
   const [filterStatus, setFilterStatus] = useState("all");
 
   const txnData = [
-    { id: "TXN-20260211-14523", merchant: "株式会社ABCマート", amount: 12800, brand: "VISA", processor: "GMO-PG", status: "成功", sColor: "green", time: "14:52:31", responseMs: 320, routing: "AI最適化", is3ds: true, userId: "USR-ABC-0451", userEmail: "tanaka.t@example.com", userName: "田中太郎" },
-    { id: "TXN-20260211-14522", merchant: "合同会社XYZショップ", amount: 3400, brand: "MC", processor: "三井住友カード", status: "成功", sColor: "green", time: "14:52:18", responseMs: 450, routing: "ブランドマッピング", is3ds: true, userId: "USR-XYZ-1120", userEmail: "sato.h@example.jp", userName: "佐藤花子" },
-    { id: "TXN-20260211-14521", merchant: "株式会社ABCマート", amount: 89000, brand: "JCB", processor: "JCB直接", status: "成功", sColor: "green", time: "14:51:55", responseMs: 280, routing: "加盟店固定", is3ds: false, userId: "USR-ABC-0892", userEmail: "suzuki.k@example.com", userName: "鈴木一郎" },
-    { id: "TXN-20260211-14520", merchant: "株式会社トラベルプラス", amount: 245000, brand: "VISA", processor: "GMO-PG", status: "失敗", sColor: "red", time: "14:51:40", responseMs: 5020, routing: "AI最適化", is3ds: true, error: "タイムアウト（接続先無応答）", failover: "三井住友カードでリトライ → 成功", userId: "USR-TRV-0033", userEmail: "yamada.a@example.co.jp", userName: "山田明" },
-    { id: "TXN-20260211-14519", merchant: "有限会社スタイルプラス", amount: 6500, brand: "VISA", processor: "GMO-PG", status: "成功", sColor: "green", time: "14:51:22", responseMs: 310, routing: "コスト最適化", is3ds: true, userId: "USR-STP-0215", userEmail: "watanabe.m@example.net", userName: "渡辺美咲" },
-    { id: "TXN-20260211-14518", merchant: "株式会社ABCマート", amount: 1500, brand: "QR", processor: "PayPay", status: "成功", sColor: "green", time: "14:50:58", responseMs: 180, routing: "ブランドマッピング", is3ds: false, userId: "USR-ABC-1340", userEmail: "ito.r@example.com", userName: "伊藤涼" },
-    { id: "TXN-20260211-14517", merchant: "合同会社XYZショップ", amount: 27800, brand: "AMEX", processor: "GMO-PG", status: "3DS待ち", sColor: "yellow", time: "14:50:45", responseMs: null, routing: "ブランドマッピング", is3ds: true, userId: "USR-XYZ-0788", userEmail: "takahashi.y@example.jp", userName: "高橋雄太" },
-    { id: "TXN-20260211-14516", merchant: "株式会社トラベルプラス", amount: 158000, brand: "VISA", processor: "GMO-PG", status: "不正検知", sColor: "red", time: "14:50:12", responseMs: null, routing: "—", is3ds: false, error: "不正スコア 0.92（閾値 0.8超過）→ 例外キューへ", userId: "USR-TRV-0091", userEmail: "unknown@tempmail.xyz", userName: "—" },
+    { id: "TXN-20260211-14523", merchant: "株式会社ABCマート", amount: 12800, brand: "VISA", processor: "Univa Pay cast", status: "成功", sColor: "green", time: "14:52:31", responseMs: 320, routing: "AI最適化", is3ds: true, userId: "USR-ABC-0451", userEmail: "tanaka.t@example.com", userName: "田中太郎" },
+    { id: "TXN-20260211-14522", merchant: "合同会社XYZショップ", amount: 3400, brand: "MC", processor: "楽天銀行", status: "成功", sColor: "green", time: "14:52:18", responseMs: 450, routing: "ブランドマッピング", is3ds: true, userId: "USR-XYZ-1120", userEmail: "sato.h@example.jp", userName: "佐藤花子" },
+    { id: "TXN-20260211-14521", merchant: "株式会社ABCマート", amount: 89000, brand: "JCB", processor: "TCMS", status: "成功", sColor: "green", time: "14:51:55", responseMs: 280, routing: "加盟店固定", is3ds: false, userId: "USR-ABC-0892", userEmail: "suzuki.k@example.com", userName: "鈴木一郎" },
+    { id: "TXN-20260211-14520", merchant: "株式会社トラベルプラス", amount: 245000, brand: "VISA", processor: "Univa Pay cast", status: "失敗", sColor: "red", time: "14:51:40", responseMs: 5020, routing: "AI最適化", is3ds: true, error: "タイムアウト（接続先無応答）", failover: "Worldpayでリトライ → 成功", userId: "USR-TRV-0033", userEmail: "yamada.a@example.co.jp", userName: "山田明" },
+    { id: "TXN-20260211-14519", merchant: "有限会社スタイルプラス", amount: 6500, brand: "VISA", processor: "Univa Pay cast", status: "成功", sColor: "green", time: "14:51:22", responseMs: 310, routing: "コスト最適化", is3ds: true, userId: "USR-STP-0215", userEmail: "watanabe.m@example.net", userName: "渡辺美咲" },
+    { id: "TXN-20260211-14518", merchant: "株式会社ABCマート", amount: 1500, brand: "WEB", processor: "ペイディ", status: "成功", sColor: "green", time: "14:50:58", responseMs: 180, routing: "ブランドマッピング", is3ds: false, userId: "USR-ABC-1340", userEmail: "ito.r@example.com", userName: "伊藤涼" },
+    { id: "TXN-20260211-14517", merchant: "合同会社XYZショップ", amount: 27800, brand: "AMEX", processor: "Asiabill", status: "3DS待ち", sColor: "yellow", time: "14:50:45", responseMs: null, routing: "ブランドマッピング", is3ds: true, userId: "USR-XYZ-0788", userEmail: "takahashi.y@example.jp", userName: "高橋雄太" },
+    { id: "TXN-20260211-14516", merchant: "株式会社トラベルプラス", amount: 158000, brand: "VISA", processor: "Worldpay", status: "不正検知", sColor: "red", time: "14:50:12", responseMs: null, routing: "—", is3ds: false, error: "不正スコア 0.92（閾値 0.8超過）→ 例外キューへ", userId: "USR-TRV-0091", userEmail: "unknown@tempmail.xyz", userName: "—" },
   ];
 
   const filtered = filterStatus === "all" ? txnData : txnData.filter(t => t.status === filterStatus);
@@ -6163,7 +6529,7 @@ const MasterTransactionMonitor = () => {
           {txnData.some(t => t.status === "失敗") && (
             <div className="bg-rose-50 rounded-lg border border-rose-300 p-2 flex items-center gap-2">
               <span className="text-sm">🚨</span>
-              <span className="text-xs text-rose-700 font-semibold">GMO-PGでタイムアウトが発生（14:51:40）— フェイルオーバーで三井住友カードにリトライ済み</span>
+              <span className="text-xs text-rose-700 font-semibold">Univa Pay castでタイムアウトが発生（14:51:40）— フェイルオーバーでWorldpayにリトライ済み</span>
               <button className="ml-auto text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded border border-rose-200">詳細を確認</button>
             </div>
           )}
@@ -6229,7 +6595,7 @@ const MasterTransactionMonitor = () => {
                     <div className="space-y-0.5 text-slate-500">
                       <div>判定理由: {t.routing}</div>
                       <div>選択接続先: {t.processor}</div>
-                      <div>候補: GMO-PG, 三井住友, JCB直接</div>
+                      <div>候補: Univa Pay cast, Worldpay, TCMS</div>
                       <div>判定時間: 3ms</div>
                     </div>
                   </div>
@@ -6261,10 +6627,11 @@ const MasterTransactionMonitor = () => {
               <p className="text-xs font-bold text-slate-600 mb-2">接続先別 レスポンスタイム</p>
               <div className="space-y-1.5">
                 {[
-                  { name: "PayPay", avg: 180, color: "bg-emerald-500" },
-                  { name: "JCB直接", avg: 280, color: "bg-emerald-500" },
-                  { name: "GMO-PG", avg: 320, color: "bg-emerald-500" },
-                  { name: "三井住友", avg: 450, color: "bg-amber-500" },
+                  { name: "ペイディ", avg: 75, color: "bg-emerald-500" },
+                  { name: "楽天銀行", avg: 85, color: "bg-emerald-500" },
+                  { name: "TCMS", avg: 95, color: "bg-emerald-500" },
+                  { name: "Worldpay", avg: 110, color: "bg-emerald-500" },
+                  { name: "Univa Pay cast", avg: 120, color: "bg-emerald-500" },
                 ].map((p, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs">
                     <span className="w-20 text-slate-600">{p.name}</span>
@@ -6282,7 +6649,7 @@ const MasterTransactionMonitor = () => {
                   { brand: "MC", count: 412, pct: 22.3, color: "bg-rose-500" },
                   { brand: "JCB", count: 356, pct: 19.3, color: "bg-emerald-500" },
                   { brand: "AMEX", count: 134, pct: 7.3, color: "bg-purple-500" },
-                  { brand: "QR", count: 122, pct: 6.6, color: "bg-amber-500" },
+                  { brand: "WEBマネー", count: 122, pct: 6.6, color: "bg-amber-500" },
                 ].map((b, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs">
                     <span className="w-12 text-slate-600 font-semibold">{b.brand}</span>
@@ -6318,11 +6685,11 @@ const MasterOrderSearch = () => {
   const [refundDialog, setRefundDialog] = useState(null);
 
   const searchResults = [
-    { id: "TXN-20260210-13201", merchant: "株式会社ABCマート", amount: 45000, brand: "VISA", processor: "GMO-PG", status: "返金済", sColor: "purple", date: "2026-02-10 16:30:22", refundAmount: 45000, userId: "USR-ABC-0451", userEmail: "tanaka.t@example.com", userName: "田中太郎" },
-    { id: "TXN-20260210-12888", merchant: "合同会社XYZショップ", amount: 8900, brand: "MC", processor: "三井住友カード", status: "成功", sColor: "green", date: "2026-02-10 14:12:05", userId: "USR-XYZ-0322", userEmail: "kobayashi.n@example.jp", userName: "小林直人" },
-    { id: "TXN-20260210-12500", merchant: "株式会社トラベルプラス", amount: 320000, brand: "VISA", processor: "GMO-PG", status: "成功", sColor: "green", date: "2026-02-10 11:45:33", userId: "USR-TRV-0150", userEmail: "nakamura.s@example.co.jp", userName: "中村翔" },
-    { id: "TXN-20260209-11200", merchant: "有限会社スタイルプラス", amount: 12500, brand: "JCB", processor: "JCB直接", status: "成功", sColor: "green", date: "2026-02-09 19:20:11", userId: "USR-STP-0087", userEmail: "yoshida.a@example.net", userName: "吉田愛" },
-    { id: "TXN-20260209-10800", merchant: "株式会社ABCマート", amount: 67000, brand: "AMEX", processor: "GMO-PG", status: "キャンセル", sColor: "gray", date: "2026-02-09 15:08:44", userId: "USR-ABC-0612", userEmail: "matsumoto.k@example.com", userName: "松本健" },
+    { id: "TXN-20260210-13201", merchant: "株式会社ABCマート", amount: 45000, brand: "VISA", processor: "Univa Pay cast", status: "返金済", sColor: "purple", date: "2026-02-10 16:30:22", refundAmount: 45000, userId: "USR-ABC-0451", userEmail: "tanaka.t@example.com", userName: "田中太郎" },
+    { id: "TXN-20260210-12888", merchant: "合同会社XYZショップ", amount: 8900, brand: "MC", processor: "楽天銀行", status: "成功", sColor: "green", date: "2026-02-10 14:12:05", userId: "USR-XYZ-0322", userEmail: "kobayashi.n@example.jp", userName: "小林直人" },
+    { id: "TXN-20260210-12500", merchant: "株式会社トラベルプラス", amount: 320000, brand: "VISA", processor: "Worldpay", status: "成功", sColor: "green", date: "2026-02-10 11:45:33", userId: "USR-TRV-0150", userEmail: "nakamura.s@example.co.jp", userName: "中村翔" },
+    { id: "TXN-20260209-11200", merchant: "有限会社スタイルプラス", amount: 12500, brand: "JCB", processor: "TCMS", status: "成功", sColor: "green", date: "2026-02-09 19:20:11", userId: "USR-STP-0087", userEmail: "yoshida.a@example.net", userName: "吉田愛" },
+    { id: "TXN-20260209-10800", merchant: "株式会社ABCマート", amount: 67000, brand: "AMEX", processor: "Asiabill", status: "キャンセル", sColor: "gray", date: "2026-02-09 15:08:44", userId: "USR-ABC-0612", userEmail: "matsumoto.k@example.com", userName: "松本健" },
   ];
 
   return (
@@ -6340,7 +6707,7 @@ const MasterOrderSearch = () => {
           <div><label className="text-xs text-slate-400">加盟店名</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="加盟店名で検索" /></div>
           <div><label className="text-xs text-slate-400">カード下4桁</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="1234" maxLength={4} /></div>
           <div><label className="text-xs text-slate-400">ブランド</label>
-            <div className="flex gap-1 mt-0.5">{["VISA","MC","JCB","AMEX","QR"].map(b => <label key={b} className="text-xs flex items-center gap-0.5"><input type="checkbox" className="w-3 h-3" />{b}</label>)}</div>
+            <div className="flex gap-1 mt-0.5">{["VISA","MC","JCB","AMEX","WEBマネー"].map(b => <label key={b} className="text-xs flex items-center gap-0.5"><input type="checkbox" className="w-3 h-3" />{b}</label>)}</div>
           </div>
           <div><label className="text-xs text-slate-400">金額（最小）</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="¥0" /></div>
           <div><label className="text-xs text-slate-400">金額（最大）</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="¥999,999" /></div>
@@ -6817,7 +7184,7 @@ const MasterFraudSettings = () => {
               <tbody>
                 {[
                   { id: 1, item: "メールアドレス", value: "ceo@abcmart.co.jp", reason: "ABCマート代表 — 正当な高額取引あり", user: "田中太郎", date: "01/20 09:00" },
-                  { id: 2, item: "IPアドレス", value: "203.0.113.0/24", reason: "GMO-PGテスト環境", user: "佐藤花子", date: "01/15 14:30" },
+                  { id: 2, item: "IPアドレス", value: "203.0.113.0/24", reason: "Univa Pay castテスト環境", user: "佐藤花子", date: "01/15 14:30" },
                   { id: 3, item: "カード番号", value: "4111-****-****-1111", reason: "テストカード", user: "田中太郎", date: "01/10 10:00" },
                   { id: 4, item: "BIN", value: "411111", reason: "VISAテストBIN", user: "鈴木一郎", date: "12/25 16:00" },
                 ].map((r, i) => (
@@ -7157,7 +7524,7 @@ const MasterReport = () => {
     {/* AI Summary example */}
     <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-3">
       <p className="text-xs font-bold text-blue-700 mb-1">🤖 AI要約（月次サマリー 2026年1月）</p>
-      <p className="text-xs text-slate-600 leading-relaxed">1月の決済総額は前月比+12%の¥180.5Mでした。成功率は98.5%で目標を達成。GMO-PG経由の取引が全体の48%を占め、コスト最適化ルーティングにより推定¥120Kの手数料削減を実現しました。チャージバック率は0.8%で業界平均を下回っています。注意点として、月末にかけてAMEX経由のタイムアウトが増加傾向（P99: 1200ms）にあり、接続先への確認を推奨します。</p>
+      <p className="text-xs text-slate-600 leading-relaxed">1月の決済総額は前月比+12%の¥180.5Mでした。成功率は98.5%で目標を達成。Univa Pay cast経由の取引が全体の28%を占め、コスト最適化ルーティングにより推定¥120Kの手数料削減を実現しました。チャージバック率は0.8%で業界平均を下回っています。注意点として、月末にかけてAsiabill経由のタイムアウトが増加傾向（P99: 1200ms）にあり、接続先への確認を推奨します。</p>
     </div>
 
     {/* Recent Reports */}
@@ -7451,7 +7818,7 @@ const MerchantSalesReport = () => {
             { brand: "Mastercard", count: 78, amount: "¥1.09M", pct: 22.8, color: "bg-rose-500" },
             { brand: "JCB", count: 65, amount: "¥0.92M", pct: 19.0, color: "bg-emerald-500" },
             { brand: "AMEX", count: 25, amount: "¥0.41M", pct: 8.5, color: "bg-purple-500" },
-            { brand: "PayPay(QR)", count: 22, amount: "¥0.24M", pct: 5.2, color: "bg-amber-500" },
+            { brand: "WEBマネー", count: 22, amount: "¥0.24M", pct: 5.2, color: "bg-amber-500" },
           ].map((b, i) => (
             <div key={i} className="flex items-center gap-2 text-xs">
               <span className="w-20 text-slate-700 font-semibold">{b.brand}</span>
@@ -7827,8 +8194,8 @@ const MerchantAccountSettings = () => {
               {[
                 { label: "契約日", value: "2025-04-12" },
                 { label: "契約ステータス", value: "有効", badge: true, bColor: "green" },
-                { label: "利用可能ブランド", value: "VISA / MC / JCB / PayPay" },
-                { label: "接続先（承認済み）", value: "GMO-PG, PayPay, JCB直接" },
+                { label: "利用可能ブランド", value: "VISA / MC / JCB / WEBマネー" },
+                { label: "接続先（承認済み）", value: "Univa Pay cast, TCMS, ビットキャッシュ" },
               ].map((c, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <span className="w-36 text-slate-500 text-right">{c.label}</span>
@@ -9146,8 +9513,7 @@ const MasterAgents = () => {
               { brand: "Mastercard", fee: "3.2%", agentFee: "0.3%", net: "2.9%", active: true },
               { brand: "JCB", fee: "3.5%", agentFee: "0.3%", net: "3.2%", active: true },
               { brand: "AMEX", fee: "3.8%", agentFee: "0.4%", net: "3.4%", active: true },
-              { brand: "QR決済", fee: "2.0%", agentFee: "0.2%", net: "1.8%", active: true },
-              { brand: "コンビニ決済", fee: "¥200/件", agentFee: "¥20/件", net: "¥180/件", active: false },
+              { brand: "WEBマネー", fee: "3.5%〜5.0%", agentFee: "0.3%", net: "3.2%〜4.7%", active: true },
             ].map((r, i) => (
               <tr key={i} className={`border-b ${!r.active ? "opacity-40" : ""}`}>
                 <td className="px-4 py-2 whitespace-nowrap w-32 font-semibold">{r.brand}</td>
@@ -9269,7 +9635,7 @@ const AgentDashboard = () => {
   const [showDetail, setShowDetail] = useState(null);
   const kpiDetails = {
     "紹介加盟店（稼働中）": { value: "23社", details: [{ label: "EC物販", value: "12社" }, { label: "デジタルコンテンツ", value: "5社" }, { label: "サービス業", value: "4社" }, { label: "その他", value: "2社" }], chart: [18, 19, 20, 21, 22, 23] },
-    "今月の取引総額": { value: "¥45.2M", details: [{ label: "VISA/MC", value: "¥32.1M" }, { label: "JCB", value: "¥8.5M" }, { label: "QR/コンビニ", value: "¥4.6M" }], chart: [38, 40, 42, 41, 43, 45.2] },
+    "今月の取引総額": { value: "¥45.2M", details: [{ label: "VISA/MC", value: "¥32.1M" }, { label: "JCB", value: "¥8.5M" }, { label: "WEBマネー", value: "¥4.6M" }], chart: [38, 40, 42, 41, 43, 45.2] },
     "今月の報酬見込み": { value: "¥2,260,000", details: [{ label: "VISA/MC手数料", value: "¥1,605,000" }, { label: "JCB手数料", value: "¥425,000" }, { label: "その他", value: "¥230,000" }], chart: [1800, 1920, 2010, 2080, 2150, 2260] },
     "先月の報酬確定額": { value: "¥2,105,000", details: [{ label: "基本報酬", value: "¥1,950,000" }, { label: "ボーナス", value: "¥155,000" }], chart: [1700, 1850, 1900, 1980, 2050, 2105] },
   };
@@ -9367,8 +9733,8 @@ const AgentDashboard = () => {
         {[
           { merchant: "ABC商事", siteId: "S-001", siteName: "ECサイトA", url: "https://ec-site-a.jp", service: "クレジット/QR", token: "aip_tk_xxxx...xxxx" },
           { merchant: "ABC商事", siteId: "S-002", siteName: "ECサイトA-SP", url: "https://sp.ec-site-a.jp", service: "クレジット", token: "aip_tk_yyyy...yyyy" },
-          { merchant: "XYZ物産", siteId: "S-010", siteName: "オンラインストアB", url: "https://store-b.xyz.jp", service: "クレジット/コンビニ", token: "aip_tk_zzzz...zzzz" },
-          { merchant: "ファッションEC", siteId: "S-015", siteName: "ファッションストア", url: "https://fashion-ec.com", service: "クレジット/QR/コンビニ", token: "aip_tk_wwww...wwww" },
+          { merchant: "XYZ物産", siteId: "S-010", siteName: "オンラインストアB", url: "https://store-b.xyz.jp", service: "クレジット/WEBマネー", token: "aip_tk_zzzz...zzzz" },
+          { merchant: "ファッションEC", siteId: "S-015", siteName: "ファッションストア", url: "https://fashion-ec.com", service: "クレジット/WEBマネー", token: "aip_tk_wwww...wwww" },
           { merchant: "フード通販ABC", siteId: "S-020", siteName: "フード通販", url: "https://food-abc.jp", service: "クレジット", token: "aip_tk_vvvv...vvvv" },
         ].map((s, i) => (
           <tr key={i} className="border-b hover:bg-blue-50">
