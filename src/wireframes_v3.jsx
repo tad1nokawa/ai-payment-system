@@ -515,13 +515,24 @@ const MasterDashboard = () => {
 
 // ─── M02: 例外キュー ───
 const MasterExceptionQueue = () => {
+  const toast = useToast();
   const [queueFilter, setQueueFilter] = useState("all");
   const [checkedItems, setCheckedItems] = useState([]);
   const [showBatchConfirm, setShowBatchConfirm] = useState(null);
   const [selectedQueueId, setSelectedQueueId] = useState("#1024");
+  const [processedItems, setProcessedItems] = useState({});
+  const [actionConfirm, setActionConfirm] = useState(null);
 
   const toggleCheck = (id) => setCheckedItems(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   const toggleAll = (ids) => setCheckedItems(prev => prev.length === ids.length ? [] : ids);
+
+  const markProcessed = (id, action) => {
+    setProcessedItems(prev => ({ ...prev, [id]: action }));
+    setSelectedQueueId(prev => {
+      const remaining = queueItems.filter(q => q.id !== id && !processedItems[q.id]);
+      return remaining.length > 0 ? remaining[0].id : prev;
+    });
+  };
 
   const queueItems = [
     { id: "#1024", type: "審査保留", target: "株式会社サンプルEC / アパレルEC", ai: "承認推薦", aiColor: "green", time: "2時間12分", timeColor: "red", locked: false,
@@ -641,20 +652,22 @@ const MasterExceptionQueue = () => {
         </div>
 
         <div className="flex gap-2 justify-end">
-          {d.badge === "不正検知" ? (<>
-            <button className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded text-xs font-semibold hover:bg-emerald-200">✓ 正常と判定</button>
-            <button className="px-4 py-2 bg-rose-600 text-white rounded text-xs font-semibold hover:bg-rose-700">🚫 ブロック確定</button>
+          {processedItems[selectedItem.id] ? (
+            <span className="text-xs text-slate-400 italic">✔ 処理済み（{processedItems[selectedItem.id]}）</span>
+          ) : d.badge === "不正検知" ? (<>
+            <button onClick={() => setActionConfirm({ title: "正常と判定", description: `${selectedItem.id} を正常な取引として処理します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "正常判定"); toast(`${selectedItem.id} を正常と判定しました`, "success"); } })} className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded text-xs font-semibold hover:bg-emerald-200">✓ 正常と判定</button>
+            <button onClick={() => setActionConfirm({ title: "ブロック確定", description: `${selectedItem.id} の取引をブロックします。`, warning: "ブロックされた取引は加盟店に通知されます。", type: "danger", onConfirm: () => { markProcessed(selectedItem.id, "ブロック"); toast(`${selectedItem.id} をブロックしました`, "warning"); } })} className="px-4 py-2 bg-rose-600 text-white rounded text-xs font-semibold hover:bg-rose-700">🚫 ブロック確定</button>
           </>) : d.badge === "精算" ? (<>
-            <button className="px-4 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">スキップ</button>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">🔄 再実行</button>
+            <button onClick={() => { markProcessed(selectedItem.id, "スキップ"); toast(`${selectedItem.id} をスキップしました`, "info"); }} className="px-4 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">スキップ</button>
+            <button onClick={() => setActionConfirm({ title: "精算再実行", description: `${selectedItem.id} の精算バッチを再実行します。`, type: "info", onConfirm: () => { markProcessed(selectedItem.id, "再実行"); toast(`${selectedItem.id} の再実行を開始しました`, "success"); } })} className="px-4 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">🔄 再実行</button>
           </>) : d.badge === "URL巡回" ? (<>
-            <button className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded text-xs font-semibold hover:bg-emerald-200">問題なし</button>
-            <button className="px-4 py-2 bg-amber-100 text-amber-700 rounded text-xs font-semibold hover:bg-amber-200">加盟店に確認</button>
-            <button className="px-4 py-2 bg-rose-600 text-white rounded text-xs font-semibold hover:bg-rose-700">停止</button>
+            <button onClick={() => setActionConfirm({ title: "問題なしと判定", description: `${selectedItem.id} のURL変更を問題なしと判定します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "問題なし"); toast(`${selectedItem.id} を問題なしと判定しました`, "success"); } })} className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded text-xs font-semibold hover:bg-emerald-200">問題なし</button>
+            <button onClick={() => setActionConfirm({ title: "加盟店に確認", description: `${selectedItem.id} について加盟店に確認メールを送信します。`, type: "warning", onConfirm: () => { markProcessed(selectedItem.id, "加盟店確認中"); toast(`${selectedItem.id} の確認メールを送信しました`, "info"); } })} className="px-4 py-2 bg-amber-100 text-amber-700 rounded text-xs font-semibold hover:bg-amber-200">加盟店に確認</button>
+            <button onClick={() => setActionConfirm({ title: "サイト停止", description: `${selectedItem.id} のサイトを停止します。`, warning: "停止すると該当サイトの決済処理が停止されます。", type: "danger", onConfirm: () => { markProcessed(selectedItem.id, "停止"); toast(`${selectedItem.id} のサイトを停止しました`, "warning"); } })} className="px-4 py-2 bg-rose-600 text-white rounded text-xs font-semibold hover:bg-rose-700">停止</button>
           </>) : (<>
-            <button className="px-4 py-2 bg-rose-100 text-rose-700 rounded text-xs font-semibold hover:bg-rose-200">拒否</button>
-            <button className="px-4 py-2 bg-amber-100 text-amber-700 rounded text-xs font-semibold hover:bg-amber-200">差戻し</button>
-            <button className="px-4 py-2 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700">✓ 承認</button>
+            <button onClick={() => setActionConfirm({ title: "審査拒否", description: `${selectedItem.id} の審査申請を拒否します。`, warning: "拒否理由が加盟店に通知されます。", type: "reject", onConfirm: () => { markProcessed(selectedItem.id, "拒否"); toast(`${selectedItem.id} を拒否しました`, "warning"); } })} className="px-4 py-2 bg-rose-100 text-rose-700 rounded text-xs font-semibold hover:bg-rose-200">拒否</button>
+            <button onClick={() => setActionConfirm({ title: "差戻し", description: `${selectedItem.id} を差戻します。追加書類の提出を依頼します。`, type: "warning", onConfirm: () => { markProcessed(selectedItem.id, "差戻し"); toast(`${selectedItem.id} を差戻しました`, "info"); } })} className="px-4 py-2 bg-amber-100 text-amber-700 rounded text-xs font-semibold hover:bg-amber-200">差戻し</button>
+            <button onClick={() => setActionConfirm({ title: "審査承認", description: `${selectedItem.id} の審査を承認します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "承認"); toast(`${selectedItem.id} を承認しました`, "success"); } })} className="px-4 py-2 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700">✓ 承認</button>
           </>)}
         </div>
       </div>
@@ -668,29 +681,33 @@ const MasterExceptionQueue = () => {
         <td colSpan="6" className="px-4 py-1 text-xs text-slate-400">{checkedItems.length > 0 ? `${checkedItems.length}件選択中` : "全選択"}</td>
       </tr>
       {queueItems.map((item, i) => (
-        <tr key={i} onClick={() => setSelectedQueueId(item.id)} className={`border-b cursor-pointer transition-colors ${selectedQueueId === item.id ? "bg-blue-100 border-l-2 border-l-blue-500" : item.locked ? "bg-orange-50 hover:bg-orange-100" : checkedItems.includes(item.id) ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-slate-100"}`}>
-          <td className="px-4 py-2 whitespace-nowrap w-8" onClick={(e) => e.stopPropagation()}><input type="checkbox" className="w-3.5 h-3.5" checked={checkedItems.includes(item.id)} onChange={() => toggleCheck(item.id)} /></td>
+        <tr key={i} onClick={() => setSelectedQueueId(item.id)} className={`border-b cursor-pointer transition-colors ${processedItems[item.id] ? "bg-slate-100 opacity-60" : selectedQueueId === item.id ? "bg-blue-100 border-l-2 border-l-blue-500" : item.locked ? "bg-orange-50 hover:bg-orange-100" : checkedItems.includes(item.id) ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-slate-100"}`}>
+          <td className="px-4 py-2 whitespace-nowrap w-8" onClick={(e) => e.stopPropagation()}><input type="checkbox" className="w-3.5 h-3.5" checked={checkedItems.includes(item.id)} onChange={() => toggleCheck(item.id)} disabled={!!processedItems[item.id]} /></td>
           <td className="px-4 py-2 whitespace-nowrap w-16 font-mono text-slate-600"><div className="flex items-center gap-1">{item.locked && <span title={`${item.lockedBy}さんが対応中`}>🔒</span>}{selectedQueueId === item.id ? <span className="font-bold text-blue-700">{item.id}</span> : item.id}</div></td>
           <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={item.type} color={item.type === "不正検知" ? "red" : item.type === "精算" ? "blue" : item.type === "URL巡回" ? "purple" : "yellow"} /></td>
           <td className="px-4 py-2 whitespace-nowrap text-slate-700">{item.target}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={item.ai} color={item.aiColor} /></td>
+          <td className="px-4 py-2 whitespace-nowrap w-24">{processedItems[item.id] ? <Badge text={`✔ ${processedItems[item.id]}`} color="gray" /> : <Badge text={item.ai} color={item.aiColor} />}</td>
           <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={item.time} color={item.timeColor} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-32"><div className="flex gap-1">
-            {item.type === "不正検知" ? (<>
-              <button className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs hover:bg-emerald-200">正常</button>
-              <button className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs hover:bg-rose-200">ブロック</button>
+          <td className="px-4 py-2 whitespace-nowrap w-32"><div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+            {processedItems[item.id] ? (
+              <span className="text-xs text-slate-400 italic">処理済み</span>
+            ) : item.type === "不正検知" ? (<>
+              <button onClick={() => setActionConfirm({ title: "正常と判定", description: `${item.id} を正常な取引として処理します。`, type: "approve", onConfirm: () => { markProcessed(item.id, "正常判定"); toast(`${item.id} を正常と判定しました`, "success"); } })} className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs hover:bg-emerald-200">正常</button>
+              <button onClick={() => setActionConfirm({ title: "ブロック確定", description: `${item.id} の取引をブロックします。`, type: "danger", onConfirm: () => { markProcessed(item.id, "ブロック"); toast(`${item.id} をブロックしました`, "warning"); } })} className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs hover:bg-rose-200">ブロック</button>
             </>) : item.type === "精算" ? (<>
-              <button className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">再実行</button>
-              <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">スキップ</button>
+              <button onClick={() => setActionConfirm({ title: "精算再実行", description: `${item.id} の精算バッチを再実行します。`, type: "info", onConfirm: () => { markProcessed(item.id, "再実行"); toast(`${item.id} の再実行を開始しました`, "success"); } })} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">再実行</button>
+              <button onClick={() => { markProcessed(item.id, "スキップ"); toast(`${item.id} をスキップしました`, "info"); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">スキップ</button>
             </>) : (<>
-              <button className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs hover:bg-emerald-200">承認</button>
-              <button className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs hover:bg-rose-200">拒否</button>
+              <button onClick={() => setActionConfirm({ title: item.type === "URL巡回" ? "問題なしと判定" : "審査承認", description: `${item.id} を${item.type === "URL巡回" ? "問題なしと判定" : "承認"}します。`, type: "approve", onConfirm: () => { markProcessed(item.id, item.type === "URL巡回" ? "問題なし" : "承認"); toast(`${item.id} を${item.type === "URL巡回" ? "問題なしと判定" : "承認"}しました`, "success"); } })} className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs hover:bg-emerald-200">{item.type === "URL巡回" ? "問題なし" : "承認"}</button>
+              <button onClick={() => setActionConfirm({ title: item.type === "URL巡回" ? "サイト停止" : "審査拒否", description: `${item.id} を${item.type === "URL巡回" ? "停止" : "拒否"}します。`, type: item.type === "URL巡回" ? "danger" : "reject", onConfirm: () => { markProcessed(item.id, item.type === "URL巡回" ? "停止" : "拒否"); toast(`${item.id} を${item.type === "URL巡回" ? "停止" : "拒否"}しました`, "warning"); } })} className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs hover:bg-rose-200">{item.type === "URL巡回" ? "停止" : "拒否"}</button>
             </>)}
           </div></td>
         </tr>
       ))}
       </TableHeader>
     </div>
+
+    <ConfirmDialog config={actionConfirm} onClose={() => setActionConfirm(null)} />
 
     {/* ── Modal: バッチ操作確認 ── */}
     {showBatchConfirm && (
@@ -729,7 +746,7 @@ const MasterExceptionQueue = () => {
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
             <button onClick={() => setShowBatchConfirm(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => { setShowBatchConfirm(null); setCheckedItems([]); }} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showBatchConfirm === "approve" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"}`}>{checkedItems.length}件を{showBatchConfirm === "approve" ? "承認" : "拒否"}する</button>
+            <button onClick={() => { const action = showBatchConfirm === "approve" ? "承認" : "拒否"; const count = checkedItems.length; checkedItems.forEach(id => markProcessed(id, action)); setShowBatchConfirm(null); setCheckedItems([]); toast(`${count}件を一括${action}しました`, showBatchConfirm === "approve" ? "success" : "warning"); }} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showBatchConfirm === "approve" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"}`}>{checkedItems.length}件を{showBatchConfirm === "approve" ? "承認" : "拒否"}する</button>
           </div>
         </div>
       </div>
