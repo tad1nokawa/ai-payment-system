@@ -3081,6 +3081,7 @@ const MasterSettlement = () => {
 const MasterSystemSettings = () => {
   const [sysTab, setSysTab] = useState(0);
   const [showAddProcessor, setShowAddProcessor] = useState(false);
+  const [selectedSysProc, setSelectedSysProc] = useState(null);
   return (
   <div className="p-5 space-y-4">
     <h2 className="text-sm font-bold text-slate-800">システム設定</h2>
@@ -3198,36 +3199,131 @@ const MasterSystemSettings = () => {
         <table className="w-full text-xs">
           <thead><tr className="bg-slate-50 text-slate-500">
             <th className="px-3 py-2 text-left font-semibold">プロセッサー</th>
-            <th className="px-3 py-2 text-left font-semibold">接続タイプ</th>
-            <th className="px-3 py-2 text-center font-semibold">環境</th>
+            <th className="px-3 py-2 text-left font-semibold">種別</th>
+            <th className="px-3 py-2 text-center font-semibold">対応ブランド</th>
             <th className="px-3 py-2 text-center font-semibold">ステータス</th>
-            <th className="px-3 py-2 text-center font-semibold">最終疎通</th>
-            <th className="px-3 py-2 text-center font-semibold">レイテンシ</th>
-            <th className="px-3 py-2 text-center font-semibold">成功率(24h)</th>
+            <th className="px-3 py-2 text-center font-semibold">稼働率</th>
+            <th className="px-3 py-2 text-center font-semibold">承認済加盟店</th>
             <th className="px-3 py-2 text-center font-semibold">操作</th>
           </tr></thead>
           <tbody>
-          {[
-            { name: "Univa Pay cast", type: "API v2", env: "本番", status: "稼働中", statusColor: "green", lastPing: "2s前", latency: "120ms", successRate: "99.97%" },
-            { name: "楽天銀行", type: "API v1", env: "本番", status: "稼働中", statusColor: "green", lastPing: "5s前", latency: "85ms", successRate: "99.99%" },
-            { name: "Worldpay", type: "API v3", env: "本番", status: "稼働中", statusColor: "green", lastPing: "3s前", latency: "110ms", successRate: "99.93%" },
-            { name: "TCMS", type: "専用v2", env: "本番", status: "稼働中", statusColor: "green", lastPing: "4s前", latency: "95ms", successRate: "99.90%" },
-            { name: "ペイディ", type: "API v1", env: "本番", status: "稼働中", statusColor: "green", lastPing: "6s前", latency: "75ms", successRate: "99.95%" },
-            { name: "Univa Pay cast (テスト)", type: "API v2", env: "テスト", status: "稼働中", statusColor: "blue", lastPing: "10s前", latency: "145ms", successRate: "99.80%" },
-          ].map((p, i) => (
-            <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
-              <td className="px-3 py-2 font-semibold text-slate-700">{p.name}</td>
+          {processorList.map((p, i) => (
+            <React.Fragment key={p.id}>
+            <tr className={`border-b ${selectedSysProc === p.id ? "bg-blue-50" : i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50 cursor-pointer`} onClick={() => setSelectedSysProc(selectedSysProc === p.id ? null : p.id)}>
+              <td className="px-3 py-2 font-semibold text-slate-700">
+                <div className="flex items-center gap-1">
+                  <span className={`text-xs ${selectedSysProc === p.id ? "text-blue-500" : "text-slate-400"}`}>{selectedSysProc === p.id ? "▼" : "▶"}</span>
+                  {p.name}
+                </div>
+              </td>
               <td className="px-3 py-2 text-slate-500">{p.type}</td>
-              <td className="px-3 py-2 text-center"><Badge text={p.env} color={p.env === "本番" ? "purple" : "blue"} /></td>
-              <td className="px-3 py-2 text-center"><Badge text={p.status} color={p.statusColor} /></td>
-              <td className="px-3 py-2 text-center text-slate-500">{p.lastPing}</td>
-              <td className="px-3 py-2 text-center text-slate-600 font-semibold">{p.latency}</td>
-              <td className="px-3 py-2 text-center text-emerald-600 font-semibold">{p.successRate}</td>
+              <td className="px-3 py-2 text-center"><div className="flex gap-1 flex-wrap justify-center">{p.brands.map(b => <Badge key={b} text={b} color="blue" />)}</div></td>
+              <td className="px-3 py-2 text-center"><Badge text={p.status} color={p.sColor} /></td>
+              <td className="px-3 py-2 text-center text-emerald-600 font-semibold">{p.uptime}</td>
+              <td className="px-3 py-2 text-center text-slate-700 font-semibold">{p.merchants}社</td>
               <td className="px-3 py-2 text-center"><div className="flex gap-1 justify-center">
-                <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">設定</button>
-                <button className="px-2 py-1 bg-blue-50 text-blue-600 rounded text-xs">テスト</button>
+                <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs" onClick={(e) => e.stopPropagation()}>設定</button>
+                <button className="px-2 py-1 bg-blue-50 text-blue-600 rounded text-xs" onClick={(e) => e.stopPropagation()}>テスト</button>
               </div></td>
             </tr>
+            {/* 接続先条件詳細パネル（クリック展開） */}
+            {selectedSysProc === p.id && (() => {
+              const isCard = p.type !== "WEBマネー";
+              return (
+              <tr><td colSpan={7} className="p-0">
+                <div className="bg-blue-50 border-x border-b border-blue-200 p-3 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <p className="text-xs font-bold text-slate-700">🔌 {p.name} — 条件詳細</p>
+                    <button onClick={(e) => { e.stopPropagation(); setSelectedSysProc(null); }} className="text-xs text-slate-400 hover:text-slate-600">✕ 閉じる</button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* 左列: 手数料 */}
+                    <div className="space-y-2">
+                      <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                        <p className="text-xs font-bold text-slate-600 mb-2">💰 ブランド別手数料率</p>
+                        {isCard ? (
+                          <div className="grid grid-cols-5 gap-1.5">
+                            {[{b:"VISA",k:"visa"},{b:"MC",k:"master"},{b:"JCB",k:"jcb"},{b:"AMEX",k:"amex"},{b:"Diners",k:"diners"}].map(({b,k}) => (
+                              <div key={k} className={`rounded border p-1.5 text-center ${p.fees[k] !== "-" ? "bg-blue-50 border-blue-200" : "bg-slate-50 border-slate-200"}`}>
+                                <p className="text-xs text-slate-400">{b}</p>
+                                <p className={`text-xs font-bold ${p.fees[k] !== "-" ? "text-blue-700" : "text-slate-300"}`}>{p.fees[k]}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="bg-blue-50 rounded border border-blue-200 p-2 text-center">
+                            <p className="text-xs text-slate-400">WEBマネー手数料</p>
+                            <p className="text-sm font-bold text-blue-700">{p.fees.webmoney}</p>
+                          </div>
+                        )}
+                      </div>
+                      {isCard && (
+                      <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                        <p className="text-xs font-bold text-slate-600 mb-2">📊 TR手数料</p>
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {[{l:"TR(成功)",v:p.trFees.success},{l:"TR(失敗)",v:p.trFees.fail},{l:"CB手数料",v:p.trFees.cb},{l:"返金",v:p.trFees.refund},{l:"3DS",v:p.trFees.tds},{l:"CB取消",v:p.trFees.cbCancel}].map(({l,v}) => (
+                            <div key={l} className="bg-slate-50 rounded border border-slate-200 p-1.5">
+                              <p className="text-xs text-slate-400">{l}</p>
+                              <p className={`text-xs font-bold ${v !== "-" ? "text-slate-700" : "text-slate-300"}`}>{v}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      )}
+                    </div>
+                    {/* 右列: 条件・制限 */}
+                    <div className="space-y-2">
+                      <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                        <p className="text-xs font-bold text-slate-600 mb-2">🔒 デポジット・制限</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="bg-purple-50 rounded border border-purple-200 p-2 space-y-1 text-xs">
+                            <p className="font-semibold text-purple-700 mb-0.5">留保条件</p>
+                            <div className="flex justify-between"><span className="text-slate-400">留保率</span><span className="font-semibold">{p.deposit.rate}</span></div>
+                            <div className="flex justify-between"><span className="text-slate-400">期間</span><span className="font-semibold">{p.deposit.period}</span></div>
+                            <div className="flex justify-between"><span className="text-slate-400">タイプ</span><span className="font-semibold">{p.deposit.type}</span></div>
+                          </div>
+                          <div className="bg-amber-50 rounded border border-amber-200 p-2 space-y-1 text-xs">
+                            <p className="font-semibold text-amber-700 mb-0.5">取引制限</p>
+                            <div className="flex justify-between"><span className="text-slate-400">TR上限</span><span className="font-semibold">{p.limits.trMax}</span></div>
+                            <div className="flex justify-between"><span className="text-slate-400">月間上限</span><span className="font-semibold">{p.limits.monthlyMax}</span></div>
+                            <div className="flex justify-between"><span className="text-slate-400">回数</span><span className="font-semibold">{p.limits.countLimit}</span></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                        <p className="text-xs font-bold text-slate-600 mb-2">💵 固定費・入金</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="bg-emerald-50 rounded border border-emerald-200 p-2 space-y-1 text-xs">
+                            <p className="font-semibold text-emerald-700 mb-0.5">固定費</p>
+                            <div className="flex justify-between"><span className="text-slate-400">初期</span><span className="font-semibold">{p.fixedCost.initial}</span></div>
+                            <div className="flex justify-between"><span className="text-slate-400">月額</span><span className="font-semibold">{p.fixedCost.monthly}</span></div>
+                          </div>
+                          <div className="bg-blue-50 rounded border border-blue-200 p-2 space-y-1 text-xs">
+                            <p className="font-semibold text-blue-700 mb-0.5">入金情報</p>
+                            <div className="flex justify-between"><span className="text-slate-400">口座</span><span className="font-semibold">{p.settlement.account}</span></div>
+                          </div>
+                        </div>
+                        <div className="mt-1.5 bg-slate-50 rounded border border-slate-200 p-1.5 text-xs">
+                          <span className="text-slate-400">入金サイクル: </span><span className="font-semibold text-slate-700">{p.settlement.cycle}</span>
+                        </div>
+                      </div>
+                      {isCard && (
+                      <div className="bg-white rounded-lg border border-slate-200 p-2.5">
+                        <p className="text-xs font-bold text-slate-600 mb-1">🚫 制限事項</p>
+                        <div className="grid grid-cols-3 gap-1 text-xs">
+                          <div><span className="text-slate-400">CVV: </span><span className="font-semibold">{p.restrictions.cvv}</span></div>
+                          <div><span className="text-slate-400">NG: </span><span className="font-semibold">{p.restrictions.ngGenre}</span></div>
+                          <div><span className="text-slate-400">USD: </span><span className="font-semibold">{p.restrictions.usd ? "対応" : "非対応"}</span></div>
+                        </div>
+                      </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </td></tr>
+              );
+            })()}
+            </React.Fragment>
           ))}
           </tbody>
         </table>
