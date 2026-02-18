@@ -362,6 +362,16 @@ const MasterDashboard = () => {
       );
     })()}
 
+    {/* クイックアクション（最上部） */}
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <p className="text-xs font-bold text-slate-600 mb-2">⚡ クイックアクション</p>
+      <div className="flex gap-2">
+        {[["📋 例外キュー", "rose"], ["🔍 取引検索", "blue"], ["📊 レポート生成", "emerald"], ["👥 加盟店一覧", "slate"], ["🤖 AI監視", "purple"]].map(([label, color], i) => (
+          <button key={i} onClick={() => nav.setMasterPage(navMap[label])} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100`}>{label}</button>
+        ))}
+      </div>
+    </div>
+
     {/* KPIs + Period Toggle */}
     <div className="space-y-2">
       <div className="flex justify-end">
@@ -478,15 +488,6 @@ const MasterDashboard = () => {
       </div>
     </div>
 
-    {/* クイックアクション */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-600 mb-2">⚡ クイックアクション</p>
-      <div className="flex gap-2">
-        {[["📋 例外キュー", "rose"], ["🔍 取引検索", "blue"], ["📊 レポート生成", "emerald"], ["👥 加盟店一覧", "slate"], ["🤖 AI監視", "purple"]].map(([label, color], i) => (
-          <button key={i} onClick={() => nav.setMasterPage(navMap[label])} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100`}>{label}</button>
-        ))}
-      </div>
-    </div>
     </div>{/* 右カラム終了 */}
 
     {/* KPIドリルダウンモーダル */}
@@ -935,6 +936,7 @@ const MasterMerchants = () => {
   const [showProcApply, setShowProcApply] = useState(false);
   const [m03Tab, setM03Tab] = useState("merchants");
   const [actionConfirm, setActionConfirm] = useState(null);
+  const [showSiteAddModal, setShowSiteAddModal] = useState(false);
 
   const handleSort = (key) => {
     if (sortKey === key) {
@@ -1038,7 +1040,7 @@ const MasterMerchants = () => {
             <div className="flex justify-between items-center mb-3">
               <p className="text-xs font-bold text-slate-600">サイト管理</p>
               <div className="flex gap-2">
-                <button onClick={() => toast("サイト追加モーダルを開きました（実装予定）", "info")} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ サイト追加</button>
+                <button onClick={() => setShowSiteAddModal(true)} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ サイト追加</button>
                 <button onClick={() => setActionConfirm({ title: "サイト一括停止", description: "表示中の全サイトを一括停止します。", warning: "停止すると該当サイトの決済処理が停止されます。", type: "danger", onConfirm: () => toast("選択したサイトを一括停止しました", "warning") })} className="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded border border-amber-200 font-semibold">⏸ 一括停止</button>
                 <button onClick={() => toast("サイト一覧をCSV出力しました", "success")} className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50">📥 CSV</button>
               </div>
@@ -1103,7 +1105,7 @@ const MasterMerchants = () => {
                             {s.settings.testMode && <Badge text="テストモード" color="purple" />}
                           </div>
                           <div className="flex gap-1">
-                            <button onClick={() => toast(`${s.siteName} の設定を保存しました`, "success")} className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold">💾 保存</button>
+                            <button onClick={() => setActionConfirm({ title: "サイト設定の保存", description: `${s.siteId} ${s.siteName} の設定変更を保存します。`, warning: "決済設定・セキュリティ設定の変更は即座に反映されます。本番環境に影響しますのでご確認ください。", type: "warning", onConfirm: () => toast(`${s.siteName} の設定を保存しました`, "success") })} className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold">💾 保存</button>
                             <button onClick={() => setActionConfirm({ title: "サイト停止", description: `${s.siteId} ${s.siteName} を停止します。`, warning: "停止すると該当サイトの決済処理が停止されます。", type: "warning", onConfirm: () => toast(`${s.siteName} を停止しました`, "warning") })} className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs border border-amber-200">⏸ 停止</button>
                             <button onClick={() => setActionConfirm({ title: "トークン再発行", description: `${s.siteId} ${s.siteName} の認証トークンを再発行します。`, warning: "再発行すると現在のトークンは無効になります。", type: "warning", inputConfirm: "再発行", onConfirm: () => toast(`${s.siteName} のトークンを再発行しました`, "success") })} className="px-2 py-1 bg-white text-slate-600 rounded text-xs border">🔑 トークン再発行</button>
                             <button onClick={() => setActionConfirm({ title: "サイト削除", description: `${s.siteId} ${s.siteName} を完全に削除します。`, warning: "削除したサイトは復元できません。関連する全ての取引データも失われます。", type: "danger", inputConfirm: "削除", onConfirm: () => toast(`${s.siteName} を削除しました`, "error") })} className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200">🗑 削除</button>
@@ -3173,6 +3175,113 @@ const MasterUserManagement = () => {
         </div>
       </div>
     )}
+    {/* ── Modal: サイト追加 ── */}
+    {showSiteAddModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowSiteAddModal(false)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[600px] max-h-[85vh] overflow-y-auto">
+          <div className="p-4 border-b bg-blue-50 rounded-t-xl flex justify-between items-center sticky top-0 z-10">
+            <h3 className="text-sm font-bold text-slate-800">🌐 新規サイト追加</h3>
+            <button onClick={() => setShowSiteAddModal(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          </div>
+          <div className="p-5 space-y-4">
+            <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-700">
+              <p className="font-bold mb-1">📋 サイト追加の流れ</p>
+              <div className="flex items-center gap-2 text-slate-600">
+                <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span><span>基本情報入力</span>
+                <span className="text-slate-300">→</span>
+                <span className="bg-slate-300 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span><span>決済設定</span>
+                <span className="text-slate-300">→</span>
+                <span className="bg-slate-300 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">3</span><span>審査申請</span>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">📌 基本情報</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-slate-600">加盟店 <span className="text-rose-500">*</span></label>
+                  <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                    <option value="">加盟店を選択...</option>
+                    <option>M-001 株式会社ABC商事</option>
+                    <option>M-002 合同会社XYZ物産</option>
+                    <option>M-003 株式会社DEFサービス</option>
+                  </select>
+                </div>
+                <div><label className="text-xs font-semibold text-slate-600">サイト名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: ECサイトB" /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                <div><label className="text-xs font-semibold text-slate-600">サイトURL <span className="text-rose-500">*</span></label><input type="url" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="https://example.com" /></div>
+                <div><label className="text-xs font-semibold text-slate-600">ジャンル <span className="text-rose-500">*</span></label>
+                  <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                    <option value="">選択...</option>
+                    <option>EC（物販）</option><option>EC（デジタル）</option><option>サブスクリプション</option>
+                    <option>教育・スクール</option><option>サービス業</option><option>その他</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                <div><label className="text-xs font-semibold text-slate-600">月間予定決済高</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: ¥5,000,000" /></div>
+                <div><label className="text-xs font-semibold text-slate-600">通知先メール <span className="text-rose-500">*</span></label><input type="email" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="admin@example.com" /></div>
+              </div>
+              <div className="mt-2"><label className="text-xs font-semibold text-slate-600">代理店（任意）</label>
+                <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                  <option value="">紐付なし</option>
+                  <option>AG-001 デジタルパートナーズ</option>
+                  <option>AG-002 ウェブコンサル合同会社</option>
+                  <option>AG-003 ITソリューションズ</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">💳 決済設定</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">3DS認証を有効化</span></label>
+                  <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">リカーリング（継続課金）</span></label>
+                  <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">CVV必須</span></label>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-500 font-semibold">決済方式</p>
+                  <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">トークン決済</span></label>
+                  <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">LINK決済</span></label>
+                  <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">API決済</span></label>
+                </div>
+              </div>
+              <div className="mt-2">
+                <label className="text-xs font-semibold text-slate-600">希望ブランド</label>
+                <div className="flex gap-3 mt-1">
+                  {["VISA", "Mastercard", "JCB", "AMEX", "Diners"].map(b => (
+                    <label key={b} className="flex items-center gap-1 text-xs cursor-pointer"><input type="checkbox" defaultChecked={b === "VISA" || b === "Mastercard"} className="w-3.5 h-3.5 rounded" />{b}</label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-bold text-slate-700 mb-2">🔒 セキュリティ</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-xs font-semibold text-slate-600">コールバックURL</label><input type="url" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="https://example.com/callback" /></div>
+                <div><label className="text-xs font-semibold text-slate-600">Webhook URL</label><input type="url" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="https://example.com/webhook" /></div>
+              </div>
+              <div className="mt-2"><label className="text-xs font-semibold text-slate-600">IP制限（改行区切り）</label>
+                <textarea rows={2} className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono resize-none" placeholder="203.0.113.0/24&#10;198.51.100.0/24" />
+              </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded p-3 text-xs text-amber-700">
+              <p className="font-bold">⚠️ サイト追加後の流れ</p>
+              <p className="mt-1">サイト作成後、M04「既存加盟店サイト追加審査」に審査案件が自動作成されます。AIサイト審査→人間判定→承認の順で審査が行われます。</p>
+            </div>
+          </div>
+          <div className="p-4 border-t flex gap-2 justify-end sticky bottom-0 bg-white">
+            <button onClick={() => setShowSiteAddModal(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+            <button onClick={() => { setShowSiteAddModal(false); toast("サイトを追加しました。サイト追加審査に案件が作成されます", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">サイトを追加して審査申請</button>
+          </div>
+        </div>
+      </div>
+    )}
+
     <ConfirmDialog config={actionConfirm} onClose={() => setActionConfirm(null)} />
     </div>
   );
@@ -3382,13 +3491,13 @@ const MasterMerchantApplications = () => {
                 <button onClick={() => setAppConfirmDialog({
                   type: "approve", icon: "✅", title: "自社承認 — 加盟店を承認", appId: selectedApp, merchantName: selectedAppData.name,
                   description: "AI審査結果を確認の上、この加盟店を自社承認します。承認後、接続先審査の開始が可能になります。",
-                  impacts: ["加盟店ステータスが「自社承認済み」に変更", "加盟店マスターに登録される", "接続先審査の開始ボタンが有効化される", "※契約書は接続先審査完了・条件確定後に生成されます"],
+                  impacts: ["加盟店ステータスが「自社承認済み」に変更", "加盟店マスターに登録される", "接続先審査の開始ボタンが有効化される", "📧 加盟店担当者に承認通知メール送信（テンプレート: approval_notification）", "📧 担当代理店にも承認通知を送信（代理店紐付がある場合）", "※契約書は接続先審査完了・条件確定後に生成されます"],
                   confirmLabel: "✅ 自社承認する"
                 })} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700 shadow-sm">✅ 承認</button>
                 <button onClick={() => setAppConfirmDialog({
                   type: "reject", icon: "❌", title: "申込却下", appId: selectedApp, merchantName: selectedAppData.name,
                   description: "この加盟店の申込を却下します。却下理由は加盟店に通知されます。",
-                  impacts: ["加盟店ステータスが「却下」に変更", "加盟店に却下通知メールが送信される", "再申請には新規の申込が必要"],
+                  impacts: ["加盟店ステータスが「却下」に変更", "📧 加盟店担当者に却下通知メール送信（テンプレート: rejection_notification）", "📧 メールに却下理由が記載される（下記で入力）", "再申請には新規の申込が必要"],
                   confirmLabel: "❌ 却下する"
                 })} className="px-3 py-1.5 bg-white text-rose-600 border border-rose-300 rounded text-xs font-semibold hover:bg-rose-50">❌ 却下</button>
                 <button onClick={() => toast(`${selectedApp} のAI再審査をリクエストしました`, "info")} className="px-3 py-1.5 bg-white text-slate-600 border rounded text-xs hover:bg-slate-100">↩ AI再審査を依頼</button>
@@ -3505,6 +3614,51 @@ const MasterMerchantApplications = () => {
               </div>
             </div>
           )}
+
+          {/* メール通知履歴 */}
+          <div className="bg-white rounded-lg border border-slate-200 p-3 mt-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-bold text-slate-600">📧 メール通知履歴</p>
+              <button onClick={() => toast("通知メールを手動再送しました", "success")} className="text-xs text-blue-600 hover:underline">手動再送</button>
+            </div>
+            <div className="space-y-1.5 text-xs">
+              {[
+                { date: "02/14 10:30", template: "申込受付確認", to: `${selectedAppData?.name || ""} 担当者`, status: "送信済み", stc: "green" },
+                ...(selectedAppData?.status !== "AI審査中" ? [{ date: "02/14 10:31", template: "AI審査完了通知（社内）", to: "admin@aipaymentsys.com", status: "送信済み", stc: "green" }] : []),
+                ...(selectedAppData?.status === "自社承認済み" ? [
+                  { date: "02/14 14:20", template: "自社承認通知", to: `${selectedAppData?.name || ""} 担当者`, status: "送信済み", stc: "green" },
+                  { date: "02/14 14:20", template: "承認通知（代理店）", to: "代理店担当者", status: "送信済み", stc: "green" },
+                ] : []),
+                ...(selectedAppData?.status === "却下" ? [
+                  { date: "02/14 14:20", template: "申込却下通知", to: `${selectedAppData?.name || ""} 担当者`, status: "送信済み", stc: "green" },
+                ] : []),
+              ].map((n, i) => (
+                <div key={i} className="flex items-center py-1 border-b last:border-0">
+                  <div className="w-28 text-slate-400">{n.date}</div>
+                  <div className="w-40 font-semibold text-slate-700">{n.template}</div>
+                  <div className="flex-1 text-slate-500">{n.to}</div>
+                  <div><Badge text={n.status} color={n.stc} /></div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 bg-slate-50 rounded p-2 text-xs text-slate-500">
+              <p className="font-semibold text-slate-600 mb-1">📋 メール配信テンプレート一覧</p>
+              <div className="grid grid-cols-2 gap-1">
+                {[
+                  ["申込受付確認", "申込時に自動送信"],
+                  ["AI審査完了（社内）", "審査完了時に管理者へ"],
+                  ["自社承認通知", "承認操作後に加盟店へ"],
+                  ["却下通知", "却下操作後に加盟店へ（理由付き）"],
+                  ["接続先審査開始通知", "接続先審査開始時"],
+                  ["契約書送付", "全審査完了・条件確定後"],
+                  ["再申込許可通知", "再申込許可時に加盟店へ"],
+                  ["代理店通知", "各ステータス変更時に代理店へ"],
+                ].map(([name, desc], i) => (
+                  <div key={i} className="flex gap-1"><span className="text-blue-600">•</span><span className="font-semibold">{name}</span><span className="text-slate-400">— {desc}</span></div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -3616,13 +3770,13 @@ const MasterMerchantApplications = () => {
                 <button onClick={() => setAppConfirmDialog({
                   type: "approve", icon: "✅", title: "サイト追加承認", appId: selectedSiteAppData.id, merchantName: `${selectedSiteAppData.merchantName} — ${selectedSiteAppData.siteName}`,
                   description: "AIサイト審査結果を確認の上、この新規サイトの追加を承認します。承認後、接続先の審査・設定を行います。",
-                  impacts: ["サイトが加盟店マスターに追加される", "接続先審査の開始が可能になる", "既存の加盟店契約情報が引き継がれる"],
+                  impacts: ["サイトが加盟店マスターに追加される", "接続先審査の開始が可能になる", "既存の加盟店契約情報が引き継がれる", "📧 加盟店担当者にサイト追加承認通知メール送信"],
                   confirmLabel: "✅ サイト追加を承認"
                 })} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700 shadow-sm">✅ 承認</button>
                 <button onClick={() => setAppConfirmDialog({
                   type: "reject", icon: "❌", title: "サイト追加却下", appId: selectedSiteAppData.id, merchantName: `${selectedSiteAppData.merchantName} — ${selectedSiteAppData.siteName}`,
                   description: "このサイト追加申請を却下します。理由は加盟店に通知されます。",
-                  impacts: ["サイト追加が却下される", "加盟店に却下通知が送信される", "既存サイトの運用には影響なし"],
+                  impacts: ["サイト追加が却下される", "📧 加盟店担当者にサイト追加却下通知メール送信（却下理由付き）", "既存サイトの運用には影響なし"],
                   confirmLabel: "❌ 却下する"
                 })} className="px-3 py-1.5 bg-white text-rose-600 border border-rose-300 rounded text-xs font-semibold hover:bg-rose-50">❌ 却下</button>
                 <button onClick={() => toast(`${selectedSiteAppData.id} のAI再審査をリクエストしました`, "info")} className="px-3 py-1.5 bg-white text-slate-600 border rounded text-xs hover:bg-slate-100">↩ AI再審査を依頼</button>
@@ -3677,6 +3831,25 @@ const MasterMerchantApplications = () => {
               </div>
             )}
           </div>
+
+          {/* 審査メモ */}
+          {(selectedSiteAppData.status === "人間判定待ち" || selectedSiteAppData.status === "承認済み") && (
+            <div className="bg-white rounded p-2 border border-slate-200 mb-3">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-xs font-bold text-slate-600">📝 審査メモ・コメント</p>
+                <span className="text-xs text-slate-400">審査時の判断根拠を記録</span>
+              </div>
+              <div className="flex gap-1">
+                <input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="審査コメントを追加..." />
+                <button onClick={() => toast("審査メモを追加しました", "success")} className="px-3 py-1 bg-teal-600 text-white rounded text-xs">追加</button>
+              </div>
+              {selectedSiteAppData.status === "承認済み" && (
+                <div className="mt-1.5 bg-slate-50 rounded p-1.5 text-xs text-slate-500">
+                  <span className="text-slate-400">02/10 14:18 admin:</span> 既存加盟店の取引実績良好。サイト内容問題なし。承認。
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 申請情報グリッド */}
           <div className="grid grid-cols-3 gap-4 mb-3">
@@ -3743,6 +3916,20 @@ const MasterMerchantApplications = () => {
               </div>
             </div>
           )}
+
+          {/* メール通知履歴（サイト追加審査） */}
+          <div className="bg-white rounded-lg border border-slate-200 p-3 mt-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-bold text-slate-600">📧 通知・コミュニケーション履歴</p>
+              <button onClick={() => toast("手動で通知メールを再送しました", "success")} className="text-xs text-blue-600 hover:underline">手動再送</button>
+            </div>
+            <div className="space-y-1 text-xs">
+              <div className="flex items-center py-1 border-b"><div className="w-28 text-slate-400">{selectedSiteAppData.date}</div><div className="w-36 font-semibold text-slate-700">サイト追加申請受付</div><div className="flex-1 text-slate-500">加盟店担当者に受付確認メール送信</div><Badge text="送信済み" color="green" /></div>
+              {selectedSiteAppData.status !== "AI審査中" && <div className="flex items-center py-1 border-b"><div className="w-28 text-slate-400">{selectedSiteAppData.date.split(" ")[0]} 10:31</div><div className="w-36 font-semibold text-slate-700">AIサイト審査完了</div><div className="flex-1 text-slate-500">社内管理者に審査完了通知</div><Badge text="送信済み" color="green" /></div>}
+              {selectedSiteAppData.status === "承認済み" && <div className="flex items-center py-1 border-b"><div className="w-28 text-slate-400">02/10 14:20</div><div className="w-36 font-semibold text-slate-700">サイト追加承認通知</div><div className="flex-1 text-slate-500">加盟店担当者に承認完了メール送信</div><Badge text="送信済み" color="green" /></div>}
+              {selectedSiteAppData.status === "却下" && <div className="flex items-center py-1 border-b"><div className="w-28 text-slate-400">02/09 16:00</div><div className="w-36 font-semibold text-slate-700">サイト追加却下通知</div><div className="flex-1 text-slate-500">加盟店担当者に却下理由付きメール送信</div><Badge text="送信済み" color="green" /></div>}
+            </div>
+          </div>
         </div>
       </div>
       )}
@@ -9867,14 +10054,34 @@ const MerchantSubscriptions = () => {
   return (
     <div className="p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-slate-800">決済管理</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-sm font-bold text-slate-800">決済管理</h2>
+          <div className="flex items-center gap-1 text-xs text-slate-400">
+            <span className="bg-slate-100 px-1.5 py-0.5 rounded">🏢 加盟店</span>
+            <span>→</span>
+            <select className="border rounded px-2 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50">
+              <option>🌐 ECサイトA</option>
+              <option>🌐 サブスクサイトB</option>
+              <option>🌐 教育プラットフォームC</option>
+            </select>
+            <span>→</span>
+            <span className="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-semibold">📦 プラン（複数）</span>
+          </div>
+        </div>
+      </div>
+      <div className="bg-blue-50 border border-blue-200 rounded p-2 text-xs text-blue-700 flex items-center gap-2">
+        <span>💡</span>
+        <span>決済管理はサイト単位で管理されます。各サイトに複数のプラン（月額・年額・分割等）を設定できます。サイトを切り替えてプランを管理してください。</span>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
         <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-emerald-500 text-emerald-700 bg-emerald-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}</div>
       {tab === "plans" && (
         <div className="space-y-3">
-          <button onClick={() => setShowCreatePlan(!showCreatePlan)} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-bold">+ プラン作成</button>
+          <div className="flex items-center justify-between">
+            <button onClick={() => setShowCreatePlan(!showCreatePlan)} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-bold">+ プラン作成</button>
+            <span className="text-xs text-slate-400">このサイトのプラン: 4件（有効3 / アーカイブ1）</span>
+          </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "プラン名", w: "flex-1" }, { label: "タイプ", w: "w-16" }, { label: "金額", w: "w-24" }, { label: "サイクル", w: "w-20" }, { label: "ユーザー数", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]}>
             {[{ name: "月額スタンダード", type: "継続", amt: "¥2,980/月", cycle: "毎月1日", users: "342", st: "active", created: "2025-06-01", mrr: "¥1,019,160", churn: "2.1%", trial: "7日間" },
@@ -10156,7 +10363,20 @@ const MerchantSubscriptions = () => {
               </div>
               <div className="bg-amber-50 border border-amber-200 rounded p-2 text-xs text-amber-700">
                 <p className="font-bold">⚠️ アップロード後の流れ</p>
-                <p className="mt-1">運営側で内容を確認・承認した後、決済予定日にバッチ処理で自動決済されます。承認前であれば取り消し可能です。</p>
+                <p className="mt-1">CSVアップロード後、運営側の<span className="font-bold">例外キュー</span>に「CSV決済承認待ち」として登録されます。運営側で内容を確認・承認した後、決済予定日にバッチ処理で自動決済されます。</p>
+              </div>
+              <div className="bg-blue-50 border border-blue-200 rounded p-2 text-xs text-blue-700">
+                <p className="font-bold">📋 例外キューに登録される情報</p>
+                <div className="grid grid-cols-2 gap-1 mt-1 text-slate-600">
+                  <div>• キュータイプ: <span className="font-semibold">CSV決済承認</span></div>
+                  <div>• 加盟店名・サイト名</div>
+                  <div>• 決済件数・合計金額</div>
+                  <div>• 決済予定日</div>
+                  <div>• アップロード日時・担当者</div>
+                  <div>• バリデーション結果（エラー/警告）</div>
+                  <div>• CSVファイル内容プレビュー</div>
+                  <div>• 優先度: 決済予定日までの日数で自動設定</div>
+                </div>
               </div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
@@ -12291,7 +12511,7 @@ const MasterCustomers = () => {
             <div className="flex gap-2">
               <button onClick={() => toast(`${selectedCustomer.id}をブロックリストに追加しました`, "warning")} className="flex-1 py-1.5 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200">🚫 ブロック</button>
               <button onClick={() => toast(`${selectedCustomer.id}をホワイトリストに追加しました`, "success")} className="flex-1 py-1.5 bg-emerald-50 text-emerald-600 rounded text-xs border border-emerald-200">✅ ホワイトリスト</button>
-              <button onClick={() => toast("M06 決済詳細画面を開きます", "info")} className="flex-1 py-1.5 bg-slate-50 text-slate-600 rounded text-xs border">M06で開く</button>
+              <button onClick={() => toast("この顧客の取引詳細画面を開きます", "info")} className="flex-1 py-1.5 bg-slate-50 text-slate-600 rounded text-xs border">🔍 取引詳細を開く</button>
             </div>
           </div>
           <div className="col-span-3 space-y-3">
@@ -12328,15 +12548,15 @@ const MasterCustomers = () => {
                 { date: "02/05 09:30", amt: "¥4,500", brand: "VISA", st: "返金済", stc: "purple", note: "一部返金 ¥2,000" },
                 { date: "01/28 16:45", amt: "¥2,980", brand: "VISA", st: "成功", stc: "green", note: "月額スタンダード（自動決済）" },
                 { date: "01/15 13:20", amt: "¥35,000", brand: "VISA", st: "成功", stc: "green", note: "" },
-                { date: "01/08 10:00", amt: "¥2,980", brand: "VISA", st: "失敗", stc: "red", note: "E-Card01: 残高不足 → リトライ成功" },
+                { date: "01/08 10:00", amt: "¥2,980", brand: "VISA", st: "失敗", stc: "red", note: "残高不足→リトライ成功" },
               ].map((t, i) => (
-                <div key={i} className="flex items-center py-1.5 border-b last:border-0 text-xs">
-                  <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: t.stc === "green" ? "#22c55e" : t.stc === "red" ? "#ef4444" : "#a855f7" }} />
-                  <div className="w-24 text-slate-400">{t.date}</div>
-                  <div className="w-20 font-bold">{t.amt}</div>
-                  <div className="w-12 font-mono text-slate-500">{t.brand}</div>
-                  <div className="w-14"><Badge text={t.st} color={t.stc} /></div>
-                  <div className="flex-1 text-slate-400">{t.note}</div>
+                <div key={i} className="flex items-center py-1.5 border-b last:border-0 text-xs whitespace-nowrap overflow-hidden">
+                  <div className="w-2 h-2 rounded-full mr-2 shrink-0" style={{ backgroundColor: t.stc === "green" ? "#22c55e" : t.stc === "red" ? "#ef4444" : "#a855f7" }} />
+                  <div className="w-24 shrink-0 text-slate-400">{t.date}</div>
+                  <div className="w-20 shrink-0 font-bold">{t.amt}</div>
+                  <div className="w-10 shrink-0 font-mono text-slate-500">{t.brand}</div>
+                  <div className="w-12 shrink-0"><Badge text={t.st} color={t.stc} /></div>
+                  <div className="flex-1 text-slate-400 truncate min-w-0">{t.note}</div>
                 </div>
               ))}
               <div className="text-center mt-2"><button onClick={() => toast("取引タイムラインを全件表示します", "info")} className="text-xs text-blue-600">さらに表示 →</button></div>
