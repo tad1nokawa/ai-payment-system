@@ -5180,14 +5180,14 @@ const MasterSystemSettings = () => {
         <div className="flex items-end"><button onClick={() => toast("操作ログを検索しました", "info")} className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
       </div>
       <div className="text-xs text-slate-400 mb-2">検索結果: 1,248件（1/63ページ）</div>
-      <table className="w-full text-xs">
+      <table className="w-full text-xs table-fixed">
         <thead><tr className="bg-slate-50 border-b">
-          <th className="text-left p-2 text-slate-500 font-semibold w-12">ID</th>
-          <th className="text-left p-2 text-slate-500 font-semibold w-20">スタッフ</th>
-          <th className="text-left p-2 text-slate-500 font-semibold w-32">操作日時</th>
-          <th className="text-left p-2 text-slate-500 font-semibold w-28">IPアドレス</th>
-          <th className="text-left p-2 text-slate-500 font-semibold w-20">種別</th>
-          <th className="text-left p-2 text-slate-500 font-semibold w-28">対象ページ</th>
+          <th className="text-left p-2 text-slate-500 font-semibold" style={{width:"50px"}}>ID</th>
+          <th className="text-left p-2 text-slate-500 font-semibold" style={{width:"72px"}}>スタッフ</th>
+          <th className="text-left p-2 text-slate-500 font-semibold" style={{width:"120px"}}>操作日時</th>
+          <th className="text-left p-2 text-slate-500 font-semibold" style={{width:"110px"}}>IPアドレス</th>
+          <th className="text-left p-2 text-slate-500 font-semibold whitespace-nowrap" style={{width:"90px"}}>種別</th>
+          <th className="text-left p-2 text-slate-500 font-semibold" style={{width:"90px"}}>対象ページ</th>
           <th className="text-left p-2 text-slate-500 font-semibold">URL / 詳細</th>
         </tr></thead>
         <tbody>
@@ -5206,9 +5206,9 @@ const MasterSystemSettings = () => {
               <td className="p-2 text-slate-700 font-semibold">{l.staff}</td>
               <td className="p-2 text-slate-500 font-mono">{l.time}</td>
               <td className="p-2 font-mono text-slate-500">{l.ip}</td>
-              <td className="p-2"><Badge text={l.type} color={l.type === "データ変更" ? "yellow" : l.type === "メール送信" ? "blue" : l.type === "ログイン" ? "green" : "default"} /></td>
-              <td className="p-2 text-slate-600">{l.page}</td>
-              <td className="p-2 text-slate-400 truncate max-w-xs" title={l.url}>{l.url}</td>
+              <td className="p-2 whitespace-nowrap"><Badge text={l.type} color={l.type === "データ変更" ? "yellow" : l.type === "メール送信" ? "blue" : l.type === "ログイン" ? "green" : "default"} /></td>
+              <td className="p-2 text-slate-600 whitespace-nowrap">{l.page}</td>
+              <td className="p-2 text-slate-400 truncate" title={l.url}>{l.url}</td>
             </tr>
           ))}
         </tbody>
@@ -8319,6 +8319,7 @@ const MasterFraudSettings = () => {
   const [testMode, setTestMode] = useState(false);
   const [showAddBlock, setShowAddBlock] = useState(null);
   const [actionConfirm, setActionConfirm] = useState(null);
+  const [expandedRule, setExpandedRule] = useState(null);
 
   const fraudRules = [
     { id: "FR-001", name: "高額取引チェック", type: "金額閾値", condition: "金額 > ¥500,000", action: "例外キュー送り", priority: 1, enabled: true, hits30d: 12 },
@@ -8365,25 +8366,73 @@ const MasterFraudSettings = () => {
             <span>🔒</span>
             <span className="text-blue-700">ルール変更は <strong>admin → super_admin の2段階承認</strong>が必要です。super_adminは直接変更可能。</span>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-            <TableHeader cols={[{ label: "ID", w: "w-20" }, { label: "ルール名", w: "w-36" }, { label: "種別", w: "w-24" }, { label: "条件", w: "flex-1" }, { label: "アクション", w: "w-36" }, { label: "優先度", w: "w-14" }, { label: "30日検知", w: "w-20" }, { label: "有効", w: "w-14" }, { label: "操作", w: "w-28" }]}>
-            {fraudRules.map((r, i) => (
-              <tr key={r.id} className={`border-b hover:bg-blue-50 ${!r.enabled ? "opacity-50" : ""} ${i % 2 ? "bg-slate-50" : ""}`}>
-                <td className="px-4 py-2 whitespace-nowrap w-20 font-mono text-slate-400">{r.id}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-36 font-semibold text-slate-700">{r.name}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={r.type} color={r.type === "AI判定" ? "purple" : r.type === "速度チェック" ? "blue" : "gray"} /></td>
-                <td className="px-4 py-2 whitespace-nowrap text-slate-500 font-mono">{r.condition}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-36"><Badge text={r.action} color={r.action.includes("ブロック") ? "red" : "yellow"} /></td>
-                <td className="px-4 py-2 whitespace-nowrap w-14 text-center text-slate-600">{r.priority}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-20 text-center text-slate-600">{r.hits30d}件</td>
-                <td className="px-4 py-2 whitespace-nowrap w-14 text-center">{r.enabled ? <span className="text-emerald-500">●</span> : <span className="text-slate-300">○</span>}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1">
-                  <button onClick={() => { setShowAddRule(true); toast(`${r.id} を編集モードで開きました`, "info"); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">編集</button>
-                  <button onClick={() => toast(`${r.id} のルールテストを開始しました`, "info")} className="px-1.5 py-1 bg-amber-100 text-amber-700 rounded text-xs">🧪</button>
-                </div></td>
-              </tr>
+          {/* ルールアコーディオン */}
+          <div className="space-y-2">
+            {fraudRules.map((r) => (
+              <div key={r.id} className={`bg-white rounded-lg border shadow-sm ${!r.enabled ? "opacity-60" : ""} ${expandedRule === r.id ? "border-blue-300 ring-1 ring-blue-100" : "border-slate-200"}`}>
+                {/* ヘッダー（クリックで開閉） */}
+                <button onClick={() => setExpandedRule(expandedRule === r.id ? null : r.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-slate-50 transition-colors rounded-lg">
+                  <span className={`text-xs transition-transform ${expandedRule === r.id ? "rotate-90" : ""}`}>▶</span>
+                  <span className="text-xs font-mono text-slate-400 w-16">{r.id}</span>
+                  <span className="text-xs font-bold text-slate-700 w-32">{r.name}</span>
+                  <Badge text={r.type} color={r.type === "AI判定" ? "purple" : r.type === "速度チェック" ? "blue" : "gray"} />
+                  <span className="text-xs text-slate-500 font-mono flex-1 truncate ml-2">{r.condition}</span>
+                  <Badge text={r.action} color={r.action.includes("ブロック") ? "red" : "yellow"} />
+                  <span className="text-xs text-slate-500 w-16 text-right">優先: {r.priority}</span>
+                  <span className="text-xs text-slate-500 w-16 text-right">{r.hits30d}件/30d</span>
+                  {r.enabled ? <span className="text-emerald-500 text-xs">●有効</span> : <span className="text-slate-300 text-xs">○無効</span>}
+                </button>
+                {/* 展開コンテンツ */}
+                {expandedRule === r.id && (
+                  <div className="border-t px-4 py-3 space-y-3 bg-slate-50/50">
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="text-xs font-semibold text-slate-600">ルール名</label>
+                        <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 bg-white" defaultValue={r.name} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-slate-600">種別</label>
+                        <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 bg-white" defaultValue={r.type}>
+                          <option>金額閾値</option><option>速度チェック</option><option>地域制限</option><option>時間帯+金額</option><option>AI判定</option><option>パターン</option><option>リスト照合</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-slate-600">優先順位</label>
+                        <input type="number" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 bg-white" defaultValue={r.priority} min="1" max="99" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-slate-600">条件</label>
+                      <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 bg-white font-mono" defaultValue={r.condition} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-semibold text-slate-600">アクション</label>
+                        <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 bg-white" defaultValue={r.action}>
+                          <option>自動ブロック</option><option>例外キュー送り</option><option>例外キュー送り（確認）</option><option>フラグのみ</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-slate-600">有効/無効</label>
+                        <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 bg-white" defaultValue={r.enabled ? "true" : "false"}>
+                          <option value="true">有効</option><option value="false">無効</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">
+                      <div className="flex justify-between"><span>30日間の検知数: <strong>{r.hits30d}件</strong></span><span>作成者: admin</span><span>最終更新: 2026-02-10</span></div>
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <div className="flex gap-2">
+                        <button onClick={() => toast(`${r.id} のルールテストを開始しました`, "info")} className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded text-xs font-semibold border border-amber-200">🧪 テスト実行</button>
+                        <button onClick={() => setActionConfirm({ title: "ルール削除", description: `${r.id} "${r.name}" を削除します。`, warning: "削除後、このルールによる検知は行われなくなります。検知ログは保持されます。", type: "danger", onConfirm: () => { setExpandedRule(null); toast(`${r.id} を削除しました`, "warning"); } })} className="px-3 py-1.5 bg-rose-100 text-rose-600 rounded text-xs border border-rose-200">削除</button>
+                      </div>
+                      <button onClick={() => setActionConfirm({ title: "ルール変更の保存", description: `${r.id} "${r.name}" の変更を保存します。`, warning: "ルール変更は即座に反映されます。admin権限の場合はsuper_adminの承認後に適用されます。", type: "warning", onConfirm: () => { setExpandedRule(null); toast(`${r.id} "${r.name}" を保存しました`, "success"); } })} className="px-4 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">💾 変更を保存</button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
-            </TableHeader>
           </div>
           {/* Simulation Panel */}
           <div className="bg-amber-50 rounded-lg border border-amber-300 p-3">
@@ -8870,7 +8919,7 @@ const MasterFraudSettings = () => {
             {/* Footer */}
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowAddRule(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { setShowAddRule(false); toast("不正検知ルールを作成しました（承認待ち）", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">ルールを作成</button>
+              <button onClick={() => setActionConfirm({ title: "ルール作成の確認", description: "新しい不正検知ルールを作成します。", warning: "作成後、admin権限の場合はsuper_adminの承認待ちになります。super_adminの場合は即座に有効化されます。", type: "approve", onConfirm: () => { setShowAddRule(false); toast("不正検知ルールを作成しました（承認待ち）", "success"); } })} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">ルールを作成</button>
             </div>
           </div>
         </div>
