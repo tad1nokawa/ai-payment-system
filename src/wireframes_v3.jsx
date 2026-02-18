@@ -1930,6 +1930,114 @@ const MasterMerchants = () => {
         </div>
       )}
       </>)}
+
+      {/* ── Modal: サイト追加 ── */}
+      {showSiteAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowSiteAddModal(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[600px] max-h-[85vh] overflow-y-auto">
+            <div className="p-4 border-b bg-blue-50 rounded-t-xl flex justify-between items-center sticky top-0 z-10">
+              <h3 className="text-sm font-bold text-slate-800">🌐 新規サイト追加</h3>
+              <button onClick={() => setShowSiteAddModal(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-700">
+                <p className="font-bold mb-1">📋 サイト追加の流れ</p>
+                <div className="flex items-center gap-2 text-slate-600">
+                  <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span><span>基本情報入力</span>
+                  <span className="text-slate-300">→</span>
+                  <span className="bg-slate-300 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span><span>決済設定</span>
+                  <span className="text-slate-300">→</span>
+                  <span className="bg-slate-300 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">3</span><span>審査申請</span>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">📌 基本情報</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div><label className="text-xs font-semibold text-slate-600">加盟店 <span className="text-rose-500">*</span></label>
+                    <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                      <option value="">加盟店を選択...</option>
+                      <option>M-001 株式会社ABC商事</option>
+                      <option>M-002 合同会社XYZ物産</option>
+                      <option>M-003 株式会社DEFサービス</option>
+                    </select>
+                  </div>
+                  <div><label className="text-xs font-semibold text-slate-600">サイト名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: ECサイトB" /></div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <div><label className="text-xs font-semibold text-slate-600">サイトURL <span className="text-rose-500">*</span></label><input type="url" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="https://example.com" /></div>
+                  <div><label className="text-xs font-semibold text-slate-600">ジャンル <span className="text-rose-500">*</span></label>
+                    <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                      <option value="">選択...</option>
+                      <option>EC（物販）</option><option>EC（デジタル）</option><option>サブスクリプション</option>
+                      <option>教育・スクール</option><option>サービス業</option><option>その他</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <div><label className="text-xs font-semibold text-slate-600">月間予定決済高</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: ¥5,000,000" /></div>
+                  <div><label className="text-xs font-semibold text-slate-600">通知先メール <span className="text-rose-500">*</span></label><input type="email" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="admin@example.com" /></div>
+                </div>
+                <div className="mt-2"><label className="text-xs font-semibold text-slate-600">代理店（任意）</label>
+                  <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                    <option value="">紐付なし</option>
+                    <option>AG-001 デジタルパートナーズ</option>
+                    <option>AG-002 ウェブコンサル合同会社</option>
+                    <option>AG-003 ITソリューションズ</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">💳 決済設定</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">3DS認証を有効化</span></label>
+                    <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">リカーリング（継続課金）</span></label>
+                    <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">CVV必須</span></label>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-xs text-slate-500 font-semibold">決済方式</p>
+                    <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">トークン決済</span></label>
+                    <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">LINK決済</span></label>
+                    <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">API決済</span></label>
+                  </div>
+                </div>
+                <div className="mt-2">
+                  <label className="text-xs font-semibold text-slate-600">希望ブランド</label>
+                  <div className="flex gap-3 mt-1">
+                    {["VISA", "Mastercard", "JCB", "AMEX", "Diners"].map(b => (
+                      <label key={b} className="flex items-center gap-1 text-xs cursor-pointer"><input type="checkbox" defaultChecked={b === "VISA" || b === "Mastercard"} className="w-3.5 h-3.5 rounded" />{b}</label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-bold text-slate-700 mb-2">🔒 セキュリティ</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div><label className="text-xs font-semibold text-slate-600">コールバックURL</label><input type="url" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="https://example.com/callback" /></div>
+                  <div><label className="text-xs font-semibold text-slate-600">Webhook URL</label><input type="url" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="https://example.com/webhook" /></div>
+                </div>
+                <div className="mt-2"><label className="text-xs font-semibold text-slate-600">IP制限（改行区切り）</label>
+                  <textarea rows={2} className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono resize-none" placeholder="203.0.113.0/24&#10;198.51.100.0/24" />
+                </div>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-200 rounded p-3 text-xs text-amber-700">
+                <p className="font-bold">⚠️ サイト追加後の流れ</p>
+                <p className="mt-1">サイト作成後、M04「既存加盟店サイト追加審査」に審査案件が自動作成されます。AIサイト審査→人間判定→承認の順で審査が行われます。</p>
+              </div>
+            </div>
+            <div className="p-4 border-t flex gap-2 justify-end sticky bottom-0 bg-white">
+              <button onClick={() => setShowSiteAddModal(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => { setShowSiteAddModal(false); toast("サイトを追加しました。サイト追加審査に案件が作成されます", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">サイトを追加して審査申請</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ConfirmDialog config={actionConfirm} onClose={() => setActionConfirm(null)} />
     </div>
   );
@@ -3171,112 +3279,6 @@ const MasterUserManagement = () => {
           <div className="p-4 border-t flex gap-2 justify-end">
             <button onClick={() => setShowInviteM04(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
             <button onClick={() => { setShowInviteM04(false); toast("招待メールを送信しました", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">招待メール送信</button>
-          </div>
-        </div>
-      </div>
-    )}
-    {/* ── Modal: サイト追加 ── */}
-    {showSiteAddModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowSiteAddModal(false)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[600px] max-h-[85vh] overflow-y-auto">
-          <div className="p-4 border-b bg-blue-50 rounded-t-xl flex justify-between items-center sticky top-0 z-10">
-            <h3 className="text-sm font-bold text-slate-800">🌐 新規サイト追加</h3>
-            <button onClick={() => setShowSiteAddModal(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
-          </div>
-          <div className="p-5 space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-700">
-              <p className="font-bold mb-1">📋 サイト追加の流れ</p>
-              <div className="flex items-center gap-2 text-slate-600">
-                <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span><span>基本情報入力</span>
-                <span className="text-slate-300">→</span>
-                <span className="bg-slate-300 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span><span>決済設定</span>
-                <span className="text-slate-300">→</span>
-                <span className="bg-slate-300 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">3</span><span>審査申請</span>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-xs font-bold text-slate-700 mb-2">📌 基本情報</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-xs font-semibold text-slate-600">加盟店 <span className="text-rose-500">*</span></label>
-                  <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
-                    <option value="">加盟店を選択...</option>
-                    <option>M-001 株式会社ABC商事</option>
-                    <option>M-002 合同会社XYZ物産</option>
-                    <option>M-003 株式会社DEFサービス</option>
-                  </select>
-                </div>
-                <div><label className="text-xs font-semibold text-slate-600">サイト名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: ECサイトB" /></div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 mt-2">
-                <div><label className="text-xs font-semibold text-slate-600">サイトURL <span className="text-rose-500">*</span></label><input type="url" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="https://example.com" /></div>
-                <div><label className="text-xs font-semibold text-slate-600">ジャンル <span className="text-rose-500">*</span></label>
-                  <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
-                    <option value="">選択...</option>
-                    <option>EC（物販）</option><option>EC（デジタル）</option><option>サブスクリプション</option>
-                    <option>教育・スクール</option><option>サービス業</option><option>その他</option>
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 mt-2">
-                <div><label className="text-xs font-semibold text-slate-600">月間予定決済高</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: ¥5,000,000" /></div>
-                <div><label className="text-xs font-semibold text-slate-600">通知先メール <span className="text-rose-500">*</span></label><input type="email" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="admin@example.com" /></div>
-              </div>
-              <div className="mt-2"><label className="text-xs font-semibold text-slate-600">代理店（任意）</label>
-                <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
-                  <option value="">紐付なし</option>
-                  <option>AG-001 デジタルパートナーズ</option>
-                  <option>AG-002 ウェブコンサル合同会社</option>
-                  <option>AG-003 ITソリューションズ</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-xs font-bold text-slate-700 mb-2">💳 決済設定</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">3DS認証を有効化</span></label>
-                  <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">リカーリング（継続課金）</span></label>
-                  <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">CVV必須</span></label>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-xs text-slate-500 font-semibold">決済方式</p>
-                  <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">トークン決済</span></label>
-                  <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">LINK決済</span></label>
-                  <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">API決済</span></label>
-                </div>
-              </div>
-              <div className="mt-2">
-                <label className="text-xs font-semibold text-slate-600">希望ブランド</label>
-                <div className="flex gap-3 mt-1">
-                  {["VISA", "Mastercard", "JCB", "AMEX", "Diners"].map(b => (
-                    <label key={b} className="flex items-center gap-1 text-xs cursor-pointer"><input type="checkbox" defaultChecked={b === "VISA" || b === "Mastercard"} className="w-3.5 h-3.5 rounded" />{b}</label>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-xs font-bold text-slate-700 mb-2">🔒 セキュリティ</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-xs font-semibold text-slate-600">コールバックURL</label><input type="url" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="https://example.com/callback" /></div>
-                <div><label className="text-xs font-semibold text-slate-600">Webhook URL</label><input type="url" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="https://example.com/webhook" /></div>
-              </div>
-              <div className="mt-2"><label className="text-xs font-semibold text-slate-600">IP制限（改行区切り）</label>
-                <textarea rows={2} className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono resize-none" placeholder="203.0.113.0/24&#10;198.51.100.0/24" />
-              </div>
-            </div>
-
-            <div className="bg-amber-50 border border-amber-200 rounded p-3 text-xs text-amber-700">
-              <p className="font-bold">⚠️ サイト追加後の流れ</p>
-              <p className="mt-1">サイト作成後、M04「既存加盟店サイト追加審査」に審査案件が自動作成されます。AIサイト審査→人間判定→承認の順で審査が行われます。</p>
-            </div>
-          </div>
-          <div className="p-4 border-t flex gap-2 justify-end sticky bottom-0 bg-white">
-            <button onClick={() => setShowSiteAddModal(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => { setShowSiteAddModal(false); toast("サイトを追加しました。サイト追加審査に案件が作成されます", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">サイトを追加して審査申請</button>
           </div>
         </div>
       </div>
