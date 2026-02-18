@@ -8312,6 +8312,160 @@ const MasterOrderSearch = () => {
 };
 
 // ─── M07: 不正検知設定 ───
+// ─── 不正検知条件ビルダー ───
+const FRAUD_CONDITION_FIELDS = [
+  { value: "amount", label: "取引金額", unit: "円", type: "number", operators: [">", ">=", "<", "<=", "==", "!=", "between"] },
+  { value: "card_country", label: "カード発行国", type: "select", options: ["JP","US","CN","KR","GB","DE","FR","SG","TW","HK","その他"], operators: ["==", "!=", "in", "not_in"] },
+  { value: "ip_country", label: "IPアドレス国", type: "select", options: ["JP","US","CN","KR","GB","DE","FR","SG","TW","HK","その他"], operators: ["==", "!=", "in", "not_in"] },
+  { value: "geo_mismatch", label: "IP/カード国不一致", type: "boolean", operators: ["=="] },
+  { value: "bin", label: "カードBIN", type: "text", operators: ["==", "in", "not_in", "blocklist"] },
+  { value: "card_brand", label: "カードブランド", type: "select", options: ["VISA","Mastercard","JCB","AMEX","Diners","UnionPay"], operators: ["==", "!=", "in", "not_in"] },
+  { value: "card_type", label: "カード種別", type: "select", options: ["credit","debit","prepaid"], operators: ["==", "!="] },
+  { value: "email", label: "メールアドレス", type: "text", operators: ["==", "contains", "not_contains", "regex", "blocklist"] },
+  { value: "email_domain", label: "メールドメイン", type: "text", operators: ["==", "in", "not_in", "blocklist"] },
+  { value: "email_disposable", label: "使い捨てメール", type: "boolean", operators: ["=="] },
+  { value: "ip_address", label: "IPアドレス", type: "text", operators: ["==", "in", "not_in", "cidr", "blocklist"] },
+  { value: "ip_proxy", label: "プロキシ/VPN検知", type: "boolean", operators: ["=="] },
+  { value: "ip_tor", label: "Tor検知", type: "boolean", operators: ["=="] },
+  { value: "device_fingerprint", label: "デバイスフィンガープリント", type: "text", operators: ["==", "blocklist", "new"] },
+  { value: "device_type", label: "デバイス種別", type: "select", options: ["desktop","mobile","tablet","bot","unknown"], operators: ["==", "!=", "in"] },
+  { value: "browser", label: "ブラウザ", type: "select", options: ["Chrome","Firefox","Safari","Edge","Opera","その他"], operators: ["==", "!=", "in"] },
+  { value: "os", label: "OS", type: "select", options: ["Windows","macOS","iOS","Android","Linux","その他"], operators: ["==", "!=", "in"] },
+  { value: "ai_score", label: "AI不正スコア", unit: "", type: "number", operators: [">", ">=", "<", "<=", "between"] },
+  { value: "velocity_card", label: "同一カード取引回数", unit: "件", type: "number", operators: [">", ">="], timeWindow: true },
+  { value: "velocity_email", label: "同一メール取引回数", unit: "件", type: "number", operators: [">", ">="], timeWindow: true },
+  { value: "velocity_ip", label: "同一IP取引回数", unit: "件", type: "number", operators: [">", ">="], timeWindow: true },
+  { value: "velocity_device", label: "同一デバイス取引回数", unit: "件", type: "number", operators: [">", ">="], timeWindow: true },
+  { value: "velocity_amount", label: "累計取引金額", unit: "円", type: "number", operators: [">", ">="], timeWindow: true },
+  { value: "unique_cards_per_email", label: "同一メールのカード数", unit: "枚", type: "number", operators: [">", ">="], timeWindow: true },
+  { value: "unique_emails_per_card", label: "同一カードのメール数", unit: "件", type: "number", operators: [">", ">="], timeWindow: true },
+  { value: "hour", label: "取引時刻（時）", unit: "時", type: "number", operators: [">", ">=", "<", "<=", "between"] },
+  { value: "day_of_week", label: "曜日", type: "select", options: ["月","火","水","木","金","土","日"], operators: ["==", "!=", "in"] },
+  { value: "is_first_txn", label: "初回取引", type: "boolean", operators: ["=="] },
+  { value: "is_recurring", label: "継続課金取引", type: "boolean", operators: ["=="] },
+  { value: "3ds_status", label: "3DS認証結果", type: "select", options: ["authenticated","attempted","failed","not_enrolled","unavailable"], operators: ["==", "!=", "in"] },
+  { value: "merchant_category", label: "加盟店カテゴリ", type: "select", options: ["EC","デジタルコンテンツ","旅行","飲食","小売","サービス","その他"], operators: ["==", "!=", "in"] },
+  { value: "currency", label: "通貨", type: "select", options: ["JPY","USD","EUR","GBP","CNY","KRW","TWD","HKD"], operators: ["==", "!="] },
+  { value: "customer_tenure", label: "顧客登録日数", unit: "日", type: "number", operators: [">", ">=", "<", "<="] },
+  { value: "shipping_billing_match", label: "配送先/請求先一致", type: "boolean", operators: ["=="] },
+  { value: "name_email_match", label: "氏名/メール整合性", type: "boolean", operators: ["=="] },
+];
+
+const OPERATOR_LABELS = {
+  ">": "＞（より大きい）", ">=": "≧（以上）", "<": "＜（より小さい）", "<=": "≦（以下）",
+  "==": "＝（等しい）", "!=": "≠（等しくない）", "between": "範囲（〜の間）",
+  "in": "いずれかに一致", "not_in": "いずれにも不一致",
+  "contains": "含む", "not_contains": "含まない", "regex": "正規表現",
+  "blocklist": "ブロックリストに一致", "cidr": "CIDR範囲", "new": "新規（初出）",
+};
+
+const TIME_WINDOWS = ["1分","3分","5分","10分","30分","1時間","6時間","12時間","24時間","7日","30日"];
+
+const ConditionBuilder = ({ conditions, onChange }) => {
+  const addGroup = () => onChange([...conditions, { logic: "AND", rules: [{ field: "amount", operator: ">", value: "", timeWindow: "" }] }]);
+  const removeGroup = (gi) => onChange(conditions.filter((_, i) => i !== gi));
+  const updateGroupLogic = (gi, logic) => { const c = [...conditions]; c[gi] = { ...c[gi], logic }; onChange(c); };
+  const addRule = (gi) => { const c = [...conditions]; c[gi] = { ...c[gi], rules: [...c[gi].rules, { field: "amount", operator: ">", value: "", timeWindow: "" }] }; onChange(c); };
+  const removeRule = (gi, ri) => { const c = [...conditions]; c[gi] = { ...c[gi], rules: c[gi].rules.filter((_, i) => i !== ri) }; if (c[gi].rules.length === 0) c.splice(gi, 1); onChange(c); };
+  const updateRule = (gi, ri, key, val) => { const c = [...conditions]; const rules = [...c[gi].rules]; rules[ri] = { ...rules[ri], [key]: val }; if (key === "field") { const fd = FRAUD_CONDITION_FIELDS.find(f => f.value === val); rules[ri].operator = fd?.operators[0] || ">"; rules[ri].value = fd?.type === "boolean" ? "true" : ""; rules[ri].value2 = ""; rules[ri].timeWindow = ""; } if (key === "operator") { rules[ri].value2 = ""; } c[gi] = { ...c[gi], rules }; onChange(c); };
+
+  return (
+    <div className="space-y-2">
+      {conditions.map((group, gi) => {
+        const fieldDefs = FRAUD_CONDITION_FIELDS;
+        return (
+          <div key={gi}>
+            {gi > 0 && (
+              <div className="flex items-center gap-2 my-1.5">
+                <div className="flex-1 border-t border-slate-200" />
+                <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-bold">AND</span>
+                <div className="flex-1 border-t border-slate-200" />
+              </div>
+            )}
+            <div className={`rounded-lg border p-2.5 ${conditions.length > 1 ? "border-blue-200 bg-blue-50/30" : "border-slate-200 bg-slate-50/50"}`}>
+              {group.rules.length > 1 && (
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-xs text-slate-500">グループ内条件:</span>
+                  {["AND","OR"].map(l => (
+                    <button key={l} onClick={() => updateGroupLogic(gi, l)} className={`px-2 py-0.5 rounded text-xs font-bold ${group.logic === l ? (l === "AND" ? "bg-blue-600 text-white" : "bg-amber-500 text-white") : "bg-white text-slate-400 border"}`}>{l}</button>
+                  ))}
+                  <span className="text-xs text-slate-400 ml-1">{group.logic === "AND" ? "（すべて満たす）" : "（いずれか満たす）"}</span>
+                </div>
+              )}
+              <div className="space-y-1.5">
+                {group.rules.map((rule, ri) => {
+                  const fd = fieldDefs.find(f => f.value === rule.field) || fieldDefs[0];
+                  const ops = fd.operators || [">"];
+                  return (
+                    <div key={ri} className="flex items-center gap-1.5 bg-white rounded border border-slate-200 p-1.5">
+                      {ri > 0 && group.rules.length > 1 && (
+                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${group.logic === "AND" ? "bg-blue-100 text-blue-600" : "bg-amber-100 text-amber-600"}`}>{group.logic}</span>
+                      )}
+                      <select value={rule.field} onChange={e => updateRule(gi, ri, "field", e.target.value)} className="text-xs border rounded px-1.5 py-1 bg-white min-w-[130px]">
+                        {fieldDefs.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                      </select>
+                      <select value={rule.operator} onChange={e => updateRule(gi, ri, "operator", e.target.value)} className="text-xs border rounded px-1.5 py-1 bg-white min-w-[120px]">
+                        {ops.map(o => <option key={o} value={o}>{OPERATOR_LABELS[o] || o}</option>)}
+                      </select>
+                      {fd.type === "boolean" ? (
+                        <select value={rule.value || "true"} onChange={e => updateRule(gi, ri, "value", e.target.value)} className="text-xs border rounded px-1.5 py-1 bg-white w-16">
+                          <option value="true">はい</option><option value="false">いいえ</option>
+                        </select>
+                      ) : fd.type === "select" && (rule.operator === "in" || rule.operator === "not_in") ? (
+                        <input value={rule.value} onChange={e => updateRule(gi, ri, "value", e.target.value)} className="text-xs border rounded px-1.5 py-1 flex-1 font-mono" placeholder={`例: ${fd.options.slice(0,2).join(", ")}`} />
+                      ) : fd.type === "select" ? (
+                        <select value={rule.value} onChange={e => updateRule(gi, ri, "value", e.target.value)} className="text-xs border rounded px-1.5 py-1 bg-white min-w-[80px]">
+                          <option value="">選択</option>
+                          {fd.options.map(o => <option key={o} value={o}>{o}</option>)}
+                        </select>
+                      ) : rule.operator === "blocklist" || rule.operator === "new" ? (
+                        <span className="text-xs text-slate-400 italic px-1">（自動照合）</span>
+                      ) : (
+                        <input value={rule.value} onChange={e => updateRule(gi, ri, "value", e.target.value)} className="text-xs border rounded px-1.5 py-1 flex-1 font-mono" placeholder={fd.unit ? `値（${fd.unit}）` : "値"} />
+                      )}
+                      {rule.operator === "between" && (
+                        <><span className="text-xs text-slate-400">〜</span><input value={rule.value2 || ""} onChange={e => updateRule(gi, ri, "value2", e.target.value)} className="text-xs border rounded px-1.5 py-1 w-20 font-mono" placeholder={fd.unit || "上限"} /></>
+                      )}
+                      {fd.timeWindow && (
+                        <select value={rule.timeWindow || ""} onChange={e => updateRule(gi, ri, "timeWindow", e.target.value)} className="text-xs border rounded px-1.5 py-1 bg-white min-w-[70px]">
+                          <option value="">時間窓</option>
+                          {TIME_WINDOWS.map(t => <option key={t} value={t}>{t}以内</option>)}
+                        </select>
+                      )}
+                      <button onClick={() => removeRule(gi, ri)} className="text-slate-300 hover:text-rose-500 text-sm px-1" title="条件を削除">✕</button>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex items-center gap-2 mt-1.5">
+                <button onClick={() => addRule(gi)} className="text-xs text-blue-600 hover:text-blue-800 font-semibold">+ 条件を追加</button>
+                {conditions.length > 1 && <button onClick={() => removeGroup(gi)} className="text-xs text-rose-400 hover:text-rose-600 ml-auto">グループ削除</button>}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+      <button onClick={addGroup} className="text-xs text-blue-600 hover:text-blue-800 font-semibold border border-dashed border-blue-300 rounded-lg px-3 py-1.5 w-full hover:bg-blue-50 transition-colors">+ ANDグループを追加</button>
+    </div>
+  );
+};
+
+const conditionsToText = (conditions) => {
+  return conditions.map(g => {
+    const parts = g.rules.map(r => {
+      const fd = FRAUD_CONDITION_FIELDS.find(f => f.value === r.field);
+      const label = fd?.label || r.field;
+      const opLabel = { ">":"＞", ">=":"≧", "<":"＜", "<=":"≦", "==":"＝", "!=":"≠", "between":"〜", "in":"∈", "not_in":"∉", "contains":"含む", "not_contains":"含まない", "regex":"正規表現", "blocklist":"ブロックリスト一致", "cidr":"CIDR", "new":"新規" }[r.operator] || r.operator;
+      if (fd?.type === "boolean") return `${label} ${r.value === "false" ? "= No" : "= Yes"}`;
+      if (r.operator === "blocklist" || r.operator === "new") return `${label} ${opLabel}`;
+      const tw = r.timeWindow ? `（${r.timeWindow}以内）` : "";
+      if (r.operator === "between") return `${label} ${r.value}〜${r.value2 || "?"}${fd?.unit || ""}${tw}`;
+      return `${label} ${opLabel} ${r.value}${fd?.unit || ""}${tw}`;
+    });
+    return parts.length > 1 ? `(${parts.join(` ${g.logic} `)})` : parts[0];
+  }).join(" AND ");
+};
+
 const MasterFraudSettings = () => {
   const toast = useToast();
   const [ruleTab, setRuleTab] = useState("rules");
@@ -8320,16 +8474,42 @@ const MasterFraudSettings = () => {
   const [showAddBlock, setShowAddBlock] = useState(null);
   const [actionConfirm, setActionConfirm] = useState(null);
   const [expandedRule, setExpandedRule] = useState(null);
+  const [newRuleConditions, setNewRuleConditions] = useState([{ logic: "AND", rules: [{ field: "amount", operator: ">", value: "", timeWindow: "" }] }]);
+
+  const initConditions = {
+    "FR-001": [{ logic: "AND", rules: [{ field: "amount", operator: ">", value: "500000", timeWindow: "" }] }],
+    "FR-002": [{ logic: "AND", rules: [{ field: "velocity_card", operator: ">=", value: "3", timeWindow: "5分" }] }],
+    "FR-003": [{ logic: "AND", rules: [
+      { field: "card_country", operator: "!=", value: "JP", timeWindow: "" },
+      { field: "amount", operator: ">", value: "100000", timeWindow: "" },
+    ] }],
+    "FR-004": [{ logic: "AND", rules: [
+      { field: "hour", operator: "between", value: "0", value2: "6", timeWindow: "" },
+      { field: "amount", operator: ">", value: "200000", timeWindow: "" },
+    ] }],
+    "FR-005": [{ logic: "AND", rules: [{ field: "ai_score", operator: ">", value: "0.80", timeWindow: "" }] }],
+    "FR-006": [{ logic: "AND", rules: [
+      { field: "ai_score", operator: ">", value: "0.60", timeWindow: "" },
+      { field: "ai_score", operator: "<=", value: "0.80", timeWindow: "" },
+    ] }],
+    "FR-007": [{ logic: "AND", rules: [
+      { field: "is_first_txn", operator: "==", value: "true", timeWindow: "" },
+      { field: "amount", operator: ">", value: "300000", timeWindow: "" },
+    ] }],
+    "FR-008": [{ logic: "AND", rules: [{ field: "bin", operator: "blocklist", value: "", timeWindow: "" }] }],
+  };
+  const [ruleConditions, setRuleConditions] = useState(initConditions);
+  const updateRuleConditions = (ruleId, conds) => setRuleConditions(prev => ({ ...prev, [ruleId]: conds }));
 
   const fraudRules = [
-    { id: "FR-001", name: "高額取引チェック", type: "金額閾値", condition: "金額 > ¥500,000", action: "例外キュー送り", priority: 1, enabled: true, hits30d: 12 },
-    { id: "FR-002", name: "短時間連続取引", type: "速度チェック", condition: "同一カード 5分以内に3件以上", action: "自動ブロック", priority: 2, enabled: true, hits30d: 8 },
-    { id: "FR-003", name: "海外カード制限", type: "地域制限", condition: "発行国 ≠ JP かつ 金額 > ¥100,000", action: "例外キュー送り", priority: 3, enabled: true, hits30d: 23 },
-    { id: "FR-004", name: "深夜帯高額", type: "時間帯+金額", condition: "0:00〜6:00 かつ 金額 > ¥200,000", action: "例外キュー送り", priority: 4, enabled: true, hits30d: 3 },
-    { id: "FR-005", name: "AIスコア閾値", type: "AI判定", condition: "不正スコア > 0.80", action: "自動ブロック", priority: 5, enabled: true, hits30d: 15 },
-    { id: "FR-006", name: "AIスコア注意", type: "AI判定", condition: "不正スコア > 0.60 かつ ≤ 0.80", action: "例外キュー送り（確認）", priority: 6, enabled: true, hits30d: 42 },
-    { id: "FR-007", name: "初回大口取引", type: "パターン", condition: "初回取引 かつ 金額 > ¥300,000", action: "例外キュー送り", priority: 7, enabled: false, hits30d: 0 },
-    { id: "FR-008", name: "BINブロックリスト", type: "リスト照合", condition: "BIN がブロックリストに一致", action: "自動ブロック", priority: 8, enabled: true, hits30d: 5 },
+    { id: "FR-001", name: "高額取引チェック", type: "金額閾値", action: "例外キュー送り", priority: 1, enabled: true, hits30d: 12 },
+    { id: "FR-002", name: "短時間連続取引", type: "速度チェック", action: "自動ブロック", priority: 2, enabled: true, hits30d: 8 },
+    { id: "FR-003", name: "海外カード制限", type: "地域制限", action: "例外キュー送り", priority: 3, enabled: true, hits30d: 23 },
+    { id: "FR-004", name: "深夜帯高額", type: "時間帯+金額", action: "例外キュー送り", priority: 4, enabled: true, hits30d: 3 },
+    { id: "FR-005", name: "AIスコア閾値", type: "AI判定", action: "自動ブロック", priority: 5, enabled: true, hits30d: 15 },
+    { id: "FR-006", name: "AIスコア注意", type: "AI判定", action: "例外キュー送り（確認）", priority: 6, enabled: true, hits30d: 42 },
+    { id: "FR-007", name: "初回大口取引", type: "パターン", action: "例外キュー送り", priority: 7, enabled: false, hits30d: 0 },
+    { id: "FR-008", name: "BINブロックリスト", type: "リスト照合", action: "自動ブロック", priority: 8, enabled: true, hits30d: 5 },
   ];
 
   return (
@@ -8376,7 +8556,7 @@ const MasterFraudSettings = () => {
                   <span className="text-xs font-mono text-slate-400 w-16">{r.id}</span>
                   <span className="text-xs font-bold text-slate-700 w-32">{r.name}</span>
                   <Badge text={r.type} color={r.type === "AI判定" ? "purple" : r.type === "速度チェック" ? "blue" : "gray"} />
-                  <span className="text-xs text-slate-500 font-mono flex-1 truncate ml-2">{r.condition}</span>
+                  <span className="text-xs text-slate-500 font-mono flex-1 truncate ml-2">{conditionsToText(ruleConditions[r.id] || [])}</span>
                   <Badge text={r.action} color={r.action.includes("ブロック") ? "red" : "yellow"} />
                   <span className="text-xs text-slate-500 w-16 text-right">優先: {r.priority}</span>
                   <span className="text-xs text-slate-500 w-16 text-right">{r.hits30d}件/30d</span>
@@ -8402,8 +8582,8 @@ const MasterFraudSettings = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-slate-600">条件</label>
-                      <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 bg-white font-mono" defaultValue={r.condition} />
+                      <label className="text-xs font-semibold text-slate-600 mb-1 block">条件設定</label>
+                      <ConditionBuilder conditions={ruleConditions[r.id] || [{ logic: "AND", rules: [{ field: "amount", operator: ">", value: "" }] }]} onChange={(c) => updateRuleConditions(r.id, c)} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
@@ -8839,39 +9019,9 @@ const MasterFraudSettings = () => {
                 <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 高額取引チェック" />
               </div>
               {/* 条件設定 */}
-              <div className="bg-slate-50 rounded-lg border border-slate-200 p-3 space-y-3">
-                <p className="text-xs font-bold text-slate-600">条件設定</p>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <label className="text-xs text-slate-500">対象フィールド <span className="text-rose-500">*</span></label>
-                    <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
-                      <option>金額</option>
-                      <option>カード発行国</option>
-                      <option>BIN</option>
-                      <option>AIスコア</option>
-                      <option>取引回数（時間窓）</option>
-                      <option>時間帯</option>
-                      <option>初回取引フラグ</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs text-slate-500">演算子 <span className="text-rose-500">*</span></label>
-                    <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
-                      <option>＞（より大きい）</option>
-                      <option>≧（以上）</option>
-                      <option>＝（等しい）</option>
-                      <option>≠（等しくない）</option>
-                      <option>＜（より小さい）</option>
-                      <option>含む</option>
-                      <option>含まない</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs text-slate-500">値 <span className="text-rose-500">*</span></label>
-                    <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 500000" />
-                  </div>
-                </div>
-                <button onClick={() => toast("AND条件を追加しました", "info")} className="text-xs text-blue-600 hover:underline">+ AND条件を追加</button>
+              <div className="bg-slate-50 rounded-lg border border-slate-200 p-3 space-y-2">
+                <p className="text-xs font-bold text-slate-600">条件設定 <span className="text-rose-500">*</span></p>
+                <ConditionBuilder conditions={newRuleConditions} onChange={setNewRuleConditions} />
               </div>
               {/* アクション */}
               <div>
@@ -8919,7 +9069,7 @@ const MasterFraudSettings = () => {
             {/* Footer */}
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowAddRule(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setActionConfirm({ title: "ルール作成の確認", description: "新しい不正検知ルールを作成します。", warning: "作成後、admin権限の場合はsuper_adminの承認待ちになります。super_adminの場合は即座に有効化されます。", type: "approve", onConfirm: () => { setShowAddRule(false); toast("不正検知ルールを作成しました（承認待ち）", "success"); } })} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">ルールを作成</button>
+              <button onClick={() => setActionConfirm({ title: "ルール作成の確認", description: "新しい不正検知ルールを作成します。", warning: "作成後、admin権限の場合はsuper_adminの承認待ちになります。super_adminの場合は即座に有効化されます。", type: "approve", onConfirm: () => { setShowAddRule(false); setNewRuleConditions([{ logic: "AND", rules: [{ field: "amount", operator: ">", value: "", timeWindow: "" }] }]); toast("不正検知ルールを作成しました（承認待ち）", "success"); } })} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">ルールを作成</button>
             </div>
           </div>
         </div>
