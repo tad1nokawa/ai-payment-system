@@ -1,10 +1,10 @@
-# DB追加設計書 v1.2 — 追加テーブル定義
+# DB追加設計書 v1.4 — テーブル定義
 
-**作成日: 2026-02-13**
-**対象: 追加要件8件 + 顧客管理(CRM)に対応するDB設計（新規13テーブル + 既存5テーブル変更 + ENUM 11型追加）**
+**作成日: 2026-02-13 / 最終更新: 2026-02-18**
+**対象: 追加要件8件 + 顧客管理(CRM) + 不正検知条件ビルダー + 操作ログ + AI管理 に対応するDB設計**
 
 > 本ドキュメントはDB_Design_ERD_v1.0.md（35テーブル / 24 ENUM）への差分追記。
-> v1.0と合わせて「全48テーブル / 35 ENUM型」となる。
+> v1.0と合わせて「全62テーブル / 42 ENUM型」となる。
 
 ---
 
@@ -618,3 +618,208 @@ UNIQUE制約: (merchant_id, processor_id)
 |-----|------|
 | hold | 留保（精算時に売上の一定割合を留保） |
 | release | 解放（リザーブ期間経過後に加盟店へ返還） |
+
+---
+
+## v1.4追加: 不正検知・AI・操作ログ・通知 関連テーブル（2026-02-18追加）
+
+ワイヤーフレーム v3 最新版の全画面精査に基づき、不足テーブルを追加。
+
+### 追加テーブル一覧
+
+| # | グループ | テーブル名（仮） | 用途 | 関連画面 |
+|---|---------|----------------|------|---------|
+| 1 | 不正検知 | fraud_rules | 不正検知ルール定義 | M07 |
+| 2 | 不正検知 | fraud_rule_conditions | ルールの条件グループ・条件行 | M07 |
+| 3 | 不正検知 | fraud_blocklist | BIN/IP/メール/デバイスのブロック・ホワイトリスト | M07 |
+| 4 | 不正検知 | fraud_detection_logs | 検知ログ（ルール発火履歴） | M07 |
+| 5 | 不正検知 | fraud_merchant_overrides | 加盟店別ルール閾値オーバーライド | M07 |
+| 6 | AI | ai_models | AIモデルバージョン管理 | M05, M07 |
+| 7 | AI | ai_model_metrics | AIモデル精度メトリクス履歴 | M05, M07 |
+| 8 | AI | ai_prompts | AIプロンプト設定（6種） | M13 API設定タブ |
+| 9 | AI | ai_chat_sessions | AIチャット会話セッション | M01, S12 |
+| 10 | AI | ai_chat_messages | AIチャットメッセージ | M01, S12 |
+| 11 | 通知 | notification_channels | 通知チャネル設定（Slack/Email/SMS） | M13 通知タブ |
+| 12 | 通知 | notification_rules | イベント別通知ルール | M13 通知タブ |
+| 13 | 監査 | audit_logs | 管理画面操作ログ（PCI DSS準拠） | M13 操作ログタブ |
+| 14 | 接続先審査 | processor_applications | 接続先審査申込 | M06, M09b |
+
+### fraud_rules（不正検知ルール）
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | UUID | PK |
+| rule_code | VARCHAR(20) | ルールコード（FR-001等） |
+| name | VARCHAR(255) | ルール名 |
+| type | fraud_rule_type | 種別（金額閾値/速度チェック/地域制限/時間帯+金額/AI判定/パターン/リスト照合） |
+| action | fraud_action | 検知時アクション（自動ブロック/例外キュー送り/例外キュー送り（確認）/フラグのみ） |
+| priority | INT | 優先順位（小さいほど先に評価） |
+| is_enabled | BOOLEAN | 有効/無効 |
+| is_test_mode | BOOLEAN | テストモード（検知のみ、ブロックしない） |
+| scope | VARCHAR(20) | 適用スコープ（global/merchant_specific） |
+| scope_merchant_ids | JSONB | 加盟店指定時のID配列 |
+| hits_30d | INT | 30日間の検知数（バッチ集計） |
+| created_by | UUID | 作成者 |
+| approved_by | UUID | 承認者（admin→super_admin承認フロー） |
+| created_at | TIMESTAMPTZ | 作成日時 |
+| updated_at | TIMESTAMPTZ | 更新日時 |
+
+### fraud_rule_conditions（ルール条件）
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | UUID | PK |
+| rule_id | UUID | FK → fraud_rules |
+| group_index | INT | グループ番号（グループ間はAND） |
+| group_logic | VARCHAR(3) | グループ内の論理（AND/OR） |
+| field | VARCHAR(50) | 条件フィールド（amount/card_country/ai_score等35種） |
+| operator | VARCHAR(20) | 演算子（>/>=/</<=/==/!=/between/in/not_in/contains/blocklist/cidr/new等） |
+| value | TEXT | 比較値 |
+| value2 | TEXT | 範囲上限値（between演算子用） |
+| time_window | VARCHAR(20) | 時間窓（速度系: 1分/5分/1時間/24時間/30日等） |
+| sort_order | INT | グループ内の表示順 |
+
+### fraud_blocklist（ブロック/ホワイトリスト）
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | UUID | PK |
+| list_type | VARCHAR(10) | block / white / ng_list |
+| entry_type | VARCHAR(20) | BIN/IP/メール/デバイスID/カスタム |
+| value | TEXT | エントリ値 |
+| reason | TEXT | 登録理由 |
+| expires_at | TIMESTAMPTZ | 有効期限（NULLで永久） |
+| added_by | UUID | 登録者 |
+| created_at | TIMESTAMPTZ | 登録日時 |
+
+### fraud_detection_logs（検知ログ）
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | UUID | PK |
+| transaction_id | UUID | FK → transactions |
+| rule_id | UUID | FK → fraud_rules |
+| action_taken | fraud_action | 実際に取られたアクション |
+| score | DECIMAL(5,4) | AI不正スコア（該当する場合） |
+| matched_conditions | JSONB | マッチした条件の詳細 |
+| is_false_positive | BOOLEAN | 誤検知フラグ（事後判定） |
+| reviewed_by | UUID | 確認者 |
+| reviewed_at | TIMESTAMPTZ | 確認日時 |
+| created_at | TIMESTAMPTZ | 検知日時 |
+
+### fraud_merchant_overrides（加盟店別閾値オーバーライド）
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | UUID | PK |
+| merchant_id | UUID | FK → merchants |
+| rule_id | UUID | FK → fraud_rules |
+| override_conditions | JSONB | オーバーライドする条件（元条件を上書き） |
+| is_enabled | BOOLEAN | 有効/無効 |
+| created_at | TIMESTAMPTZ | 作成日時 |
+| updated_at | TIMESTAMPTZ | 更新日時 |
+
+UNIQUE制約: (merchant_id, rule_id)
+
+### ai_models（AIモデル管理）
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | UUID | PK |
+| module | ai_module_type | モジュール種別（fraud/review/routing/chat/prediction） |
+| version | VARCHAR(20) | バージョン（v2.1等） |
+| status | ai_model_status | ステータス（training/shadow/active/retired） |
+| accuracy | DECIMAL(5,2) | 精度 |
+| precision_score | DECIMAL(5,2) | 適合率 |
+| recall | DECIMAL(5,2) | 再現率 |
+| f1_score | DECIMAL(5,2) | F1スコア |
+| false_positive_rate | DECIMAL(5,4) | 誤検知率 |
+| training_data_count | INT | 学習データ件数 |
+| trained_at | TIMESTAMPTZ | 学習完了日時 |
+| activated_at | TIMESTAMPTZ | 本番投入日時 |
+| created_at | TIMESTAMPTZ | 作成日時 |
+
+### ai_prompts（AIプロンプト設定）
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | UUID | PK |
+| function_name | VARCHAR(50) | 機能名（fraud_detection/review/chat_support/report/url_patrol/routing） |
+| display_name | VARCHAR(100) | 表示名 |
+| model | VARCHAR(50) | 使用モデル（claude-4-opus等） |
+| max_tokens | INT | 最大トークン数 |
+| temperature | DECIMAL(3,2) | Temperature |
+| system_prompt | TEXT | システムプロンプト |
+| is_active | BOOLEAN | 有効フラグ |
+| updated_by | UUID | 更新者 |
+| updated_at | TIMESTAMPTZ | 更新日時 |
+
+### audit_logs（操作ログ）
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | BIGSERIAL | PK |
+| user_id | UUID | 操作者 |
+| user_type | VARCHAR(20) | admin/merchant/agent |
+| user_name | VARCHAR(100) | 表示名 |
+| action_type | VARCHAR(50) | 操作種別（画面操作/データ変更/メール送信/ログイン/ログアウト） |
+| target_page | VARCHAR(100) | 対象ページ |
+| target_url | TEXT | URL/詳細 |
+| ip_address | INET | IPアドレス |
+| user_agent | TEXT | User-Agent |
+| details | JSONB | 変更内容の詳細 |
+| created_at | TIMESTAMPTZ | 操作日時 |
+
+パーティション: created_at で月次パーティション、90日保持（PCI DSS準拠）
+
+### processor_applications（接続先審査）
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | UUID | PK |
+| application_id | UUID | FK → merchant_applications |
+| site_id | UUID | FK → sites |
+| processor_id | UUID | FK → processors |
+| status | proc_app_status | ステータス（pending/api_review/merchant_registration/test_transaction/approved/rejected） |
+| api_review_status | VARCHAR(20) | API審査ステータス |
+| merchant_reg_status | VARCHAR(20) | 加盟店登録ステータス |
+| test_txn_status | VARCHAR(20) | テスト決済ステータス |
+| external_merchant_id | VARCHAR(100) | 接続先側の加盟店ID |
+| notes | TEXT | メモ |
+| created_at | TIMESTAMPTZ | 作成日時 |
+| updated_at | TIMESTAMPTZ | 更新日時 |
+
+### 追加ENUM型（v1.4）
+
+```sql
+CREATE TYPE fraud_rule_type AS ENUM (
+    'amount_threshold', 'velocity', 'geo_restriction',
+    'time_amount', 'ai_score', 'pattern', 'list_match', 'custom'
+);
+
+CREATE TYPE fraud_action AS ENUM (
+    'auto_block', 'queue_review', 'queue_review_confirm', 'flag_only'
+);
+
+CREATE TYPE ai_module_type AS ENUM (
+    'fraud', 'review', 'routing', 'chat', 'prediction', 'url_patrol'
+);
+
+CREATE TYPE ai_model_status AS ENUM (
+    'training', 'shadow', 'active', 'retired'
+);
+
+CREATE TYPE proc_app_status AS ENUM (
+    'pending', 'api_review', 'merchant_registration',
+    'test_transaction', 'approved', 'rejected'
+);
+```
+
+---
+
+## テーブル数サマリー（v1.4更新）
+
+| 区分 | v1.0 | v1.1追加 | v1.2追加 | v1.3追加 | v1.4追加 | 合計 |
+|------|------|---------|---------|---------|---------|------|
+| テーブル | 35 | 10 | 5 | 2 | 10 | **62** |
+| ENUM | 24 | 8 | 4 | 1 | 5 | **42** |
