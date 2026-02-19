@@ -13269,6 +13269,82 @@ const MerchantCustomers = () => {
 };
 
 // ─── P02: 決済ページ ───
+// 決済処理ステップアニメーション
+const PaymentProcessingFlow = ({ onComplete, onError }) => {
+  const steps = [
+    { id: 1, label: "トークン化", desc: "カード情報を暗号化", icon: "🔑", zone: "A" },
+    { id: 2, label: "ルーティング", desc: "最適な接続先を選択", icon: "🔀", zone: "A" },
+    { id: 3, label: "不正検知", desc: "リスクスコア判定", icon: "🛡️", zone: "A" },
+    { id: 4, label: "接続先通信", desc: "プロセッサーへ送信", icon: "📡", zone: "A" },
+    { id: 5, label: "結果同期", desc: "管理系DBに記録", icon: "💾", zone: "B" },
+  ];
+  const [currentStep, setCurrentStep] = useState(0);
+  const [status, setStatus] = useState("processing"); // processing | success | error
+
+  useEffect(() => {
+    if (status !== "processing") return;
+    if (currentStep >= steps.length) {
+      setStatus("success");
+      setTimeout(() => onComplete(), 800);
+      return;
+    }
+    const timer = setTimeout(() => setCurrentStep(s => s + 1), 900 + Math.random() * 400);
+    return () => clearTimeout(timer);
+  }, [currentStep, status]);
+
+  return (
+    <div className="bg-white rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
+      <div className="bg-slate-900 text-white px-6 py-5">
+        <div className="flex items-center gap-2"><span className="text-lg">🔒</span><span className="text-sm font-bold">決済処理中</span></div>
+      </div>
+      <div className="px-6 py-5">
+        {/* Progress bar */}
+        <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden mb-6">
+          <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500 ease-out" style={{ width: `${(currentStep / steps.length) * 100}%` }} />
+        </div>
+
+        {/* Steps */}
+        <div className="space-y-2">
+          {steps.map((step, idx) => {
+            const isDone = idx < currentStep;
+            const isActive = idx === currentStep && status === "processing";
+            return (
+              <div key={step.id} className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${isActive ? "bg-blue-50 border border-blue-200 shadow-sm" : isDone ? "bg-emerald-50/50" : "opacity-40"}`}>
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0 ${isDone ? "bg-emerald-100" : isActive ? "bg-blue-100" : "bg-slate-100"}`}>
+                  {isDone ? "✅" : isActive ? <span className="animate-pulse">{step.icon}</span> : step.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-bold ${isDone ? "text-emerald-700" : isActive ? "text-blue-700" : "text-slate-400"}`}>{step.label}</span>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${step.zone === "A" ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600"}`}>Zone {step.zone}</span>
+                  </div>
+                  <p className={`text-xs ${isDone ? "text-emerald-500" : isActive ? "text-blue-500" : "text-slate-300"}`}>{isDone ? "完了" : isActive ? "処理中..." : step.desc}</p>
+                </div>
+                {isActive && <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin shrink-0" />}
+                {isDone && <span className="text-emerald-500 text-xs font-bold shrink-0">✓</span>}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Zone Legend */}
+        <div className="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-slate-100">
+          <span className="flex items-center gap-1 text-[10px]"><span className="w-2 h-2 rounded bg-red-400"></span><span className="text-slate-400">Zone A (CDE)</span></span>
+          <span className="flex items-center gap-1 text-[10px]"><span className="w-2 h-2 rounded bg-blue-400"></span><span className="text-slate-400">Zone B (管理系)</span></span>
+        </div>
+
+        <p className="text-xs text-slate-400 text-center mt-3">ブラウザを閉じないでください</p>
+
+        {/* ワイヤーフレーム用: 手動遷移ボタン */}
+        <div className="mt-4 flex gap-2 justify-center">
+          <button onClick={onComplete} className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded text-xs">→ 成功</button>
+          <button onClick={onError} className="px-3 py-1 bg-rose-100 text-rose-700 rounded text-xs">→ 失敗</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const PaymentPage = () => {
   const [screen, setScreen] = useState("input");
   return (
@@ -13352,20 +13428,7 @@ const PaymentPage = () => {
         )}
 
         {screen === "processing" && (
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
-            <div className="bg-slate-900 text-white px-6 py-5">
-              <div className="flex items-center gap-2"><span className="text-lg">🔒</span><span className="text-sm font-bold">安全なお支払い</span></div>
-            </div>
-            <div className="px-6 py-16 text-center">
-              <div className="animate-spin w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full mx-auto" />
-              <p className="text-sm font-bold mt-4 text-slate-700">決済処理中…</p>
-              <p className="text-xs text-slate-400 mt-2">ブラウザを閉じないでください</p>
-              <div className="mt-6 flex gap-2 justify-center">
-                <button onClick={() => setScreen("complete")} className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded text-xs">→ 成功</button>
-                <button onClick={() => setScreen("error")} className="px-3 py-1 bg-rose-100 text-rose-700 rounded text-xs">→ 失敗</button>
-              </div>
-            </div>
-          </div>
+          <PaymentProcessingFlow onComplete={() => setScreen("complete")} onError={() => setScreen("error")} />
         )}
 
         {screen === "complete" && (

@@ -417,6 +417,94 @@
   </div>
 </div>
 
+<!-- ========== 2.5 PAYMENT PROCESSING STEPS ========== -->
+<div class="user-section">
+  <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">⚡ 決済処理ステップ詳細 — Zone A 内部フロー</h3>
+  <p style="font-size:12px;color:var(--text-sub);margin-bottom:16px;">「¥9,800を支払う」ボタン押下後に実行される処理フロー。カード番号はZone A内で完結し、Zone Bにはトークンと結果のみ同期。</p>
+
+  <!-- Step flow -->
+  <div style="display:flex;align-items:stretch;gap:0;margin:20px 0;overflow-x:auto;">
+    <!-- Step 1 -->
+    <div style="flex:1;min-width:0;">
+      <div style="background:var(--zone-a-bg);border:2px solid var(--zone-a-border);border-radius:12px;padding:16px;text-align:center;position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--zone-a);color:white;font-size:10px;font-weight:700;padding:2px 10px;border-radius:10px;">STEP 1</div>
+        <div style="font-size:28px;margin:8px 0 4px;">🔑</div>
+        <div style="font-size:13px;font-weight:700;color:#991B1B;">トークン化</div>
+        <div style="font-size:10px;color:var(--text-sub);margin-top:4px;">カード番号 → トークン<br>CDE iframe内で暗号化</div>
+        <div style="margin-top:8px;"><span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;background:#FEE2E2;color:#991B1B;">Zone A</span></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;padding:0 4px;"><div style="width:24px;height:3px;background:var(--zone-a);position:relative;"><div style="position:absolute;right:-1px;top:-4px;width:0;height:0;border-left:7px solid var(--zone-a);border-top:5px solid transparent;border-bottom:5px solid transparent;"></div></div></div>
+    <!-- Step 2 -->
+    <div style="flex:1;min-width:0;">
+      <div style="background:var(--zone-a-bg);border:2px solid var(--zone-a-border);border-radius:12px;padding:16px;text-align:center;position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--zone-a);color:white;font-size:10px;font-weight:700;padding:2px 10px;border-radius:10px;">STEP 2</div>
+        <div style="font-size:28px;margin:8px 0 4px;">🔀</div>
+        <div style="font-size:13px;font-weight:700;color:#991B1B;">ルーティング</div>
+        <div style="font-size:10px;color:var(--text-sub);margin-top:4px;">成功率・手数料から<br>最適接続先を自動選択</div>
+        <div style="margin-top:8px;"><span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;background:#FEE2E2;color:#991B1B;">Zone A</span></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;padding:0 4px;"><div style="width:24px;height:3px;background:var(--zone-a);position:relative;"><div style="position:absolute;right:-1px;top:-4px;width:0;height:0;border-left:7px solid var(--zone-a);border-top:5px solid transparent;border-bottom:5px solid transparent;"></div></div></div>
+    <!-- Step 3 -->
+    <div style="flex:1;min-width:0;">
+      <div style="background:var(--zone-a-bg);border:2px solid var(--zone-a-border);border-radius:12px;padding:16px;text-align:center;position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--zone-a);color:white;font-size:10px;font-weight:700;padding:2px 10px;border-radius:10px;">STEP 3</div>
+        <div style="font-size:28px;margin:8px 0 4px;">🛡️</div>
+        <div style="font-size:13px;font-weight:700;color:#991B1B;">不正検知</div>
+        <div style="font-size:10px;color:var(--text-sub);margin-top:4px;">リスクスコア判定<br>速度/金額/BINチェック</div>
+        <div style="margin-top:8px;"><span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;background:#FEE2E2;color:#991B1B;">Zone A</span></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;padding:0 4px;"><div style="width:24px;height:3px;background:var(--zone-a);position:relative;"><div style="position:absolute;right:-1px;top:-4px;width:0;height:0;border-left:7px solid var(--zone-a);border-top:5px solid transparent;border-bottom:5px solid transparent;"></div></div></div>
+    <!-- Step 4 -->
+    <div style="flex:1;min-width:0;">
+      <div style="background:var(--zone-a-bg);border:2px solid var(--zone-a-border);border-radius:12px;padding:16px;text-align:center;position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--zone-a);color:white;font-size:10px;font-weight:700;padding:2px 10px;border-radius:10px;">STEP 4</div>
+        <div style="font-size:28px;margin:8px 0 4px;">📡</div>
+        <div style="font-size:13px;font-weight:700;color:#991B1B;">接続先通信</div>
+        <div style="font-size:10px;color:var(--text-sub);margin-top:4px;">プロセッサーへ決済要求<br>3DS認証 (必要時)</div>
+        <div style="margin-top:8px;"><span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;background:#FEE2E2;color:#991B1B;">Zone A</span></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;padding:0 4px;"><div style="width:24px;height:3px;background:var(--cross);position:relative;"><div style="position:absolute;right:-1px;top:-4px;width:0;height:0;border-left:7px solid var(--cross);border-top:5px solid transparent;border-bottom:5px solid transparent;"></div></div></div>
+    <!-- Step 5 -->
+    <div style="flex:1;min-width:0;">
+      <div style="background:var(--zone-b-bg);border:2px solid var(--zone-b-border);border-radius:12px;padding:16px;text-align:center;position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--zone-b);color:white;font-size:10px;font-weight:700;padding:2px 10px;border-radius:10px;">STEP 5</div>
+        <div style="font-size:28px;margin:8px 0 4px;">💾</div>
+        <div style="font-size:13px;font-weight:700;color:#1E40AF;">結果同期</div>
+        <div style="font-size:10px;color:var(--text-sub);margin-top:4px;">管理系DBに取引記録<br>例外キュー・通知</div>
+        <div style="margin-top:8px;"><span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;background:#DBEAFE;color:#1E40AF;">Zone B</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail table -->
+  <table style="width:100%;border-collapse:separate;border-spacing:0;border-radius:10px;overflow:hidden;border:1px solid var(--border);font-size:12px;margin-top:16px;">
+    <thead>
+      <tr>
+        <th style="background:#1E293B;color:white;padding:8px 12px;text-align:left;font-size:11px;">ステップ</th>
+        <th style="background:#1E293B;color:white;padding:8px 12px;text-align:left;font-size:11px;">処理内容</th>
+        <th style="background:#1E293B;color:white;padding:8px 12px;text-align:left;font-size:11px;">データ</th>
+        <th style="background:#1E293B;color:white;padding:8px 12px;text-align:left;font-size:11px;width:60px;">Zone</th>
+        <th style="background:#1E293B;color:white;padding:8px 12px;text-align:left;font-size:11px;">失敗時の動作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid var(--border);font-weight:700;">🔑 トークン化</td><td style="padding:8px 12px;border-bottom:1px solid var(--border);">CDE iframe内でカード番号をトークンに変換。JSブリッジでtoken返却</td><td style="padding:8px 12px;border-bottom:1px solid var(--border);">カード番号 → token_xxx</td><td style="padding:8px 12px;border-bottom:1px solid var(--border);"><span class="dir-badge dir-a-to-b" style="font-size:10px;">Zone A</span></td><td style="padding:8px 12px;border-bottom:1px solid var(--border);">エラー画面表示</td></tr>
+      <tr style="background:#F8FAFC;"><td style="padding:8px 12px;border-bottom:1px solid var(--border);font-weight:700;">🔀 ルーティング</td><td style="padding:8px 12px;border-bottom:1px solid var(--border);">成功率・コスト・BIN・地域でスコアリング。最適プロセッサーを自動選択</td><td style="padding:8px 12px;border-bottom:1px solid var(--border);">ルーティングルール (Zone Bから同期済)</td><td style="padding:8px 12px;border-bottom:1px solid var(--border);"><span class="dir-badge dir-a-to-b" style="font-size:10px;">Zone A</span></td><td style="padding:8px 12px;border-bottom:1px solid var(--border);">フォールバック接続先へ</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid var(--border);font-weight:700;">🛡️ 不正検知</td><td style="padding:8px 12px;border-bottom:1px solid var(--border);">速度チェック・金額閾値・BINブロック・地域制限をリアルタイム判定</td><td style="padding:8px 12px;border-bottom:1px solid var(--border);">不正検知ルール (Zone Bから同期済)</td><td style="padding:8px 12px;border-bottom:1px solid var(--border);"><span class="dir-badge dir-a-to-b" style="font-size:10px;">Zone A</span></td><td style="padding:8px 12px;border-bottom:1px solid var(--border);">自動ブロック or 例外キュー</td></tr>
+      <tr style="background:#F8FAFC;"><td style="padding:8px 12px;border-bottom:1px solid var(--border);font-weight:700;">📡 接続先通信</td><td style="padding:8px 12px;border-bottom:1px solid var(--border);">選択されたプロセッサーへ決済要求送信。3DS認証が必要な場合はリダイレクト</td><td style="padding:8px 12px;border-bottom:1px solid var(--border);">token + 金額 + 3DS結果</td><td style="padding:8px 12px;border-bottom:1px solid var(--border);"><span class="dir-badge dir-a-to-b" style="font-size:10px;">Zone A</span></td><td style="padding:8px 12px;border-bottom:1px solid var(--border);">決済失敗エラー表示</td></tr>
+      <tr><td style="padding:8px 12px;font-weight:700;">💾 結果同期</td><td style="padding:8px 12px;">取引結果をイベント駆動でZone Bへ。管理系DBに保存、例外キュー・通知処理</td><td style="padding:8px 12px;">取引結果 (トークンのみ、カード番号なし)</td><td style="padding:8px 12px;"><span class="dir-badge dir-b-to-a" style="font-size:10px;">Zone B</span></td><td style="padding:8px 12px;">リトライキュー→手動確認</td></tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:12px 16px;font-size:12px;">
+    <strong>💡 ワイヤーフレームで確認:</strong> 上部メニュー「決済ページ」→「処理中」タブで、このフローがアニメーション付きで動作確認できます。
+  </div>
+</div>
+
 <!-- ========== 3. CROSS-ZONE FUNCTIONS ========== -->
 <div class="section-title"><span class="num">3</span> 環境をまたぐ機能 (7件) — 要連携設計</div>
 
