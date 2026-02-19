@@ -87,47 +87,99 @@ const ConfirmDialog = ({ config, onClose }) => {
 };
 
 // ─── 共通UIコンポーネント ───
-const Sidebar = ({ items, active, onSelect, title, color, user }) => (
+const Sidebar = ({ items, active, onSelect, title, color, user, switchableUsers, currentUserId, onSwitchUser }) => {
+  const [showSwitcher, setShowSwitcher] = useState(false);
+  const switcherRef = useRef(null);
+
+  // 外部クリックで閉じる
+  useEffect(() => {
+    if (!showSwitcher) return;
+    const handler = (e) => { if (switcherRef.current && !switcherRef.current.contains(e.target)) setShowSwitcher(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showSwitcher]);
+
+  // 権限に応じたメニューフィルタリング
+  const currentUser = switchableUsers?.find(u => u.id === currentUserId);
+  const filteredItems = currentUser ? items.map(item => {
+    if (item.separator) return item;
+    // サイドバーIDからメニューIDを逆引き
+    const menuEntry = Object.entries(MENU_TO_SIDEBAR).find(([, sid]) => sid === item.id);
+    if (!menuEntry) return item;
+    const perm = currentUser.permissions[menuEntry[0]];
+    if (perm === "none") return { ...item, hidden: true };
+    if (perm === "readonly") return { ...item, readOnly: true };
+    return item;
+  }) : items;
+
+  return (
   <div className="w-56 bg-slate-900 text-white flex flex-col shrink-0">
     <div className="px-5 py-4 border-b border-slate-700/50">
       <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{title}</p>
       <p className="text-base font-bold" style={{ color }}>{active}</p>
     </div>
     <nav className="flex-1 py-2 overflow-y-auto">
-      {items.map((item, idx) =>
+      {filteredItems.map((item, idx) =>
         item.separator ? (
           <div key={`sep-${idx}`} className="px-4 pt-4 pb-1.5">
             <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">{item.label}</p>
           </div>
-        ) : (
+        ) : item.hidden ? null : (
         <button
           key={item.id}
           onClick={() => onSelect(item.id)}
           className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2.5 transition-all duration-200 ${
             active === item.id ? "bg-slate-700/70 text-white border-l-3 border-l-white rounded-r-lg" : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
-          }`}
+          } ${item.readOnly ? "opacity-60" : ""}`}
         >
           <span>{item.icon}</span>
           <span>{item.label}</span>
-          {item.badge && <span className="ml-auto bg-rose-500 text-white text-[10px] rounded-full min-w-5 h-5 flex items-center justify-center font-semibold">{item.badge}</span>}
+          {item.readOnly && <span className="ml-auto text-[9px] text-amber-400/70 font-medium">閲覧</span>}
+          {!item.readOnly && item.badge && <span className="ml-auto bg-rose-500 text-white text-[10px] rounded-full min-w-5 h-5 flex items-center justify-center font-semibold">{item.badge}</span>}
         </button>
         )
       )}
     </nav>
-    <div className="px-5 py-3 border-t border-slate-700/50 shrink-0">
+    <div className="px-5 py-3 border-t border-slate-700/50 shrink-0 relative" ref={switcherRef}>
+      {/* ユーザー切替ポップアップ */}
+      {showSwitcher && switchableUsers && (
+        <div className="absolute bottom-full left-0 w-full bg-slate-800 border border-slate-600/50 rounded-t-lg shadow-xl overflow-hidden z-50">
+          <div className="px-3 py-2 bg-slate-700/50 border-b border-slate-600/30">
+            <p className="text-[10px] font-semibold text-amber-400 uppercase tracking-wider">🔄 ユーザー切替 (デモ用)</p>
+          </div>
+          <div className="max-h-64 overflow-y-auto">
+            {switchableUsers.map(u => (
+              <button key={u.id} onClick={() => { onSwitchUser(u.id); setShowSwitcher(false); }}
+                className={`w-full text-left px-3 py-2.5 flex items-center gap-2.5 transition-colors text-xs ${
+                  currentUserId === u.id ? "bg-blue-600/20 border-l-2 border-l-blue-400" : "hover:bg-slate-700/50 border-l-2 border-l-transparent"
+                }`}>
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: u.rColor }}>{u.initials}</div>
+                <div className="flex-1 min-w-0">
+                  <p className={`font-medium truncate ${currentUserId === u.id ? "text-blue-300" : "text-slate-200"}`}>{u.name}</p>
+                  <p className="text-[9px] text-slate-500 truncate">{u.roleLabel}</p>
+                </div>
+                {currentUserId === u.id && <span className="text-blue-400 text-[10px]">●</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {user && (
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold" style={{ color }}>{user.initials}</div>
+        <button onClick={() => switchableUsers && setShowSwitcher(!showSwitcher)}
+          className={`flex items-center gap-2 mb-2 w-full text-left rounded-lg p-1 -m-1 transition-colors ${switchableUsers ? "hover:bg-slate-800 cursor-pointer" : ""}`}>
+          <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ color: "#fff", backgroundColor: currentUser?.rColor || "#475569" }}>{user.initials}</div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-slate-200 truncate">{user.name}</p>
             <p className="text-[10px] text-slate-500 truncate">{user.role}</p>
           </div>
-        </div>
+          {switchableUsers && <span className="text-slate-500 text-[10px]">{showSwitcher ? "▼" : "▲"}</span>}
+        </button>
       )}
       <div className="text-xs text-slate-500 flex items-center gap-2">v1.0 / AI Payment</div>
     </div>
   </div>
-);
+  );
+};
 
 const colorMap = {
   blue: "text-blue-600",
@@ -2928,54 +2980,123 @@ const MerchantAIChat = () => {
 };
 
 // ─── M12: ユーザー管理 ───
+const MASTER_MENU_ITEMS = [
+  { id: "M01", label: "ダッシュボード", icon: "📊", group: "概況" },
+  { id: "M02", label: "例外キュー", icon: "⚡", group: "概況" },
+  { id: "M03", label: "リアルタイム監視", icon: "📡", group: "モニタリング" },
+  { id: "M03b", label: "注文検索", icon: "🔍", group: "取引" },
+  { id: "M16", label: "顧客管理", icon: "👥", group: "取引" },
+  { id: "M14", label: "継続課金管理", icon: "🔄", group: "取引" },
+  { id: "M04", label: "加盟店管理", icon: "🏪", group: "加盟店" },
+  { id: "M06", label: "審査・申込", icon: "📝", group: "加盟店" },
+  { id: "M09b", label: "接続先審査", icon: "🔗", group: "加盟店" },
+  { id: "M15", label: "代理店管理", icon: "🤝", group: "加盟店" },
+  { id: "M08", label: "精算・入金管理", icon: "💰", group: "精算" },
+  { id: "M11", label: "レポート", icon: "📄", group: "精算" },
+  { id: "M09", label: "接続先管理", icon: "🖥️", group: "決済インフラ" },
+  { id: "M10", label: "ルーティング", icon: "🔀", group: "決済インフラ" },
+  { id: "M07", label: "不正検知", icon: "🛡️", group: "決済インフラ" },
+  { id: "M05", label: "AI監視", icon: "🤖", group: "運用" },
+  { id: "M12", label: "スタッフ管理", icon: "👤", group: "運用" },
+  { id: "M13", label: "システム設定", icon: "⚙️", group: "運用" },
+];
+
+const MENU_GROUPS = ["概況", "モニタリング", "取引", "加盟店", "精算", "決済インフラ", "運用"];
+
+// ワイヤーフレーム確認用: ログインユーザー切替リスト
+const SWITCHABLE_USERS = [
+  { id: "U001", name: "田中 太郎", initials: "田", roleLabel: "スーパー管理者", rColor: "#EF4444",
+    permissions: Object.fromEntries(MASTER_MENU_ITEMS.map(m => [m.id, "full"])) },
+  { id: "U002", name: "佐藤 花子", initials: "佐", roleLabel: "管理者", rColor: "#3B82F6",
+    permissions: Object.fromEntries(MASTER_MENU_ITEMS.map(m => [m.id, m.id === "M12" || m.id === "M13" ? "readonly" : "full"])) },
+  { id: "U003", name: "山田 一郎", initials: "山", roleLabel: "レビュアー（審査）", rColor: "#8B5CF6",
+    permissions: { M01: "readonly", M02: "full", M03: "readonly", M03b: "readonly", M16: "none", M14: "none", M04: "full", M06: "full", M09b: "full", M15: "none", M08: "none", M11: "none", M09: "none", M10: "none", M07: "full", M05: "none", M12: "none", M13: "none" } },
+  { id: "U004", name: "鈴木 美咲", initials: "鈴", roleLabel: "レビュアー（不正検知）", rColor: "#8B5CF6",
+    permissions: { M01: "readonly", M02: "full", M03: "readonly", M03b: "readonly", M16: "none", M14: "none", M04: "none", M06: "none", M09b: "none", M15: "none", M08: "none", M11: "none", M09: "none", M10: "none", M07: "full", M05: "readonly", M12: "none", M13: "none" } },
+  { id: "U005", name: "高橋 健太", initials: "高", roleLabel: "レビュアー（閲覧中心）", rColor: "#8B5CF6",
+    permissions: { M01: "readonly", M02: "none", M03: "none", M03b: "readonly", M16: "none", M14: "none", M04: "readonly", M06: "readonly", M09b: "none", M15: "none", M08: "none", M11: "none", M09: "none", M10: "none", M07: "none", M05: "none", M12: "none", M13: "none" } },
+  { id: "U006", name: "伊藤 翔", initials: "伊", roleLabel: "レビュアー（精算）", rColor: "#8B5CF6",
+    permissions: { M01: "readonly", M02: "full", M03: "readonly", M03b: "readonly", M16: "none", M14: "none", M04: "full", M06: "full", M09b: "none", M15: "none", M08: "full", M11: "readonly", M09: "none", M10: "none", M07: "none", M05: "none", M12: "none", M13: "none" } },
+];
+
+// メニューIDとサイドバーID間のマッピング
+const MENU_TO_SIDEBAR = {
+  M01: "dashboard", M02: "queue", M03: "txn", "M03b": "orderSearch", M16: "customers",
+  M14: "recurring", M04: "merchants", M06: "applications", "M09b": "processors",
+  M15: "agents", M08: "settlement", M11: "report", M09: null, M10: "routing",
+  M07: "fraud", M05: "ai", M12: "users", M13: "settings",
+};
+
 const MasterUserManagement = () => {
   const toast = useToast();
   const [showInviteM04, setShowInviteM04] = useState(false);
-  const [selectedStaff, setSelectedStaff] = useState(null);
-  const [showRoleEdit, setShowRoleEdit] = useState(null);
+  const [expandedStaff, setExpandedStaff] = useState(null);
+  const [expandedSection, setExpandedSection] = useState("permissions");
   const [actionConfirm, setActionConfirm] = useState(null);
 
+  // メニュー権限: { メニューID: "full" | "readonly" | "none" }
+  const defaultPermissions = {
+    super_admin: Object.fromEntries(MASTER_MENU_ITEMS.map(m => [m.id, "full"])),
+    admin: Object.fromEntries(MASTER_MENU_ITEMS.map(m => [m.id, "full"])),
+  };
+
   const staffData = [
-    { name: "田中 太郎", email: "tanaka@company.jp", roleLabel: "スーパー管理者", categories: ["全カテゴリ"], catColors: ["red"], mfa: true, lastLogin: "2026-02-11 14:30", rColor: "red", joinDate: "2024-01-15", status: "有効", sessions: [
-      { date: "02/11 14:30", ip: "203.0.113.10", device: "Chrome / macOS", duration: "2h 15m" },
-      { date: "02/11 09:00", ip: "203.0.113.10", device: "Chrome / macOS", duration: "4h 30m" },
-      { date: "02/10 13:20", ip: "203.0.113.10", device: "Chrome / macOS", duration: "3h 10m" },
-    ], activity: [
-      { date: "02/11 14:35", action: "加盟店承認", target: "ABCマート", page: "M04" },
-      { date: "02/11 10:20", action: "システム設定変更", target: "通知設定", page: "M13" },
-      { date: "02/10 16:00", action: "スタッフ招待", target: "新規レビュアー", page: "M12" },
-      { date: "02/10 11:30", action: "ルーティング変更", target: "VISA接続先", page: "M10" },
-    ]},
-    { name: "佐藤 花子", email: "sato@company.jp", roleLabel: "管理者", categories: ["全カテゴリ"], catColors: ["blue"], mfa: true, lastLogin: "2026-02-11 13:45", rColor: "blue", joinDate: "2024-03-01", status: "有効", sessions: [
-      { date: "02/11 13:45", ip: "198.51.100.5", device: "Firefox / Windows", duration: "3h 20m" },
-      { date: "02/10 09:15", ip: "198.51.100.5", device: "Firefox / Windows", duration: "6h 45m" },
-    ], activity: [
-      { date: "02/11 14:00", action: "レポート生成", target: "月次サマリー", page: "M11" },
-      { date: "02/11 10:30", action: "精算バッチ実行", target: "2026-02-10分", page: "M08" },
-    ]},
-    { name: "山田 一郎", email: "yamada@company.jp", roleLabel: "レビュアー", categories: ["審査", "不正検知"], catColors: ["purple", "yellow"], mfa: true, lastLogin: "2026-02-11 14:20", rColor: "purple", joinDate: "2024-06-15", status: "有効", sessions: [
-      { date: "02/11 14:20", ip: "192.0.2.100", device: "Chrome / Windows", duration: "5h 10m" },
-    ], activity: [
-      { date: "02/11 14:25", action: "審査承認", target: "DEFショップ", page: "M04" },
-      { date: "02/11 11:00", action: "不正検知確認", target: "TX-89012", page: "M07" },
-    ]},
-    { name: "鈴木 美咲", email: "suzuki@company.jp", roleLabel: "レビュアー", categories: ["不正検知", "URL巡回"], catColors: ["yellow", "green"], mfa: true, lastLogin: "2026-02-11 12:10", rColor: "purple", joinDate: "2024-08-01", status: "有効", sessions: [
-      { date: "02/11 12:10", ip: "10.0.0.50", device: "Safari / macOS", duration: "3h 00m" },
-    ], activity: [
-      { date: "02/11 12:15", action: "ブロック解除", target: "IP: 45.xxx.xxx.1", page: "M07" },
-    ]},
-    { name: "高橋 健太", email: "takahashi@company.jp", roleLabel: "レビュアー", categories: ["URL巡回"], catColors: ["green"], mfa: false, lastLogin: "2026-02-10 18:00", rColor: "purple", joinDate: "2025-01-10", status: "有効", sessions: [
-      { date: "02/10 18:00", ip: "172.16.0.20", device: "Chrome / Windows", duration: "1h 30m" },
-    ], activity: [
-      { date: "02/10 18:10", action: "URL巡回確認", target: "サイト#S-042", page: "M06" },
-    ]},
-    { name: "伊藤 翔", email: "ito@company.jp", roleLabel: "レビュアー", categories: ["審査", "精算"], catColors: ["purple", "blue"], mfa: true, lastLogin: "2026-02-11 09:30", rColor: "purple", joinDate: "2025-03-20", status: "有効", sessions: [
-      { date: "02/11 09:30", ip: "10.0.0.80", device: "Edge / Windows", duration: "4h 20m" },
-    ], activity: [
-      { date: "02/11 09:45", action: "精算確認", target: "バッチ#B-0211", page: "M08" },
-      { date: "02/11 09:35", action: "審査レビュー", target: "GHIトレーディング", page: "M04" },
-    ]},
+    { id: "U001", name: "田中 太郎", email: "tanaka@company.jp", roleLabel: "スーパー管理者", mfa: true, lastLogin: "2026-02-11 14:30", rColor: "red", joinDate: "2024-01-15", status: "有効",
+      permissions: Object.fromEntries(MASTER_MENU_ITEMS.map(m => [m.id, "full"])),
+      sessions: [
+        { date: "02/11 14:30", ip: "203.0.113.10", device: "Chrome / macOS", duration: "2h 15m" },
+        { date: "02/11 09:00", ip: "203.0.113.10", device: "Chrome / macOS", duration: "4h 30m" },
+        { date: "02/10 13:20", ip: "203.0.113.10", device: "Chrome / macOS", duration: "3h 10m" },
+      ], activity: [
+        { date: "02/11 14:35", action: "加盟店承認", target: "ABCマート", page: "M04" },
+        { date: "02/11 10:20", action: "システム設定変更", target: "通知設定", page: "M13" },
+        { date: "02/10 16:00", action: "スタッフ招待", target: "新規レビュアー", page: "M12" },
+        { date: "02/10 11:30", action: "ルーティング変更", target: "VISA接続先", page: "M10" },
+      ]},
+    { id: "U002", name: "佐藤 花子", email: "sato@company.jp", roleLabel: "管理者", mfa: true, lastLogin: "2026-02-11 13:45", rColor: "blue", joinDate: "2024-03-01", status: "有効",
+      permissions: Object.fromEntries(MASTER_MENU_ITEMS.map(m => [m.id, m.id === "M12" || m.id === "M13" ? "readonly" : "full"])),
+      sessions: [
+        { date: "02/11 13:45", ip: "198.51.100.5", device: "Firefox / Windows", duration: "3h 20m" },
+        { date: "02/10 09:15", ip: "198.51.100.5", device: "Firefox / Windows", duration: "6h 45m" },
+      ], activity: [
+        { date: "02/11 14:00", action: "レポート生成", target: "月次サマリー", page: "M11" },
+        { date: "02/11 10:30", action: "精算バッチ実行", target: "2026-02-10分", page: "M08" },
+      ]},
+    { id: "U003", name: "山田 一郎", email: "yamada@company.jp", roleLabel: "レビュアー", mfa: true, lastLogin: "2026-02-11 14:20", rColor: "purple", joinDate: "2024-06-15", status: "有効",
+      permissions: { M01: "readonly", M02: "full", M03: "readonly", M03b: "readonly", M16: "none", M14: "none", M04: "full", M06: "full", M09b: "full", M15: "none", M08: "none", M11: "none", M09: "none", M10: "none", M07: "full", M05: "none", M12: "none", M13: "none" },
+      sessions: [
+        { date: "02/11 14:20", ip: "192.0.2.100", device: "Chrome / Windows", duration: "5h 10m" },
+      ], activity: [
+        { date: "02/11 14:25", action: "審査承認", target: "DEFショップ", page: "M04" },
+        { date: "02/11 11:00", action: "不正検知確認", target: "TX-89012", page: "M07" },
+      ]},
+    { id: "U004", name: "鈴木 美咲", email: "suzuki@company.jp", roleLabel: "レビュアー", mfa: true, lastLogin: "2026-02-11 12:10", rColor: "purple", joinDate: "2024-08-01", status: "有効",
+      permissions: { M01: "readonly", M02: "full", M03: "readonly", M03b: "readonly", M16: "none", M14: "none", M04: "none", M06: "none", M09b: "none", M15: "none", M08: "none", M11: "none", M09: "none", M10: "none", M07: "full", M05: "readonly", M12: "none", M13: "none" },
+      sessions: [
+        { date: "02/11 12:10", ip: "10.0.0.50", device: "Safari / macOS", duration: "3h 00m" },
+      ], activity: [
+        { date: "02/11 12:15", action: "ブロック解除", target: "IP: 45.xxx.xxx.1", page: "M07" },
+      ]},
+    { id: "U005", name: "高橋 健太", email: "takahashi@company.jp", roleLabel: "レビュアー", mfa: false, lastLogin: "2026-02-10 18:00", rColor: "purple", joinDate: "2025-01-10", status: "有効",
+      permissions: { M01: "readonly", M02: "none", M03: "none", M03b: "readonly", M16: "none", M14: "none", M04: "readonly", M06: "readonly", M09b: "none", M15: "none", M08: "none", M11: "none", M09: "none", M10: "none", M07: "none", M05: "none", M12: "none", M13: "none" },
+      sessions: [
+        { date: "02/10 18:00", ip: "172.16.0.20", device: "Chrome / Windows", duration: "1h 30m" },
+      ], activity: [
+        { date: "02/10 18:10", action: "URL巡回確認", target: "サイト#S-042", page: "M06" },
+      ]},
+    { id: "U006", name: "伊藤 翔", email: "ito@company.jp", roleLabel: "レビュアー", mfa: true, lastLogin: "2026-02-11 09:30", rColor: "purple", joinDate: "2025-03-20", status: "有効",
+      permissions: { M01: "readonly", M02: "full", M03: "readonly", M03b: "readonly", M16: "none", M14: "none", M04: "full", M06: "full", M09b: "none", M15: "none", M08: "full", M11: "readonly", M09: "none", M10: "none", M07: "none", M05: "none", M12: "none", M13: "none" },
+      sessions: [
+        { date: "02/11 09:30", ip: "10.0.0.80", device: "Edge / Windows", duration: "4h 20m" },
+      ], activity: [
+        { date: "02/11 09:45", action: "精算確認", target: "バッチ#B-0211", page: "M08" },
+        { date: "02/11 09:35", action: "審査レビュー", target: "GHIトレーディング", page: "M04" },
+      ]},
   ];
+
+  const permLabel = (v) => v === "full" ? "編集可" : v === "readonly" ? "閲覧のみ" : "非表示";
+  const permColor = (v) => v === "full" ? "green" : v === "readonly" ? "yellow" : "gray";
+  const permCount = (perms, type) => Object.values(perms).filter(v => v === type).length;
 
   return (
   <div className="p-5 space-y-4">
@@ -2987,9 +3108,9 @@ const MasterUserManagement = () => {
     {/* Role Summary */}
     <div className="flex gap-3">
       {[
-        { role: "スーパー管理者", count: 1, textClass: "text-rose-600", icon: "👑" },
-        { role: "管理者", count: 2, textClass: "text-blue-600", icon: "🔑" },
-        { role: "レビュアー", count: 4, textClass: "text-purple-600", icon: "📋" },
+        { role: "スーパー管理者", count: staffData.filter(s => s.roleLabel === "スーパー管理者").length, textClass: "text-rose-600", icon: "👑", desc: "全メニュー編集可" },
+        { role: "管理者", count: staffData.filter(s => s.roleLabel === "管理者").length, textClass: "text-blue-600", icon: "🔑", desc: "個別メニュー権限設定可" },
+        { role: "レビュアー", count: staffData.filter(s => s.roleLabel === "レビュアー").length, textClass: "text-purple-600", icon: "📋", desc: "個別メニュー権限設定可" },
       ].map((r, i) => (
         <div key={i} className="flex-1 bg-white rounded-lg border border-slate-200 shadow-sm p-3">
           <div className="flex items-center gap-2 mb-1">
@@ -2997,168 +3118,120 @@ const MasterUserManagement = () => {
             <span className="text-xs font-bold text-slate-600">{r.role}</span>
           </div>
           <span className={`text-lg font-bold ${r.textClass}`}>{r.count}名</span>
+          <p className="text-xs text-slate-400 mt-0.5">{r.desc}</p>
         </div>
       ))}
     </div>
 
-    {/* Category Assignment Summary */}
-    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-3">
-      <p className="text-xs font-bold text-blue-700 mb-2">💡 カテゴリ担当（レビュアーは複数カテゴリ兼任可能）</p>
-      <div className="flex gap-4 text-xs">
-        {[
-          { cat: "審査", count: 3, icon: "📋", color: "purple" },
-          { cat: "不正検知", count: 2, icon: "🛡️", color: "yellow" },
-          { cat: "URL巡回", count: 2, icon: "🌐", color: "green" },
-          { cat: "精算", count: 1, icon: "💰", color: "blue" },
-        ].map((c, i) => (
-          <div key={i} className="flex items-center gap-1.5">
-            <span>{c.icon}</span>
-            <span className="text-slate-600">{c.cat}</span>
-            <Badge text={`${c.count}名`} color={c.color} />
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* User List */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
-      <TableHeader cols={[{ label: "名前", w: "w-36" }, { label: "メール", w: "flex-1" }, { label: "ロール", w: "w-24" }, { label: "担当カテゴリ", w: "w-44" }, { label: "MFA", w: "w-16" }, { label: "最終ログイン", w: "w-32" }, { label: "操作", w: "w-28" }]}>
-      {staffData.map((u, i) => (
-        <tr key={i} className={`border-b cursor-pointer hover:bg-blue-50 ${i % 2 ? "bg-slate-50" : ""}`} onClick={() => setSelectedStaff(u)}>
-          <td className="px-4 py-2 whitespace-nowrap w-36 font-semibold text-slate-700"><div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs">👤</div>
-            {u.name}
-          </div></td>
-          <td className="px-4 py-2 whitespace-nowrap text-slate-500">{u.email}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={u.roleLabel} color={u.rColor} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-44"><div className="flex gap-1 flex-wrap">
-            {u.categories.map((cat, ci) => (
-              <Badge key={ci} text={cat} color={u.catColors[ci] || "gray"} />
-            ))}
-          </div></td>
-          <td className="px-4 py-2 whitespace-nowrap w-16">{u.mfa ? <span className="text-emerald-600">✅</span> : <span className="text-rose-500">❌</span>}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{u.lastLogin}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setShowRoleEdit(u)} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">編集</button>
-            <button onClick={() => setActionConfirm({ title: "ユーザー無効化", description: `${u.name}（${u.email}）を無効化します。`, warning: "無効化されたユーザーはログインできなくなります。", type: "danger", onConfirm: () => toast(`${u.name} を無効化しました`, "warning") })} className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs hover:bg-rose-100">無効化</button>
-          </div></td>
-        </tr>
-      ))}
-      </TableHeader>
-    </div>
-
-    {/* New Staff Registration Form (Modal Preview) */}
-    <div className="bg-white rounded-lg border p-4">
-      <p className="text-xs font-bold text-slate-600 mb-3">📧 スタッフ招待フォーム（招待メール送信 → リンクからパスワード設定 → アカウント有効化）</p>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs text-slate-500 block mb-1">氏名 *</label>
-          <input className="w-full text-xs border rounded px-2 py-1.5" placeholder="例: 山田 太郎" />
-        </div>
-        <div>
-          <label className="text-xs text-slate-500 block mb-1">メールアドレス *</label>
-          <input className="w-full text-xs border rounded px-2 py-1.5" placeholder="例: yamada@company.jp" />
-        </div>
-        <div>
-          <label className="text-xs text-slate-500 block mb-1">ロール *</label>
-          <select className="w-full text-xs border rounded px-2 py-1.5">
-            <option>選択してください</option>
-            <option>管理者（admin）— 全カテゴリ閲覧・操作可</option>
-            <option>レビュアー（reviewer）— 担当カテゴリのみ</option>
-          </select>
-        </div>
-        <div>
-          <label className="text-xs text-slate-500 block mb-1">MFA設定 *</label>
-          <select className="w-full text-xs border rounded px-2 py-1.5">
-            <option>必須（推奨）</option>
-            <option>任意</option>
-          </select>
-        </div>
-        <div className="col-span-2">
-          <label className="text-xs text-slate-500 block mb-1">担当カテゴリ（レビュアーの場合 / 複数選択可） *</label>
-          <div className="flex gap-3 mt-1">
-            {[
-              { cat: "審査", icon: "📋", checked: true },
-              { cat: "不正検知", icon: "🛡️", checked: true },
-              { cat: "URL巡回", icon: "🌐", checked: false },
-              { cat: "精算", icon: "💰", checked: false },
-            ].map((c, i) => (
-              <label key={i} className={`flex items-center gap-1.5 text-xs px-2 py-1.5 rounded border cursor-pointer ${c.checked ? "bg-blue-50 border-blue-300 text-blue-700" : "bg-white border-slate-200 text-slate-500"}`}>
-                <input type="checkbox" defaultChecked={c.checked} className="w-3 h-3" />
-                <span>{c.icon}</span>
-                <span>{c.cat}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      </div>
-      <div className="flex gap-2 mt-3">
-        <button onClick={() => { setShowInviteM04(false); toast("招待メールを送信しました", "success"); }} className="px-4 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold">招待メール送信</button>
-        <button onClick={() => setShowInviteM04(false)} className="px-4 py-1.5 bg-slate-100 text-slate-600 rounded text-xs">キャンセル</button>
-      </div>
-    </div>
-
-    {/* ── Slide Panel: スタッフ詳細 ── */}
-    {selectedStaff && (
-      <div className="fixed inset-0 z-50 flex">
-        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedStaff(null)} />
-        <div className="w-[480px] bg-white shadow-xl border-l overflow-y-auto">
-          <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
-            <h3 className="text-sm font-bold text-slate-800">👤 スタッフ詳細</h3>
-            <button onClick={() => setSelectedStaff(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
-          </div>
-          <div className="p-5 space-y-4">
-            {/* Profile */}
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center text-2xl">👤</div>
-              <div className="flex-1">
-                <p className="text-sm font-bold text-slate-800">{selectedStaff.name}</p>
-                <p className="text-xs text-slate-500">{selectedStaff.email}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge text={selectedStaff.roleLabel} color={selectedStaff.rColor} />
-                  <Badge text={selectedStaff.status} color="green" />
-                  {selectedStaff.mfa ? <span className="text-xs text-emerald-600">🔒 MFA有効</span> : <span className="text-xs text-rose-500">⚠️ MFA無効</span>}
-                </div>
+    {/* Staff Accordion List */}
+    <div className="space-y-2">
+      {staffData.map((u, i) => {
+        const isExpanded = expandedStaff === u.id;
+        return (
+        <div key={u.id} className={`bg-white rounded-lg border shadow-sm ${isExpanded ? "border-blue-300 ring-1 ring-blue-100" : "border-slate-200"}`}>
+          {/* Accordion Header */}
+          <div className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-50/50 transition-colors ${isExpanded ? "bg-blue-50/30" : ""}`} onClick={() => { setExpandedStaff(isExpanded ? null : u.id); setExpandedSection("permissions"); }}>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center text-sm shrink-0">👤</div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-800">{u.name}</span>
+                <Badge text={u.roleLabel} color={u.rColor} />
+                {u.mfa ? <span className="text-xs text-emerald-500">🔒</span> : <span className="text-xs text-rose-400">⚠️MFA無効</span>}
               </div>
+              <p className="text-xs text-slate-400">{u.email}</p>
             </div>
+            <div className="flex items-center gap-4 shrink-0">
+              <div className="flex gap-1.5 text-xs">
+                <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 font-semibold">{permCount(u.permissions, "full")}編集</span>
+                <span className="px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 font-semibold">{permCount(u.permissions, "readonly")}閲覧</span>
+                <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-400 font-semibold">{permCount(u.permissions, "none")}非表示</span>
+              </div>
+              <span className="text-xs text-slate-400">{u.lastLogin}</span>
+              <span className={`text-slate-400 transition-transform ${isExpanded ? "rotate-180" : ""}`}>▼</span>
+            </div>
+          </div>
 
-            {/* Info Grid */}
-            <div className="grid grid-cols-2 gap-3">
+          {/* Accordion Body */}
+          {isExpanded && (
+          <div className="border-t">
+            {/* Inner Tabs */}
+            <div className="flex border-b bg-slate-50 px-4">
               {[
-                { label: "参加日", value: selectedStaff.joinDate },
-                { label: "最終ログイン", value: selectedStaff.lastLogin },
-                { label: "セッション数（今月）", value: `${selectedStaff.sessions.length}回` },
-                { label: "操作数（今月）", value: `${selectedStaff.activity.length}件` },
-              ].map((item, i) => (
-                <div key={i} className="bg-slate-50 rounded p-2">
-                  <p className="text-xs text-slate-400">{item.label}</p>
-                  <p className="text-xs font-bold text-slate-700">{item.value}</p>
-                </div>
+                { key: "permissions", label: "メニュー権限", icon: "🔐" },
+                { key: "activity", label: "操作ログ", icon: "📝" },
+                { key: "sessions", label: "セッション", icon: "💻" },
+                { key: "info", label: "基本情報", icon: "ℹ️" },
+              ].map(tab => (
+                <button key={tab.key} onClick={() => setExpandedSection(tab.key)} className={`px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${expandedSection === tab.key ? "border-blue-500 text-blue-700 bg-white" : "border-transparent text-slate-500 hover:text-slate-700"}`}>
+                  {tab.icon} {tab.label}
+                </button>
               ))}
-            </div>
-
-            {/* Category Assignment */}
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-xs font-bold text-slate-700">📂 担当カテゴリ</p>
-                <button onClick={() => { setShowRoleEdit(selectedStaff); }} className="text-xs text-blue-600 hover:underline">変更</button>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                {selectedStaff.categories.map((cat, ci) => (
-                  <span key={ci} className="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-xs font-semibold text-blue-700">{cat}</span>
-                ))}
+              <div className="flex-1" />
+              <div className="flex items-center gap-1 py-1" onClick={e => e.stopPropagation()}>
+                <button onClick={() => setActionConfirm({ title: "パスワードリセット", description: `${u.name} にパスワードリセットメールを送信します。`, type: "warning", onConfirm: () => toast(`${u.name} にリセットメールを送信しました`, "success") })} className="px-2 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded text-xs hover:bg-yellow-100">パスワードリセット</button>
+                <button onClick={() => setActionConfirm({ title: "ユーザー無効化", description: `${u.name}（${u.email}）を無効化します。`, warning: "無効化されたユーザーはログインできなくなります。", type: "danger", onConfirm: () => toast(`${u.name} を無効化しました`, "warning") })} className="px-2 py-1 bg-rose-50 text-rose-600 border border-rose-200 rounded text-xs hover:bg-rose-100">無効化</button>
               </div>
             </div>
 
-            {/* Activity Log */}
-            <div>
-              <p className="text-xs font-bold text-slate-700 mb-2">📝 最近の操作</p>
+            <div className="p-4">
+              {/* ── メニュー権限タブ ── */}
+              {expandedSection === "permissions" && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-slate-500">各メニューへのアクセス権限を個別に設定できます。</p>
+                  {u.roleLabel === "スーパー管理者" && (
+                    <Badge text="全メニュー編集可（変更不可）" color="red" />
+                  )}
+                </div>
+                {MENU_GROUPS.map(group => {
+                  const items = MASTER_MENU_ITEMS.filter(m => m.group === group);
+                  return (
+                  <div key={group}>
+                    <p className="text-xs font-bold text-slate-600 mb-1.5 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" />
+                      {group}
+                    </p>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {items.map(menu => {
+                        const perm = u.permissions[menu.id] || "none";
+                        return (
+                        <div key={menu.id} className={`flex items-center gap-2 px-3 py-2 rounded border text-xs ${perm === "full" ? "bg-emerald-50 border-emerald-200" : perm === "readonly" ? "bg-amber-50 border-amber-200" : "bg-slate-50 border-slate-200 opacity-60"}`}>
+                          <span>{menu.icon}</span>
+                          <span className={`flex-1 font-semibold ${perm === "none" ? "text-slate-400 line-through" : "text-slate-700"}`}>{menu.id} {menu.label}</span>
+                          <select
+                            defaultValue={perm}
+                            disabled={u.roleLabel === "スーパー管理者"}
+                            className={`text-xs border rounded px-1.5 py-0.5 ${u.roleLabel === "スーパー管理者" ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-white cursor-pointer"}`}
+                          >
+                            <option value="full">編集可</option>
+                            <option value="readonly">閲覧のみ</option>
+                            <option value="none">非表示</option>
+                          </select>
+                        </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  );
+                })}
+                {u.roleLabel !== "スーパー管理者" && (
+                <div className="flex gap-2 pt-2 border-t">
+                  <button onClick={() => toast(`${u.name} のメニュー権限を保存しました`, "success")} className="px-4 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">権限を保存</button>
+                  <button className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded text-xs hover:bg-slate-200">全て編集可にする</button>
+                  <button className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded text-xs hover:bg-slate-200">全て閲覧のみにする</button>
+                </div>
+                )}
+              </div>
+              )}
+
+              {/* ── 操作ログタブ ── */}
+              {expandedSection === "activity" && (
               <div className="space-y-2">
-                {selectedStaff.activity.map((a, i) => (
-                  <div key={i} className="flex items-start gap-3">
+                {u.activity.map((a, ai) => (
+                  <div key={ai} className="flex items-start gap-3">
                     <div className="flex flex-col items-center">
-                      <div className="w-2 h-2 rounded-full bg-blue-400 mt-1" />
-                      {i < selectedStaff.activity.length - 1 && <div className="w-px h-6 bg-slate-200" />}
+                      <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5" />
+                      {ai < u.activity.length - 1 && <div className="w-px h-6 bg-slate-200" />}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
@@ -3169,99 +3242,69 @@ const MasterUserManagement = () => {
                     </div>
                   </div>
                 ))}
+                {u.activity.length === 0 && <p className="text-xs text-slate-400 py-4 text-center">操作ログがありません</p>}
               </div>
-            </div>
+              )}
 
-            {/* Session History */}
-            <div>
-              <p className="text-xs font-bold text-slate-700 mb-2">💻 セッション履歴</p>
+              {/* ── セッションタブ ── */}
+              {expandedSection === "sessions" && (
               <div className="space-y-1">
-                {selectedStaff.sessions.map((s, i) => (
-                  <div key={i} className="flex items-center gap-3 text-xs p-2 bg-slate-50 rounded border">
+                {u.sessions.map((s, si) => (
+                  <div key={si} className="flex items-center gap-3 text-xs p-2 bg-slate-50 rounded border">
                     <span className="w-24 text-slate-400">{s.date}</span>
-                    <span className="w-28 text-slate-500">{s.ip}</span>
+                    <span className="w-28 text-slate-500 font-mono">{s.ip}</span>
                     <span className="flex-1 text-slate-600">{s.device}</span>
                     <span className="text-slate-400">{s.duration}</span>
                   </div>
                 ))}
               </div>
-            </div>
+              )}
 
-            {/* Action Buttons */}
-            <div className="flex gap-2 pt-2 border-t">
-              <button onClick={() => setShowRoleEdit(selectedStaff)} className="flex-1 px-3 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">ロール・カテゴリ編集</button>
-              <button onClick={() => setActionConfirm({ title: "パスワードリセット", description: `${selectedStaff.name} にパスワードリセットメールを送信します。`, type: "warning", onConfirm: () => toast(`${selectedStaff.name} にパスワードリセットメールを送信しました`, "success") })} className="px-3 py-2 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded text-xs font-semibold hover:bg-yellow-100">パスワードリセット</button>
-              <button onClick={() => setActionConfirm({ title: "ユーザー無効化", description: `${selectedStaff.name} を無効化します。`, warning: "無効化されたユーザーはログインできなくなります。", type: "danger", onConfirm: () => toast(`${selectedStaff.name} を無効化しました`, "warning") })} className="px-3 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded text-xs font-semibold hover:bg-rose-100">無効化</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
-
-    {/* ── Modal: ロール編集 ── */}
-    {showRoleEdit && (
-      <div className="fixed inset-0 z-[60] flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowRoleEdit(null)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
-          <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
-            <h3 className="text-sm font-bold text-slate-800">✏️ ロール・カテゴリ編集</h3>
-            <button onClick={() => setShowRoleEdit(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
-          </div>
-          <div className="p-5 space-y-4">
-            <div className="flex items-center gap-3 bg-slate-50 rounded p-3">
-              <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">👤</div>
-              <div>
-                <p className="text-sm font-bold text-slate-800">{showRoleEdit.name}</p>
-                <p className="text-xs text-slate-400">{showRoleEdit.email}</p>
+              {/* ── 基本情報タブ ── */}
+              {expandedSection === "info" && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-4 gap-3">
+                  {[
+                    { label: "ロール", value: u.roleLabel },
+                    { label: "参加日", value: u.joinDate },
+                    { label: "MFA", value: u.mfa ? "有効" : "無効" },
+                    { label: "ステータス", value: u.status },
+                  ].map((item, ii) => (
+                    <div key={ii} className="bg-slate-50 rounded p-2">
+                      <p className="text-xs text-slate-400">{item.label}</p>
+                      <p className="text-xs font-bold text-slate-700">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600">ロール変更</label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <select defaultValue={u.roleLabel} disabled={u.roleLabel === "スーパー管理者"} className="text-xs border rounded px-2 py-1.5">
+                      <option>スーパー管理者</option>
+                      <option>管理者</option>
+                      <option>レビュアー</option>
+                    </select>
+                    <input className="flex-1 text-xs border rounded px-2 py-1.5" placeholder="変更理由（監査ログに記録されます）" />
+                    <button onClick={() => toast(`${u.name} のロールを変更しました`, "success")} className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 whitespace-nowrap">変更</button>
+                  </div>
+                  <p className="text-xs text-amber-600 mt-1">⚠️ ロール変更時はメニュー権限設定も合わせて見直してください。</p>
+                </div>
               </div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-slate-600">ロール <span className="text-rose-500">*</span></label>
-              <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue={showRoleEdit.roleLabel}>
-                <option>スーパー管理者</option>
-                <option>管理者</option>
-                <option>レビュアー</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-slate-600">担当カテゴリ（レビュアーの場合）</label>
-              <div className="flex gap-2 mt-1 flex-wrap">
-                {[
-                  { cat: "審査", icon: "📋", checked: showRoleEdit.categories.includes("審査") || showRoleEdit.categories.includes("全カテゴリ") },
-                  { cat: "不正検知", icon: "🛡️", checked: showRoleEdit.categories.includes("不正検知") || showRoleEdit.categories.includes("全カテゴリ") },
-                  { cat: "URL巡回", icon: "🌐", checked: showRoleEdit.categories.includes("URL巡回") || showRoleEdit.categories.includes("全カテゴリ") },
-                  { cat: "精算", icon: "💰", checked: showRoleEdit.categories.includes("精算") || showRoleEdit.categories.includes("全カテゴリ") },
-                ].map((c, i) => (
-                  <label key={i} className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded border cursor-pointer ${c.checked ? "bg-blue-50 border-blue-300 text-blue-700" : "bg-white border-slate-200 text-slate-500"}`}>
-                    <input type="checkbox" defaultChecked={c.checked} className="w-3 h-3" />
-                    <span>{c.icon}</span>
-                    <span>{c.cat}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-slate-600">変更理由 <span className="text-rose-500">*</span></label>
-              <textarea className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 h-16 resize-none" placeholder="ロール変更の理由を入力（監査ログに記録されます）" />
-            </div>
-            <div className="bg-yellow-50 rounded border border-yellow-200 p-2 text-xs text-yellow-700">
-              ⚠️ ロール変更は即時反映されます。変更内容は操作ログに記録されます。
+              )}
             </div>
           </div>
-          <div className="p-4 border-t flex gap-2 justify-end">
-            <button onClick={() => setShowRoleEdit(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => { setShowRoleEdit(null); toast("ロール・カテゴリ設定を保存しました", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">変更を保存</button>
-          </div>
+          )}
         </div>
-      </div>
-    )}
+        );
+      })}
+    </div>
 
-    {/* ── Modal: 招待確認 ── */}
+    {/* ── Modal: 招待 ── */}
     {showInviteM04 && (
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowInviteM04(false)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
-          <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
+        <div className="relative bg-white rounded-xl shadow-2xl w-[520px] max-h-[85vh] overflow-y-auto">
+          <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center sticky top-0 z-10">
             <h3 className="text-sm font-bold text-slate-800">📧 スタッフを招待</h3>
             <button onClick={() => setShowInviteM04(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
           </div>
@@ -3272,11 +3315,31 @@ const MasterUserManagement = () => {
               <div><label className="text-xs font-semibold text-slate-600">ロール <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>管理者（admin）</option><option>レビュアー（reviewer）</option></select></div>
               <div><label className="text-xs font-semibold text-slate-600">MFA <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>必須（推奨）</option><option>任意</option></select></div>
             </div>
-            <div><label className="text-xs font-semibold text-slate-600">担当カテゴリ</label>
-              <div className="flex gap-2 mt-1">{["加盟店審査","不正検知","精算","技術サポート"].map((c,i) => <label key={i} className="flex items-center gap-1 text-xs"><input type="checkbox" defaultChecked={i<2} />{c}</label>)}</div>
+            <div>
+              <label className="text-xs font-semibold text-slate-600">メニュー権限（招待後に詳細設定可）</label>
+              <div className="mt-2 space-y-2 max-h-48 overflow-y-auto border rounded p-2">
+                {MENU_GROUPS.map(group => (
+                  <div key={group}>
+                    <p className="text-xs font-bold text-slate-500 mb-1">{group}</p>
+                    <div className="grid grid-cols-2 gap-1">
+                      {MASTER_MENU_ITEMS.filter(m => m.group === group).map(menu => (
+                        <div key={menu.id} className="flex items-center gap-1.5 text-xs">
+                          <span>{menu.icon}</span>
+                          <span className="flex-1 text-slate-600">{menu.label}</span>
+                          <select className="text-xs border rounded px-1 py-0.5 bg-white" defaultValue="none">
+                            <option value="full">編集可</option>
+                            <option value="readonly">閲覧のみ</option>
+                            <option value="none">非表示</option>
+                          </select>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          <div className="p-4 border-t flex gap-2 justify-end">
+          <div className="p-4 border-t flex gap-2 justify-end sticky bottom-0 bg-white">
             <button onClick={() => setShowInviteM04(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
             <button onClick={() => { setShowInviteM04(false); toast("招待メールを送信しました", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">招待メール送信</button>
           </div>
@@ -13440,6 +13503,24 @@ export default function Wireframes() {
   const [masterPage, setMasterPage] = useState("dashboard");
   const [merchantPage, setMerchantPage] = useState("m_dashboard");
   const [agentPage, setAgentPage] = useState("d_dashboard");
+  const [currentUserId, setCurrentUserId] = useState("U001"); // ワイヤーフレーム確認用ユーザー切替
+
+  // 現在のユーザー情報を取得
+  const currentUser = SWITCHABLE_USERS.find(u => u.id === currentUserId) || SWITCHABLE_USERS[0];
+  const masterUserProp = { name: currentUser.name, role: currentUser.roleLabel, initials: currentUser.initials };
+
+  // ユーザー切替時にアクセス不可ページにいた場合、ダッシュボードへ戻す
+  const handleSwitchUser = (userId) => {
+    const newUser = SWITCHABLE_USERS.find(u => u.id === userId);
+    if (newUser) {
+      const currentSidebarId = masterPage;
+      const menuEntry = Object.entries(MENU_TO_SIDEBAR).find(([, sid]) => sid === currentSidebarId);
+      if (menuEntry && newUser.permissions[menuEntry[0]] === "none") {
+        setMasterPage("dashboard");
+      }
+    }
+    setCurrentUserId(userId);
+  };
 
   const renderMaster = () => {
     switch (masterPage) {
@@ -13527,7 +13608,7 @@ export default function Wireframes() {
       <div className="flex flex-1 min-h-0">
         {view === "master" ? (
           <>
-            <Sidebar items={masterMenuItems} active={masterPage} onSelect={setMasterPage} title="マスター管理" color="#60A5FA" user={{ name: "田中 管理太郎", role: "super_admin", initials: "田" }} />
+            <Sidebar items={masterMenuItems} active={masterPage} onSelect={setMasterPage} title="マスター管理" color="#60A5FA" user={masterUserProp} switchableUsers={SWITCHABLE_USERS} currentUserId={currentUserId} onSwitchUser={handleSwitchUser} />
             <div className="flex-1 overflow-y-auto bg-slate-50">{renderMaster()}</div>
           </>
         ) : view === "merchant" ? (
