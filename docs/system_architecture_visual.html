@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Payment System — システム構成図 (Zone A / Zone B)</title>
+<style>
+  :root {
+    --zone-a: #DC2626;
+    --zone-a-bg: #FEF2F2;
+    --zone-a-border: #FECACA;
+    --zone-a-light: #FCA5A5;
+    --zone-b: #2563EB;
+    --zone-b-bg: #EFF6FF;
+    --zone-b-border: #BFDBFE;
+    --zone-b-light: #93C5FD;
+    --cross: #7C3AED;
+    --cross-bg: #F5F3FF;
+    --cross-border: #DDD6FE;
+    --ok: #059669;
+    --warn: #D97706;
+    --critical: #DC2626;
+    --bg: #F8FAFC;
+    --card: #FFFFFF;
+    --text: #1E293B;
+    --text-sub: #64748B;
+    --border: #E2E8F0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Segoe UI","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* Header */
+  .header { background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); color: white; padding: 32px 40px; }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+  .header .sub { font-size: 14px; color: #94A3B8; }
+  .header .badges { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+  .header .badge { font-size: 12px; padding: 4px 14px; border-radius: 20px; font-weight: 600; }
+  .badge-a { background: rgba(220,38,38,0.2); color: #FCA5A5; border: 1px solid rgba(220,38,38,0.3); }
+  .badge-b { background: rgba(37,99,235,0.2); color: #93C5FD; border: 1px solid rgba(37,99,235,0.3); }
+  .badge-cross { background: rgba(124,58,237,0.2); color: #C4B5FD; border: 1px solid rgba(124,58,237,0.3); }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px 24px; }
+
+  /* Section titles */
+  .section-title { font-size: 20px; font-weight: 700; margin: 40px 0 20px; padding-bottom: 8px; border-bottom: 3px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .section-title .num { background: #1E293B; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+  .section-title:first-of-type { margin-top: 0; }
+
+  /* === MAIN ARCHITECTURE DIAGRAM === */
+  .arch-diagram { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 0; margin: 20px 0 40px; }
+  .zone-card { border-radius: 16px; padding: 28px; position: relative; overflow: hidden; }
+  .zone-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .zone-a-card { background: var(--zone-a-bg); border: 2px solid var(--zone-a-border); }
+  .zone-a-card::before { background: linear-gradient(90deg, #DC2626, #F87171); }
+  .zone-b-card { background: var(--zone-b-bg); border: 2px solid var(--zone-b-border); }
+  .zone-b-card::before { background: linear-gradient(90deg, #2563EB, #60A5FA); }
+
+  .zone-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .zone-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; }
+  .zone-icon-a { background: linear-gradient(135deg, #DC2626, #B91C1C); }
+  .zone-icon-b { background: linear-gradient(135deg, #2563EB, #1D4ED8); }
+  .zone-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
+  .zone-label-a { color: var(--zone-a); }
+  .zone-label-b { color: var(--zone-b); }
+  .zone-name { font-size: 20px; font-weight: 700; }
+  .zone-team { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+
+  .zone-section { margin-top: 18px; }
+  .zone-section-title { font-size: 12px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; padding-bottom: 4px; border-bottom: 1px dashed var(--border); }
+
+  .func-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .func-item { background: white; border-radius: 10px; padding: 10px 12px; font-size: 13px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); transition: transform 0.15s; }
+  .func-item:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .func-item .icon { font-size: 18px; flex-shrink: 0; }
+  .func-item .label { font-weight: 600; font-size: 12px; }
+  .func-item .desc { font-size: 10px; color: var(--text-sub); }
+
+  .infra-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .infra-item { background: rgba(255,255,255,0.7); border-radius: 8px; padding: 8px 12px; font-size: 12px; display: flex; align-items: center; gap: 6px; border: 1px solid var(--border); }
+  .infra-item .icon { font-size: 16px; }
+
+  /* Connector (middle column) */
+  .arch-connector { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px 0; }
+  .conn-line { width: 4px; flex: 1; background: repeating-linear-gradient(to bottom, var(--cross) 0px, var(--cross) 6px, transparent 6px, transparent 12px); border-radius: 2px; }
+  .conn-badge { background: var(--cross); color: white; font-size: 9px; font-weight: 700; padding: 6px 6px; border-radius: 8px; text-align: center; line-height: 1.2; writing-mode: vertical-rl; letter-spacing: 1px; white-space: nowrap; }
+
+  /* PCI Badge */
+  .pci-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; margin-top: 8px; }
+  .pci-required { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+  .pci-not-required { background: #DBEAFE; color: #1E40AF; border: 1px solid #BFDBFE; }
+
+  /* === USER FLOW === */
+  .user-section { background: white; border-radius: 16px; padding: 28px; margin: 0 0 24px; border: 1px solid var(--border); }
+
+  /* === FLOW DIAGRAM === */
+  .flow-row { display: flex; align-items: center; gap: 0; margin: 16px 0; position: relative; }
+  .flow-node { border-radius: 12px; padding: 14px 18px; text-align: center; font-size: 12px; font-weight: 600; min-width: 140px; position: relative; z-index: 1; }
+  .flow-user { background: #F0FDF4; border: 2px solid #86EFAC; color: #166534; }
+  .flow-spa { background: #FFF7ED; border: 2px solid #FDBA74; color: #9A3412; }
+  .flow-zone-a { background: var(--zone-a-bg); border: 2px solid var(--zone-a-border); color: #991B1B; }
+  .flow-zone-b { background: var(--zone-b-bg); border: 2px solid var(--zone-b-border); color: #1E40AF; }
+  .flow-processor { background: #F5F3FF; border: 2px solid var(--cross-border); color: #5B21B6; }
+  .flow-arrow { flex-shrink: 0; display: flex; align-items: center; gap: 0; }
+  .flow-arrow-line { height: 3px; width: 60px; position: relative; }
+  .flow-arrow-line::after { content: ""; position: absolute; right: -1px; top: -5px; width: 0; height: 0; border-left: 8px solid; border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+  .flow-arrow-line.a-to-b { background: var(--zone-a); }
+  .flow-arrow-line.a-to-b::after { border-left-color: var(--zone-a); }
+  .flow-arrow-line.b-to-a { background: var(--zone-b); }
+  .flow-arrow-line.b-to-a::after { border-left-color: var(--zone-b); }
+  .flow-arrow-line.green { background: #16A34A; }
+  .flow-arrow-line.green::after { border-left-color: #16A34A; }
+  .flow-arrow-line.orange { background: #EA580C; }
+  .flow-arrow-line.orange::after { border-left-color: #EA580C; }
+  .flow-arrow-label { font-size: 10px; color: var(--text-sub); text-align: center; white-space: nowrap; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); }
+
+  /* === CROSS ZONE TABLE === */
+  .cross-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin: 16px 0; font-size: 13px; }
+  .cross-table th { background: #1E293B; color: white; padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; }
+  .cross-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .cross-table tr:last-child td { border-bottom: none; }
+  .cross-table tr:nth-child(even) { background: #F8FAFC; }
+  .cross-table tr:hover td { background: #F1F5F9; }
+  .dir-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; white-space: nowrap; }
+  .dir-a-to-b { background: #FEE2E2; color: #991B1B; }
+  .dir-b-to-a { background: #DBEAFE; color: #1E40AF; }
+  .dir-both { background: #F3E8FF; color: #6B21A8; }
+
+  /* === SCREEN MAPPING === */
+  .screen-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin: 16px 0; }
+  .screen-card { background: white; border-radius: 10px; padding: 14px 16px; border-left: 4px solid; font-size: 13px; }
+  .screen-card-a { border-left-color: var(--zone-a); background: var(--zone-a-bg); }
+  .screen-card-b { border-left-color: var(--zone-b); background: var(--zone-b-bg); }
+  .screen-card-cross { border-left-color: var(--cross); background: var(--cross-bg); }
+  .screen-card .id { font-weight: 700; margin-right: 6px; }
+  .screen-card .tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-left: 6px; }
+  .tag-a { background: #FEE2E2; color: #991B1B; }
+  .tag-b { background: #DBEAFE; color: #1E40AF; }
+  .tag-cross { background: #F3E8FF; color: #6B21A8; }
+
+  /* === REVIEW STATUS === */
+  .review-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 12px; margin: 16px 0; }
+  .review-item { background: white; border-radius: 10px; padding: 14px 16px; border: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start; }
+  .review-item .status-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+  .review-item .title { font-size: 13px; font-weight: 700; }
+  .review-item .detail { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+  .review-ok { border-left: 4px solid var(--ok); }
+  .review-warn { border-left: 4px solid var(--warn); }
+  .review-critical { border-left: 4px solid var(--critical); }
+
+  /* === DOMAIN MAP === */
+  .domain-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+  .domain-card { background: white; border-radius: 12px; padding: 16px; text-align: center; border: 2px solid var(--border); }
+  .domain-card .url { font-size: 14px; font-weight: 700; color: var(--zone-b); font-family: "Consolas","Courier New", monospace; }
+  .domain-card .role { font-size: 12px; color: var(--text-sub); margin-top: 4px; }
+  .domain-card .zone-tag { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 10px; display: inline-block; margin-top: 8px; }
+
+  /* === INTERNAL API TABLE === */
+  .api-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin: 16px 0; font-size: 12px; }
+  .api-table th { background: #1E293B; color: white; padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; }
+  .api-table td { padding: 8px 14px; border-bottom: 1px solid var(--border); }
+  .api-table tr:last-child td { border-bottom: none; }
+  .api-table tr:nth-child(even) { background: #F8FAFC; }
+
+  /* Footer */
+  .footer { text-align: center; padding: 32px; color: var(--text-sub); font-size: 12px; border-top: 1px solid var(--border); margin-top: 40px; }
+
+  /* === LEGEND === */
+  .legend { display: flex; gap: 24px; margin: 16px 0; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .legend-dot { width: 14px; height: 14px; border-radius: 4px; }
+
+  /* Print */
+  @media print {
+    body { background: white; }
+    .header { break-after: avoid; }
+    .section-title { break-after: avoid; }
+    .arch-diagram, .user-section, .cross-table, .review-grid { break-inside: avoid; }
+  }
+
+  /* Top overview boxes */
+  .overview-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 20px 0; }
+  .overview-box { background: white; border-radius: 12px; padding: 20px; border: 1px solid var(--border); text-align: center; }
+  .overview-box .big { font-size: 36px; font-weight: 800; }
+  .overview-box .label { font-size: 12px; color: var(--text-sub); margin-top: 4px; }
+
+  /* Actor row */
+  .actor-row { display: flex; justify-content: space-around; margin: 20px 0; }
+  .actor { text-align: center; }
+  .actor .icon { font-size: 40px; }
+  .actor .name { font-size: 13px; font-weight: 600; margin-top: 4px; }
+  .actor .desc { font-size: 11px; color: var(--text-sub); }
+
+  /* Full-width func items */
+  .func-grid-full { display: grid; grid-template-columns: 1fr; gap: 6px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>🏗️ AI Payment System — システム構成図</h1>
+  <div class="sub">MTG資料 / Zone A (CDE) ↔ Zone B (管理系) の分離設計</div>
+  <div class="badges">
+    <span class="badge badge-a">🔴 Zone A — CDE (PCI DSS準拠) — 江成チーム</span>
+    <span class="badge badge-b">🔵 Zone B — 管理系システム — 別途構築</span>
+    <span class="badge badge-cross">🟣 環境をまたぐ機能 — 要連携設計</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- OVERVIEW NUMBERS -->
+<div class="overview-row">
+  <div class="overview-box">
+    <div class="big" style="color:var(--zone-a)">8</div>
+    <div class="label">Zone A 機能</div>
+  </div>
+  <div class="overview-box">
+    <div class="big" style="color:var(--zone-b)">16</div>
+    <div class="label">Zone B 機能</div>
+  </div>
+  <div class="overview-box">
+    <div class="big" style="color:var(--cross)">7</div>
+    <div class="label">環境間連携</div>
+  </div>
+</div>
+
+<!-- ========== 1. ARCHITECTURE DIAGRAM ========== -->
+<div class="section-title"><span class="num">1</span> 全体構成図 — Zone A / Zone B</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--zone-a)"></div> Zone A: CDE (PCI DSS準拠)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--zone-b)"></div> Zone B: 管理系システム</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--cross)"></div> 環境間通信 (VPC Peering)</div>
+</div>
+
+<!-- Main 2-column diagram -->
+<div class="arch-diagram">
+
+  <!-- Zone A -->
+  <div class="zone-card zone-a-card">
+    <div class="zone-header">
+      <div class="zone-icon zone-icon-a">🔐</div>
+      <div>
+        <div class="zone-label zone-label-a">AWS 環境A</div>
+        <div class="zone-name">CDE — 決済処理基盤</div>
+        <div class="zone-team">👤 江成チーム構築</div>
+      </div>
+    </div>
+    <div class="pci-badge pci-required">🛡️ PCI DSS Lv.1 準拠必須</div>
+
+    <div class="zone-section">
+      <div class="zone-section-title">💳 決済処理機能 (8件)</div>
+      <div class="func-grid">
+        <div class="func-item"><span class="icon">🔑</span><div><div class="label">トークン化API</div><div class="desc">カード番号→トークン変換</div></div></div>
+        <div class="func-item"><span class="icon">💳</span><div><div class="label">決済処理</div><div class="desc">auth / capture / void</div></div></div>
+        <div class="func-item"><span class="icon">🔒</span><div><div class="label">3DS認証</div><div class="desc">カード発行元認証</div></div></div>
+        <div class="func-item"><span class="icon">🔀</span><div><div class="label">ルーティングエンジン</div><div class="desc">リアルタイム接続先選択</div></div></div>
+        <div class="func-item"><span class="icon">🔄</span><div><div class="label">リカーリング</div><div class="desc">定期課金バッチ実行</div></div></div>
+        <div class="func-item"><span class="icon">↩️</span><div><div class="label">返金処理</div><div class="desc">接続先への返金実行</div></div></div>
+        <div class="func-item"><span class="icon">🔗</span><div><div class="label">決済リンク処理</div><div class="desc">リンク決済の実行</div></div></div>
+        <div class="func-item"><span class="icon">📡</span><div><div class="label">接続先API通信</div><div class="desc">各プロセッサーとの通信</div></div></div>
+      </div>
+    </div>
+
+    <div class="zone-section">
+      <div class="zone-section-title">🗄️ CDE 内インフラ</div>
+      <div class="infra-grid">
+        <div class="infra-item"><span class="icon">🗃️</span> CDE内DB (カード番号)</div>
+        <div class="infra-item"><span class="icon">🔐</span> HSM / KMS (暗号鍵)</div>
+        <div class="infra-item"><span class="icon">🛡️</span> WAF / IDS / IPS</div>
+        <div class="infra-item"><span class="icon">📊</span> 監査証跡ログ</div>
+      </div>
+    </div>
+
+    <div class="zone-section">
+      <div class="zone-section-title">🏦 接続先 (プロセッサー)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <span style="background:white;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">Univa Paycast</span>
+        <span style="background:white;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">楽天銀行</span>
+        <span style="background:white;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">Worldpay</span>
+        <span style="background:white;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">TCMS</span>
+        <span style="background:white;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">Asiabill</span>
+        <span style="background:white;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">ビットキャッシュ</span>
+        <span style="background:white;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">ペイディ</span>
+        <span style="background:white;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">ONTHELINE</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connector -->
+  <div class="arch-connector">
+    <div class="conn-line"></div>
+    <div class="conn-badge">内部API<br>15件</div>
+    <div class="conn-line"></div>
+    <div style="font-size:10px;color:var(--cross);font-weight:700;text-align:center;">VPC<br>Peering</div>
+    <div class="conn-line"></div>
+  </div>
+
+  <!-- Zone B -->
+  <div class="zone-card zone-b-card">
+    <div class="zone-header">
+      <div class="zone-icon zone-icon-b">🖥️</div>
+      <div>
+        <div class="zone-label zone-label-b">AWS 環境B</div>
+        <div class="zone-name">管理系システム</div>
+        <div class="zone-team">👤 別途構築</div>
+      </div>
+    </div>
+    <div class="pci-badge pci-not-required">✅ PCI DSS 準拠不要 (カード番号非保持)</div>
+
+    <div class="zone-section">
+      <div class="zone-section-title">🖥️ 管理画面機能 (16件)</div>
+      <div class="func-grid">
+        <div class="func-item"><span class="icon">🏪</span><div><div class="label">加盟店・サイト管理</div><div class="desc">M04, M06, S06, S08</div></div></div>
+        <div class="func-item"><span class="icon">🔍</span><div><div class="label">取引検索・閲覧</div><div class="desc">M03, M03b, S02</div></div></div>
+        <div class="func-item"><span class="icon">⚡</span><div><div class="label">例外キュー管理</div><div class="desc">M02, M01</div></div></div>
+        <div class="func-item"><span class="icon">💰</span><div><div class="label">精算・入金管理</div><div class="desc">M08, S04</div></div></div>
+        <div class="func-item"><span class="icon">🛡️</span><div><div class="label">不正検知ルール</div><div class="desc">M07 (設定・閲覧)</div></div></div>
+        <div class="func-item"><span class="icon">🔀</span><div><div class="label">ルーティング管理</div><div class="desc">M10 (ルール設定)</div></div></div>
+        <div class="func-item"><span class="icon">📄</span><div><div class="label">レポート生成</div><div class="desc">M11, S03</div></div></div>
+        <div class="func-item"><span class="icon">👤</span><div><div class="label">ユーザー認証</div><div class="desc">M12, S07, D05</div></div></div>
+        <div class="func-item"><span class="icon">👥</span><div><div class="label">顧客CRM</div><div class="desc">M16, S11</div></div></div>
+        <div class="func-item"><span class="icon">🔄</span><div><div class="label">継続課金管理</div><div class="desc">M14, S10 (設定)</div></div></div>
+        <div class="func-item"><span class="icon">🔗</span><div><div class="label">決済リンク管理</div><div class="desc">S09 (設定)</div></div></div>
+        <div class="func-item"><span class="icon">🤝</span><div><div class="label">代理店管理</div><div class="desc">M15, D01-D05</div></div></div>
+        <div class="func-item"><span class="icon">🤖</span><div><div class="label">AI監視・チャット</div><div class="desc">M05, M01, S12</div></div></div>
+        <div class="func-item"><span class="icon">⚙️</span><div><div class="label">システム設定</div><div class="desc">M13</div></div></div>
+        <div class="func-item"><span class="icon">📋</span><div><div class="label">操作ログ・監査</div><div class="desc">M13 (90日保持)</div></div></div>
+        <div class="func-item"><span class="icon">🔔</span><div><div class="label">通知配信</div><div class="desc">メール/Webhook</div></div></div>
+      </div>
+    </div>
+
+    <div class="zone-section">
+      <div class="zone-section-title">🗄️ 管理系インフラ</div>
+      <div class="infra-grid">
+        <div class="infra-item"><span class="icon">🐘</span> PostgreSQL (62テーブル)</div>
+        <div class="infra-item"><span class="icon">⚡</span> Redis (キャッシュ)</div>
+        <div class="infra-item"><span class="icon">📦</span> S3 (CSV/レポート)</div>
+        <div class="infra-item"><span class="icon">📧</span> SES / SNS (通知)</div>
+        <div class="infra-item"><span class="icon">🌐</span> CloudFront (SPA)</div>
+        <div class="infra-item"><span class="icon">⚖️</span> ALB + ECS Fargate</div>
+      </div>
+    </div>
+
+    <div class="zone-section">
+      <div class="zone-section-title">👥 利用者</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <span style="background:white;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">🏢 PSP運営スタッフ</span>
+        <span style="background:white;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">🏪 加盟店スタッフ</span>
+        <span style="background:white;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">🤝 代理店スタッフ</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 2. DATA FLOW ========== -->
+<div class="section-title"><span class="num">2</span> 主要データフロー</div>
+
+<!-- Payment Flow -->
+<div class="user-section">
+  <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">💳 決済フロー (購入者 → Zone A → Zone B)</h3>
+  <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:12px; text-align:center;">
+    <div>
+      <div style="background:#F0FDF4;border:2px solid #86EFAC;border-radius:12px;padding:14px;font-weight:700;font-size:13px;">🛒 購入者</div>
+      <div style="margin:8px 0;font-size:11px;color:var(--text-sub);">P02 決済ページ</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <div style="font-size:10px;color:var(--text-sub);margin-bottom:4px;">iframe内<br>カード入力</div>
+      <div style="height:3px;width:100%;background:var(--zone-a);position:relative;">
+        <div style="position:absolute;right:-1px;top:-5px;width:0;height:0;border-left:8px solid var(--zone-a);border-top:6px solid transparent;border-bottom:6px solid transparent;"></div>
+      </div>
+    </div>
+    <div>
+      <div style="background:var(--zone-a-bg);border:2px solid var(--zone-a-border);border-radius:12px;padding:14px;font-weight:700;font-size:13px;color:#991B1B;">🔐 Zone A<br><small style="font-weight:400;">トークン化→決済→接続先</small></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <div style="font-size:10px;color:var(--text-sub);margin-bottom:4px;">取引結果<br>同期(Event)</div>
+      <div style="height:3px;width:100%;background:var(--cross);position:relative;">
+        <div style="position:absolute;right:-1px;top:-5px;width:0;height:0;border-left:8px solid var(--cross);border-top:6px solid transparent;border-bottom:6px solid transparent;"></div>
+      </div>
+    </div>
+    <div>
+      <div style="background:var(--zone-b-bg);border:2px solid var(--zone-b-border);border-radius:12px;padding:14px;font-weight:700;font-size:13px;color:#1E40AF;">🖥️ Zone B<br><small style="font-weight:400;">取引記録・例外キュー・通知</small></div>
+    </div>
+  </div>
+  <div style="margin-top:16px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:12px 16px;font-size:12px;">
+    <strong>⚠️ ポイント:</strong> カード番号は <strong style="color:var(--zone-a)">Zone A のみ</strong> で処理。Zone B にはトークンのみ同期。管理画面 (Zone B) からカード番号は一切参照不可。
+  </div>
+</div>
+
+<!-- Management Flow -->
+<div class="user-section">
+  <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">🖥️ 管理画面フロー (管理者 → Zone B → Zone A)</h3>
+  <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:12px; text-align:center;">
+    <div>
+      <div style="background:#FFF7ED;border:2px solid #FDBA74;border-radius:12px;padding:14px;font-weight:700;font-size:13px;color:#9A3412;">👤 管理者<br><small style="font-weight:400;">ブラウザ SPA</small></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <div style="font-size:10px;color:var(--text-sub);margin-bottom:4px;">検索/操作<br>API呼出</div>
+      <div style="height:3px;width:100%;background:var(--zone-b);position:relative;">
+        <div style="position:absolute;right:-1px;top:-5px;width:0;height:0;border-left:8px solid var(--zone-b);border-top:6px solid transparent;border-bottom:6px solid transparent;"></div>
+      </div>
+    </div>
+    <div>
+      <div style="background:var(--zone-b-bg);border:2px solid var(--zone-b-border);border-radius:12px;padding:14px;font-weight:700;font-size:13px;color:#1E40AF;">🖥️ Zone B<br><small style="font-weight:400;">管理API + DB</small></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <div style="font-size:10px;color:var(--text-sub);margin-bottom:4px;">返金指示等<br>内部API</div>
+      <div style="height:3px;width:100%;background:var(--cross);position:relative;">
+        <div style="position:absolute;right:-1px;top:-5px;width:0;height:0;border-left:8px solid var(--cross);border-top:6px solid transparent;border-bottom:6px solid transparent;"></div>
+      </div>
+    </div>
+    <div>
+      <div style="background:var(--zone-a-bg);border:2px solid var(--zone-a-border);border-radius:12px;padding:14px;font-weight:700;font-size:13px;color:#991B1B;">🔐 Zone A<br><small style="font-weight:400;">返金実行・接続先通信</small></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 3. CROSS-ZONE FUNCTIONS ========== -->
+<div class="section-title"><span class="num">3</span> 環境をまたぐ機能 (7件) — 要連携設計</div>
+
+<table class="cross-table">
+  <thead>
+    <tr>
+      <th style="width:30px">#</th>
+      <th>機能</th>
+      <th>Zone A の役割</th>
+      <th>Zone B の役割</th>
+      <th style="width:90px">方向</th>
+      <th>推奨方式</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>C-1</strong></td>
+      <td><strong>🔀 ルーティング</strong></td>
+      <td>リアルタイムルール適用</td>
+      <td>ルール設定・管理 (M10)</td>
+      <td><span class="dir-badge dir-b-to-a">B → A</span></td>
+      <td>ルール変更時にAPI同期</td>
+    </tr>
+    <tr>
+      <td><strong>C-2</strong></td>
+      <td><strong>🛡️ 不正検知</strong></td>
+      <td>決済時リアルタイム判定</td>
+      <td>ルール設定・ログ閲覧 (M07)</td>
+      <td><span class="dir-badge dir-both">双方向</span></td>
+      <td>ハイブリッド (速度系→A, AI→B)</td>
+    </tr>
+    <tr>
+      <td><strong>C-3</strong></td>
+      <td><strong>↩️ 返金</strong></td>
+      <td>接続先への返金実行</td>
+      <td>返金指示・結果表示</td>
+      <td><span class="dir-badge dir-b-to-a">B → A</span></td>
+      <td>Zone B→A 内部API呼出</td>
+    </tr>
+    <tr>
+      <td><strong>C-4</strong></td>
+      <td><strong>🔄 リカーリング</strong></td>
+      <td>定期課金実行バッチ</td>
+      <td>プラン設定・ユーザー管理</td>
+      <td><span class="dir-badge dir-both">双方向</span></td>
+      <td>A実行→結果をBにEvent通知</td>
+    </tr>
+    <tr>
+      <td><strong>C-5</strong></td>
+      <td><strong>📊 取引データ</strong></td>
+      <td>取引結果生成</td>
+      <td>取引検索・表示</td>
+      <td><span class="dir-badge dir-a-to-b">A → B</span></td>
+      <td>イベント駆動同期 (SQS)</td>
+    </tr>
+    <tr>
+      <td><strong>C-6</strong></td>
+      <td><strong>🏥 プロセッサーヘルス</strong></td>
+      <td>稼働率計測</td>
+      <td>ヘルス表示・アラート (M01)</td>
+      <td><span class="dir-badge dir-a-to-b">A → B</span></td>
+      <td>定期ヘルスデータ送信</td>
+    </tr>
+    <tr>
+      <td><strong>C-7</strong></td>
+      <td><strong>💰 精算</strong></td>
+      <td>取引ごと手数料計算</td>
+      <td>バッチ管理・入金管理</td>
+      <td><span class="dir-badge dir-a-to-b">A → B</span></td>
+      <td>精算データをA→B同期</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ========== 4. INTERNAL APIs ========== -->
+<div class="section-title"><span class="num">4</span> 内部API一覧 (Zone A ↔ Zone B) — 15件</div>
+
+<table class="api-table">
+  <thead>
+    <tr>
+      <th style="width:55px">API ID</th>
+      <th>API名</th>
+      <th style="width:80px">方向</th>
+      <th>用途</th>
+      <th>タイミング</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>I-001</strong></td><td>取引結果通知</td><td><span class="dir-badge dir-a-to-b">A → B</span></td><td>決済完了/失敗時に管理系DBへ同期</td><td>決済完了時</td></tr>
+    <tr><td><strong>I-002</strong></td><td>返金実行</td><td><span class="dir-badge dir-b-to-a">B → A</span></td><td>管理画面からの返金指示</td><td>オンデマンド</td></tr>
+    <tr><td><strong>I-003</strong></td><td>キャンセル実行</td><td><span class="dir-badge dir-b-to-a">B → A</span></td><td>管理画面からのキャンセル指示</td><td>オンデマンド</td></tr>
+    <tr><td><strong>I-004</strong></td><td>ルーティングルール同期</td><td><span class="dir-badge dir-b-to-a">B → A</span></td><td>ルール変更時にZone Aに反映</td><td>ルール変更時</td></tr>
+    <tr><td><strong>I-005</strong></td><td>不正検知ルール同期</td><td><span class="dir-badge dir-b-to-a">B → A</span></td><td>ルール変更時にZone Aに反映</td><td>ルール変更時</td></tr>
+    <tr><td><strong>I-006</strong></td><td>ブロックリスト同期</td><td><span class="dir-badge dir-b-to-a">B → A</span></td><td>BIN/IP/メール等のブロックリスト更新</td><td>リスト変更時</td></tr>
+    <tr><td><strong>I-007</strong></td><td>プロセッサーヘルス通知</td><td><span class="dir-badge dir-a-to-b">A → B</span></td><td>稼働率/レスポンス/エラー数の定期送信</td><td>定期 (1分毎)</td></tr>
+    <tr><td><strong>I-008</strong></td><td>リカーリング対象取得</td><td><span class="dir-badge dir-a-to-b">A → B</span></td><td>本日の課金対象ユーザー一覧</td><td>日次バッチ前</td></tr>
+    <tr><td><strong>I-009</strong></td><td>リカーリング結果通知</td><td><span class="dir-badge dir-a-to-b">A → B</span></td><td>課金実行結果の通知</td><td>バッチ実行後</td></tr>
+    <tr><td><strong>I-010</strong></td><td>精算データ集計</td><td><span class="dir-badge dir-a-to-b">A → B</span></td><td>期間内取引の手数料集計データ</td><td>精算バッチ時</td></tr>
+    <tr><td><strong>I-011</strong></td><td>プロセッサー設定同期</td><td><span class="dir-badge dir-b-to-a">B → A</span></td><td>接続先の有効/無効切替、手数料率変更</td><td>設定変更時</td></tr>
+    <tr><td><strong>I-012</strong></td><td>加盟店設定同期</td><td><span class="dir-badge dir-b-to-a">B → A</span></td><td>加盟店/サイトのステータス変更</td><td>ステータス変更時</td></tr>
+    <tr><td><strong>I-013</strong></td><td>カード変更URL生成</td><td><span class="dir-badge dir-b-to-a">B → A</span></td><td>サブスクユーザーのカード変更</td><td>オンデマンド</td></tr>
+    <tr><td><strong>I-014</strong></td><td>3DS結果取得</td><td><span class="dir-badge dir-a-to-b">A → B</span></td><td>3DS認証結果の管理系DB記録</td><td>3DS完了時</td></tr>
+    <tr><td><strong>I-015</strong></td><td>不正検知結果通知</td><td><span class="dir-badge dir-a-to-b">A → B</span></td><td>リアルタイム判定結果の通知</td><td>判定完了時</td></tr>
+  </tbody>
+</table>
+
+<div style="display:flex;gap:24px;margin:12px 0;font-size:12px;">
+  <div><span class="dir-badge dir-a-to-b">A → B</span> : 7件 (取引結果・ヘルス・精算等)</div>
+  <div><span class="dir-badge dir-b-to-a">B → A</span> : 8件 (返金・ルール同期・設定変更等)</div>
+</div>
+
+<!-- ========== 5. DOMAIN STRUCTURE ========== -->
+<div class="section-title"><span class="num">5</span> 推奨ドメイン構成</div>
+
+<div class="domain-grid">
+  <div class="domain-card">
+    <div style="font-size:28px;margin-bottom:8px;">💳</div>
+    <div class="url">pay.aipayment.jp</div>
+    <div class="role">決済ページ (P02)</div>
+    <div class="zone-tag" style="background:#FEE2E2;color:#991B1B;">CDE iframe含む</div>
+  </div>
+  <div class="domain-card">
+    <div style="font-size:28px;margin-bottom:8px;">🔐</div>
+    <div class="url">cde.aipayment.jp</div>
+    <div class="role">CDE iframe (トークン化)</div>
+    <div class="zone-tag" style="background:#FEE2E2;color:#991B1B;">Zone A</div>
+  </div>
+  <div class="domain-card">
+    <div style="font-size:28px;margin-bottom:8px;">🖥️</div>
+    <div class="url">admin.aipayment.jp</div>
+    <div class="role">管理画面 SPA</div>
+    <div class="zone-tag" style="background:#DBEAFE;color:#1E40AF;">Zone B</div>
+  </div>
+  <div class="domain-card">
+    <div style="font-size:28px;margin-bottom:8px;">📝</div>
+    <div class="url">apply.aipayment.jp</div>
+    <div class="role">申込ページ (P01/P03)</div>
+    <div class="zone-tag" style="background:#DBEAFE;color:#1E40AF;">Zone B</div>
+  </div>
+</div>
+
+<!-- ========== 6. SCREEN ↔ ZONE MAPPING ========== -->
+<div class="section-title"><span class="num">6</span> 画面 ↔ Zone マッピング</div>
+
+<h4 style="font-size:14px;margin:12px 0 8px;">🔴 Zone A に関わる画面 (CDE経由)</h4>
+<div class="screen-grid">
+  <div class="screen-card screen-card-a"><span class="id">P02</span> 決済ページ <span class="tag tag-a">CDE iframe</span></div>
+</div>
+
+<h4 style="font-size:14px;margin:16px 0 8px;">🔵 Zone B のみで完結する画面</h4>
+<div class="screen-grid">
+  <div class="screen-card screen-card-b"><span class="id">M01</span> ダッシュボード</div>
+  <div class="screen-card screen-card-b"><span class="id">M02</span> 例外キュー</div>
+  <div class="screen-card screen-card-b"><span class="id">M03</span> リアルタイム監視</div>
+  <div class="screen-card screen-card-b"><span class="id">M04</span> 加盟店管理</div>
+  <div class="screen-card screen-card-b"><span class="id">M05</span> AI監視</div>
+  <div class="screen-card screen-card-b"><span class="id">M06</span> 審査・申込</div>
+  <div class="screen-card screen-card-b"><span class="id">M09b</span> 接続先審査</div>
+  <div class="screen-card screen-card-b"><span class="id">M11</span> レポート</div>
+  <div class="screen-card screen-card-b"><span class="id">M12</span> スタッフ管理</div>
+  <div class="screen-card screen-card-b"><span class="id">M13</span> システム設定</div>
+  <div class="screen-card screen-card-b"><span class="id">M15</span> 代理店管理</div>
+  <div class="screen-card screen-card-b"><span class="id">M16</span> 顧客管理</div>
+  <div class="screen-card screen-card-b"><span class="id">S01-S12</span> 加盟店画面 (全12画面)</div>
+  <div class="screen-card screen-card-b"><span class="id">D01-D05</span> 代理店画面 (全5画面)</div>
+  <div class="screen-card screen-card-b"><span class="id">P01</span> 加盟店 新規申込</div>
+  <div class="screen-card screen-card-b"><span class="id">P03</span> 代理店 新規申込</div>
+</div>
+
+<h4 style="font-size:14px;margin:16px 0 8px;">🟣 Zone A ↔ B 両方に関わる画面</h4>
+<div class="screen-grid">
+  <div class="screen-card screen-card-cross"><span class="id">M03b</span> 注文検索 <span class="tag tag-cross">返金→ZoneA</span></div>
+  <div class="screen-card screen-card-cross"><span class="id">M07</span> 不正検知 <span class="tag tag-cross">ルール→ZoneA同期</span></div>
+  <div class="screen-card screen-card-cross"><span class="id">M08</span> 精算・入金 <span class="tag tag-cross">精算データ←ZoneA</span></div>
+  <div class="screen-card screen-card-cross"><span class="id">M10</span> ルーティング <span class="tag tag-cross">ルール→ZoneA同期</span></div>
+  <div class="screen-card screen-card-cross"><span class="id">M14</span> 継続課金管理 <span class="tag tag-cross">課金実行=ZoneA</span></div>
+  <div class="screen-card screen-card-cross"><span class="id">S10</span> 加盟店 決済管理 <span class="tag tag-cross">CSV決済→ZoneA</span></div>
+</div>
+
+<!-- ========== 7. DESIGN REVIEW ========== -->
+<div class="section-title"><span class="num">7</span> 設計レビューサマリー</div>
+
+<div style="display:flex;gap:16px;margin-bottom:16px;">
+  <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:12px 20px;text-align:center;flex:1;">
+    <div style="font-size:28px;font-weight:800;color:var(--ok);">8</div>
+    <div style="font-size:12px;color:var(--ok);font-weight:600;">✅ 問題なし</div>
+  </div>
+  <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:12px 20px;text-align:center;flex:1;">
+    <div style="font-size:28px;font-weight:800;color:var(--warn);">6</div>
+    <div style="font-size:12px;color:var(--warn);font-weight:600;">⚠️ 要検討</div>
+  </div>
+  <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px 20px;text-align:center;flex:1;">
+    <div style="font-size:28px;font-weight:800;color:var(--critical);">3</div>
+    <div style="font-size:12px;color:var(--critical);font-weight:600;">🔴 要対応</div>
+  </div>
+</div>
+
+<div class="review-grid">
+  <div class="review-item review-critical">
+    <div class="status-icon">🔴</div>
+    <div><div class="title">内部API仕様が未定義</div><div class="detail">Zone A ↔ B 間の15件以上のAPIが未定義。江成チームと仕様合意が必要。</div></div>
+  </div>
+  <div class="review-item review-critical">
+    <div class="status-icon">🔴</div>
+    <div><div class="title">環境間同期方式が未定義</div><div class="detail">イベント駆動 (SQS/EventBridge) 推奨。取引データ・精算・ヘルスの同期方式を決定する必要あり。</div></div>
+  </div>
+  <div class="review-item review-critical">
+    <div class="status-icon">🔴</div>
+    <div><div class="title">パスワードポリシーが弱い</div><div class="detail">現状: 8文字/英数字。PCI DSS要件: 12文字以上/大小数記号必須/90日更新/6回失敗ロック。</div></div>
+  </div>
+  <div class="review-item review-warn">
+    <div class="status-icon">⚠️</div>
+    <div><div class="title">ルーティングエンジン配置</div><div class="detail">ルール同期方式が未定義。Zone Aにルールキャッシュ(Redis)を持ち、変更時にAPI同期を推奨。</div></div>
+  </div>
+  <div class="review-item review-warn">
+    <div class="status-icon">⚠️</div>
+    <div><div class="title">不正検知ルール実行位置</div><div class="detail">ハイブリッド推奨: 速度系/金額系→Zone A、AI系→Zone B。</div></div>
+  </div>
+  <div class="review-item review-warn">
+    <div class="status-icon">⚠️</div>
+    <div><div class="title">取引データ同期方式</div><div class="detail">イベント駆動同期推奨 (SQS/EventBridge)。Zone A→Zone Bにカード番号なしで同期。</div></div>
+  </div>
+  <div class="review-item review-warn">
+    <div class="status-icon">⚠️</div>
+    <div><div class="title">P02決済ページホスティング</div><div class="detail">別ドメイン (pay.aipayment.jp) 推奨。CDE iframeのCORS設定が必要。</div></div>
+  </div>
+  <div class="review-item review-warn">
+    <div class="status-icon">⚠️</div>
+    <div><div class="title">AI機能の実行環境</div><div class="detail">チャット=外部API (Claude)、不正検知AI=自社モデル(SageMaker)を推奨。</div></div>
+  </div>
+  <div class="review-item review-warn">
+    <div class="status-icon">⚠️</div>
+    <div><div class="title">精算処理の分担</div><div class="detail">取引ごと手数料はZone Aで計算、集計・バッチ管理はZone Bを推奨。</div></div>
+  </div>
+</div>
+
+<!-- ========== 8. NEXT STEPS ========== -->
+<div class="section-title"><span class="num">8</span> Next Steps — 江成チームとの確認事項</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+  <div class="user-section" style="margin:0;">
+    <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;">🤝 環境間連携</h4>
+    <ul style="font-size:13px;padding-left:20px;display:flex;flex-direction:column;gap:8px;">
+      <li>Zone A → Zone B の取引データ同期方式は？</li>
+      <li>Zone B → Zone A のルール同期方式は？</li>
+      <li>VPC Peering or PrivateLink の構成は？</li>
+      <li>内部API認証方式（mTLS / IAM / API Key？）</li>
+    </ul>
+  </div>
+  <div class="user-section" style="margin:0;">
+    <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;">🔐 CDE (Zone A) の機能範囲</h4>
+    <ul style="font-size:13px;padding-left:20px;display:flex;flex-direction:column;gap:8px;">
+      <li>ルーティングエンジンはZone A内で完結するか？</li>
+      <li>不正検知のリアルタイム判定はZone Aで行うか？</li>
+      <li>精算の手数料計算はZone Aで行うか？</li>
+      <li>リカーリングエンジンのスケジューラーはZone A内か？</li>
+    </ul>
+  </div>
+  <div class="user-section" style="margin:0;">
+    <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;">🌐 フロント関連</h4>
+    <ul style="font-size:13px;padding-left:20px;display:flex;flex-direction:column;gap:8px;">
+      <li>P02決済ページのホスティング先は？</li>
+      <li>CDE iframeのCORS許可ドメインは？</li>
+      <li>管理画面SPAのデプロイ先（CloudFront + S3？）</li>
+    </ul>
+  </div>
+  <div class="user-section" style="margin:0;">
+    <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;">📋 優先アクション</h4>
+    <ol style="font-size:13px;padding-left:20px;display:flex;flex-direction:column;gap:8px;">
+      <li><strong style="color:var(--critical);">内部API仕様書の作成</strong>（15件）</li>
+      <li><strong style="color:var(--critical);">環境間同期方式の決定</strong></li>
+      <li><strong style="color:var(--warn);">ドメイン・インフラ構成の決定</strong></li>
+      <li><strong style="color:var(--warn);">パスワードポリシーの強化</strong></li>
+    </ol>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  AI Payment System — システム構成図 v1.0 | 作成日: 2026-02-19 | MTG資料
+</div>
+
+</body>
+</html>
