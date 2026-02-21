@@ -633,7 +633,7 @@ const MasterExceptionQueue = () => {
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-slate-800">例外キュー</h2>
       <div className="flex gap-2">
-        {[{ k: "all", label: "全て" }, { k: "review", label: "審査保留" }, { k: "fraud", label: "不正検知" }, { k: "url", label: "URL巡回" }, { k: "settlement", label: "精算" }, { k: "done", label: "処理済み" }].map(f => (
+        {[{ k: "all", label: "全て" }, { k: "review", label: "審査保留" }, { k: "fraud", label: "不正検知" }, { k: "url", label: "URL巡回" }, { k: "settlement", label: "精算" }, { k: "chargeback", label: "チャージバック" }, { k: "done", label: "処理済み" }].map(f => (
           <button key={f.k} onClick={() => setQueueFilter(f.k)} className={`text-xs px-2 py-1 rounded border ${queueFilter === f.k ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-white text-slate-500"} ${f.k === "done" ? "border-dashed" : ""}`}>{f.label}</button>
         ))}
       </div>
