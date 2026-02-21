@@ -239,4 +239,10 @@ Google Drive上の管理画面動画12本 + スクリーンショット54枚を�
 - [x] ワイヤーフレーム修正: M02例外キューにチャージバックフィルタ追加
 - [x] ドキュメント構成整理（旧版4ファイル削除、nul削除、Screen_Logic_Gapsリネーム→v2.0、DB_Design_ERD_v1.0.md新規作成、CLAUDE.md全ドキュメント参照追加、.gitignore更新）
 - [x] 優先度の最終決定（Requirements_Priority.md v2.0 — P0:52機能/P1:38機能/P2:14機能/P3:5機能）
-- [ ] 質問票回答待ち（Requirements_Questionnaire_v1.0.md）
+- [x] 質問票回答取得（Requirements_Questionnaire_v1.0.md — 31問確定/17問後ほど）
+  - 確定: 手数料=取引時点料率+TR手数料、精算=接続先依存・AM2:00バッチ、PCI DSS v4.0=15分セッション
+  - 確定: MFA=マスター管理のみ、IP制限=マスター+加盟店、パスワード90日、6回ロック
+  - 確定: PC限定、i18n設計準備、30秒ポーリング、AWS PrivateLink、RDS Multi-AZ
+  - 後ほど: B全5問(リカーリング詳細)、A-6(リザーブ)、H-1〜H-4(江成チーム)、J-1(ドメイン)等
+- [ ] 確定回答を各ドキュメントに反映（DB設計・画面仕様・API仕様・Screen_Logic_Gaps等）
+- [ ] 未決定17問のフォローアップ（特にPhase 1ブロッカー: A-6, B-1〜B-3）
