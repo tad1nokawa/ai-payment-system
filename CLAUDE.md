@@ -162,7 +162,7 @@
 - `docs/AQUAGATES_Gap_Analysis.md` - ギャップ分析
 - `docs/AQUAGATES_Screen_Mapping.md` - 画面マッピング（全54画面 完了）
 - `docs/AQUAGATES_Screen_List.xlsx` - AQUAGATES画面一覧Excel（必要/不要判定用）
-- `docs/Requirements_Priority.md` - 要件優先度（分析中）
+- `docs/Requirements_Priority.md` - 要件優先度マトリクス v2.0（109機能、Phase計画付き）
 - `docs/Requirements_Questionnaire_v1.0.md` - 現場スタッフ向け要件確認質問票（48問）
 - `docs/Analysis_Checklist.md` - 分析チェックリスト
 
@@ -238,5 +238,5 @@ Google Drive上の管理画面動画12本 + スクリーンショット54枚を�
   - System_Architecture: テーブル数 62/42→64/46、画面数 38→36
 - [x] ワイヤーフレーム修正: M02例外キューにチャージバックフィルタ追加
 - [x] ドキュメント構成整理（旧版4ファイル削除、nul削除、Screen_Logic_Gapsリネーム→v2.0、DB_Design_ERD_v1.0.md新規作成、CLAUDE.md全ドキュメント参照追加、.gitignore更新）
-- [ ] 優先度の最終決定
+- [x] 優先度の最終決定（Requirements_Priority.md v2.0 — P0:52機能/P1:38機能/P2:14機能/P3:5機能）
 - [ ] 質問票回答待ち（Requirements_Questionnaire_v1.0.md）
