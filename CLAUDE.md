@@ -145,18 +145,29 @@
 - 各機能: モデル選択、最大トークン数、Temperature、システムプロンプト（テキストエリア）
 
 ## 関連ドキュメント
-- `docs/Screen_Specification_v1.0.md` - 画面仕様書（36画面）
-- `docs/DB_Design_Addendum_v1.1.md` - DB設計（64テーブル、46 ENUM）
+
+### 設計ドキュメント
 - `docs/System_Architecture_v1.0.md` - システム全体構成書
+- `docs/DB_Design_ERD_v1.0.md` - ベースDB設計書（35テーブル / 24 ENUM）
+- `docs/DB_Design_Addendum_v1.1.md` - DB追加設計（+29テーブル / +22 ENUM → 全64 / 46）
+- `docs/Screen_Specification_v1.0.md` - 画面仕様書（36画面）
+- `docs/Screen_Logic_Gaps_v2.0.md` - 画面ロジック定義書（39項目、⏳1件は質問票待ち）
 - `docs/Core_System_Integration_v2.0.md` - フロントエンド→バックエンドAPI一覧（143件）
 - `docs/Internal_API_Specification_v1.0.md` - Zone A↔B内部API仕様書（15件、mTLS認証）
+- `docs/Feature_List_v2.0.md` - 機能一覧 v2.0
+- `docs/PCI_DSS_Compliance_Report.html` - PCI DSS v4.0準拠レポート
+- `docs/system_architecture_visual.html` - システム構成図ビジュアル
+
+### 分析ドキュメント
 - `docs/AQUAGATES_Gap_Analysis.md` - ギャップ分析
 - `docs/AQUAGATES_Screen_Mapping.md` - 画面マッピング（全54画面 完了）
 - `docs/AQUAGATES_Screen_List.xlsx` - AQUAGATES画面一覧Excel（必要/不要判定用）
 - `docs/Requirements_Priority.md` - 要件優先度（分析中）
 - `docs/Requirements_Questionnaire_v1.0.md` - 現場スタッフ向け要件確認質問票（48問）
-- `docs/Screen_Logic_Gaps_v1.0.md` - 画面ロジック定義書 v2.0（39項目全てにロジック定義済み、⏳1件は質問票待ち）
 - `docs/Analysis_Checklist.md` - 分析チェックリスト
+
+### マスターデータ
+- `docs/AI_Payment_System_仕様書_v2.0.xlsx` - マスター仕様書Excel
 
 ## AQUAGATES分析（動画分析 + スクリーンショット補完 完了）
 Google Drive上の管理画面動画12本 + スクリーンショット54枚を分析し、全54サブ画面のマッピングを完了。
@@ -218,7 +229,7 @@ Google Drive上の管理画面動画12本 + スクリーンショット54枚を�
   - 決済制限候補: ✅ 実装（要件9、M07候補タブ追加）
   - 返金ポリシー: ✅ 確定（一部返金なし、手数料取消なし、管理者金額編集可）
   - チャージバック未収リスク検知: ✅ M02例外キュー連携で実装
-- [x] 画面側からの未定義ロジック洗い出し（`docs/Screen_Logic_Gaps_v1.0.md` — 39項目特定）
+- [x] 画面側からの未定義ロジック洗い出し（`docs/Screen_Logic_Gaps_v2.0.md` — 39項目特定）
 - [x] 39項目全てにロジック定義（v2.0）— 計算式、閾値、遷移ルール、API仕様を明記（⏳1件: セッションタイムアウトは質問票待ち）
 - [x] ドキュメント間の不整合修正（4件）
   - Core_System_Integration: 操作ログ保持期間 90日→12ヶ月
@@ -226,5 +237,6 @@ Google Drive上の管理画面動画12本 + スクリーンショット54枚を�
   - Screen_Specification: 画面数 34→36
   - System_Architecture: テーブル数 62/42→64/46、画面数 38→36
 - [x] ワイヤーフレーム修正: M02例外キューにチャージバックフィルタ追加
+- [x] ドキュメント構成整理（旧版4ファイル削除、nul削除、Screen_Logic_Gapsリネーム→v2.0、DB_Design_ERD_v1.0.md新規作成、CLAUDE.md全ドキュメント参照追加、.gitignore更新）
 - [ ] 優先度の最終決定
 - [ ] 質問票回答待ち（Requirements_Questionnaire_v1.0.md）

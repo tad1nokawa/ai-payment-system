@@ -5,3 +5,6 @@ dist
 
 .vercel
 .env*.local
+
+# Windows artifacts
+nul
