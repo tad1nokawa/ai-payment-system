@@ -88,7 +88,7 @@
 | **扱うデータ** | カード番号, CVV, 暗号鍵 | トークン, 取引結果, 加盟店情報, 精算データ |
 | **ネットワーク** | 完全隔離VPC, WAF, IDS/IPS | 通常のVPC, WAF |
 | **アクセス** | 限定的（API経由のみ） | 管理画面SPA + API |
-| **監査** | PCI DSS Lv.1 準拠の監査証跡 | 操作ログ（audit_logs, 90日保持） |
+| **監査** | PCI DSS Lv.1 準拠の監査証跡 | 操作ログ（audit_logs, **12ヶ月保持** — PCI DSS v4.0 Req 10.5.1準拠） |
 | **主要機能** | 決済処理, トークン化, 3DS, ルーティングエンジン | 管理画面API, CRM, レポート, AI |
 
 ---
@@ -202,7 +202,7 @@
 | 1 | **CDE分離方針** | ✅ カード番号をCDE内に閉じ、管理系はトークン参照のみ。PCI DSS準拠の基本設計として正しい |
 | 2 | **P02のiframeトークン化** | ✅ CDE内iframeでカード入力→postMessageでtoken返却。管理系JSがカード番号に触れない設計 |
 | 3 | **DB設計のカード情報** | ✅ `customer_cards.card_token` / `subscription_users.card_token` はCDE側トークン参照のみ。カード番号カラムなし |
-| 4 | **操作ログ（audit_logs）** | ✅ PCI DSS要件の90日保持、月次パーティション設計済み |
+| 4 | **操作ログ（audit_logs）** | ✅ PCI DSS v4.0要件の12ヶ月保持、月次パーティション設計済み |
 | 5 | **62テーブル/42 ENUM** | ✅ 機能要件に対して漏れなく設計されている |
 | 6 | **143 API** | ✅ 画面機能に対して必要なAPIが網羅されている |
 | 7 | **マルチテナント分離** | ✅ merchant_id / agent_id によるデータ分離設計 |
@@ -376,20 +376,83 @@ Zone A（バッチ実行）:
 | I-014 | 3DS結果取得 | A→B | 3DS認証結果の管理系DB記録 |
 | I-015 | 不正検知結果通知 | A→B | リアルタイム判定結果の通知 |
 
-→ **「内部API仕様書」を別途作成する必要あり**
+→ ✅ **「内部API仕様書 v1.0」（Internal_API_Specification_v1.0.md）として作成済み** — 15件全APIの認証方式（mTLS + HMAC）、データフォーマット、セキュリティグループ定義を含む
 
 ---
 
-#### 5.3.2 パスワードポリシーの強化
+#### 5.3.2 パスワードポリシー ✅ PCI DSS v4.0準拠済み
 
-**現状**: 8文字以上/英数字混合（M12で定義）
-**AQUAGATES（PCI DSS準拠）**: 12~32文字、英大文字+小文字+数字+記号必須、過去4回不可、90日更新、6回失敗でロック（30分）
+**PCI DSS v4.0 Req 8.3.6 準拠ポリシー（M13セキュリティタブに実装済み）**:
 
-**対応**: M13セキュリティ設定のパスワードポリシーをAQUAGATES相当に強化
+| 項目 | 設定値 | PCI DSS v4.0要件 |
+|------|--------|-----------------|
+| 最小文字数 | **12文字** | 12文字以上（Req 8.3.6） |
+| 最大文字数 | **128文字** | 制限なし推奨 |
+| 英大文字 | **必須** | 複雑性要件（Req 8.3.6） |
+| 英小文字 | **必須** | 複雑性要件（Req 8.3.6） |
+| 数字 | **必須** | 複雑性要件（Req 8.3.6） |
+| 特殊文字 | **必須** | 複雑性要件（Req 8.3.6） |
+| パスワード履歴 | **過去5回の再利用禁止** | 過去4回以上（Req 8.3.7） |
+| 有効期限 | **90日** | 90日以内（Req 8.3.9） |
+| ログイン失敗ロック | **5回失敗で30分ロック** | 10回以内（Req 8.3.4） |
+| ブルートフォース検知 | **10回/分で自動ブロック** | 自動検知必須（Req 8.3.4） |
+
+**バックエンド実装時の要件**:
+- パスワードハッシュ: bcrypt（cost factor ≥ 12）またはArgon2id
+- パスワード強度チェック: zxcvbn等のライブラリで推測容易なパスワードを拒否
+- 初回ログイン時のパスワード変更強制
+- パスワードリセット時のMFA確認必須
 
 ---
 
-#### 5.3.3 CSVバッチ決済の実行環境
+#### 5.3.3 決済ページスクリプト完全性管理 ✅ PCI DSS v4.0 Req 6.4.3 / 11.6.1
+
+**e-スキミング防止のためのスクリプト管理（P02決済ページ）**:
+
+| 対策 | 実装内容 | PCI DSS要件 |
+|------|---------|------------|
+| **スクリプトインベントリ** | P02で参照する全.jsファイルのURL + SHA256ハッシュ + 目的を文書化 | Req 6.4.3 |
+| **Content Security Policy** | `Content-Security-Policy: script-src 'self' 'nonce-{random}' https://cde.aipayment.jp; frame-src https://cde.aipayment.jp;` | Req 6.4.3 |
+| **Subresource Integrity** | 全外部スクリプトに`integrity="sha256-..."`属性を付与 | Req 6.4.3 |
+| **週次ハッシュ監視** | 自動化ツールで決済ページのスクリプトハッシュを週次検証。変更検知時にSlack/Email通知 | Req 11.6.1 |
+| **CDE iframe分離** | カード入力はcde.aipayment.jpのiframe内。管理系JSからpostMessageでトークンのみ受信 | Req 6.4.3 |
+
+**スクリプトインベントリ（P02: pay.aipayment.jp）**:
+
+| ファイル | ホスト | 用途 | SRIハッシュ |
+|---------|--------|------|-----------|
+| /js/payment.js | pay.aipayment.jp | 決済フロー制御 | sha256-（ビルド時生成） |
+| /js/3ds-handler.js | pay.aipayment.jp | 3DS認証処理 | sha256-（ビルド時生成） |
+| /iframe/tokenizer.js | cde.aipayment.jp | カードトークン化（CDE内） | sha256-（CDE側管理） |
+
+**CSPヘッダー設定（pay.aipayment.jp）**:
+```
+Content-Security-Policy:
+  default-src 'none';
+  script-src 'self' 'nonce-{server_generated}';
+  frame-src https://cde.aipayment.jp;
+  connect-src 'self' https://cde.aipayment.jp;
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data: https://cdn.aipayment.jp;
+  font-src 'self';
+  base-uri 'none';
+  form-action 'none';
+  frame-ancestors 'none';
+```
+
+**週次監視フロー**:
+```
+1. 毎週月曜 AM3:00 に自動スキャン実行
+2. pay.aipayment.jp のHTMLを取得
+3. 全<script>タグのSRIハッシュを検証
+4. インベントリにないスクリプトを検出
+5. 差分検出時: Slack通知 + audit_logsに記録 + PagerDutyアラート
+6. 月次レポートに結果を含める
+```
+
+---
+
+#### 5.3.4 CSVバッチ決済の実行環境
 
 **現状**: S10のCSV決済タブからCSVアップロード→バッチ実行
 **課題**: CSVの各レコードの決済実行はZone A、管理・承認フローはZone B
@@ -404,7 +467,7 @@ Zone A（バッチ実行）:
 
 ---
 
-#### 5.3.4 AI機能の外部API連携
+#### 5.3.5 AI機能の外部API連携
 
 **現状**: AI機能が6種（不正検知/審査/ルーティング/チャット/予測/URL巡回）
 **課題**: AIモデルの実行環境とAPI接続が未定義
@@ -514,16 +577,16 @@ Zone A（バッチ実行）:
 | DB設計 | ✅ 62テーブル / 42 ENUM 定義済み |
 | フロント→バックエンドAPI | ✅ 143件定義済み |
 | CDE分離方針 | ✅ カード番号非保持、トークン参照のみ |
-| **内部API（Zone A↔B）** | 🔴 **未定義（15件以上必要）** |
+| **内部API（Zone A↔B）** | ✅ **15件定義済み（Internal_API_Specification_v1.0.md）** |
 | **環境間同期方式** | 🔴 **未定義（イベント駆動推奨）** |
 | **ドメイン/ホスティング構成** | ⚠️ **要検討** |
-| **パスワードポリシー** | ⚠️ **PCI DSS要件に対して弱い** |
+| **パスワードポリシー** | ✅ **PCI DSS v4.0 Req 8.3.6準拠（12文字+複雑性要件）** |
 | **AI実行環境** | ⚠️ **要検討** |
 
 ### 次のステップ
 
 1. **江成チームとの確認**: Zone Aの機能範囲と内部API仕様の合意
-2. **内部API仕様書の作成**: Zone A↔B間の15件以上のAPIを定義
+2. ~~**内部API仕様書の作成**~~: ✅ 完了（Internal_API_Specification_v1.0.md — 15件定義済み）
 3. **ドメイン・インフラ構成の決定**: ホスティング先、CDN、DB構成
-4. **パスワードポリシーの強化**: AQUAGATES/PCI DSS相当に引き上げ
+4. ~~**パスワードポリシーの強化**~~: ✅ 完了（PCI DSS v4.0 Req 8.3.6準拠 — 12文字+複雑性要件）
 5. **AI環境の選定**: 外部API vs 自社モデルの判断

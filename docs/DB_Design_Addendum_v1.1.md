@@ -770,7 +770,13 @@ UNIQUE制約: (merchant_id, rule_id)
 | details | JSONB | 変更内容の詳細 |
 | created_at | TIMESTAMPTZ | 操作日時 |
 
-パーティション: created_at で月次パーティション、90日保持（PCI DSS準拠）
+パーティション: created_at で月次パーティション
+保持ポリシー（PCI DSS v4.0 Req 10.5.1準拠）:
+  - 直近3ヶ月: RDS PostgreSQL（即時検索可能、月次パーティション）
+  - 3〜12ヶ月: S3 Standard（アーカイブだが即日アクセス可能、Parquet形式）
+  - 12ヶ月以降: S3 Glacier Deep Archive（コンプライアンス保管、復元に12-48時間）
+  ※ 合計12ヶ月以上のログを即時〜アーカイブで保持
+  ※ SIEM（CloudWatch Logs Insights / Security Hub）で自動日次レビュー実施
 
 ### processor_applications（接続先審査）
 
@@ -817,9 +823,125 @@ CREATE TYPE proc_app_status AS ENUM (
 
 ---
 
-## テーブル数サマリー（v1.4更新）
+## v1.5追加: チャージバック・決済制限候補 関連テーブル（2026-02-21追加）
 
-| 区分 | v1.0 | v1.1追加 | v1.2追加 | v1.3追加 | v1.4追加 | 合計 |
-|------|------|---------|---------|---------|---------|------|
-| テーブル | 35 | 10 | 5 | 2 | 10 | **62** |
-| ENUM | 24 | 8 | 4 | 1 | 5 | **42** |
+要件の詰め（デポジット管理・チャージバック未収リスク検知・決済制限候補）に基づき追加。
+
+### 追加テーブル一覧
+
+| # | グループ | テーブル名 | 用途 | 関連画面 |
+|---|---------|----------|------|---------|
+| 1 | 精算 | chargebacks | チャージバック案件管理 | M08 |
+| 2 | 不正検知 | fraud_candidates | 決済制限候補（AI/ルール自動検知） | M07 |
+
+### chargebacks（チャージバック案件管理）
+
+チャージバック発生から解決までの案件を管理。未収リスク検知時はM02例外キューに自動エスカレーション。
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | UUID | PK |
+| transaction_id | UUID | FK → transactions（対象取引） |
+| merchant_id | UUID | FK → merchants |
+| site_id | UUID | FK → sites（NULLable） |
+| case_number | VARCHAR(50) | アクワイアラ/ブランド発番のケース番号 |
+| reason_code | VARCHAR(20) | チャージバック理由コード（ブランド別） |
+| reason_description | TEXT | 理由の説明 |
+| amount | DECIMAL(12,0) | チャージバック金額 |
+| currency | VARCHAR(3) | 通貨コード |
+| original_amount | DECIMAL(12,0) | 元取引金額 |
+| status | ENUM chargeback_status | ステータス |
+| received_at | TIMESTAMP | CB受領日時 |
+| deadline_at | TIMESTAMP | 反論期限（ブランド規定） |
+| responded_at | TIMESTAMP | 反論提出日時（NULLable） |
+| resolved_at | TIMESTAMP | 解決日時（NULLable） |
+| resolution | ENUM chargeback_resolution | 解決種別（NULLable） |
+| reserve_deducted | DECIMAL(12,0) | リザーブから充当した金額（0の場合あり） |
+| is_uncollectible_risk | BOOLEAN | 未収リスクフラグ（取扱高不足時にtrue） |
+| merchant_balance_at_cb | DECIMAL(12,0) | CB発生時の加盟店取扱高残高 |
+| exception_queue_id | UUID | FK → exception_queue（エスカレーション先、NULLable） |
+| evidence_files | JSONB | 証拠資料メタデータ（ファイルパス・種類・アップロード日） |
+| admin_adjusted_amount | DECIMAL(12,0) | 管理者による金額手動編集後の金額（NULLable） |
+| admin_adjust_reason | TEXT | 金額編集理由（NULLable） |
+| admin_adjusted_by | UUID | FK → users（編集者、NULLable） |
+| admin_adjusted_at | TIMESTAMP | 編集日時（NULLable） |
+| notes | TEXT | 内部メモ |
+| created_at | TIMESTAMP | 作成日時 |
+| updated_at | TIMESTAMP | 更新日時 |
+
+INDEX: (merchant_id, status), (transaction_id), (received_at), (is_uncollectible_risk, status)
+
+### ENUM: chargeback_status
+
+| 値 | 説明 |
+|-----|------|
+| received | 受領（アクワイアラから通知受信） |
+| investigating | 調査中（証拠収集） |
+| rebuttal_submitted | 反論提出済 |
+| won | 勝訴（CB取消） |
+| lost | 敗訴（CB確定） |
+| withdrawn | 取下げ（顧客側取消） |
+| expired | 期限切れ（反論なし→自動敗訴） |
+
+### ENUM: chargeback_resolution
+
+| 値 | 説明 |
+|-----|------|
+| merchant_won | 加盟店勝訴（CBを覆した） |
+| merchant_lost | 加盟店敗訴（CB確定） |
+| merchant_accepted | 加盟店受入（反論せず） |
+| withdrawn_by_cardholder | カード会員取下げ |
+| expired_no_response | 期限切れ（未対応） |
+
+### fraud_candidates（決済制限候補）
+
+AI/ルールベースで自動検知された制限候補。運営スタッフが採用/不採用を判断。
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | UUID | PK |
+| type | ENUM fraud_candidate_type | 候補種別 |
+| value | VARCHAR(255) | 対象の値（BIN/IP/メール等） |
+| reason | TEXT | 検出理由 |
+| risk_score | INTEGER | リスクスコア（0-100） |
+| status | ENUM fraud_candidate_status | ステータス |
+| detected_by | VARCHAR(50) | 検出元（'ai_model' / 'rule_engine' / ルールID等） |
+| related_txn_count | INTEGER | 関連取引数 |
+| related_merchant_count | INTEGER | 関連加盟店数 |
+| detected_at | TIMESTAMP | 検出日時 |
+| expires_at | TIMESTAMP | 自動期限切れ日時（検出から30日） |
+| reviewed_by | UUID | FK → users（レビュー担当者、NULLable） |
+| reviewed_at | TIMESTAMP | レビュー日時（NULLable） |
+| review_note | TEXT | レビューメモ（不採用理由等、NULLable） |
+| blocklist_id | UUID | FK → fraud_blocklist（採用時に追加されたブロックリストID、NULLable） |
+| created_at | TIMESTAMP | 作成日時 |
+
+INDEX: (status, detected_at), (type, value), (expires_at)
+
+### ENUM: fraud_candidate_type
+
+| 値 | 説明 |
+|-----|------|
+| card_bin | カードBIN（先頭6-8桁） |
+| ip_address | IPアドレス |
+| email | メールアドレス |
+| email_domain | メールドメイン |
+| device_fingerprint | デバイスフィンガープリント |
+
+### ENUM: fraud_candidate_status
+
+| 値 | 説明 |
+|-----|------|
+| pending | 未処理（レビュー待ち） |
+| approved | 採用（ブロックリストに追加済み） |
+| rejected | 不採用（除外） |
+| expired | 期限切れ（30日超過で自動失効） |
+
+---
+
+## テーブル数サマリー（v1.5更新）
+
+| 区分 | v1.0 | v1.1追加 | v1.2追加 | v1.3追加 | v1.4追加 | v1.5追加 | 合計 |
+|------|------|---------|---------|---------|---------|---------|------|
+| テーブル | 35 | 10 | 5 | 2 | 10 | 2 | **64** |
+| ENUM | 24 | 8 | 4 | 1 | 5 | 4 | **46** |

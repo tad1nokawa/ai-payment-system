@@ -4029,6 +4029,7 @@ const MasterMerchantApplications = () => {
 // ─── M08: 精算・入金 ───
 const MasterSettlement = () => {
   const toast = useToast();
+  const [settleTab, setSettleTab] = useState("settlement");
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [selectedPayout, setSelectedPayout] = useState(null);
   const [showBatchConfirm, setShowBatchConfirm] = useState(false);
@@ -4055,6 +4056,15 @@ const MasterSettlement = () => {
       </div>
     </div>
 
+    {/* Tabs */}
+    <div className="flex gap-1 border-b">
+      {[{ id: "settlement", label: "精算・入金" }, { id: "deposit", label: "デポジット管理" }, { id: "chargeback", label: "チャージバック" }].map(tab => (
+        <button key={tab.id} onClick={() => setSettleTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 ${settleTab === tab.id ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-slate-400"}`}>{tab.label}</button>
+      ))}
+    </div>
+
+    {/* Tab: 精算・入金 */}
+    {settleTab === "settlement" && (<>
     {/* KPIs */}
     <div className="flex gap-3">
       <KPICard label="今月精算総額" value="¥45.2M" sub="前月比" trend={5} />
@@ -4239,6 +4249,192 @@ const MasterSettlement = () => {
       </div>
       <p className="text-xs text-orange-600 mt-2">※ 代理店フィーは各加盟店の決済手数料から自動差引されます。決済種別ごとの料率はフィー設定画面で管理します。</p>
     </div>
+    </>)}
+
+    {/* Tab: デポジット管理 */}
+    {settleTab === "deposit" && (
+      <div className="space-y-3">
+        <div className="flex gap-3">
+          <KPICard label="リザーブ総残高" value="¥12.8M" sub="全加盟店合計" color="blue" />
+          <KPICard label="今月留保額" value="¥4.5M" sub="精算時自動留保" color="yellow" />
+          <KPICard label="今月解放額" value="¥3.2M" sub="保持期間満了" color="green" />
+          <KPICard label="CB充当額" value="¥380K" sub="今月" color="red" />
+        </div>
+        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-bold text-slate-600">加盟店別リザーブ設定・残高</p>
+            <div className="flex gap-2">
+              <input className="text-xs border rounded px-2 py-1 w-48" placeholder="加盟店ID・名前で検索" />
+              <select className="text-xs border rounded px-2 py-1"><option>全ステータス</option><option>残高あり</option><option>解放待ち</option></select>
+            </div>
+          </div>
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="bg-slate-50 border-b">
+                <th className="text-left p-2 text-slate-500 font-semibold">加盟店</th>
+                <th className="text-center p-2 text-slate-500 font-semibold">リザーブ率</th>
+                <th className="text-center p-2 text-slate-500 font-semibold">保持期間</th>
+                <th className="text-right p-2 text-slate-500 font-semibold">リザーブ残高</th>
+                <th className="text-right p-2 text-slate-500 font-semibold">今月留保</th>
+                <th className="text-right p-2 text-slate-500 font-semibold">次回解放予定</th>
+                <th className="text-center p-2 text-slate-500 font-semibold">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { merchant: "M-001 ABCマート", rate: "10%", period: "180日", balance: "¥4,200,000", held: "¥420,000", nextRelease: "2026-03-15 ¥380K", risk: "low" },
+                { merchant: "M-002 XYZショップ", rate: "15%", period: "180日", balance: "¥2,775,000", held: "¥277,500", nextRelease: "2026-03-15 ¥250K", risk: "mid" },
+                { merchant: "M-004 テスト商事", rate: "20%", period: "180日", balance: "¥1,360,000", held: "¥136,000", nextRelease: "2026-03-15 ¥120K", risk: "mid" },
+                { merchant: "M-007 ネットプラス", rate: "30%", period: "180日", balance: "¥3,900,000", held: "¥520,000", nextRelease: "2026-04-01 ¥310K", risk: "high" },
+                { merchant: "M-011 デジタルEC", rate: "10%", period: "180日", balance: "¥580,000", held: "¥58,000", nextRelease: "2026-03-20 ¥45K", risk: "low" },
+              ].map((r, i) => (
+                <tr key={i} className="border-b">
+                  <td className="p-2 font-semibold text-slate-700">{r.merchant}</td>
+                  <td className="p-2 text-center"><span className={`px-2 py-0.5 rounded text-xs font-bold ${r.risk === "high" ? "bg-rose-100 text-rose-700" : r.risk === "mid" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"}`}>{r.rate}</span></td>
+                  <td className="p-2 text-center text-slate-500">{r.period}</td>
+                  <td className="p-2 text-right font-bold text-slate-800">{r.balance}</td>
+                  <td className="p-2 text-right text-slate-600">{r.held}</td>
+                  <td className="p-2 text-right text-emerald-600">{r.nextRelease}</td>
+                  <td className="p-2 text-center">
+                    <button onClick={() => toast(`${r.merchant} のリザーブ設定を編集中`, "info")} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">設定</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <p className="text-xs font-bold text-slate-600 mb-2">リザーブ入出金履歴（直近）</p>
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="bg-slate-50 border-b">
+                <th className="text-left p-2 text-slate-500 font-semibold">日時</th>
+                <th className="text-left p-2 text-slate-500 font-semibold">加盟店</th>
+                <th className="text-center p-2 text-slate-500 font-semibold">種別</th>
+                <th className="text-right p-2 text-slate-500 font-semibold">金額</th>
+                <th className="text-right p-2 text-slate-500 font-semibold">残高</th>
+                <th className="text-left p-2 text-slate-500 font-semibold">備考</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { date: "02/21 02:04", merchant: "M-001 ABCマート", type: "留保", amount: "+¥420,000", balance: "¥4,200,000", note: "精算バッチ #B-0221" },
+                { date: "02/21 02:04", merchant: "M-002 XYZショップ", type: "留保", amount: "+¥277,500", balance: "¥2,775,000", note: "精算バッチ #B-0221" },
+                { date: "02/20 14:30", merchant: "M-007 ネットプラス", type: "CB充当", amount: "-¥85,000", balance: "¥3,900,000", note: "CB-2026-0089 VISA" },
+                { date: "02/15 02:05", merchant: "M-011 デジタルEC", type: "解放", amount: "-¥45,000", balance: "¥580,000", note: "保持期間満了（2025-08分）" },
+                { date: "02/15 02:05", merchant: "M-001 ABCマート", type: "解放", amount: "-¥380,000", balance: "¥4,160,000", note: "保持期間満了（2025-08分）" },
+              ].map((r, i) => (
+                <tr key={i} className="border-b">
+                  <td className="p-2 text-slate-500">{r.date}</td>
+                  <td className="p-2 text-slate-700">{r.merchant}</td>
+                  <td className="p-2 text-center"><Badge text={r.type} color={r.type === "留保" ? "blue" : r.type === "解放" ? "green" : "red"} /></td>
+                  <td className={`p-2 text-right font-bold ${r.amount.startsWith("+") ? "text-blue-600" : "text-rose-600"}`}>{r.amount}</td>
+                  <td className="p-2 text-right text-slate-600">{r.balance}</td>
+                  <td className="p-2 text-slate-500">{r.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">
+          💡 リザーブ率は加盟店のリスクレベルに応じて5-30%で設定。チャージバック発生時はリザーブから自動充当されます。保持期間満了後に自動解放。
+        </div>
+      </div>
+    )}
+
+    {/* Tab: チャージバック */}
+    {settleTab === "chargeback" && (
+      <div className="space-y-3">
+        <div className="flex gap-3">
+          <KPICard label="今月CB件数" value="8件" sub="前月比" trend={-12} />
+          <KPICard label="CB金額合計" value="¥892K" sub="今月" color="red" />
+          <KPICard label="反論中" value="3件" sub="期限内" color="yellow" />
+          <KPICard label="未収リスク" value="1件" sub="要対応" color="red" />
+          <KPICard label="勝訴率" value="42%" sub="過去6ヶ月" color="green" />
+        </div>
+        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-bold text-slate-600">チャージバック案件一覧</p>
+            <div className="flex gap-2">
+              <div className="flex gap-1">
+                {["全て","受領","調査中","反論済","確定"].map((s, i) => (
+                  <button key={s} className={`text-xs px-2.5 py-1 rounded ${i === 0 ? "bg-blue-600 text-white font-semibold" : "bg-slate-100 text-slate-500"}`}>{s}</button>
+                ))}
+              </div>
+              <input className="text-xs border rounded px-2 py-1 w-40" placeholder="ケース番号で検索" />
+            </div>
+          </div>
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="bg-slate-50 border-b">
+                <th className="text-left p-2 text-slate-500 font-semibold">ケース番号</th>
+                <th className="text-left p-2 text-slate-500 font-semibold">加盟店</th>
+                <th className="text-left p-2 text-slate-500 font-semibold">理由</th>
+                <th className="text-right p-2 text-slate-500 font-semibold">金額</th>
+                <th className="text-center p-2 text-slate-500 font-semibold">ブランド</th>
+                <th className="text-center p-2 text-slate-500 font-semibold">ステータス</th>
+                <th className="text-left p-2 text-slate-500 font-semibold">反論期限</th>
+                <th className="text-center p-2 text-slate-500 font-semibold">未収リスク</th>
+                <th className="text-center p-2 text-slate-500 font-semibold">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { case: "CB-2026-0095", merchant: "M-002 XYZショップ", reason: "13.1 商品未受領", amount: "¥185,000", brand: "VISA", status: "受領", deadline: "2026-03-18", risk: true, riskNote: "取扱高不足" },
+                { case: "CB-2026-0094", merchant: "M-007 ネットプラス", reason: "10.4 不正利用", amount: "¥320,000", brand: "MC", status: "調査中", deadline: "2026-03-15", risk: false, riskNote: "" },
+                { case: "CB-2026-0093", merchant: "M-001 ABCマート", reason: "13.3 商品相違", amount: "¥42,000", brand: "VISA", status: "反論提出済", deadline: "2026-03-10", risk: false, riskNote: "" },
+                { case: "CB-2026-0092", merchant: "M-004 テスト商事", reason: "10.4 不正利用", amount: "¥98,000", brand: "JCB", status: "反論提出済", deadline: "2026-03-08", risk: false, riskNote: "" },
+                { case: "CB-2026-0091", merchant: "M-007 ネットプラス", reason: "13.1 商品未受領", amount: "¥85,000", brand: "VISA", status: "敗訴", deadline: "-", risk: false, riskNote: "" },
+                { case: "CB-2026-0090", merchant: "M-001 ABCマート", reason: "10.4 不正利用", amount: "¥67,000", brand: "MC", status: "勝訴", deadline: "-", risk: false, riskNote: "" },
+                { case: "CB-2026-0089", merchant: "M-007 ネットプラス", reason: "10.4 不正利用", amount: "¥85,000", brand: "VISA", status: "敗訴", deadline: "-", risk: false, riskNote: "" },
+                { case: "CB-2026-0088", merchant: "M-011 デジタルEC", reason: "13.7 キャンセル品", amount: "¥10,000", brand: "VISA", status: "取下げ", deadline: "-", risk: false, riskNote: "" },
+              ].map((c, i) => (
+                <tr key={i} className={`border-b ${c.risk ? "bg-rose-50" : ""}`}>
+                  <td className="p-2 font-mono font-semibold text-blue-700">{c.case}</td>
+                  <td className="p-2 text-slate-700">{c.merchant}</td>
+                  <td className="p-2 text-slate-600">{c.reason}</td>
+                  <td className="p-2 text-right font-bold text-slate-800">{c.amount}</td>
+                  <td className="p-2 text-center"><Badge text={c.brand} color={c.brand === "VISA" ? "blue" : c.brand === "MC" ? "red" : "green"} /></td>
+                  <td className="p-2 text-center"><Badge text={c.status} color={c.status === "受領" ? "yellow" : c.status === "調査中" ? "blue" : c.status === "反論提出済" ? "cyan" : c.status === "勝訴" ? "green" : c.status === "敗訴" ? "red" : "slate"} /></td>
+                  <td className="p-2 text-slate-500">{c.deadline !== "-" ? c.deadline : <span className="text-slate-300">—</span>}</td>
+                  <td className="p-2 text-center">{c.risk ? <span className="px-2 py-0.5 rounded bg-rose-600 text-white text-xs font-bold">⚠ {c.riskNote}</span> : <span className="text-slate-300">—</span>}</td>
+                  <td className="p-2 text-center">
+                    {(c.status === "受領" || c.status === "調査中") && (
+                      <button onClick={() => toast(`${c.case} の詳細を表示`, "info")} className="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs font-semibold">対応</button>
+                    )}
+                    {c.status === "反論提出済" && (
+                      <button onClick={() => toast(`${c.case} の反論状況を確認`, "info")} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">確認</button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {/* 未収リスクアラート */}
+        <div className="bg-rose-50 rounded-lg border border-rose-300 p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-sm">🚨</span>
+            <p className="text-xs font-bold text-rose-700">未収リスクアラート</p>
+          </div>
+          <div className="bg-white rounded border border-rose-200 p-2 text-xs">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-bold text-slate-800">CB-2026-0095: M-002 XYZショップ — ¥185,000</p>
+                <p className="text-rose-600 mt-0.5">チャージバック発生時点の取扱高: ¥23,000（リザーブ残高: ¥2,775,000 → 充当可能だがサイト取扱高が極端に低下）</p>
+                <p className="text-slate-500 mt-0.5">検知理由: 当該サイトの直近30日取扱高が前月比95%減。解約/休止の可能性。</p>
+              </div>
+              <div className="flex gap-1">
+                <button onClick={() => toast("例外キュー（M02）にエスカレーションしました", "warning")} className="px-3 py-1.5 bg-rose-600 text-white rounded text-xs font-semibold whitespace-nowrap">M02へ送る</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="bg-amber-50 rounded border border-amber-200 p-2 text-xs text-amber-800">
+          ⚠️ 管理者権限でリファンド・チャージバックの金額を手動編集できます。編集時は変更前/後金額と理由が操作ログに記録されます。
+        </div>
+      </div>
+    )}
 
     {/* バッチ詳細スライドパネル */}
     {selectedBatch && (
@@ -4947,10 +5143,10 @@ const MasterSystemSettings = () => {
 
     {/* Password Policy */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-600 mb-3">🔐 パスワードポリシー</p>
+      <p className="text-xs font-bold text-slate-600 mb-3">🔐 パスワードポリシー <span className="text-emerald-600 font-normal">PCI DSS v4.0 Req 8.3.6準拠</span></p>
       <div className="grid grid-cols-2 gap-3">
-        <div><label className="text-xs text-slate-500">最小文字数</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="12" /></div>
-        <div><label className="text-xs text-slate-500">有効期限（日）</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="90" /></div>
+        <div><label className="text-xs text-slate-500">最小文字数（PCI DSS: 12以上）</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="12" /></div>
+        <div><label className="text-xs text-slate-500">有効期限（日）（PCI DSS: 90日以内）</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="90" /></div>
         <div className="col-span-2 space-y-1.5">
           <label className="flex items-center gap-2 text-xs"><input type="checkbox" defaultChecked className="w-3.5 h-3.5" /><span className="text-slate-700">大文字を含む</span></label>
           <label className="flex items-center gap-2 text-xs"><input type="checkbox" defaultChecked className="w-3.5 h-3.5" /><span className="text-slate-700">小文字を含む</span></label>
@@ -5024,8 +5220,8 @@ const MasterSystemSettings = () => {
       <div className="grid grid-cols-2 gap-3">
         <div><label className="text-xs text-slate-500">セッションタイムアウト（分）</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="30" /></div>
         <div><label className="text-xs text-slate-500">同時セッション数上限</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="3" /></div>
-        <div><label className="text-xs text-slate-500">ログイン失敗ロック回数</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="5" /></div>
-        <div><label className="text-xs text-slate-500">ロック解除時間（分）</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="30" /></div>
+        <div><label className="text-xs text-slate-500">ログイン失敗ロック回数（PCI DSS: 10回以内）</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="5" /></div>
+        <div><label className="text-xs text-slate-500">ロック解除時間（分）（PCI DSS: 30分以上）</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="30" /></div>
         <div><label className="text-xs text-slate-500">API レート制限（req/min）</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="120" /></div>
         <div><label className="text-xs text-slate-500">ブルートフォース検知閾値</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="10回/分" /></div>
       </div>
@@ -5038,10 +5234,13 @@ const MasterSystemSettings = () => {
         {[
           { item: "通信暗号化", value: "TLS 1.3", status: "適合" },
           { item: "データ暗号化（保存時）", value: "AES-256-GCM", status: "適合" },
-          { item: "PCI DSS", value: "SAQ-D Level 1", status: "適合" },
-          { item: "カード番号トークン化", value: "有効", status: "適合" },
+          { item: "PCI DSS", value: "v4.0 Level 1 準拠", status: "適合" },
+          { item: "カード番号トークン化", value: "有効（CDE iframe方式）", status: "適合" },
           { item: "ログ暗号化", value: "有効", status: "適合" },
+          { item: "ログ保持期間", value: "12ヶ月（3ヶ月即時 + 9ヶ月S3アーカイブ）", status: "適合" },
+          { item: "SIEM自動レビュー", value: "CloudWatch Logs Insights（日次自動）", status: "適合" },
           { item: "鍵ローテーション", value: "90日ごと（次回: 2026-03-15）", status: "適合" },
+          { item: "決済ページスクリプト監視", value: "CSP + SRI + 週次ハッシュ検証（Req 6.4.3/11.6.1）", status: "適合" },
         ].map((c, i) => (
           <div key={i} className="flex items-center gap-3 p-2 rounded border">
             <span className="w-48 font-semibold text-slate-700">{c.item}</span>
@@ -5225,7 +5424,7 @@ const MasterSystemSettings = () => {
     {sysTab === 7 && (<>
     <div className="bg-blue-50 rounded border border-blue-200 p-2 flex items-center gap-2 text-xs">
       <span>🔒</span>
-      <span className="text-blue-700"><strong>PCI DSS準拠</strong> — 管理画面の全操作を記録しています。ログは90日間保持されます。</span>
+      <span className="text-blue-700"><strong>PCI DSS v4.0準拠</strong> — 管理画面の全操作を記録しています。ログは12ヶ月間保持されます（直近3ヶ月: 即時検索 / 3〜12ヶ月: S3アーカイブ）。SIEM自動日次レビュー実施中。</span>
     </div>
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
@@ -8596,7 +8795,7 @@ const MasterFraudSettings = () => {
 
       {/* Tabs */}
       <div className="flex gap-1 border-b">
-        {[{ id: "rules", label: "ルール管理" }, { id: "ai", label: "AIモデル設定" }, { id: "lists", label: "ブロック/ホワイトリスト" }, { id: "import", label: "CSVインポート" }, { id: "ng_list", label: "制限登録禁止リスト" }, { id: "log", label: "検知ログ" }, { id: "merchant", label: "加盟店別設定" }].map(tab => (
+        {[{ id: "rules", label: "ルール管理" }, { id: "ai", label: "AIモデル設定" }, { id: "lists", label: "ブロック/ホワイトリスト" }, { id: "import", label: "CSVインポート" }, { id: "ng_list", label: "制限登録禁止リスト" }, { id: "candidates", label: "候補" }, { id: "log", label: "検知ログ" }, { id: "merchant", label: "加盟店別設定" }].map(tab => (
           <button key={tab.id} onClick={() => setRuleTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 ${ruleTab === tab.id ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-slate-400"}`}>{tab.label}</button>
         ))}
       </div>
@@ -8942,6 +9141,81 @@ const MasterFraudSettings = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: 候補（制限候補の自動検知→採用/不採用） */}
+      {ruleTab === "candidates" && (
+        <div className="space-y-3">
+          <div className="bg-amber-50 rounded border border-amber-200 p-2 text-xs text-amber-800">
+            🤖 AI/ルールベースで不正の疑いがあるエンティティを自動検出しています。内容を確認し「採用」（ブロック追加）または「不採用」（除外）を判断してください。
+          </div>
+          <div className="flex gap-3">
+            <KPICard label="未処理" value="12件" sub="要確認" color="yellow" />
+            <KPICard label="今月採用" value="34件" sub="ブロック追加済" color="red" />
+            <KPICard label="今月不採用" value="8件" sub="除外済" color="green" />
+            <KPICard label="自動期限切れ" value="3件" sub="30日超過" />
+          </div>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex gap-1">
+                {["全て","未処理","採用済","不採用"].map((s, i) => (
+                  <button key={s} className={`text-xs px-2.5 py-1 rounded ${i === 1 ? "bg-amber-500 text-white font-semibold" : "bg-slate-100 text-slate-500"}`}>{s}</button>
+                ))}
+              </div>
+              <select className="text-xs border rounded px-2 py-1"><option>全種別</option><option>カードBIN</option><option>IPアドレス</option><option>メールアドレス</option><option>メールドメイン</option><option>デバイス</option></select>
+              <select className="text-xs border rounded px-2 py-1"><option>リスクスコア: 全て</option><option>90以上（極高）</option><option>70-89（高）</option><option>50-69（中）</option></select>
+            </div>
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-slate-50 border-b">
+                  <th className="text-left p-2 text-slate-500 font-semibold">検出日</th>
+                  <th className="text-left p-2 text-slate-500 font-semibold">種別</th>
+                  <th className="text-left p-2 text-slate-500 font-semibold">値</th>
+                  <th className="text-left p-2 text-slate-500 font-semibold">検出理由</th>
+                  <th className="text-center p-2 text-slate-500 font-semibold">スコア</th>
+                  <th className="text-center p-2 text-slate-500 font-semibold">該当取引</th>
+                  <th className="text-center p-2 text-slate-500 font-semibold">ステータス</th>
+                  <th className="text-center p-2 text-slate-500 font-semibold">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { date: "2026-02-21 14:32", type: "カードBIN", value: "411111", reason: "5分間に8回失敗（閾値: 5回）", score: 92, txns: 23, status: "未処理" },
+                  { date: "2026-02-21 12:15", type: "IPアドレス", value: "203.0.113.45", reason: "異なる10枚のカードで決済試行", score: 88, txns: 10, status: "未処理" },
+                  { date: "2026-02-21 10:05", type: "メールドメイン", value: "@tempmail.xyz", reason: "使い捨てメール + チャージバック率12%", score: 85, txns: 45, status: "未処理" },
+                  { date: "2026-02-20 22:41", type: "デバイス", value: "fp_a3f8c2...d91e", reason: "3サイトで同一デバイス、全て失敗", score: 78, txns: 9, status: "未処理" },
+                  { date: "2026-02-20 18:30", type: "カードBIN", value: "520000", reason: "海外発行 + 高額取引集中", score: 71, txns: 15, status: "未処理" },
+                  { date: "2026-02-20 09:12", type: "IPアドレス", value: "198.51.100.22", reason: "Tor出口ノード + 連続決済", score: 95, txns: 7, status: "採用済" },
+                  { date: "2026-02-19 16:55", type: "メールアドレス", value: "test***@gmail.com", reason: "同一メールで5加盟店に決済", score: 62, txns: 5, status: "不採用" },
+                  { date: "2026-02-19 08:20", type: "カードBIN", value: "601100", reason: "AIスコア平均0.82", score: 74, txns: 31, status: "採用済" },
+                ].map((c, i) => (
+                  <tr key={i} className={`border-b ${c.status === "未処理" ? "bg-amber-50/50" : ""}`}>
+                    <td className="p-2 text-slate-500">{c.date}</td>
+                    <td className="p-2"><Badge text={c.type} color={c.type === "カードBIN" ? "blue" : c.type === "IPアドレス" ? "purple" : c.type.includes("メール") ? "cyan" : "slate"} /></td>
+                    <td className="p-2 font-mono font-semibold text-slate-700">{c.value}</td>
+                    <td className="p-2 text-slate-600">{c.reason}</td>
+                    <td className="p-2 text-center"><span className={`inline-block px-2 py-0.5 rounded-full font-bold ${c.score >= 90 ? "bg-rose-100 text-rose-700" : c.score >= 70 ? "bg-amber-100 text-amber-700" : "bg-yellow-100 text-yellow-700"}`}>{c.score}</span></td>
+                    <td className="p-2 text-center text-slate-600">{c.txns}件</td>
+                    <td className="p-2 text-center"><Badge text={c.status} color={c.status === "未処理" ? "yellow" : c.status === "採用済" ? "red" : "green"} /></td>
+                    <td className="p-2 text-center">
+                      {c.status === "未処理" ? (
+                        <div className="flex gap-1 justify-center">
+                          <button onClick={() => toast(`${c.type} ${c.value} をブロックリストに追加しました`, "warning")} className="px-2 py-0.5 bg-rose-600 text-white rounded text-xs font-semibold">採用</button>
+                          <button onClick={() => toast(`${c.type} ${c.value} を不採用にしました`, "info")} className="px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-xs">不採用</button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400">{c.status === "採用済" ? "ブロック中" : "除外済"}</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="bg-slate-50 rounded border border-slate-200 p-2 text-xs text-slate-500">
+            💡 候補は検出から30日間未処理の場合、自動的に期限切れとなります。採用された候補はM07「ブロック/ホワイトリスト」タブに自動追加されます。
           </div>
         </div>
       )}
@@ -13361,6 +13635,11 @@ const PaymentPage = () => {
 
         {screen === "input" && (
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
+            {/* PCI DSS v4.0 Req 6.4.3 / 11.6.1 スクリプト完全性管理 */}
+            <div className="bg-amber-50 border-b border-amber-200 px-4 py-1.5 text-xs text-amber-700">
+              <span className="font-bold">⚡ CDE iframe方式</span> — カード入力フォームはcde.aipayment.jp内のiframeで動作。管理系JSはカード番号に触れません。
+              <span className="ml-2 text-amber-500">CSP: script-src 'self' 'nonce-...' | SRI: 全スクリプトにintegrity属性 | 週次ハッシュ監視</span>
+            </div>
             <div className="bg-slate-900 text-white px-6 py-5">
               <div className="flex items-center gap-2"><span className="text-lg">🔒</span><span className="text-sm font-bold">安全なお支払い</span></div>
             </div>
@@ -13378,7 +13657,7 @@ const PaymentPage = () => {
               <div><label className="text-xs text-slate-500">カード名義</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="TARO YAMADA" /></div>
               <button onClick={() => setScreen("3ds")} className="w-full py-3.5 bg-blue-600 text-white rounded-xl text-base font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:shadow-xl transition-all duration-200 mt-3">💳 ¥9,800 を支払う</button>
               <div className="flex items-center justify-center gap-3 text-xs text-slate-400 pt-2">
-                <span>🔒 SSL暗号化通信</span><span>|</span><span>PCI DSS準拠</span>
+                <span>🔒 TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
               </div>
               <div className="flex justify-center gap-2 pt-1">
                 {["VISA", "MC", "JCB", "AMEX"].map(b => (
@@ -13450,7 +13729,7 @@ const PaymentPage = () => {
               <button className="w-full py-2 bg-slate-100 text-slate-600 rounded-lg text-sm mt-3 border">ページを閉じる</button>
             </div>
             <div className="flex items-center justify-center gap-3 text-xs text-slate-400 py-3 border-t">
-              <span>🔒 SSL暗号化通信</span><span>|</span><span>PCI DSS準拠</span>
+              <span>🔒 TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
             </div>
           </div>
         )}
@@ -13472,7 +13751,7 @@ const PaymentPage = () => {
               </div>
             </div>
             <div className="flex items-center justify-center gap-3 text-xs text-slate-400 py-3 border-t">
-              <span>🔒 SSL暗号化通信</span><span>|</span><span>PCI DSS準拠</span>
+              <span>🔒 TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
             </div>
           </div>
         )}
@@ -13491,7 +13770,7 @@ const PaymentPage = () => {
               </div>
             </div>
             <div className="flex items-center justify-center gap-3 text-xs text-slate-400 py-3 border-t">
-              <span>🔒 SSL暗号化通信</span><span>|</span><span>PCI DSS準拠</span>
+              <span>🔒 TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
             </div>
           </div>
         )}
