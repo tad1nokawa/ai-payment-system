@@ -540,7 +540,7 @@ CREATE TYPE commission_status AS ENUM (
 4. 失敗 →
    a. consecutive_failures += 1
    b. consecutive_failures < 3 → next_payment_date = TODAY + 10日（リトライ）
-   c. consecutive_failures >= 3 → status = 'failed_stopped'（自動停止、再開不可）
+   c. consecutive_failures >= 3 → status = 'failed_stopped'（自動停止。Phase 1では再開不可。質問票 B-1 方向性: Phase 2以降で再開機能を検討）
    d. 停止時は加盟店にメール通知
 
 ※分割決済の場合:
