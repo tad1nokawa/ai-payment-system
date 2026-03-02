@@ -1,5 +1,5 @@
 import React, { useState, useContext, useCallback, useRef, useEffect, createContext } from "react";
-import { LayoutDashboard, Zap, Search, CreditCard, Bot, ClipboardList, Shield, Users, Settings, Building2, FileText, TrendingUp, Wallet, BarChart3, Network, AlertTriangle, Eye, Link2, RefreshCw, UserCircle, Wrench, MessageSquare, ChevronDown, ChevronRight, ChevronLeft, ChevronUp, X, Check, Plus, Download, Upload, Filter, MoreHorizontal, Lock, ArrowUpRight, ArrowDownRight, Bell, LogOut, Copy, ThumbsUp, ThumbsDown, Send, Loader2, Info, AlertCircle, CheckCircle2, XCircle, CircleDot, ExternalLink, Pencil, Trash2, Archive, Play, Pause, RotateCcw, Calendar, Clock, Globe, Mail, Phone, Receipt, ArrowRight, ArrowLeft, Handshake, Monitor, Radio, ShoppingCart, Repeat, UserPlus, FileSpreadsheet, Landmark } from "lucide-react";
+import { LayoutDashboard, Zap, Search, CreditCard, Bot, ClipboardList, Shield, Users, Settings, Building2, FileText, TrendingUp, Wallet, BarChart3, Network, AlertTriangle, Eye, Link2, RefreshCw, UserCircle, Wrench, MessageSquare, ChevronDown, ChevronRight, ChevronLeft, ChevronUp, X, Check, Plus, Download, Upload, Filter, MoreHorizontal, Lock, ArrowUpRight, ArrowDownRight, Bell, LogOut, Copy, ThumbsUp, ThumbsDown, Send, Loader2, Info, AlertCircle, CheckCircle2, XCircle, CircleDot, ExternalLink, Pencil, Trash2, Archive, Play, Pause, RotateCcw, Calendar, Clock, Globe, Mail, Phone, Receipt, ArrowRight, ArrowLeft, Handshake, Monitor, Radio, ShoppingCart, Repeat, UserPlus, FileSpreadsheet, Landmark, AlertOctagon, Ban, Circle, Coins, FlaskConical, FolderOpen, Key, Lightbulb, MailOpen, Megaphone, Package, Paperclip, PenLine, Pin, Plug, Rocket, Save, ShieldAlert, ShieldCheck, Shuffle, Smartphone, Sparkles, User } from "lucide-react";
 
 // ─── トースト通知システム ───
 const ToastContext = createContext(() => {});
@@ -23,7 +23,7 @@ const ToastProvider = ({ children }) => {
               t.type === "success" ? "bg-emerald-50 text-emerald-800 border-emerald-200" :
               t.type === "error" ? "bg-rose-50 text-rose-800 border-rose-200" :
               t.type === "warning" ? "bg-amber-50 text-amber-800 border-amber-200" :
-              "bg-blue-50 text-blue-800 border-blue-200"
+              "bg-brand-50 text-brand-800 border-brand-200"
             }`}>
               <Icon size={16} className="shrink-0" />
               <span>{t.message}</span>
@@ -141,7 +141,7 @@ const Sidebar = ({ items, active, onSelect, title, color, user, switchableUsers,
           </span>
           <span className="truncate">{item.label}</span>
           {item.readOnly && <span className="ml-auto text-[9px] text-amber-500 font-medium bg-amber-50 px-1.5 py-0.5 rounded">閲覧</span>}
-          {!item.readOnly && item.badge && <span className="ml-auto bg-rose-500 text-white text-[10px] rounded-full min-w-5 h-5 flex items-center justify-center font-semibold">{item.badge}</span>}
+          {!item.readOnly && item.badge && <span className="ml-auto bg-danger-500 text-white text-[10px] rounded-full min-w-5 h-5 flex items-center justify-center font-semibold">{item.badge}</span>}
         </button>
         )
       )}
@@ -203,7 +203,7 @@ const KPICard = ({ label, value, sub, trend, color = "blue" }) => (
     <div className="flex items-center gap-2 mt-2">
       {trend && (
         <span className={`text-xs font-medium inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md ${
-          trend > 0 ? "text-emerald-700 bg-emerald-50" : "text-rose-700 bg-rose-50"
+          trend > 0 ? "text-success-700 bg-success-50" : "text-danger-700 bg-danger-50"
         }`}>
           {trend > 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
           {Math.abs(trend)}%
@@ -227,10 +227,10 @@ const TableHeader = ({ cols, children }) => (
 
 const Badge = ({ text, color }) => {
   const colors = {
-    green: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
-    red: "bg-rose-50 text-rose-700 border-rose-200/60",
-    yellow: "bg-amber-50 text-amber-700 border-amber-200/60",
-    blue: "bg-blue-50 text-blue-700 border-blue-200/60",
+    green: "bg-success-50 text-success-700 border-success-200/60",
+    red: "bg-danger-50 text-danger-700 border-danger-200/60",
+    yellow: "bg-warning-50 text-warning-700 border-warning-200/60",
+    blue: "bg-brand-50 text-brand-700 border-brand-200/60",
     gray: "bg-slate-50 text-slate-600 border-slate-200",
     purple: "bg-violet-50 text-violet-700 border-violet-200/60",
     brand: "bg-brand-50 text-brand-700 border-brand-200",
@@ -298,7 +298,14 @@ const MasterDashboard = () => {
     setAiSummaryLoading(true);
     setTimeout(() => { setAiSummaryLoading(false); toast("AIサマリーを再生成しました", "info"); }, 1500);
   };
-  const navMap = { "📋 例外キュー": "queue", "🔍 取引検索": "orderSearch", "📊 レポート生成": "report", "👥 加盟店一覧": "merchants", "🤖 AI監視": "ai" };
+  const navItems = [
+    { icon: ClipboardList, label: "例外キュー", key: "queue" },
+    { icon: Search, label: "取引検索", key: "orderSearch" },
+    { icon: BarChart3, label: "レポート生成", key: "report" },
+    { icon: Users, label: "加盟店一覧", key: "merchants" },
+    { icon: Bot, label: "AI監視", key: "ai" },
+  ];
+  const navMap = Object.fromEntries(navItems.map(n => [n.label, n.key]));
   const kpiDrillData = {
     "取引量": { value: "1,247件", details: [{ label: "VISA", value: "486件" }, { label: "Mastercard", value: "312件" }, { label: "JCB", value: "198件" }, { label: "AMEX", value: "89件" }, { label: "WEBマネー", value: "162件" }] },
     "決済高": { value: "¥16.2M", details: [{ label: "カード決済", value: "¥14.8M" }, { label: "WEBマネー", value: "¥1.4M" }] },
@@ -311,9 +318,9 @@ const MasterDashboard = () => {
     <div className={`${chatOpen ? "w-80" : "w-10"} shrink-0 transition-all duration-300`}>
       {chatOpen ? (
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden flex flex-col" style={{ height: "calc(100vh - 80px)" }}>
-        <div className="p-3 border-b bg-gradient-to-r from-blue-50 to-purple-50 flex items-center gap-2">
-          <span className="text-sm">💬</span>
-          <p className="text-xs font-bold text-blue-700">AIチャットサポート</p>
+        <div className="p-3 border-b bg-gradient-to-r from-brand-50 to-purple-50 flex items-center gap-2">
+          <MessageSquare className="w-4 h-4 inline" />
+          <p className="text-xs font-bold text-brand-700">AIチャットサポート</p>
           <Badge text="Claude 4 Opus" color="purple" />
           <button onClick={() => setChatOpen(false)} className="ml-auto text-slate-400 hover:text-slate-600 text-sm" title="チャットを閉じる">◀</button>
         </div>
@@ -321,7 +328,7 @@ const MasterDashboard = () => {
         <div className="p-2 border-b bg-slate-50">
           <div className="flex flex-wrap gap-1">
             {["不正検知の状況", "今日の決済件数", "例外キューの確認", "精算状況", "エラーコード検索"].map(q => (
-              <button key={q} onClick={() => sendChat(q)} className="text-xs bg-white border rounded px-2 py-1 text-slate-500 hover:bg-blue-50 hover:text-blue-600">{q}</button>
+              <button key={q} onClick={() => sendChat(q)} className="text-xs bg-white border rounded px-2 py-1 text-slate-500 hover:bg-brand-50 hover:text-brand-600">{q}</button>
             ))}
           </div>
         </div>
@@ -329,17 +336,17 @@ const MasterDashboard = () => {
         <div className="flex-1 p-3 space-y-2 overflow-y-auto bg-slate-50">
           {chatMessages.map((msg, i) => msg.role === "user" ? (
             <div key={i} className="flex gap-2 justify-end">
-              <div className="bg-blue-600 rounded-lg p-2 max-w-[220px]"><p className="text-xs text-white whitespace-pre-wrap">{msg.text}</p></div>
+              <div className="bg-brand-500 rounded-lg p-2 max-w-[220px]"><p className="text-xs text-white whitespace-pre-wrap">{msg.text}</p></div>
             </div>
           ) : (
             <div key={i} className="flex gap-2">
-              <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs shrink-0">🤖</div>
+              <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs shrink-0"><Bot className="w-4 h-4 inline" /></div>
               <div className="bg-white rounded-lg p-2 border border-slate-200">
                 <p className="text-xs text-slate-700 whitespace-pre-wrap">{msg.text}</p>
                 <div className="flex gap-1 mt-1.5 border-t pt-1">
-                  <button onClick={() => toast("フィードバックを送信しました", "success")} className="text-xs text-slate-400 hover:text-emerald-600">👍</button>
-                  <button onClick={() => toast("フィードバックを送信しました", "info")} className="text-xs text-slate-400 hover:text-red-600">👎</button>
-                  <button onClick={() => { navigator.clipboard?.writeText(msg.text); toast("クリップボードにコピーしました", "info"); }} className="text-xs text-slate-400 hover:text-blue-600 ml-auto">📋</button>
+                  <button onClick={() => toast("フィードバックを送信しました", "success")} className="text-xs text-slate-400 hover:text-success-600"><ThumbsUp className="w-3.5 h-3.5 inline" /></button>
+                  <button onClick={() => toast("フィードバックを送信しました", "info")} className="text-xs text-slate-400 hover:text-danger-600"><ThumbsDown className="w-3.5 h-3.5 inline" /></button>
+                  <button onClick={() => { navigator.clipboard?.writeText(msg.text); toast("クリップボードにコピーしました", "info"); }} className="text-xs text-slate-400 hover:text-brand-600 ml-auto"><ClipboardList className="w-4 h-4 inline" /></button>
                 </div>
               </div>
             </div>
@@ -348,12 +355,12 @@ const MasterDashboard = () => {
         {/* 入力エリア */}
         <div className="p-2 border-t bg-white flex gap-2">
           <input value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === "Enter" && sendChat(chatInput)} className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="AIアシスタントに質問..." />
-          <button onClick={() => sendChat(chatInput)} className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700">送信</button>
+          <button onClick={() => sendChat(chatInput)} className="px-3 py-2 bg-brand-500 text-white rounded-lg text-xs font-bold hover:bg-brand-600">送信</button>
         </div>
       </div>
       ) : (
-      <button onClick={() => setChatOpen(true)} className="bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col items-center justify-center gap-2 hover:bg-blue-50 transition-colors cursor-pointer" style={{ height: "calc(100vh - 80px)" }}>
-        <span className="text-lg">💬</span>
+      <button onClick={() => setChatOpen(true)} className="bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col items-center justify-center gap-2 hover:bg-brand-50 transition-colors cursor-pointer" style={{ height: "calc(100vh - 80px)" }}>
+        <MessageSquare className="w-4 h-4 inline" />
         <span className="text-[10px] text-slate-400 font-bold" style={{ writingMode: "vertical-rl" }}>AIチャット</span>
       </button>
       )}
@@ -364,19 +371,19 @@ const MasterDashboard = () => {
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-slate-800">ダッシュボード</h2>
       <div className="flex gap-2">
-        <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded">全システム正常</span>
+        <span className="text-xs bg-success-100 text-success-700 px-2 py-1 rounded">全システム正常</span>
         <span className="text-xs text-slate-400">最終更新: 14:32</span>
       </div>
     </div>
 
     {/* AI Summary — ※ reviewer ロールには非表示 / Redisキャッシュ30分 */}
-    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-3">
+    <div className="bg-gradient-to-r from-brand-50 to-purple-50 rounded-lg border border-brand-200 p-3">
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-2">
-          <span>🤖</span>
-          <span className="text-xs font-bold text-blue-700">AI サマリー</span>
+          <Bot className="w-4 h-4 inline" />
+          <span className="text-xs font-bold text-brand-700">AI サマリー</span>
         </div>
-        <button onClick={handleRegenerate} className="text-xs text-blue-500 hover:text-blue-700">{aiSummaryLoading ? "⏳ 生成中..." : "🔄 再生成"}</button>
+        <button onClick={handleRegenerate} className="text-xs text-brand-500 hover:text-brand-700">{aiSummaryLoading ? "生成中..." : "再生成"}</button>
       </div>
       <p className={`text-xs text-slate-700 transition-opacity duration-300 ${aiSummaryLoading ? "opacity-30" : "opacity-100"}`}>{aiSummaryLoading ? "AIサマリーを生成しています..." : "本日の取引は順調です。取引量は前日比+8%、決済成功率99.2%。不正検知で2件を自動ブロック済み。例外キューに審査保留3件あり（うち1件は2時間超過）。対応をお願いします。"}</p>
     </div>
@@ -384,33 +391,33 @@ const MasterDashboard = () => {
     {/* お知らせ欄 */}
     {(() => {
       const allNotices = [
-        { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: "🔧", target: "全体" },
-        { date: "02/16", title: "Worldpay接続 レート改定のお知らせ（3月適用）", type: "重要", tColor: "red", icon: "💳", target: "管理者" },
-        { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: "🚀", target: "全体" },
-        { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: "⚠️", target: "全体" },
-        { date: "02/12", title: "3Dセキュア2.0 完全移行のお知らせ", type: "お知らせ", tColor: "default", icon: "📌", target: "全体" },
-        { date: "02/10", title: "代理店向け報酬計算ロジック変更について", type: "重要", tColor: "red", icon: "🤝", target: "管理者" },
+        { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: <Wrench className="w-4 h-4 inline text-slate-500" />, target: "全体" },
+        { date: "02/16", title: "Worldpay接続 レート改定のお知らせ（3月適用）", type: "重要", tColor: "red", icon: <CreditCard className="w-4 h-4 inline text-slate-500" />, target: "管理者" },
+        { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: <Rocket className="w-4 h-4 inline text-brand-500" />, target: "全体" },
+        { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: <AlertTriangle className="w-4 h-4 inline text-warning-500" />, target: "全体" },
+        { date: "02/12", title: "3Dセキュア2.0 完全移行のお知らせ", type: "お知らせ", tColor: "default", icon: <Pin className="w-4 h-4 inline text-slate-500" />, target: "全体" },
+        { date: "02/10", title: "代理店向け報酬計算ロジック変更について", type: "重要", tColor: "red", icon: <Handshake className="w-4 h-4 inline text-slate-500" />, target: "管理者" },
       ];
       const renderNotice = (n, i) => (
-        <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-blue-50 ${i === 0 ? "border-amber-300 bg-amber-50" : i === 1 ? "border-rose-200 bg-rose-50/50" : "border-slate-200"}`}>
+        <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-brand-50 ${i === 0 ? "border-warning-300 bg-warning-50" : i === 1 ? "border-danger-200 bg-danger-50/50" : "border-slate-200"}`}>
           <span>{n.icon}</span>
           <span className="w-12 text-slate-400 shrink-0">{n.date}</span>
           <Badge text={n.type} color={n.tColor} />
           <span className="px-1.5 py-0.5 bg-slate-100 rounded text-xs text-slate-500">{n.target}</span>
-          <span className={`flex-1 ${i <= 1 ? "font-semibold" : ""} ${i === 0 ? "text-amber-800" : i === 1 ? "text-rose-700" : "text-slate-700"}`}>{n.title}</span>
+          <span className={`flex-1 ${i <= 1 ? "font-semibold" : ""} ${i === 0 ? "text-warning-800" : i === 1 ? "text-danger-700" : "text-slate-700"}`}>{n.title}</span>
         </div>
       );
       return (
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <span>📢</span>
+            <Megaphone className="w-4 h-4 inline" />
             <p className="text-xs font-bold text-slate-600">お知らせ</p>
             <Badge text="管理者向け" color="purple" />
             {allNotices.length > 3 && <span className="text-xs text-slate-300">({allNotices.length}件)</span>}
           </div>
           {allNotices.length > 3 && (
-            <button className="text-xs text-blue-600 cursor-pointer hover:underline" onClick={() => setShowAllNotices(!showAllNotices)}>
+            <button className="text-xs text-brand-600 cursor-pointer hover:underline" onClick={() => setShowAllNotices(!showAllNotices)}>
               {showAllNotices ? "閉じる ▲" : `すべて見る (${allNotices.length - 3}件) ▼`}
             </button>
           )}
@@ -429,10 +436,10 @@ const MasterDashboard = () => {
 
     {/* クイックアクション（最上部） */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-600 mb-2">⚡ クイックアクション</p>
+      <p className="text-xs font-bold text-slate-600 mb-2"><Zap className="w-4 h-4 inline mr-1" /> クイックアクション</p>
       <div className="flex gap-2">
-        {[["📋 例外キュー", "rose"], ["🔍 取引検索", "blue"], ["📊 レポート生成", "emerald"], ["👥 加盟店一覧", "slate"], ["🤖 AI監視", "purple"]].map(([label, color], i) => (
-          <button key={i} onClick={() => nav.setMasterPage(navMap[label])} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100`}>{label}</button>
+        {[{ icon: ClipboardList, label: "例外キュー", color: "rose" }, { icon: Search, label: "取引検索", color: "blue" }, { icon: BarChart3, label: "レポート生成", color: "emerald" }, { icon: Users, label: "加盟店一覧", color: "slate" }, { icon: Bot, label: "AI監視", color: "purple" }].map(({ icon: Icon, label, color }, i) => (
+          <button key={i} onClick={() => nav.setMasterPage(navMap[label])} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100 flex items-center justify-center gap-1`}><Icon className="w-3.5 h-3.5" /> {label}</button>
         ))}
       </div>
     </div>
@@ -442,14 +449,14 @@ const MasterDashboard = () => {
       <div className="flex justify-end">
         <div className="flex bg-slate-100 rounded-lg p-1">
           {[{k:"today",l:"本日"},{k:"week",l:"今週"},{k:"month",l:"今月"}].map(p => (
-            <button key={p.k} className={`text-sm px-3 py-1.5 rounded ${kpiPeriod === p.k ? "bg-white shadow-sm text-blue-600 font-semibold" : "text-slate-500"}`}
+            <button key={p.k} className={`text-sm px-3 py-1.5 rounded ${kpiPeriod === p.k ? "bg-white shadow-sm text-brand-600 font-semibold" : "text-slate-500"}`}
               onClick={() => setKpiPeriod(p.k)}>{p.l}</button>
           ))}
         </div>
       </div>
       <div className="flex gap-3">
         {[{ label: "取引量", value: "1,247件", sub: "前日比", trend: 8 }, { label: "決済高", value: "¥18.3M", sub: "前日比", trend: 12 }, { label: "決済成功率", value: "99.2%", sub: "目標: 99.0%", color: "green" }, { label: "チャージバック率", value: "0.03%", sub: "基準: 1.0%以下", color: "green" }, { label: "自動化率", value: "94.2%", sub: "目標: 95%", color: "purple" }].map((k, i) => (
-          <div key={i} onClick={() => kpiDrillData[k.label] && setShowKpiDrill(k.label)} className={`flex-1 ${kpiDrillData[k.label] ? "cursor-pointer hover:ring-2 hover:ring-blue-200 rounded-lg transition-all" : ""}`}>
+          <div key={i} onClick={() => kpiDrillData[k.label] && setShowKpiDrill(k.label)} className={`flex-1 ${kpiDrillData[k.label] ? "cursor-pointer hover:ring-2 hover:ring-brand-200 rounded-lg transition-all" : ""}`}>
             <KPICard label={k.label} value={k.value} sub={k.sub} trend={k.trend} color={k.color} />
           </div>
         ))}
@@ -464,14 +471,14 @@ const MasterDashboard = () => {
             <p className="text-xs font-bold text-slate-600">取引推移</p>
             <div className="flex bg-slate-100 rounded-lg p-1">
               {[{k:"count",l:"件数"},{k:"amount",l:"金額"}].map(t => (
-                <button key={t.k} className={`text-sm px-3 py-1.5 rounded ${chartType === t.k ? "bg-white shadow-sm text-blue-600 font-semibold" : "text-slate-400"}`}
+                <button key={t.k} className={`text-sm px-3 py-1.5 rounded ${chartType === t.k ? "bg-white shadow-sm text-brand-600 font-semibold" : "text-slate-400"}`}
                   onClick={() => setChartType(t.k)}>{t.l}</button>
               ))}
             </div>
           </div>
           <div className="flex bg-slate-100 rounded-lg p-1">
             {[{k:"7d",l:"7日"},{k:"30d",l:"30日"},{k:"90d",l:"90日"}].map(p => (
-              <button key={p.k} className={`text-sm px-3 py-1.5 rounded ${chartPeriod === p.k ? "bg-white shadow-sm text-blue-600 font-semibold" : "text-slate-400"}`}
+              <button key={p.k} className={`text-sm px-3 py-1.5 rounded ${chartPeriod === p.k ? "bg-white shadow-sm text-brand-600 font-semibold" : "text-slate-400"}`}
                 onClick={() => setChartPeriod(p.k)}>{p.l}</button>
             ))}
           </div>
@@ -480,7 +487,7 @@ const MasterDashboard = () => {
           <div className="h-24 flex items-end gap-1">
             {[820, 950, 1100, 980, 1150, 1200, 1247].map((v, i) => (
               <div key={i} className="flex-1 flex flex-col items-center">
-                <div className="w-full bg-blue-400 rounded-t" style={{ height: `${(v / 1300) * 80}px` }} />
+                <div className="w-full bg-brand-400 rounded-t" style={{ height: `${(v / 1300) * 80}px` }} />
                 <span className="text-xs text-slate-400 mt-1">{["月","火","水","木","金","土","日"][i]}</span>
               </div>
             ))}
@@ -489,7 +496,7 @@ const MasterDashboard = () => {
           <div className="h-24 flex items-end gap-1">
             {[12.5, 14.2, 16.8, 15.1, 17.3, 18.0, 18.3].map((v, i) => (
               <div key={i} className="flex-1 flex flex-col items-center">
-                <div className="w-full bg-emerald-400 rounded-t" style={{ height: `${(v / 20) * 80}px` }} />
+                <div className="w-full bg-success-400 rounded-t" style={{ height: `${(v / 20) * 80}px` }} />
                 <span className="text-xs text-slate-400 mt-1">{["月","火","水","木","金","土","日"][i]}</span>
               </div>
             ))}
@@ -500,13 +507,13 @@ const MasterDashboard = () => {
         <div className="flex justify-between items-center mb-2">
           <p className="text-xs font-bold text-slate-600">例外キュー</p>
           <div className="flex items-center gap-2">
-            <span className="bg-rose-500 text-white text-xs rounded-full px-1.5 py-0.5">3件</span>
-            <button onClick={() => nav.setMasterPage("queue")} className="text-xs text-blue-500 hover:underline">全て見る →</button>
+            <span className="bg-danger-500 text-white text-xs rounded-full px-1.5 py-0.5">3件</span>
+            <button onClick={() => nav.setMasterPage("queue")} className="text-xs text-brand-500 hover:underline">全て見る →</button>
           </div>
         </div>
         <div className="space-y-2">
-          <div className="bg-amber-50 rounded p-2 border border-amber-200">
-            <div className="flex justify-between"><span className="text-xs font-semibold text-slate-700">審査保留 #1024</span><Badge text="⚠️ 2h超過" color="red" /></div>
+          <div className="bg-warning-50 rounded p-2 border border-warning-200">
+            <div className="flex justify-between"><span className="text-xs font-semibold text-slate-700">審査保留 #1024</span><Badge text="2h超過" color="red" /></div>
             <p className="text-xs text-slate-500 mt-1">中リスク加盟店 / AI推薦: 承認</p>
           </div>
           <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
@@ -521,7 +528,7 @@ const MasterDashboard = () => {
       </div>
     </div>
 
-    {/* Processor Health — 🟢正常 🟡注意 🔴異常 🔵メンテナンス 🟠緊急 */}
+    {/* Processor Health — green=正常 yellow=注意 red=異常 blue=メンテナンス orange=緊急 */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <p className="text-xs font-bold text-slate-600 mb-2">接続先ヘルス</p>
       <div className="flex gap-3">
@@ -535,16 +542,16 @@ const MasterDashboard = () => {
         ].map((p, i) => (
           <div key={i} className="flex-1 bg-slate-50 rounded p-2 flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${
-              p.status === "healthy" ? "bg-emerald-500" :
-              p.status === "warning" ? "bg-amber-500" :
-              p.status === "error" ? "bg-rose-500" :
-              p.status === "maintenance" ? "bg-blue-500" :
+              p.status === "healthy" ? "bg-success-500" :
+              p.status === "warning" ? "bg-warning-500" :
+              p.status === "error" ? "bg-danger-500" :
+              p.status === "maintenance" ? "bg-brand-500" :
               "bg-orange-500"
             }`} />
             <div>
               <div className="flex items-center gap-1">
                 <p className="text-xs font-semibold text-slate-700">{p.name}</p>
-                {p.tag && <span className={`text-xs px-1 py-0.5 rounded ${p.status === "maintenance" ? "bg-blue-100 text-blue-600" : "bg-orange-100 text-orange-600"}`}>{p.tag}</span>}
+                {p.tag && <span className={`text-xs px-1 py-0.5 rounded ${p.status === "maintenance" ? "bg-brand-100 text-brand-600" : "bg-orange-100 text-orange-600"}`}>{p.tag}</span>}
               </div>
               <p className="text-xs text-slate-400">{p.tag ? "計画停止中" : `成功率 ${p.rate} / ${p.ms}`}</p>
             </div>
@@ -562,7 +569,7 @@ const MasterDashboard = () => {
         <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
           <div className="p-4 border-b flex items-center justify-between">
             <p className="text-sm font-bold">{showKpiDrill} - 内訳</p>
-            <button onClick={() => setShowKpiDrill(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <button onClick={() => setShowKpiDrill(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-4 space-y-4">
             <div className="text-center py-2"><p className="text-2xl font-bold text-slate-800">{kpiDrillData[showKpiDrill].value}</p></div>
@@ -603,36 +610,36 @@ const MasterExceptionQueue = () => {
   const queueItems = [
     { id: "#1024", type: "審査保留", target: "株式会社サンプルEC / アパレルEC", ai: "承認推薦", aiColor: "green", time: "2時間12分", timeColor: "red", locked: false,
       detail: { badge: "審査保留", company: "株式会社サンプルEC", staleTime: "2時間12分", receivedAt: "2026-02-11 12:20",
-        aiLabel: "承認を推薦", aiIcon: "✅", aiConf: "82%", aiColor: "text-emerald-700",
-        risk: "中リスク (スコア: 58/100)", riskColor: "text-amber-600", riskSub: "業種: アパレルEC / 月商予測: ¥3M",
+        aiLabel: "承認を推薦", aiIcon: <CheckCircle2 className="w-5 h-5 text-success-600" />, aiConf: "82%", aiColor: "text-success-700",
+        risk: "中リスク (スコア: 58/100)", riskColor: "text-warning-600", riskSub: "業種: アパレルEC / 月商予測: ¥3M",
         aiSummary: "法人設立3年、財務状況は安定。サイト内容に問題なし。反社チェッククリア。唯一の懸念点は取扱商品カテゴリが「高額アパレル」で返品率が業界平均より高い可能性あり。",
-        data: [["法人名", "株式会社サンプルEC"], ["設立", "2023年4月"], ["資本金", "¥10M"], ["代表", "山田 太郎"], ["業種", "アパレルEC"], ["URL", "sample-ec.jp ✅"], ["反社チェック", "✅ クリア"], ["決算書", "✅ 解析済み"]],
+        data: [["法人名", "株式会社サンプルEC"], ["設立", "2023年4月"], ["資本金", "¥10M"], ["代表", "山田 太郎"], ["業種", "アパレルEC"], ["URL", "sample-ec.jp"], ["反社チェック", "クリア"], ["決算書", "解析済み"]],
       }},
     { id: "#5521", type: "不正検知", target: "¥89,000 / カード決済 / 山本商店", ai: "ブロック推薦", aiColor: "red", time: "30分", timeColor: "gray", locked: false,
       detail: { badge: "不正検知", company: "山本商店", staleTime: "30分", receivedAt: "2026-02-11 14:02",
-        aiLabel: "ブロックを推薦", aiIcon: "🚫", aiConf: "94%", aiColor: "text-rose-700",
-        risk: "高リスク (スコア: 89/100)", riskColor: "text-rose-600", riskSub: "取引金額: ¥89,000 / VISA / 3Dセキュア未通過",
+        aiLabel: "ブロックを推薦", aiIcon: <Ban className="w-5 h-5 text-danger-500" />, aiConf: "94%", aiColor: "text-danger-700",
+        risk: "高リスク (スコア: 89/100)", riskColor: "text-danger-600", riskSub: "取引金額: ¥89,000 / VISA / 3Dセキュア未通過",
         aiSummary: "過去30日間で同一カード番号から異なる加盟店で5件の取引あり。IPアドレスが海外VPN経由。カード発行国と利用国不一致。短時間での連続決済パターンに該当。",
         data: [["取引ID", "TXN-20260211-14502"], ["加盟店", "山本商店"], ["金額", "¥89,000"], ["ブランド", "VISA"], ["カード発行国", "US"], ["利用国", "JP（VPN経由）"], ["不正スコア", "0.89"], ["3DS", "未通過"]],
       }},
     { id: "#1025", type: "審査保留", target: "合同会社テストショップ / 雑貨EC", ai: "承認推薦", aiColor: "green", time: "15分", timeColor: "gray", locked: true, lockedBy: "田中",
       detail: { badge: "審査保留", company: "合同会社テストショップ", staleTime: "15分", receivedAt: "2026-02-11 14:17",
-        aiLabel: "承認を推薦", aiIcon: "✅", aiConf: "91%", aiColor: "text-emerald-700",
-        risk: "低リスク (スコア: 25/100)", riskColor: "text-emerald-600", riskSub: "業種: 雑貨EC / 月商予測: ¥1.5M",
+        aiLabel: "承認を推薦", aiIcon: <CheckCircle2 className="w-5 h-5 text-success-600" />, aiConf: "91%", aiColor: "text-success-700",
+        risk: "低リスク (スコア: 25/100)", riskColor: "text-success-600", riskSub: "業種: 雑貨EC / 月商予測: ¥1.5M",
         aiSummary: "法人設立5年、財務健全。過去の取引実績あり（別PSP経由）。サイト内容は適正。代表者の信用情報も問題なし。",
-        data: [["法人名", "合同会社テストショップ"], ["設立", "2021年8月"], ["資本金", "¥5M"], ["代表", "佐藤 花子"], ["業種", "雑貨EC"], ["URL", "test-shop.jp ✅"], ["反社チェック", "✅ クリア"], ["決算書", "✅ 解析済み"]],
+        data: [["法人名", "合同会社テストショップ"], ["設立", "2021年8月"], ["資本金", "¥5M"], ["代表", "佐藤 花子"], ["業種", "雑貨EC"], ["URL", "test-shop.jp"], ["反社チェック", "クリア"], ["決算書", "解析済み"]],
       }},
     { id: "#5518", type: "URL巡回", target: "sample-shop.jp / 商品ページ変更検知", ai: "要確認", aiColor: "yellow", time: "1時間", timeColor: "yellow", locked: false,
       detail: { badge: "URL巡回", company: "sample-shop.jp", staleTime: "1時間", receivedAt: "2026-02-11 13:32",
-        aiLabel: "要確認", aiIcon: "⚠️", aiConf: "65%", aiColor: "text-amber-700",
-        risk: "中リスク (スコア: 52/100)", riskColor: "text-amber-600", riskSub: "商品ページの内容変更検知",
+        aiLabel: "要確認", aiIcon: <AlertTriangle className="w-5 h-5 text-warning-500" />, aiConf: "65%", aiColor: "text-warning-700",
+        risk: "中リスク (スコア: 52/100)", riskColor: "text-warning-600", riskSub: "商品ページの内容変更検知",
         aiSummary: "定期巡回で商品ページの大幅変更を検知。新たに「サプリメント」カテゴリが追加されており、申告業種（雑貨）との乖離の可能性あり。薬機法関連の表記チェックが必要。",
         data: [["サイトURL", "sample-shop.jp"], ["変更検知日時", "2026-02-11 13:30"], ["変更種別", "商品カテゴリ追加"], ["新カテゴリ", "サプリメント"], ["申告業種", "雑貨EC"], ["前回巡回", "2026-02-04"], ["変更箇所数", "12ページ"], ["AI判定", "業種乖離の可能性"]],
       }},
     { id: "#5515", type: "精算", target: "Univa Pay cast / バッチ#B-0210 / エラー3件", ai: "再実行推薦", aiColor: "blue", time: "2時間", timeColor: "red", locked: false,
       detail: { badge: "精算", company: "Univa Pay cast バッチ#B-0210", staleTime: "2時間", receivedAt: "2026-02-11 12:32",
-        aiLabel: "再実行を推薦", aiIcon: "🔄", aiConf: "88%", aiColor: "text-blue-700",
-        risk: "低リスク (スコア: 15/100)", riskColor: "text-emerald-600", riskSub: "精算バッチのタイムアウトエラー",
+        aiLabel: "再実行を推薦", aiIcon: <RefreshCw className="w-5 h-5 text-brand-500" />, aiConf: "88%", aiColor: "text-brand-700",
+        risk: "低リスク (スコア: 15/100)", riskColor: "text-success-600", riskSub: "精算バッチのタイムアウトエラー",
         aiSummary: "バッチ#B-0210の精算処理で3件のタイムアウトエラー。原因はプロセッサー側の一時的な遅延と推定。同時間帯の他のバッチは正常完了。再実行で解決する可能性が高い。",
         data: [["バッチID", "B-0210"], ["接続先", "Univa Pay cast"], ["エラー件数", "3件"], ["エラー種別", "タイムアウト"], ["正常件数", "147件"], ["総額", "¥8,520,000"], ["エラー金額", "¥312,000"], ["推薦アクション", "再実行"]],
       }},
@@ -647,7 +654,7 @@ const MasterExceptionQueue = () => {
       <h2 className="text-sm font-bold text-slate-800">例外キュー</h2>
       <div className="flex gap-2">
         {[{ k: "all", label: "全て" }, { k: "review", label: "審査保留" }, { k: "fraud", label: "不正検知" }, { k: "url", label: "URL巡回" }, { k: "settlement", label: "精算" }, { k: "chargeback", label: "チャージバック" }, { k: "done", label: "処理済み" }].map(f => (
-          <button key={f.k} onClick={() => setQueueFilter(f.k)} className={`text-xs px-2 py-1 rounded border ${queueFilter === f.k ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-white text-slate-500"} ${f.k === "done" ? "border-dashed" : ""}`}>{f.label}</button>
+          <button key={f.k} onClick={() => setQueueFilter(f.k)} className={`text-xs px-2 py-1 rounded border ${queueFilter === f.k ? "bg-brand-50 text-brand-600 border-brand-200" : "bg-white text-slate-500"} ${f.k === "done" ? "border-dashed" : ""}`}>{f.label}</button>
         ))}
       </div>
     </div>
@@ -660,26 +667,26 @@ const MasterExceptionQueue = () => {
       </div>
       <div className="flex items-center gap-1.5">
         <span className="text-slate-400">AI一致率:</span>
-        <span className="font-bold text-emerald-600">87%</span>
+        <span className="font-bold text-success-600">87%</span>
       </div>
       {checkedItems.length > 0 && (
-        <div className="flex items-center gap-2 ml-auto bg-blue-50 rounded px-3 py-1 border border-blue-200">
-          <span className="font-bold text-blue-700">{checkedItems.length}件選択中</span>
-          <button onClick={() => setShowBatchConfirm("approve")} className="px-2 py-0.5 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700">一括承認</button>
-          <button onClick={() => setShowBatchConfirm("reject")} className="px-2 py-0.5 bg-rose-600 text-white rounded text-xs font-semibold hover:bg-rose-700">一括拒否</button>
-          <button onClick={() => setCheckedItems([])} className="text-xs text-slate-400 hover:text-slate-600">✕ 解除</button>
+        <div className="flex items-center gap-2 ml-auto bg-brand-50 rounded px-3 py-1 border border-brand-200">
+          <span className="font-bold text-brand-700">{checkedItems.length}件選択中</span>
+          <button onClick={() => setShowBatchConfirm("approve")} className="px-2 py-0.5 bg-success-600 text-white rounded text-xs font-semibold hover:bg-success-700">一括承認</button>
+          <button onClick={() => setShowBatchConfirm("reject")} className="px-2 py-0.5 bg-danger-600 text-white rounded text-xs font-semibold hover:bg-danger-700">一括拒否</button>
+          <button onClick={() => setCheckedItems([])} className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1"><X className="w-3.5 h-3.5" /> 解除</button>
         </div>
       )}
     </div>
 
     {/* Detail card — 選択中のキューアイテム詳細 */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
-      <div className={`p-3 border-b ${d.badge === "不正検知" ? "bg-rose-50" : d.badge === "精算" ? "bg-blue-50" : d.badge === "URL巡回" ? "bg-purple-50" : "bg-amber-50"}`}>
+      <div className={`p-3 border-b ${d.badge === "不正検知" ? "bg-danger-50" : d.badge === "精算" ? "bg-brand-50" : d.badge === "URL巡回" ? "bg-purple-50" : "bg-warning-50"}`}>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Badge text={d.badge} color={d.badge === "不正検知" ? "red" : d.badge === "精算" ? "blue" : d.badge === "URL巡回" ? "purple" : "yellow"} />
             <span className="text-sm font-bold text-slate-800">{selectedItem.id} - {d.company}</span>
-            {parseInt(d.staleTime) >= 60 || d.staleTime.includes("時間") ? <Badge text={`⚠️ 滞留 ${d.staleTime}`} color="red" /> : <Badge text={`滞留 ${d.staleTime}`} color="gray" />}
+            {parseInt(d.staleTime) >= 60 || d.staleTime.includes("時間") ? <Badge text={`滞留 ${d.staleTime}`} color="red" /> : <Badge text={`滞留 ${d.staleTime}`} color="gray" />}
           </div>
           <span className="text-xs text-slate-400">受付: {d.receivedAt}</span>
         </div>
@@ -719,21 +726,21 @@ const MasterExceptionQueue = () => {
 
         <div className="flex gap-2 justify-end">
           {processedItems[selectedItem.id] ? (
-            <span className="text-xs text-slate-400 italic">✔ 処理済み（{processedItems[selectedItem.id]}）</span>
+            <span className="text-xs text-slate-400 italic"><Check className="w-4 h-4 inline" /> 処理済み（{processedItems[selectedItem.id]}）</span>
           ) : d.badge === "不正検知" ? (<>
-            <button onClick={() => setActionConfirm({ title: "正常と判定", description: `${selectedItem.id} を正常な取引として処理します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "正常判定"); toast(`${selectedItem.id} を正常と判定しました`, "success"); } })} className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded text-xs font-semibold hover:bg-emerald-200">✓ 正常と判定</button>
-            <button onClick={() => setActionConfirm({ title: "ブロック確定", description: `${selectedItem.id} の取引をブロックします。`, warning: "ブロックされた取引は加盟店に通知されます。", type: "danger", onConfirm: () => { markProcessed(selectedItem.id, "ブロック"); toast(`${selectedItem.id} をブロックしました`, "warning"); } })} className="px-4 py-2 bg-rose-600 text-white rounded text-xs font-semibold hover:bg-rose-700">🚫 ブロック確定</button>
+            <button onClick={() => setActionConfirm({ title: "正常と判定", description: `${selectedItem.id} を正常な取引として処理します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "正常判定"); toast(`${selectedItem.id} を正常と判定しました`, "success"); } })} className="px-4 py-2 bg-success-100 text-success-700 rounded text-xs font-semibold hover:bg-success-200"><Check className="w-4 h-4 inline mr-1" /> 正常と判定</button>
+            <button onClick={() => setActionConfirm({ title: "ブロック確定", description: `${selectedItem.id} の取引をブロックします。`, warning: "ブロックされた取引は加盟店に通知されます。", type: "danger", onConfirm: () => { markProcessed(selectedItem.id, "ブロック"); toast(`${selectedItem.id} をブロックしました`, "warning"); } })} className="px-4 py-2 bg-danger-600 text-white rounded text-xs font-semibold hover:bg-danger-700"><Ban className="w-4 h-4 inline mr-1" /> ブロック確定</button>
           </>) : d.badge === "精算" ? (<>
             <button onClick={() => { markProcessed(selectedItem.id, "スキップ"); toast(`${selectedItem.id} をスキップしました`, "info"); }} className="px-4 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">スキップ</button>
-            <button onClick={() => setActionConfirm({ title: "精算再実行", description: `${selectedItem.id} の精算バッチを再実行します。`, type: "info", onConfirm: () => { markProcessed(selectedItem.id, "再実行"); toast(`${selectedItem.id} の再実行を開始しました`, "success"); } })} className="px-4 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">🔄 再実行</button>
+            <button onClick={() => setActionConfirm({ title: "精算再実行", description: `${selectedItem.id} の精算バッチを再実行します。`, type: "info", onConfirm: () => { markProcessed(selectedItem.id, "再実行"); toast(`${selectedItem.id} の再実行を開始しました`, "success"); } })} className="px-4 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600"><RefreshCw className="w-4 h-4 inline mr-1" /> 再実行</button>
           </>) : d.badge === "URL巡回" ? (<>
-            <button onClick={() => setActionConfirm({ title: "問題なしと判定", description: `${selectedItem.id} のURL変更を問題なしと判定します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "問題なし"); toast(`${selectedItem.id} を問題なしと判定しました`, "success"); } })} className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded text-xs font-semibold hover:bg-emerald-200">問題なし</button>
-            <button onClick={() => setActionConfirm({ title: "加盟店に確認", description: `${selectedItem.id} について加盟店に確認メールを送信します。`, type: "warning", onConfirm: () => { markProcessed(selectedItem.id, "加盟店確認中"); toast(`${selectedItem.id} の確認メールを送信しました`, "info"); } })} className="px-4 py-2 bg-amber-100 text-amber-700 rounded text-xs font-semibold hover:bg-amber-200">加盟店に確認</button>
-            <button onClick={() => setActionConfirm({ title: "サイト停止", description: `${selectedItem.id} のサイトを停止します。`, warning: "停止すると該当サイトの決済処理が停止されます。", type: "danger", onConfirm: () => { markProcessed(selectedItem.id, "停止"); toast(`${selectedItem.id} のサイトを停止しました`, "warning"); } })} className="px-4 py-2 bg-rose-600 text-white rounded text-xs font-semibold hover:bg-rose-700">停止</button>
+            <button onClick={() => setActionConfirm({ title: "問題なしと判定", description: `${selectedItem.id} のURL変更を問題なしと判定します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "問題なし"); toast(`${selectedItem.id} を問題なしと判定しました`, "success"); } })} className="px-4 py-2 bg-success-100 text-success-700 rounded text-xs font-semibold hover:bg-success-200">問題なし</button>
+            <button onClick={() => setActionConfirm({ title: "加盟店に確認", description: `${selectedItem.id} について加盟店に確認メールを送信します。`, type: "warning", onConfirm: () => { markProcessed(selectedItem.id, "加盟店確認中"); toast(`${selectedItem.id} の確認メールを送信しました`, "info"); } })} className="px-4 py-2 bg-warning-100 text-warning-700 rounded text-xs font-semibold hover:bg-warning-200">加盟店に確認</button>
+            <button onClick={() => setActionConfirm({ title: "サイト停止", description: `${selectedItem.id} のサイトを停止します。`, warning: "停止すると該当サイトの決済処理が停止されます。", type: "danger", onConfirm: () => { markProcessed(selectedItem.id, "停止"); toast(`${selectedItem.id} のサイトを停止しました`, "warning"); } })} className="px-4 py-2 bg-danger-600 text-white rounded text-xs font-semibold hover:bg-danger-700">停止</button>
           </>) : (<>
-            <button onClick={() => setActionConfirm({ title: "審査拒否", description: `${selectedItem.id} の審査申請を拒否します。`, warning: "拒否理由が加盟店に通知されます。", type: "reject", onConfirm: () => { markProcessed(selectedItem.id, "拒否"); toast(`${selectedItem.id} を拒否しました`, "warning"); } })} className="px-4 py-2 bg-rose-100 text-rose-700 rounded text-xs font-semibold hover:bg-rose-200">拒否</button>
-            <button onClick={() => setActionConfirm({ title: "差戻し", description: `${selectedItem.id} を差戻します。追加書類の提出を依頼します。`, type: "warning", onConfirm: () => { markProcessed(selectedItem.id, "差戻し"); toast(`${selectedItem.id} を差戻しました`, "info"); } })} className="px-4 py-2 bg-amber-100 text-amber-700 rounded text-xs font-semibold hover:bg-amber-200">差戻し</button>
-            <button onClick={() => setActionConfirm({ title: "審査承認", description: `${selectedItem.id} の審査を承認します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "承認"); toast(`${selectedItem.id} を承認しました`, "success"); } })} className="px-4 py-2 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700">✓ 承認</button>
+            <button onClick={() => setActionConfirm({ title: "審査拒否", description: `${selectedItem.id} の審査申請を拒否します。`, warning: "拒否理由が加盟店に通知されます。", type: "reject", onConfirm: () => { markProcessed(selectedItem.id, "拒否"); toast(`${selectedItem.id} を拒否しました`, "warning"); } })} className="px-4 py-2 bg-danger-100 text-danger-700 rounded text-xs font-semibold hover:bg-danger-200">拒否</button>
+            <button onClick={() => setActionConfirm({ title: "差戻し", description: `${selectedItem.id} を差戻します。追加書類の提出を依頼します。`, type: "warning", onConfirm: () => { markProcessed(selectedItem.id, "差戻し"); toast(`${selectedItem.id} を差戻しました`, "info"); } })} className="px-4 py-2 bg-warning-100 text-warning-700 rounded text-xs font-semibold hover:bg-warning-200">差戻し</button>
+            <button onClick={() => setActionConfirm({ title: "審査承認", description: `${selectedItem.id} の審査を承認します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "承認"); toast(`${selectedItem.id} を承認しました`, "success"); } })} className="px-4 py-2 bg-success-600 text-white rounded text-xs font-semibold hover:bg-success-700"><Check className="w-4 h-4 inline mr-1" /> 承認</button>
           </>)}
         </div>
       </div>
@@ -747,25 +754,25 @@ const MasterExceptionQueue = () => {
         <td colSpan="6" className="px-4 py-1 text-xs text-slate-400">{checkedItems.length > 0 ? `${checkedItems.length}件選択中` : "全選択"}</td>
       </tr>
       {queueItems.map((item, i) => (
-        <tr key={i} onClick={() => setSelectedQueueId(item.id)} className={`border-b cursor-pointer transition-colors ${processedItems[item.id] ? "bg-slate-100 opacity-60" : selectedQueueId === item.id ? "bg-blue-100 border-l-2 border-l-blue-500" : item.locked ? "bg-orange-50 hover:bg-orange-100" : checkedItems.includes(item.id) ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-slate-100"}`}>
+        <tr key={i} onClick={() => setSelectedQueueId(item.id)} className={`border-b cursor-pointer transition-colors ${processedItems[item.id] ? "bg-slate-100 opacity-60" : selectedQueueId === item.id ? "bg-brand-100 border-l-2 border-l-brand-500" : item.locked ? "bg-orange-50 hover:bg-orange-100" : checkedItems.includes(item.id) ? "bg-brand-50 hover:bg-brand-100" : "hover:bg-slate-100"}`}>
           <td className="px-4 py-2 whitespace-nowrap w-8" onClick={(e) => e.stopPropagation()}><input type="checkbox" className="w-3.5 h-3.5" checked={checkedItems.includes(item.id)} onChange={() => toggleCheck(item.id)} disabled={!!processedItems[item.id]} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-16 font-mono text-slate-600"><div className="flex items-center gap-1">{item.locked && <span title={`${item.lockedBy}さんが対応中`}>🔒</span>}{selectedQueueId === item.id ? <span className="font-bold text-blue-700">{item.id}</span> : item.id}</div></td>
+          <td className="px-4 py-2 whitespace-nowrap w-16 font-mono text-slate-600"><div className="flex items-center gap-1">{item.locked && <Lock className="w-4 h-4 inline" />}{selectedQueueId === item.id ? <span className="font-bold text-brand-700">{item.id}</span> : item.id}</div></td>
           <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={item.type} color={item.type === "不正検知" ? "red" : item.type === "精算" ? "blue" : item.type === "URL巡回" ? "purple" : "yellow"} /></td>
           <td className="px-4 py-2 whitespace-nowrap text-slate-700">{item.target}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-24">{processedItems[item.id] ? <Badge text={`✔ ${processedItems[item.id]}`} color="gray" /> : <Badge text={item.ai} color={item.aiColor} />}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24">{processedItems[item.id] ? <Badge text={`${processedItems[item.id]}`} color="gray" /> : <Badge text={item.ai} color={item.aiColor} />}</td>
           <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={item.time} color={item.timeColor} /></td>
           <td className="px-4 py-2 whitespace-nowrap w-32"><div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
             {processedItems[item.id] ? (
               <span className="text-xs text-slate-400 italic">処理済み</span>
             ) : item.type === "不正検知" ? (<>
-              <button onClick={() => setActionConfirm({ title: "正常と判定", description: `${item.id} を正常な取引として処理します。`, type: "approve", onConfirm: () => { markProcessed(item.id, "正常判定"); toast(`${item.id} を正常と判定しました`, "success"); } })} className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs hover:bg-emerald-200">正常</button>
-              <button onClick={() => setActionConfirm({ title: "ブロック確定", description: `${item.id} の取引をブロックします。`, type: "danger", onConfirm: () => { markProcessed(item.id, "ブロック"); toast(`${item.id} をブロックしました`, "warning"); } })} className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs hover:bg-rose-200">ブロック</button>
+              <button onClick={() => setActionConfirm({ title: "正常と判定", description: `${item.id} を正常な取引として処理します。`, type: "approve", onConfirm: () => { markProcessed(item.id, "正常判定"); toast(`${item.id} を正常と判定しました`, "success"); } })} className="px-2 py-1 bg-success-100 text-success-700 rounded text-xs hover:bg-success-200">正常</button>
+              <button onClick={() => setActionConfirm({ title: "ブロック確定", description: `${item.id} の取引をブロックします。`, type: "danger", onConfirm: () => { markProcessed(item.id, "ブロック"); toast(`${item.id} をブロックしました`, "warning"); } })} className="px-2 py-1 bg-danger-100 text-danger-700 rounded text-xs hover:bg-danger-200">ブロック</button>
             </>) : item.type === "精算" ? (<>
-              <button onClick={() => setActionConfirm({ title: "精算再実行", description: `${item.id} の精算バッチを再実行します。`, type: "info", onConfirm: () => { markProcessed(item.id, "再実行"); toast(`${item.id} の再実行を開始しました`, "success"); } })} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">再実行</button>
+              <button onClick={() => setActionConfirm({ title: "精算再実行", description: `${item.id} の精算バッチを再実行します。`, type: "info", onConfirm: () => { markProcessed(item.id, "再実行"); toast(`${item.id} の再実行を開始しました`, "success"); } })} className="px-2 py-1 bg-brand-100 text-brand-700 rounded text-xs hover:bg-brand-200">再実行</button>
               <button onClick={() => { markProcessed(item.id, "スキップ"); toast(`${item.id} をスキップしました`, "info"); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">スキップ</button>
             </>) : (<>
-              <button onClick={() => setActionConfirm({ title: item.type === "URL巡回" ? "問題なしと判定" : "審査承認", description: `${item.id} を${item.type === "URL巡回" ? "問題なしと判定" : "承認"}します。`, type: "approve", onConfirm: () => { markProcessed(item.id, item.type === "URL巡回" ? "問題なし" : "承認"); toast(`${item.id} を${item.type === "URL巡回" ? "問題なしと判定" : "承認"}しました`, "success"); } })} className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs hover:bg-emerald-200">{item.type === "URL巡回" ? "問題なし" : "承認"}</button>
-              <button onClick={() => setActionConfirm({ title: item.type === "URL巡回" ? "サイト停止" : "審査拒否", description: `${item.id} を${item.type === "URL巡回" ? "停止" : "拒否"}します。`, type: item.type === "URL巡回" ? "danger" : "reject", onConfirm: () => { markProcessed(item.id, item.type === "URL巡回" ? "停止" : "拒否"); toast(`${item.id} を${item.type === "URL巡回" ? "停止" : "拒否"}しました`, "warning"); } })} className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs hover:bg-rose-200">{item.type === "URL巡回" ? "停止" : "拒否"}</button>
+              <button onClick={() => setActionConfirm({ title: item.type === "URL巡回" ? "問題なしと判定" : "審査承認", description: `${item.id} を${item.type === "URL巡回" ? "問題なしと判定" : "承認"}します。`, type: "approve", onConfirm: () => { markProcessed(item.id, item.type === "URL巡回" ? "問題なし" : "承認"); toast(`${item.id} を${item.type === "URL巡回" ? "問題なしと判定" : "承認"}しました`, "success"); } })} className="px-2 py-1 bg-success-100 text-success-700 rounded text-xs hover:bg-success-200">{item.type === "URL巡回" ? "問題なし" : "承認"}</button>
+              <button onClick={() => setActionConfirm({ title: item.type === "URL巡回" ? "サイト停止" : "審査拒否", description: `${item.id} を${item.type === "URL巡回" ? "停止" : "拒否"}します。`, type: item.type === "URL巡回" ? "danger" : "reject", onConfirm: () => { markProcessed(item.id, item.type === "URL巡回" ? "停止" : "拒否"); toast(`${item.id} を${item.type === "URL巡回" ? "停止" : "拒否"}しました`, "warning"); } })} className="px-2 py-1 bg-danger-100 text-danger-700 rounded text-xs hover:bg-danger-200">{item.type === "URL巡回" ? "停止" : "拒否"}</button>
             </>)}
           </div></td>
         </tr>
@@ -780,12 +787,12 @@ const MasterExceptionQueue = () => {
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowBatchConfirm(null)} />
         <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
-          <div className={`p-4 border-b rounded-t-xl flex justify-between items-center ${showBatchConfirm === "approve" ? "bg-emerald-50" : "bg-rose-50"}`}>
-            <h3 className="text-sm font-bold text-slate-800">{showBatchConfirm === "approve" ? "✅ 一括承認の確認" : "❌ 一括拒否の確認"}</h3>
-            <button onClick={() => setShowBatchConfirm(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          <div className={`p-4 border-b rounded-t-xl flex justify-between items-center ${showBatchConfirm === "approve" ? "bg-success-50" : "bg-danger-50"}`}>
+            <h3 className="text-sm font-bold text-slate-800">{showBatchConfirm === "approve" ? "一括承認の確認" : "一括拒否の確認"}</h3>
+            <button onClick={() => setShowBatchConfirm(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
-            <div className={`rounded-lg border p-3 ${showBatchConfirm === "approve" ? "bg-emerald-50 border-emerald-200" : "bg-rose-50 border-rose-200"}`}>
+            <div className={`rounded-lg border p-3 ${showBatchConfirm === "approve" ? "bg-success-50 border-success-200" : "bg-danger-50 border-danger-200"}`}>
               <p className="text-xs font-bold text-slate-700 mb-2">対象: {checkedItems.length}件</p>
               <div className="space-y-1">
                 {checkedItems.map((id, i) => {
@@ -802,17 +809,17 @@ const MasterExceptionQueue = () => {
             </div>
             {showBatchConfirm === "reject" && (
               <div>
-                <label className="text-xs font-semibold text-slate-600">拒否理由 <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-semibold text-slate-600">拒否理由 <span className="text-danger-500">*</span></label>
                 <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>ポリシー違反</option><option>不正利用の疑い</option><option>書類不備</option><option>その他</option></select>
               </div>
             )}
-            <div className="bg-yellow-50 rounded border border-yellow-200 p-2 text-xs text-yellow-700">
-              ⚠️ この操作は元に戻せません。{showBatchConfirm === "approve" ? "承認" : "拒否"}後、関連する通知が自動送信されます。
+            <div className="bg-warning-50 rounded border border-warning-200 p-2 text-xs text-warning-700">
+              この操作は元に戻せません。{showBatchConfirm === "approve" ? "承認" : "拒否"}後、関連する通知が自動送信されます。
             </div>
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
             <button onClick={() => setShowBatchConfirm(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => { const action = showBatchConfirm === "approve" ? "承認" : "拒否"; const count = checkedItems.length; checkedItems.forEach(id => markProcessed(id, action)); setShowBatchConfirm(null); setCheckedItems([]); toast(`${count}件を一括${action}しました`, showBatchConfirm === "approve" ? "success" : "warning"); }} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showBatchConfirm === "approve" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"}`}>{checkedItems.length}件を{showBatchConfirm === "approve" ? "承認" : "拒否"}する</button>
+            <button onClick={() => { const action = showBatchConfirm === "approve" ? "承認" : "拒否"; const count = checkedItems.length; checkedItems.forEach(id => markProcessed(id, action)); setShowBatchConfirm(null); setCheckedItems([]); toast(`${count}件を一括${action}しました`, showBatchConfirm === "approve" ? "success" : "warning"); }} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showBatchConfirm === "approve" ? "bg-success-600 hover:bg-success-700" : "bg-danger-600 hover:bg-danger-700"}`}>{checkedItems.length}件を{showBatchConfirm === "approve" ? "承認" : "拒否"}する</button>
           </div>
         </div>
       </div>
@@ -955,11 +962,11 @@ const merchantData = [
 ];
 
 const PROC_STATUS = {
-  approved: { label: "✅ 承認済", color: "green", textClass: "text-emerald-600" },
-  reviewing: { label: "🔄 審査中", color: "blue", textClass: "text-blue-600" },
-  pending: { label: "⏳ 申請準備中", color: "gray", textClass: "text-slate-600" },
-  suspended: { label: "⛔ 停止", color: "red", textClass: "text-rose-600" },
-  rejected: { label: "❌ 却下", color: "red", textClass: "text-rose-600" },
+  approved: { label: "承認済", color: "green", textClass: "text-success-600", icon: CheckCircle2, iconClass: "text-success-600" },
+  reviewing: { label: "審査中", color: "blue", textClass: "text-brand-600", icon: RefreshCw, iconClass: "text-brand-600" },
+  pending: { label: "申請準備中", color: "gray", textClass: "text-slate-600", icon: Clock, iconClass: "text-slate-500" },
+  suspended: { label: "停止", color: "red", textClass: "text-danger-600", icon: ShieldAlert, iconClass: "text-danger-600" },
+  rejected: { label: "却下", color: "red", textClass: "text-danger-600", icon: XCircle, iconClass: "text-danger-600" },
 };
 
 const SortableHeader = ({ cols, sortKey, sortDir, onSort, children }) => (
@@ -967,13 +974,13 @@ const SortableHeader = ({ cols, sortKey, sortDir, onSort, children }) => (
     <thead>
       <tr className="bg-slate-50/80 border-b border-slate-200 font-semibold text-slate-500 uppercase tracking-wider">
         {cols.map((c, i) => (
-          <th key={i} className={`px-4 py-3 whitespace-nowrap font-semibold ${c.w === "flex-1" ? "" : c.w} ${c.sortKey ? "cursor-pointer hover:text-blue-600 select-none" : ""}`}
+          <th key={i} className={`px-4 py-3 whitespace-nowrap font-semibold ${c.w === "flex-1" ? "" : c.w} ${c.sortKey ? "cursor-pointer hover:text-brand-600 select-none" : ""}`}
             onClick={() => c.sortKey && onSort(c.sortKey)}
           >
             <span className="inline-flex items-center gap-1">
               {c.label}
               {c.sortKey && sortKey === c.sortKey && (
-                <span className="text-blue-600 text-xs">{sortDir === "asc" ? "▲" : "▼"}</span>
+                <span className="text-brand-600 text-xs">{sortDir === "asc" ? "▲" : "▼"}</span>
               )}
               {c.sortKey && sortKey !== c.sortKey && (
                 <span className="text-slate-300 text-xs">⇅</span>
@@ -1032,9 +1039,9 @@ const MasterMerchants = () => {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-bold text-slate-800">加盟店管理 <span className="text-slate-400 font-normal">({filtered.length}件)</span></h2>
-          <button onClick={() => setShowAddModal(true)} className="text-xs bg-blue-600 text-white px-2.5 py-1 rounded hover:bg-blue-700">+ 手動登録</button>
-          <button onClick={() => toast("加盟店一覧をCSV出力しました", "success")} className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50">📥 CSV</button>
-          <button onClick={() => toast("加盟店一覧をExcel出力しました", "success")} className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50">📥 Excel</button>
+          <button onClick={() => setShowAddModal(true)} className="text-xs bg-brand-500 text-white px-2.5 py-1 rounded hover:bg-brand-600">+ 手動登録</button>
+          <button onClick={() => toast("加盟店一覧をCSV出力しました", "success")} className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50"><Download className="w-4 h-4 inline mr-1" /> CSV</button>
+          <button onClick={() => toast("加盟店一覧をExcel出力しました", "success")} className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50"><Download className="w-4 h-4 inline mr-1" /> Excel</button>
         </div>
         <div className="flex gap-2">
           <input className="text-xs border rounded px-2 py-1 w-48" placeholder="加盟店名 / IDで検索..." value={searchText} onChange={e => setSearchText(e.target.value)} />
@@ -1050,7 +1057,7 @@ const MasterMerchants = () => {
       {/* Tabs: 加盟店一覧 / サイト管理 */}
       <div className="flex gap-1 border-b">
         {[{ id: "merchants", label: "加盟店一覧" }, { id: "sites", label: "サイト管理" }].map(t => (
-          <button key={t.id} onClick={() => setM03Tab(t.id)} className={`text-xs px-3 py-2 border-b-2 ${m03Tab === t.id ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+          <button key={t.id} onClick={() => setM03Tab(t.id)} className={`text-xs px-3 py-2 border-b-2 ${m03Tab === t.id ? "border-brand-500 text-brand-600 font-semibold" : "border-transparent text-slate-400"}`}>{t.label}</button>
         ))}
       </div>
 
@@ -1087,11 +1094,11 @@ const MasterMerchants = () => {
           {/* KPI */}
           <div className="grid grid-cols-5 gap-3">
             {[
-              ["🌐", "総サイト数", allSites.length, "blue"],
-              ["✅", "有効", allSites.filter(s => s.siteStatus === "有効").length, "emerald"],
-              ["🔄", "審査中", allSites.filter(s => s.siteStatus === "審査中").length, "amber"],
-              ["🧪", "テスト", allSites.filter(s => s.siteStatus === "テスト").length, "purple"],
-              ["⛔", "停止", allSites.filter(s => s.siteStatus === "停止").length, "rose"],
+              [<Globe className="w-4 h-4 inline" />, "総サイト数", allSites.length, "blue"],
+              [<CheckCircle2 className="w-4 h-4 text-success-600 inline" />, "有効", allSites.filter(s => s.siteStatus === "有効").length, "emerald"],
+              [<RefreshCw className="w-4 h-4 inline" />, "審査中", allSites.filter(s => s.siteStatus === "審査中").length, "amber"],
+              [<FlaskConical className="w-4 h-4 inline" />, "テスト", allSites.filter(s => s.siteStatus === "テスト").length, "purple"],
+              [<ShieldAlert className="w-4 h-4 inline" />, "停止", allSites.filter(s => s.siteStatus === "停止").length, "rose"],
             ].map(([icon, label, val, color], i) => (
               <div key={i} className={`bg-${color}-50 rounded-lg border border-${color}-200 p-2 text-center`}>
                 <p className="text-xs text-slate-400">{icon} {label}</p>
@@ -1105,9 +1112,9 @@ const MasterMerchants = () => {
             <div className="flex justify-between items-center mb-3">
               <p className="text-xs font-bold text-slate-600">サイト管理</p>
               <div className="flex gap-2">
-                <button onClick={() => setShowSiteAddModal(true)} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ サイト追加</button>
-                <button onClick={() => setActionConfirm({ title: "サイト一括停止", description: "表示中の全サイトを一括停止します。", warning: "停止すると該当サイトの決済処理が停止されます。", type: "danger", onConfirm: () => toast("選択したサイトを一括停止しました", "warning") })} className="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded border border-amber-200 font-semibold">⏸ 一括停止</button>
-                <button onClick={() => toast("サイト一覧をCSV出力しました", "success")} className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50">📥 CSV</button>
+                <button onClick={() => setShowSiteAddModal(true)} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold">+ サイト追加</button>
+                <button onClick={() => setActionConfirm({ title: "サイト一括停止", description: "表示中の全サイトを一括停止します。", warning: "停止すると該当サイトの決済処理が停止されます。", type: "danger", onConfirm: () => toast("選択したサイトを一括停止しました", "warning") })} className="text-xs bg-warning-100 text-warning-700 px-3 py-1 rounded border border-warning-200 font-semibold"><Pause className="w-3.5 h-3.5 inline mr-1" /> 一括停止</button>
+                <button onClick={() => toast("サイト一覧をCSV出力しました", "success")} className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50"><Download className="w-4 h-4 inline mr-1" /> CSV</button>
               </div>
             </div>
             <div className="grid grid-cols-6 gap-2">
@@ -1116,7 +1123,7 @@ const MasterMerchants = () => {
               <div><label className="text-xs text-slate-400">加盟店名</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="加盟店で絞込" /></div>
               <div><label className="text-xs text-slate-400">代理店</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>AG-001</option><option>AG-002</option><option>AG-003</option><option>なし</option></select></div>
               <div><label className="text-xs text-slate-400">利用状態</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>有効</option><option>審査中</option><option>テスト</option><option>停止</option></select></div>
-              <div className="flex items-end"><button onClick={() => toast("検索条件を適用しました", "info")} className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
+              <div className="flex items-end"><button onClick={() => toast("検索条件を適用しました", "info")} className="text-xs bg-brand-500 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
             </div>
           </div>
 
@@ -1124,7 +1131,7 @@ const MasterMerchants = () => {
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <div className="px-3 py-2 border-b flex justify-between items-center">
               <span className="text-xs text-slate-400">全 {allSites.length} サイト</span>
-              <span className="text-xs text-slate-300">💡 行クリックで詳細展開</span>
+              <span className="text-xs text-slate-300"><Lightbulb className="w-4 h-4 inline mr-1" /> 行クリックで詳細展開</span>
             </div>
             <table className="w-full text-xs">
               <thead><tr className="bg-slate-50 border-b">
@@ -1144,36 +1151,36 @@ const MasterMerchants = () => {
               <tbody>
                 {allSites.map((s, i) => (
                   <React.Fragment key={s.siteId}>
-                  <tr onClick={() => setExpandedSiteId(expandedSiteId === s.siteId ? null : s.siteId)} className={`border-b cursor-pointer transition-colors ${expandedSiteId === s.siteId ? "bg-blue-100 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50/50 hover:bg-blue-50" : "hover:bg-blue-50"}`}>
+                  <tr onClick={() => setExpandedSiteId(expandedSiteId === s.siteId ? null : s.siteId)} className={`border-b cursor-pointer transition-colors ${expandedSiteId === s.siteId ? "bg-brand-100 border-l-2 border-l-brand-500" : i % 2 ? "bg-slate-50/50 hover:bg-brand-50" : "hover:bg-brand-50"}`}>
                     <td className="p-2" onClick={e => e.stopPropagation()}><input type="checkbox" className="w-3 h-3" /></td>
-                    <td className="p-2 font-mono text-blue-600">{s.siteId}</td>
+                    <td className="p-2 font-mono text-brand-600">{s.siteId}</td>
                     <td className="p-2 text-slate-700 font-semibold">{s.siteName}</td>
                     <td className="p-2 text-slate-500 w-24 truncate">{s.merchantName.replace(/株式会社|合同会社|有限会社/g, "")}</td>
                     <td className="p-2 w-20">{s.agentId ? <span className="text-xs font-mono text-orange-600">{s.agentId}</span> : <span className="text-slate-300">—</span>}</td>
-                    <td className="p-2 text-blue-500 font-mono truncate max-w-[6rem]" title={s.url}>{s.url.replace(/https?:\/\//, "").split("/")[0]}</td>
-                    <td className="p-2 text-center">{s.settings.tds ? "✅" : "—"}</td>
-                    <td className="p-2 text-center">{s.settings.rec ? "🔄" : "—"}</td>
-                    <td className="p-2 text-center">{s.settings.ipRestrict ? "🔒" : "—"}</td>
-                    <td className="p-2 w-16"><span className="text-emerald-600 font-bold">{s.approvedProcs.length}</span><span className="text-slate-300">/{s.processors.length}</span></td>
+                    <td className="p-2 text-brand-500 font-mono truncate max-w-[6rem]" title={s.url}>{s.url.replace(/https?:\/\//, "").split("/")[0]}</td>
+                    <td className="p-2 text-center">{s.settings.tds ? <CheckCircle2 className="w-4 h-4 text-success-600 inline" /> : "—"}</td>
+                    <td className="p-2 text-center">{s.settings.rec ? "" : "—"}</td>
+                    <td className="p-2 text-center">{s.settings.ipRestrict ? <CheckCircle2 className="w-4 h-4 text-success-600 inline" /> : "—"}</td>
+                    <td className="p-2 w-16"><span className="text-success-600 font-bold">{s.approvedProcs.length}</span><span className="text-slate-300">/{s.processors.length}</span></td>
                     <td className="p-2 w-20 text-right font-semibold">{s.settings.monthlyVol || "—"}</td>
                     <td className="p-2 text-center"><Badge text={s.siteStatus} color={s.siteStatusColor} /></td>
                   </tr>
                   {expandedSiteId === s.siteId && (
                     <tr><td colSpan={12} className="p-0">
-                      <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                      <div className="px-4 py-3 bg-brand-50 border-b border-l-2 border-l-brand-500">
                         {/* ── ヘッダー ── */}
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-mono bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">{s.siteId}</span>
+                            <span className="text-xs font-mono bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded">{s.siteId}</span>
                             <span className="text-xs font-bold text-slate-700">{s.siteName}</span>
                             <Badge text={s.siteStatus} color={s.siteStatusColor} />
                             {s.settings.testMode && <Badge text="テストモード" color="purple" />}
                           </div>
                           <div className="flex gap-1">
-                            <button onClick={() => setActionConfirm({ title: "サイト設定の保存", description: `${s.siteId} ${s.siteName} の設定変更を保存します。`, warning: "決済設定・セキュリティ設定の変更は即座に反映されます。本番環境に影響しますのでご確認ください。", type: "warning", onConfirm: () => toast(`${s.siteName} の設定を保存しました`, "success") })} className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold">💾 保存</button>
-                            <button onClick={() => setActionConfirm({ title: "サイト停止", description: `${s.siteId} ${s.siteName} を停止します。`, warning: "停止すると該当サイトの決済処理が停止されます。", type: "warning", onConfirm: () => toast(`${s.siteName} を停止しました`, "warning") })} className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs border border-amber-200">⏸ 停止</button>
-                            <button onClick={() => setActionConfirm({ title: "トークン再発行", description: `${s.siteId} ${s.siteName} の認証トークンを再発行します。`, warning: "再発行すると現在のトークンは無効になります。", type: "warning", inputConfirm: "再発行", onConfirm: () => toast(`${s.siteName} のトークンを再発行しました`, "success") })} className="px-2 py-1 bg-white text-slate-600 rounded text-xs border">🔑 トークン再発行</button>
-                            <button onClick={() => setActionConfirm({ title: "サイト削除", description: `${s.siteId} ${s.siteName} を完全に削除します。`, warning: "削除したサイトは復元できません。関連する全ての取引データも失われます。", type: "danger", inputConfirm: "削除", onConfirm: () => toast(`${s.siteName} を削除しました`, "error") })} className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200">🗑 削除</button>
+                            <button onClick={() => setActionConfirm({ title: "サイト設定の保存", description: `${s.siteId} ${s.siteName} の設定変更を保存します。`, warning: "決済設定・セキュリティ設定の変更は即座に反映されます。本番環境に影響しますのでご確認ください。", type: "warning", onConfirm: () => toast(`${s.siteName} の設定を保存しました`, "success") })} className="px-3 py-1 bg-brand-500 text-white rounded text-xs font-semibold"><Save className="w-4 h-4 inline mr-1" /> 保存</button>
+                            <button onClick={() => setActionConfirm({ title: "サイト停止", description: `${s.siteId} ${s.siteName} を停止します。`, warning: "停止すると該当サイトの決済処理が停止されます。", type: "warning", onConfirm: () => toast(`${s.siteName} を停止しました`, "warning") })} className="px-2 py-1 bg-warning-100 text-warning-700 rounded text-xs border border-warning-200"><Pause className="w-3.5 h-3.5 inline mr-1" /> 停止</button>
+                            <button onClick={() => setActionConfirm({ title: "トークン再発行", description: `${s.siteId} ${s.siteName} の認証トークンを再発行します。`, warning: "再発行すると現在のトークンは無効になります。", type: "warning", inputConfirm: "再発行", onConfirm: () => toast(`${s.siteName} のトークンを再発行しました`, "success") })} className="px-2 py-1 bg-white text-slate-600 rounded text-xs border"><Key className="w-4 h-4 inline mr-1" /> トークン再発行</button>
+                            <button onClick={() => setActionConfirm({ title: "サイト削除", description: `${s.siteId} ${s.siteName} を完全に削除します。`, warning: "削除したサイトは復元できません。関連する全ての取引データも失われます。", type: "danger", inputConfirm: "削除", onConfirm: () => toast(`${s.siteName} を削除しました`, "error") })} className="px-2 py-1 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200"><Trash2 className="w-4 h-4 inline mr-1" /> 削除</button>
                           </div>
                         </div>
 
@@ -1181,7 +1188,7 @@ const MasterMerchants = () => {
                         <div className="grid grid-cols-3 gap-3 text-xs">
                           {/* カラム1: サイト基本情報（編集可能） */}
                           <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                            <p className="font-semibold text-slate-600 mb-1.5">🌐 サイト基本情報</p>
+                            <p className="font-semibold text-slate-600 mb-1.5"><Globe className="w-4 h-4 inline mr-1" /> サイト基本情報</p>
                             <div className="space-y-1.5">
                               <div><label className="text-slate-400">加盟店</label><div className="font-semibold text-slate-700">{s.merchantName} <span className="text-slate-400 font-mono">({s.merchantId})</span></div></div>
                               <div><label className="text-slate-400">サイト名</label><input type="text" defaultValue={s.siteName} className="w-full border rounded px-2 py-1 text-xs mt-0.5" /></div>
@@ -1204,12 +1211,12 @@ const MasterMerchants = () => {
 
                           {/* カラム2: 決済設定（編集可能） */}
                           <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                            <p className="font-semibold text-slate-600 mb-1.5">💳 決済設定</p>
+                            <p className="font-semibold text-slate-600 mb-1.5"><CreditCard className="w-4 h-4 inline mr-1" /> 決済設定</p>
                             <div className="space-y-1.5">
                               <div className="flex items-center justify-between">
                                 <span className="text-slate-400">3DS認証</span>
                                 <div className="flex items-center gap-1">
-                                  <label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" defaultChecked={s.settings.tds} className="sr-only peer" /><div className="w-7 h-4 bg-slate-200 peer-checked:bg-emerald-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-3" /></label>
+                                  <label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" defaultChecked={s.settings.tds} className="sr-only peer" /><div className="w-7 h-4 bg-slate-200 peer-checked:bg-success-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-3" /></label>
                                   <select defaultValue={s.settings.tdsMode || "全件"} className="border rounded px-1 py-0.5 text-xs w-16">
                                     <option>全件</option><option>条件付き</option>
                                   </select>
@@ -1218,7 +1225,7 @@ const MasterMerchants = () => {
                               <div className="flex items-center justify-between">
                                 <span className="text-slate-400">リカーリング</span>
                                 <div className="flex items-center gap-1">
-                                  <label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" defaultChecked={s.settings.rec} className="sr-only peer" /><div className="w-7 h-4 bg-slate-200 peer-checked:bg-emerald-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-3" /></label>
+                                  <label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" defaultChecked={s.settings.rec} className="sr-only peer" /><div className="w-7 h-4 bg-slate-200 peer-checked:bg-success-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-3" /></label>
                                   <span className="text-slate-400">最大</span>
                                   <input type="number" defaultValue={s.settings.recMax} className="border rounded px-1 py-0.5 text-xs w-10 text-center" min="0" max="99" />
                                   <span className="text-slate-400">回</span>
@@ -1246,11 +1253,11 @@ const MasterMerchants = () => {
 
                           {/* カラム3: セキュリティ・API（編集可能） */}
                           <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                            <p className="font-semibold text-slate-600 mb-1.5">🔒 セキュリティ・API</p>
+                            <p className="font-semibold text-slate-600 mb-1.5"><Lock className="w-4 h-4 inline mr-1" /> セキュリティ・API</p>
                             <div className="space-y-1.5">
                               <div className="flex items-center justify-between">
                                 <span className="text-slate-400">IP制限</span>
-                                <label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" defaultChecked={s.settings.ipRestrict} className="sr-only peer" /><div className="w-7 h-4 bg-slate-200 peer-checked:bg-emerald-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-3" /></label>
+                                <label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" defaultChecked={s.settings.ipRestrict} className="sr-only peer" /><div className="w-7 h-4 bg-slate-200 peer-checked:bg-success-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-3" /></label>
                               </div>
                               <div>
                                 <label className="text-slate-400">許可IP (改行区切り)</label>
@@ -1268,7 +1275,7 @@ const MasterMerchants = () => {
                                 <label className="text-slate-400">認証トークン</label>
                                 <div className="flex gap-1 mt-0.5">
                                   <input type="text" value={s.settings.authToken ? s.settings.authToken.substring(0, 12) + "••••••" : "—"} readOnly className="flex-1 border rounded px-2 py-1 text-xs font-mono bg-slate-50 text-slate-500" />
-                                  <button onClick={() => toast("トークンをクリップボードにコピーしました", "success")} className="px-1.5 py-1 bg-slate-100 text-slate-500 rounded text-xs border hover:bg-slate-200">📋</button>
+                                  <button onClick={() => toast("トークンをクリップボードにコピーしました", "success")} className="px-1.5 py-1 bg-slate-100 text-slate-500 rounded text-xs border hover:bg-slate-200"><ClipboardList className="w-4 h-4 inline" /></button>
                                 </div>
                               </div>
                             </div>
@@ -1279,11 +1286,11 @@ const MasterMerchants = () => {
                         {/* ── 接続先条件（全幅・編集可能） ── */}
                         <div className="mt-3 bg-white rounded-lg border border-slate-200 p-2.5 text-xs">
                           <div className="flex items-center justify-between mb-2">
-                            <p className="font-semibold text-slate-600">🔌 接続先条件 ({s.processors.length})</p>
+                            <p className="font-semibold text-slate-600"><Plug className="w-4 h-4 inline mr-1" /> 接続先条件 ({s.processors.length})</p>
                             <div className="flex items-center gap-2">
                               <div className="flex items-center gap-3 text-slate-400">
-                                <span>月間処理額: <span className="font-bold text-blue-700">{s.settings.monthlyVol || "—"}</span></span>
-                                <span>成功率: <span className="font-bold text-emerald-700">{s.settings.successRate || "—"}</span></span>
+                                <span>月間処理額: <span className="font-bold text-brand-700">{s.settings.monthlyVol || "—"}</span></span>
+                                <span>成功率: <span className="font-bold text-success-700">{s.settings.successRate || "—"}</span></span>
                                 <span>総取引: <span className="font-bold text-slate-700">{s.totalTxn.toLocaleString()}</span></span>
                               </div>
                               {/* サイト全体の粗利サマリー */}
@@ -1309,14 +1316,14 @@ const MasterMerchants = () => {
                                 if (siteMargins.length === 0 && !hasTrBelowCost) return null;
                                 const avg = siteMargins.length > 0 ? (siteMargins.reduce((a,b)=>a+b,0)/siteMargins.length).toFixed(2) : null;
                                 const hasNeg = siteMargins.some(m => m < 0) || hasTrBelowCost;
-                                return <span className={`ml-2 text-xs font-bold px-2 py-0.5 rounded ${hasNeg ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}>
-                                  {avg !== null ? <>サイト平均粗利: {avg >= 0 ? "+" : ""}{avg}%</> : null}{hasTrBelowCost ? " ⚠TR仕入れ割れ有" : ""}
+                                return <span className={`ml-2 text-xs font-bold px-2 py-0.5 rounded ${hasNeg ? "bg-danger-100 text-danger-700" : "bg-success-100 text-success-700"}`}>
+                                  {avg !== null ? <>サイト平均粗利: {avg >= 0 ? "+" : ""}{avg}%</> : null}{hasTrBelowCost ? <> <AlertTriangle className="w-3.5 h-3.5 text-warning-500 inline" /> TR仕入れ割れ有</> : ""}
                                 </span>;
                               })()}
                             </div>
                           </div>
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-amber-600 font-semibold" style={{fontSize:"9px"}}>※ 空欄=システム設定の仕入れ値が適用。利益を載せた料率を入力してください</span>
+                            <span className="text-warning-600 font-semibold" style={{fontSize:"9px"}}>※ 空欄=システム設定の仕入れ値が適用。利益を載せた料率を入力してください</span>
                           </div>
                           <div className="space-y-2">
                             {s.processors.map((proc, pi) => {
@@ -1325,7 +1332,7 @@ const MasterMerchants = () => {
                               const isCredit = pInfo.type !== "WEBマネー";
                               const brandKeys = isCredit ? ["visa","master","jcb","amex","diners"] : ["webmoney"];
                               return (
-                              <div key={pi} className={`rounded-lg border ${proc.status === "approved" ? "border-emerald-300 bg-emerald-50/30" : proc.status === "suspended" ? "border-rose-300 bg-rose-50/30" : "border-slate-300 bg-slate-50/30"} p-2.5`}>
+                              <div key={pi} className={`rounded-lg border ${proc.status === "approved" ? "border-success-300 bg-success-50/30" : proc.status === "suspended" ? "border-danger-300 bg-danger-50/30" : "border-slate-300 bg-slate-50/30"} p-2.5`}>
                                 {/* 接続先ヘッダー */}
                                 <div className="flex items-center justify-between mb-2">
                                   <div className="flex items-center gap-2">
@@ -1339,7 +1346,7 @@ const MasterMerchants = () => {
                                 {/* ブランド別手数料率 */}
                                 <div className="grid grid-cols-2 gap-2">
                                   <div>
-                                    <p className="text-slate-400 mb-1 font-semibold">加盟店提示料率 <span className="text-amber-500 font-normal">（利益込み）</span></p>
+                                    <p className="text-slate-400 mb-1 font-semibold">加盟店提示料率 <span className="text-warning-500 font-normal">（利益込み）</span></p>
                                     <div className="grid gap-1" style={{gridTemplateColumns: `repeat(${brandKeys.length}, 1fr)`}}>
                                       {brandKeys.map(bk => {
                                         const costVal = pInfo.fees?.[bk] || "-";
@@ -1351,10 +1358,10 @@ const MasterMerchants = () => {
                                         return (
                                         <div key={bk} className="text-center">
                                           <p className="text-slate-400 uppercase" style={{fontSize:"9px"}}>{bk === "webmoney" ? "WEBマネー" : bk}</p>
-                                          <input type="text" defaultValue={overrideVal} placeholder={costVal} className={`w-full border rounded px-1 py-0.5 text-center text-xs ${belowCost ? "border-rose-400 bg-rose-50 text-rose-700 font-semibold" : overrideVal ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                          <input type="text" defaultValue={overrideVal} placeholder={costVal} className={`w-full border rounded px-1 py-0.5 text-center text-xs ${belowCost ? "border-danger-400 bg-danger-50 text-danger-700 font-semibold" : overrideVal ? "border-warning-400 bg-warning-50 text-warning-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
                                           <p className="text-slate-300" style={{fontSize:"8px"}}>仕入: {costVal}</p>
-                                          {margin !== null && !belowCost && <p className="text-emerald-500 font-semibold" style={{fontSize:"8px"}}>粗利 +{margin}%</p>}
-                                          {belowCost && <p className="text-rose-500 font-semibold" style={{fontSize:"8px"}}>⚠ 仕入れ割れ</p>}
+                                          {margin !== null && !belowCost && <p className="text-success-500 font-semibold" style={{fontSize:"8px"}}>粗利 +{margin}%</p>}
+                                          {belowCost && <p className="text-danger-500 font-semibold" style={{fontSize:"8px"}}><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 仕入れ割れ</p>}
                                         </div>
                                         );
                                       })}
@@ -1363,7 +1370,7 @@ const MasterMerchants = () => {
                                   {/* TR手数料 */}
                                   {isCredit && (
                                   <div>
-                                    <p className="text-slate-400 mb-1 font-semibold">TR手数料 <span className="text-amber-500 font-normal">（利益込み）</span></p>
+                                    <p className="text-slate-400 mb-1 font-semibold">TR手数料 <span className="text-warning-500 font-normal">（利益込み）</span></p>
                                     <div className="grid grid-cols-3 gap-1">
                                       {[["TR(成功)", pInfo.trFees?.success, proc.trFeesOverride?.success],
                                         ["TR(失敗)", pInfo.trFees?.fail, proc.trFeesOverride?.fail],
@@ -1381,10 +1388,10 @@ const MasterMerchants = () => {
                                         return (
                                         <div key={ti}>
                                           <p className="text-slate-400" style={{fontSize:"9px"}}>{label}</p>
-                                          <input type="text" defaultValue={ovr || ""} placeholder={costStr} className={`w-full border rounded px-1 py-0.5 text-xs ${trBelowCost ? "border-rose-400 bg-rose-50 text-rose-700 font-semibold" : ovr ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                          <input type="text" defaultValue={ovr || ""} placeholder={costStr} className={`w-full border rounded px-1 py-0.5 text-xs ${trBelowCost ? "border-danger-400 bg-danger-50 text-danger-700 font-semibold" : ovr ? "border-warning-400 bg-warning-50 text-warning-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
                                           <p className="text-slate-300" style={{fontSize:"8px"}}>仕入: {costStr}</p>
-                                          {trMargin !== null && !trBelowCost && <p className="text-emerald-500 font-semibold" style={{fontSize:"8px"}}>粗利 +{trMargin.toFixed(trMargin < 1 ? 2 : 0)}{costStr.includes("USD") ? "USD" : costStr.includes("%") ? "%" : "円"}</p>}
-                                          {trBelowCost && <p className="text-rose-500 font-semibold" style={{fontSize:"8px"}}>⚠ 仕入れ割れ</p>}
+                                          {trMargin !== null && !trBelowCost && <p className="text-success-500 font-semibold" style={{fontSize:"8px"}}>粗利 +{trMargin.toFixed(trMargin < 1 ? 2 : 0)}{costStr.includes("USD") ? "USD" : costStr.includes("%") ? "%" : "円"}</p>}
+                                          {trBelowCost && <p className="text-danger-500 font-semibold" style={{fontSize:"8px"}}><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 仕入れ割れ</p>}
                                         </div>
                                         );
                                       })}
@@ -1399,11 +1406,11 @@ const MasterMerchants = () => {
                                     <div className="grid grid-cols-2 gap-1">
                                       <div>
                                         <p className="text-slate-400" style={{fontSize:"9px"}}>留保率</p>
-                                        <input type="text" defaultValue={proc.depositOverride?.rate || ""} placeholder={pInfo.deposit?.rate || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.depositOverride?.rate ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                        <input type="text" defaultValue={proc.depositOverride?.rate || ""} placeholder={pInfo.deposit?.rate || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.depositOverride?.rate ? "border-warning-400 bg-warning-50 text-warning-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
                                       </div>
                                       <div>
                                         <p className="text-slate-400" style={{fontSize:"9px"}}>期間</p>
-                                        <input type="text" defaultValue={proc.depositOverride?.period || ""} placeholder={pInfo.deposit?.period || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.depositOverride?.period ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                        <input type="text" defaultValue={proc.depositOverride?.period || ""} placeholder={pInfo.deposit?.period || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.depositOverride?.period ? "border-warning-400 bg-warning-50 text-warning-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
                                       </div>
                                     </div>
                                   </div>
@@ -1412,21 +1419,21 @@ const MasterMerchants = () => {
                                     <div className="grid grid-cols-3 gap-1">
                                       <div>
                                         <p className="text-slate-400" style={{fontSize:"9px"}}>1件上限</p>
-                                        <input type="text" defaultValue={proc.limitOverride?.trMax || ""} placeholder={pInfo.limits?.trMax || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.limitOverride?.trMax ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                        <input type="text" defaultValue={proc.limitOverride?.trMax || ""} placeholder={pInfo.limits?.trMax || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.limitOverride?.trMax ? "border-warning-400 bg-warning-50 text-warning-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
                                       </div>
                                       <div>
                                         <p className="text-slate-400" style={{fontSize:"9px"}}>月間上限</p>
-                                        <input type="text" defaultValue={proc.limitOverride?.monthly || ""} placeholder={pInfo.limits?.monthlyMax || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.limitOverride?.monthly ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                        <input type="text" defaultValue={proc.limitOverride?.monthly || ""} placeholder={pInfo.limits?.monthlyMax || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.limitOverride?.monthly ? "border-warning-400 bg-warning-50 text-warning-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
                                       </div>
                                       <div>
                                         <p className="text-slate-400" style={{fontSize:"9px"}}>回数制限</p>
-                                        <input type="text" defaultValue={proc.limitOverride?.count || ""} placeholder={pInfo.limits?.countLimit || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.limitOverride?.count ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                        <input type="text" defaultValue={proc.limitOverride?.count || ""} placeholder={pInfo.limits?.countLimit || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.limitOverride?.count ? "border-warning-400 bg-warning-50 text-warning-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
                                       </div>
                                     </div>
                                   </div>
                                   <div>
                                     <p className="text-slate-400 mb-1 font-semibold">入金サイクル</p>
-                                    <input type="text" defaultValue={proc.settlementOverride || ""} placeholder={pInfo.settlement?.cycle || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.settlementOverride ? "border-amber-400 bg-amber-50 text-amber-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
+                                    <input type="text" defaultValue={proc.settlementOverride || ""} placeholder={pInfo.settlement?.cycle || "-"} className={`w-full border rounded px-1 py-0.5 text-xs ${proc.settlementOverride ? "border-warning-400 bg-warning-50 text-warning-700 font-semibold" : "border-slate-200 text-slate-400"}`} />
                                     <p className="text-slate-300 mt-0.5" style={{fontSize:"8px"}}>デフォルト: {pInfo.settlement?.cycle || "-"}</p>
                                   </div>
                                 </div>
@@ -1453,17 +1460,17 @@ const MasterMerchants = () => {
                                   const avgMargin = margins.length > 0 ? (margins.reduce((s, m) => s + m.margin, 0) / margins.length).toFixed(2) : null;
                                   const hasNegative = margins.some(m => m.margin < 0) || trMargins.some(m => m.margin < 0);
                                   return (
-                                    <div className={`mt-2 pt-2 border-t border-dashed ${hasNegative ? "border-rose-300" : "border-emerald-300"}`}>
+                                    <div className={`mt-2 pt-2 border-t border-dashed ${hasNegative ? "border-danger-300" : "border-success-300"}`}>
                                       <div className="flex items-center justify-between flex-wrap gap-1">
-                                        <p className="text-xs font-semibold text-slate-500">📊 この接続先の粗利</p>
+                                        <p className="text-xs font-semibold text-slate-500"><BarChart3 className="w-4 h-4 inline mr-1" /> この接続先の粗利</p>
                                         <div className="flex items-center gap-2 flex-wrap">
                                           {margins.map(m => (
-                                            <span key={m.brand} className={`text-xs ${m.margin < 0 ? "text-rose-600 font-bold" : "text-emerald-600"}`}>
+                                            <span key={m.brand} className={`text-xs ${m.margin < 0 ? "text-danger-600 font-bold" : "text-success-600"}`}>
                                               {m.brand.toUpperCase()}: {m.margin >= 0 ? "+" : ""}{m.margin.toFixed(2)}%
                                             </span>
                                           ))}
                                           {avgMargin !== null && (
-                                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${margins.some(m => m.margin < 0) ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}>
+                                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${margins.some(m => m.margin < 0) ? "bg-danger-100 text-danger-700" : "bg-success-100 text-success-700"}`}>
                                               料率平均粗利: {avgMargin >= 0 ? "+" : ""}{avgMargin}%
                                             </span>
                                           )}
@@ -1473,15 +1480,15 @@ const MasterMerchants = () => {
                                         <div className="flex items-center gap-2 flex-wrap mt-1">
                                           <p className="text-[10px] text-slate-400">TR手数料粗利:</p>
                                           {trMargins.map(m => (
-                                            <span key={m.brand} className={`text-[10px] ${m.margin < 0 ? "text-rose-600 font-bold" : "text-emerald-600"}`}>
+                                            <span key={m.brand} className={`text-[10px] ${m.margin < 0 ? "text-danger-600 font-bold" : "text-success-600"}`}>
                                               {m.brand}: {m.margin >= 0 ? "+" : ""}{m.margin < 1 && m.margin > -1 ? m.margin.toFixed(2) : Math.round(m.margin)}{m.unit}
                                             </span>
                                           ))}
                                         </div>
                                       )}
                                       {hasNegative && (
-                                        <div className="mt-1 bg-rose-50 border border-rose-300 rounded p-1.5">
-                                          <p className="text-[10px] text-rose-600 font-semibold">⚠ 仕入れ原価を下回る手数料が設定されています。このまま登録すると赤字になります。料率を見直してください。</p>
+                                        <div className="mt-1 bg-danger-50 border border-danger-300 rounded p-1.5">
+                                          <p className="text-[10px] text-danger-600 font-semibold"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 仕入れ原価を下回る手数料が設定されています。このまま登録すると赤字になります。料率を見直してください。</p>
                                         </div>
                                       )}
                                     </div>
@@ -1509,14 +1516,14 @@ const MasterMerchants = () => {
       {/* Sort indicator */}
       <div className="flex items-center gap-2 text-xs text-slate-400">
         <span>並び替え:</span>
-        <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-200">
+        <span className="bg-brand-50 text-brand-600 px-2 py-0.5 rounded border border-brand-200">
           {{ id:"加盟店ID", name:"加盟店名", salesNum:"月間決済高", cbNum:"CB率", successNum:"成功率", feeNum:"手数料", riskOrder:"リスク" }[sortKey] || sortKey}
           {sortDir === "asc" ? " ↑昇順" : " ↓降順"}
         </span>
         {sortKey !== "id" && (
-          <button className="text-slate-400 hover:text-slate-600" onClick={() => { setSortKey("id"); setSortDir("asc"); }}>✕ リセット</button>
+          <button className="text-slate-400 hover:text-slate-600 flex items-center gap-1" onClick={() => { setSortKey("id"); setSortDir("asc"); }}><X className="w-3.5 h-3.5" /> リセット</button>
         )}
-        <span className="ml-auto text-slate-300">💡 行クリックで接続先審査状況を表示</span>
+        <span className="ml-auto text-slate-300"><Lightbulb className="w-4 h-4 inline mr-1" /> 行クリックで接続先審査状況を表示</span>
       </div>
 
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
@@ -1543,7 +1550,7 @@ const MasterMerchants = () => {
           return (
             <React.Fragment key={m.id}>
               <tr
-                className={`border-b cursor-pointer transition-colors ${isExpanded ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"}`}
+                className={`border-b cursor-pointer transition-colors ${isExpanded ? "bg-brand-50 border-l-2 border-l-brand-500" : i % 2 ? "bg-slate-50 hover:bg-brand-50" : "hover:bg-brand-50"}`}
                 onClick={() => setExpandedId(isExpanded ? null : m.id)}
               >
                 <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-slate-500">{m.id}</td>
@@ -1552,7 +1559,7 @@ const MasterMerchants = () => {
                 <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={m.risk} color={m.rColor} /></td>
                 <td className="px-4 py-2 whitespace-nowrap w-12 text-center"><span className="text-xs font-semibold text-slate-600">{m.sites.length}</span></td>
                 <td className="px-4 py-2 whitespace-nowrap w-16">
-                  <span className={`text-xs font-semibold ${approvedCount === 0 ? "text-slate-400" : approvedCount >= 3 ? "text-emerald-600" : "text-blue-600"}`}>
+                  <span className={`text-xs font-semibold ${approvedCount === 0 ? "text-slate-400" : approvedCount >= 3 ? "text-success-600" : "text-brand-600"}`}>
                     {approvedCount}/{totalCount}
                   </span>
                 </td>
@@ -1560,15 +1567,15 @@ const MasterMerchants = () => {
                 <td className="px-4 py-2 whitespace-nowrap w-16 text-right text-slate-600">{m.cb}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16 text-right text-slate-600">{m.success}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16 text-right text-slate-600">{m.fee}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-14"><button onClick={(e) => { e.stopPropagation(); setSlidePanel(m); }} className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">詳細</button></td>
+                <td className="px-4 py-2 whitespace-nowrap w-14"><button onClick={(e) => { e.stopPropagation(); setSlidePanel(m); }} className="px-2 py-0.5 bg-brand-100 text-brand-700 rounded text-xs hover:bg-brand-200">詳細</button></td>
               </tr>
 
               {/* ── Expanded: サイト→接続先→各条件 階層パネル ── */}
               {isExpanded && (
-                <tr><td colSpan={11} className="p-0"><div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                <tr><td colSpan={11} className="p-0"><div className="px-4 py-3 bg-brand-50 border-b border-l-2 border-l-brand-500">
                   <div className="flex justify-between items-center mb-2">
-                    <p className="text-xs font-bold text-slate-700">🏢 サイト・接続先一覧 — {m.name}（{m.sites.length}サイト / {m.processors.length}接続先）</p>
-                    <button onClick={() => setShowProcApply(true)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">+ 接続先審査を追加申請</button>
+                    <p className="text-xs font-bold text-slate-700"><Building2 className="w-4 h-4 inline mr-1" /> サイト・接続先一覧 — {m.name}（{m.sites.length}サイト / {m.processors.length}接続先）</p>
+                    <button onClick={() => setShowProcApply(true)} className="text-xs bg-brand-500 text-white px-2 py-1 rounded hover:bg-brand-600">+ 接続先審査を追加申請</button>
                   </div>
 
                   {/* ── サイト別展開 ── */}
@@ -1578,7 +1585,7 @@ const MasterMerchants = () => {
                       <div key={si} className="bg-white rounded-lg border border-slate-200 mb-2 last:mb-0 overflow-hidden">
                         {/* サイトヘッダー */}
                         <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 border-b">
-                          <span className="text-sm">🌐</span>
+                          <Globe className="w-4 h-4 inline" />
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <span className="text-xs font-bold text-slate-700">{site.siteName}</span>
@@ -1586,11 +1593,11 @@ const MasterMerchants = () => {
                               <Badge text={`${siteApproved}/${site.processors.length} 接続`} color={siteApproved === site.processors.length ? "green" : "blue"} />
                             </div>
                             <div className="flex items-center gap-3 mt-0.5">
-                              <span className="text-xs text-blue-500 truncate max-w-[200px]">{site.url}</span>
+                              <span className="text-xs text-brand-500 truncate max-w-[200px]">{site.url}</span>
                               {site.agentName && <span className="text-xs text-slate-400">代理店: {site.agentName}</span>}
                             </div>
                           </div>
-                          <button onClick={() => toast("接続先追加モーダルを開きました（実装予定）", "info")} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">+ 接続先追加</button>
+                          <button onClick={() => toast("接続先追加モーダルを開きました（実装予定）", "info")} className="text-xs bg-brand-100 text-brand-700 px-2 py-1 rounded hover:bg-brand-200">+ 接続先追加</button>
                         </div>
 
                         {/* サイト内の接続先一覧 */}
@@ -1599,11 +1606,11 @@ const MasterMerchants = () => {
                           const pInfo = processorList.find(p => p.name === proc.name);
                           const isCard = pInfo && pInfo.type !== "WEBマネー";
                           return (
-                            <div key={pi} className={`border-b last:border-0 ${proc.status === "suspended" ? "bg-rose-50/30" : ""}`}>
+                            <div key={pi} className={`border-b last:border-0 ${proc.status === "suspended" ? "bg-danger-50/30" : ""}`}>
                               {/* 接続先サマリー行 */}
                               <div className="flex items-center px-4 py-2 text-xs">
                                 <div className="w-8 text-center">
-                                  {proc.status === "approved" ? "✅" : proc.status === "reviewing" ? "🔄" : proc.status === "suspended" ? "⛔" : "⏳"}
+                                  {proc.status === "approved" ? <CheckCircle2 className="w-4 h-4 text-success-600" /> : proc.status === "reviewing" ? <RefreshCw className="w-4 h-4 text-brand-500" /> : proc.status === "suspended" ? <ShieldAlert className="w-4 h-4 text-danger-500" /> : <Clock className="w-4 h-4 text-slate-400" />}
                                 </div>
                                 <div className="w-36 font-semibold text-slate-700">{proc.name}</div>
                                 <div className="w-24 text-slate-500">{proc.brands}</div>
@@ -1613,8 +1620,8 @@ const MasterMerchants = () => {
                                 <div className="w-20 font-mono text-slate-400 text-xs">{proc.mid || "—"}</div>
                                 <div className="flex-1 flex gap-1 justify-end">
                                   {proc.status === "approved" && <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">詳細</button>}
-                                  {proc.status === "reviewing" && <button className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">審査確認</button>}
-                                  {proc.status === "pending" && <button className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-xs">審査申請</button>}
+                                  {proc.status === "reviewing" && <button className="px-2 py-0.5 bg-brand-100 text-brand-700 rounded text-xs">審査確認</button>}
+                                  {proc.status === "pending" && <button className="px-2 py-0.5 bg-success-100 text-success-700 rounded text-xs">審査申請</button>}
                                 </div>
                               </div>
 
@@ -1631,17 +1638,17 @@ const MasterMerchants = () => {
                                             const def = pInfo.fees[brand];
                                             const ovr = proc.feeOverride && proc.feeOverride[brand];
                                             return (
-                                              <div key={brand} className={`px-2 py-1 rounded border text-xs ${ovr ? "bg-amber-50 border-amber-300" : "bg-white border-slate-200"}`}>
+                                              <div key={brand} className={`px-2 py-1 rounded border text-xs ${ovr ? "bg-warning-50 border-warning-300" : "bg-white border-slate-200"}`}>
                                                 <span className="text-slate-400 uppercase">{brand}: </span>
-                                                <span className={`font-semibold ${ovr ? "text-amber-700" : "text-slate-700"}`}>{ovr || def}</span>
+                                                <span className={`font-semibold ${ovr ? "text-warning-700" : "text-slate-700"}`}>{ovr || def}</span>
                                                 {ovr && <span className="text-slate-400 ml-1 line-through">{def}</span>}
                                               </div>
                                             );
                                           })
                                         ) : (
-                                          <div className={`px-2 py-1 rounded border text-xs ${proc.feeOverride?.webmoney ? "bg-amber-50 border-amber-300" : "bg-white border-slate-200"}`}>
+                                          <div className={`px-2 py-1 rounded border text-xs ${proc.feeOverride?.webmoney ? "bg-warning-50 border-warning-300" : "bg-white border-slate-200"}`}>
                                             <span className="text-slate-400">WEBマネー: </span>
-                                            <span className={`font-semibold ${proc.feeOverride?.webmoney ? "text-amber-700" : "text-slate-700"}`}>{proc.feeOverride?.webmoney || pInfo.fees?.webmoney || pInfo.fees?.visa || "-"}</span>
+                                            <span className={`font-semibold ${proc.feeOverride?.webmoney ? "text-warning-700" : "text-slate-700"}`}>{proc.feeOverride?.webmoney || pInfo.fees?.webmoney || pInfo.fees?.visa || "-"}</span>
                                             {proc.feeOverride?.webmoney && <span className="text-slate-400 ml-1 line-through">{pInfo.fees?.webmoney || pInfo.fees?.visa || "-"}</span>}
                                           </div>
                                         )}
@@ -1670,8 +1677,8 @@ const MasterMerchants = () => {
                                             const depPeriod = proc.depositOverride?.period || pInfo.deposit.period;
                                             const hasOvr = proc.depositOverride?.rate || proc.depositOverride?.period;
                                             return (<>
-                                              <div className="flex justify-between"><span className="text-slate-500">留保率:</span><span className={`font-semibold ${hasOvr ? "text-amber-700" : ""}`}>{depRate}</span></div>
-                                              <div className="flex justify-between"><span className="text-slate-500">期間:</span><span className={`font-semibold ${hasOvr ? "text-amber-700" : ""}`}>{depPeriod}</span></div>
+                                              <div className="flex justify-between"><span className="text-slate-500">留保率:</span><span className={`font-semibold ${hasOvr ? "text-warning-700" : ""}`}>{depRate}</span></div>
+                                              <div className="flex justify-between"><span className="text-slate-500">期間:</span><span className={`font-semibold ${hasOvr ? "text-warning-700" : ""}`}>{depPeriod}</span></div>
                                               <div className="flex justify-between"><span className="text-slate-500">種別:</span><span className="font-semibold">{pInfo.deposit.type}</span></div>
                                             </>);
                                           })()}
@@ -1688,9 +1695,9 @@ const MasterMerchants = () => {
                                             const count = proc.limitOverride?.count || pInfo.limits.countLimit;
                                             const hasOvr = proc.limitOverride?.trMax || proc.limitOverride?.monthly || proc.limitOverride?.count;
                                             return (<>
-                                              <div className="flex justify-between"><span className="text-slate-500">1件上限:</span><span className={`font-semibold ${proc.limitOverride?.trMax ? "text-amber-700" : ""}`}>{trMax}</span></div>
-                                              <div className="flex justify-between"><span className="text-slate-500">月間:</span><span className={`font-semibold ${proc.limitOverride?.monthly ? "text-amber-700" : ""}`}>{monthly}</span></div>
-                                              <div className="flex justify-between"><span className="text-slate-500">回数:</span><span className={`font-semibold ${proc.limitOverride?.count ? "text-amber-700" : ""}`}>{count}</span></div>
+                                              <div className="flex justify-between"><span className="text-slate-500">1件上限:</span><span className={`font-semibold ${proc.limitOverride?.trMax ? "text-warning-700" : ""}`}>{trMax}</span></div>
+                                              <div className="flex justify-between"><span className="text-slate-500">月間:</span><span className={`font-semibold ${proc.limitOverride?.monthly ? "text-warning-700" : ""}`}>{monthly}</span></div>
+                                              <div className="flex justify-between"><span className="text-slate-500">回数:</span><span className={`font-semibold ${proc.limitOverride?.count ? "text-warning-700" : ""}`}>{count}</span></div>
                                             </>);
                                           })()}
                                         </div>
@@ -1700,14 +1707,14 @@ const MasterMerchants = () => {
                                     {/* 入金サイクル */}
                                     <div className="flex items-center gap-4 text-xs pt-1 border-t border-slate-200">
                                       <span className="text-slate-400">入金:</span>
-                                      <span className={`font-semibold ${proc.settlementOverride ? "text-amber-700" : "text-slate-700"}`}>{proc.settlementOverride || pInfo.settlement.cycle}</span>
+                                      <span className={`font-semibold ${proc.settlementOverride ? "text-warning-700" : "text-slate-700"}`}>{proc.settlementOverride || pInfo.settlement.cycle}</span>
                                       {proc.settlementOverride && <span className="text-slate-400 text-xs">（デフォルト: {pInfo.settlement.cycle}）</span>}
                                     </div>
 
                                     {/* オーバーライド注記 */}
                                     {(proc.feeOverride || proc.depositOverride || proc.limitOverride || proc.settlementOverride) && (
-                                      <div className="text-xs text-amber-600 flex items-center gap-1 pt-1">
-                                        <span>⚠️</span>
+                                      <div className="text-xs text-warning-600 flex items-center gap-1 pt-1">
+                                        <AlertTriangle className="w-4 h-4 text-warning-500 inline" />
                                         <span>黄色の値は加盟店別にオーバーライドされた個別条件です</span>
                                       </div>
                                     )}
@@ -1723,13 +1730,13 @@ const MasterMerchants = () => {
 
                   {/* AI Suggestion */}
                   {m.processors.filter(p => p.status === "approved").length === 1 && m.salesNum > 1000000 && (
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded border border-blue-200 p-2 mt-2">
-                      <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI提案:</span> 月間決済高{m.sales}の実績があります。接続先を追加すると、フェイルオーバーやコスト最適化のルーティングが可能になります。Worldpay接続の審査を推薦します。</p>
+                    <div className="bg-gradient-to-r from-brand-50 to-purple-50 rounded border border-brand-200 p-2 mt-2">
+                      <p className="text-xs text-brand-700"><Bot className="w-4 h-4 inline mr-1" /> <span className="font-semibold">AI提案:</span> 月間決済高{m.sales}の実績があります。接続先を追加すると、フェイルオーバーやコスト最適化のルーティングが可能になります。Worldpay接続の審査を推薦します。</p>
                     </div>
                   )}
                   {m.processors.filter(p => p.status === "approved").length >= 3 && (
-                    <div className="bg-gradient-to-r from-emerald-50 to-emerald-50 rounded border border-emerald-200 p-2 mt-2">
-                      <p className="text-xs text-emerald-700">✅ <span className="font-semibold">ルーティング最適化:</span> 3接続先以上が有効です。AIルーティングによるコスト最適化・フェイルオーバーが完全に機能しています。</p>
+                    <div className="bg-gradient-to-r from-success-50 to-success-50 rounded border border-success-200 p-2 mt-2">
+                      <p className="text-xs text-success-700"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> <span className="font-semibold">ルーティング最適化:</span> 3接続先以上が有効です。AIルーティングによるコスト最適化・フェイルオーバーが完全に機能しています。</p>
                     </div>
                   )}
                 </div></td></tr>
@@ -1750,7 +1757,7 @@ const MasterMerchants = () => {
           <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
             <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">加盟店詳細</h3>
-              <button onClick={() => setSlidePanel(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <button onClick={() => setSlidePanel(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               {/* 企業情報 */}
@@ -1760,7 +1767,7 @@ const MasterMerchants = () => {
                   <div className="flex justify-between"><span className="text-slate-400">法人名</span><span className="font-semibold">{slidePanel.name}</span></div>
                   <div className="flex justify-between"><span className="text-slate-400">ID</span><span className="font-mono">{slidePanel.id}</span></div>
                   <div className="flex justify-between"><span className="text-slate-400">ステータス</span><Badge text={slidePanel.status} color={slidePanel.sColor} /></div>
-                  <div className="flex justify-between"><span className="text-slate-400">URL</span><span className="text-blue-600">sample-ec.jp</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400">URL</span><span className="text-brand-600">sample-ec.jp</span></div>
                 </div>
               </div>
               {/* リスク情報 */}
@@ -1791,11 +1798,11 @@ const MasterMerchants = () => {
               </div>
               {/* サイト別接続先状況 */}
               <div className="border-t pt-3">
-                <p className="text-xs font-bold text-slate-600 mb-2">🌐 サイト別 接続先・手数料一覧</p>
+                <p className="text-xs font-bold text-slate-600 mb-2"><Globe className="w-4 h-4 inline mr-1" /> サイト別 接続先・手数料一覧</p>
                 {(slidePanel.sites || []).map((site, si) => (
                   <div key={si} className="mb-3 bg-slate-50 rounded-lg border border-slate-200 p-2">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="font-mono text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">{site.siteId}</span>
+                      <span className="font-mono text-xs bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded">{site.siteId}</span>
                       <span className="text-xs font-semibold text-slate-700">{site.siteName}</span>
                       {site.agentName && <span className="text-xs text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">代理店: {site.agentName}</span>}
                     </div>
@@ -1822,13 +1829,13 @@ const MasterMerchants = () => {
                               <td className="px-2 py-1 text-center"><Badge text={st.label} color={st.color} /></td>
                               <td className="px-2 py-1 text-center font-mono text-slate-500">{mp.mid || "—"}</td>
                               {isWM ? (
-                                <td colSpan={3} className={`px-2 py-1 text-center font-semibold ${mp.feeOverride?.webmoney ? "text-amber-600" : "text-blue-700"}`}>{mp.feeOverride?.webmoney || procDef?.fees?.webmoney || "-"}</td>
+                                <td colSpan={3} className={`px-2 py-1 text-center font-semibold ${mp.feeOverride?.webmoney ? "text-warning-600" : "text-brand-700"}`}>{mp.feeOverride?.webmoney || procDef?.fees?.webmoney || "-"}</td>
                               ) : (<>
-                                <td className={`px-2 py-1 text-center font-semibold ${mp.feeOverride?.visa ? "text-amber-600" : "text-slate-600"}`}>{mp.feeOverride?.visa || procDef?.fees?.visa || "-"}</td>
-                                <td className={`px-2 py-1 text-center font-semibold ${mp.feeOverride?.master ? "text-amber-600" : "text-slate-600"}`}>{mp.feeOverride?.master || procDef?.fees?.master || "-"}</td>
-                                <td className={`px-2 py-1 text-center font-semibold ${mp.feeOverride?.jcb ? "text-amber-600" : "text-slate-600"}`}>{mp.feeOverride?.jcb || procDef?.fees?.jcb || "-"}</td>
+                                <td className={`px-2 py-1 text-center font-semibold ${mp.feeOverride?.visa ? "text-warning-600" : "text-slate-600"}`}>{mp.feeOverride?.visa || procDef?.fees?.visa || "-"}</td>
+                                <td className={`px-2 py-1 text-center font-semibold ${mp.feeOverride?.master ? "text-warning-600" : "text-slate-600"}`}>{mp.feeOverride?.master || procDef?.fees?.master || "-"}</td>
+                                <td className={`px-2 py-1 text-center font-semibold ${mp.feeOverride?.jcb ? "text-warning-600" : "text-slate-600"}`}>{mp.feeOverride?.jcb || procDef?.fees?.jcb || "-"}</td>
                               </>)}
-                              <td className={`px-2 py-1 text-center ${mp.depositOverride?.rate ? "text-amber-600 font-semibold" : "text-slate-500"}`}>{mp.depositOverride?.rate || procDef?.deposit?.rate || "-"}</td>
+                              <td className={`px-2 py-1 text-center ${mp.depositOverride?.rate ? "text-warning-600 font-semibold" : "text-slate-500"}`}>{mp.depositOverride?.rate || procDef?.deposit?.rate || "-"}</td>
                               <td className="px-2 py-1 text-center text-slate-500 truncate max-w-[120px]">{mp.settlementOverride || procDef?.settlement?.cycle || "-"}</td>
                             </tr>
                           );
@@ -1838,11 +1845,11 @@ const MasterMerchants = () => {
                     </div>
                   </div>
                 ))}
-                <p className="text-xs text-amber-600">※ オレンジ = デフォルトからのオーバーライド値</p>
+                <p className="text-xs text-warning-600">※ オレンジ = デフォルトからのオーバーライド値</p>
               </div>
               {/* リザーブ設定（サイト・接続先別自動表示） */}
               <div className="border-t pt-3">
-                <p className="text-xs font-bold text-purple-700 mb-2">🔒 リザーブ（デポジット）設定</p>
+                <p className="text-xs font-bold text-purple-700 mb-2"><Lock className="w-4 h-4 inline mr-1" /> リザーブ（デポジット）設定</p>
                 <div className="space-y-2">
                   {(slidePanel.sites || []).flatMap(site =>
                     site.processors.filter(mp => mp.status === "approved").map(mp => {
@@ -1875,10 +1882,10 @@ const MasterMerchants = () => {
               </div>
               {/* 操作ボタン */}
               <div className="border-t pt-3 space-y-2">
-                <button className="w-full py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">保存</button>
+                <button className="w-full py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">保存</button>
                 <div className="flex gap-2">
-                  <button onClick={() => setShowConfirm("suspend")} className="flex-1 py-2 bg-amber-100 text-amber-700 rounded text-xs font-semibold hover:bg-amber-200">⚠ サスペンド</button>
-                  <button onClick={() => setShowConfirm("terminate")} className="flex-1 py-2 bg-rose-100 text-rose-700 rounded text-xs font-semibold hover:bg-rose-200">🚨 解約</button>
+                  <button onClick={() => setShowConfirm("suspend")} className="flex-1 py-2 bg-warning-100 text-warning-700 rounded text-xs font-semibold hover:bg-warning-200"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> サスペンド</button>
+                  <button onClick={() => setShowConfirm("terminate")} className="flex-1 py-2 bg-danger-100 text-danger-700 rounded text-xs font-semibold hover:bg-danger-200"><AlertOctagon className="w-4 h-4 text-danger-500 inline mr-1" /> 解約</button>
                 </div>
               </div>
             </div>
@@ -1891,12 +1898,12 @@ const MasterMerchants = () => {
         <div className="fixed inset-0 z-50 flex">
           <div className="flex-1 bg-black bg-opacity-30" onClick={() => setShowAddModal(false)} />
           <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
-            <div className="p-4 border-b bg-blue-50 flex justify-between items-center">
+            <div className="p-4 border-b bg-brand-50 flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">加盟店 手動登録</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
-              <div className="bg-amber-50 rounded border border-amber-200 p-2 text-xs text-amber-700">⚠️ 手動登録はAI審査をスキップします。audit_logsに記録されます。</div>
+              <div className="bg-warning-50 rounded border border-warning-200 p-2 text-xs text-warning-700"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 手動登録はAI審査をスキップします。audit_logsに記録されます。</div>
               {[
                 { label: "法人名", placeholder: "株式会社〇〇", required: true },
                 { label: "法人番号", placeholder: "1234567890123（13桁）", required: true },
@@ -1907,12 +1914,12 @@ const MasterMerchants = () => {
                 { label: "URL", placeholder: "https://example.com", required: true },
               ].map((f, i) => (
                 <div key={i}>
-                  <label className="text-xs font-semibold text-slate-600">{f.label} {f.required && <span className="text-rose-500">*</span>}</label>
+                  <label className="text-xs font-semibold text-slate-600">{f.label} {f.required && <span className="text-danger-500">*</span>}</label>
                   <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder={f.placeholder} />
                 </div>
               ))}
               <div>
-                <label className="text-xs font-semibold text-slate-600">業種 <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-semibold text-slate-600">業種 <span className="text-danger-500">*</span></label>
                 <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
                   <option>選択してください</option>
                   <option>EC（物販）</option><option>EC（デジタル）</option><option>旅行</option>
@@ -1920,22 +1927,22 @@ const MasterMerchants = () => {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600">月間予定決済高 <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-semibold text-slate-600">月間予定決済高 <span className="text-danger-500">*</span></label>
                 <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="¥1,000,000" />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600">初期リスクレベル <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-semibold text-slate-600">初期リスクレベル <span className="text-danger-500">*</span></label>
                 <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
                   <option>低</option><option>中</option><option>高</option>
                 </select>
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600">登録理由 <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-semibold text-slate-600">登録理由 <span className="text-danger-500">*</span></label>
                 <textarea className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 h-16" placeholder="手動登録の理由を入力..." />
               </div>
             </div>
             <div className="p-4 border-t space-y-2">
-              <button onClick={() => { setShowAddModal(false); toast("加盟店を手動登録しました", "success"); }} className="w-full py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">登録する</button>
+              <button onClick={() => { setShowAddModal(false); toast("加盟店を手動登録しました", "success"); }} className="w-full py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">登録する</button>
               <button onClick={() => setShowAddModal(false)} className="w-full py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
             </div>
           </div>
@@ -1947,19 +1954,19 @@ const MasterMerchants = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowConfirm(null)} />
           <div className="relative bg-white rounded-xl shadow-2xl w-[420px] p-6">
-            <h3 className={`text-sm font-bold mb-3 ${showConfirm === "suspend" ? "text-amber-700" : "text-rose-700"}`}>
-              {showConfirm === "suspend" ? "⚠ 加盟店をサスペンドしますか？" : "🚨 加盟店を解約しますか？"}
+            <h3 className={`text-sm font-bold mb-3 ${showConfirm === "suspend" ? "text-warning-700" : "text-danger-700"}`}>
+              {showConfirm === "suspend" ? "加盟店をサスペンドしますか？" : "加盟店を解約しますか？"}
             </h3>
             <p className="text-xs text-slate-600 mb-3">
               {showConfirm === "suspend" ? "サスペンド中は全サイトの決済処理が停止されます。復帰は管理者が手動で行います。" : "解約後は全データが保持されますが、決済処理は完全に停止されます。未精算分は精算完了後に入金されます。"}
             </p>
             <div className="mb-3">
-              <label className="text-xs font-semibold text-slate-600">理由（必須） <span className="text-rose-500">*</span></label>
+              <label className="text-xs font-semibold text-slate-600">理由（必須） <span className="text-danger-500">*</span></label>
               <textarea className="w-full text-xs border rounded p-2 h-16 mt-0.5" placeholder="理由を入力..." />
             </div>
             <div className="flex gap-2 justify-end">
               <button onClick={() => setShowConfirm(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { const action = showConfirm === "suspend" ? "サスペンド" : "解約"; setShowConfirm(null); toast(`加盟店を${action}しました`, showConfirm === "suspend" ? "warning" : "error"); }} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showConfirm === "suspend" ? "bg-amber-600 hover:bg-amber-700" : "bg-rose-600 hover:bg-rose-700"}`}>
+              <button onClick={() => { const action = showConfirm === "suspend" ? "サスペンド" : "解約"; setShowConfirm(null); toast(`加盟店を${action}しました`, showConfirm === "suspend" ? "warning" : "error"); }} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showConfirm === "suspend" ? "bg-warning-600 hover:bg-warning-700" : "bg-danger-600 hover:bg-danger-700"}`}>
                 {showConfirm === "suspend" ? "サスペンドする" : "解約する"}
               </button>
             </div>
@@ -1974,22 +1981,22 @@ const MasterMerchants = () => {
           <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">接続先審査を追加申請</h3>
-              <button onClick={() => setShowProcApply(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <button onClick={() => setShowProcApply(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-600">接続先 <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-semibold text-slate-600">接続先 <span className="text-danger-500">*</span></label>
                 <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>選択してください</option><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option><option>ONTHELINE</option><option>Asiabill</option><option>ビットキャッシュ</option><option>スマートピット</option><option>ネットライドキャッシュ</option><option>セキュリティマネー</option><option>Gマネー</option><option>ペイディ</option><option>ニーハオペイ</option></select>
               </div>
               <div>
                 <label className="text-xs font-semibold text-slate-600">申請理由</label>
                 <textarea className="w-full text-xs border rounded p-2 h-16 mt-0.5" placeholder="追加申請の理由を入力..." />
               </div>
-              <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">💡 申請後、審査完了まで1〜5営業日かかります</div>
+              <div className="bg-brand-50 rounded border border-brand-200 p-2 text-xs text-brand-700"><Lightbulb className="w-4 h-4 inline mr-1" /> 申請後、審査完了まで1〜5営業日かかります</div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowProcApply(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { setShowProcApply(false); toast("接続先審査を申請しました", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">申請する</button>
+              <button onClick={() => { setShowProcApply(false); toast("接続先審査を申請しました", "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">申請する</button>
             </div>
           </div>
         </div>
@@ -2001,15 +2008,15 @@ const MasterMerchants = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowSiteAddModal(false)} />
           <div className="relative bg-white rounded-xl shadow-2xl w-[600px] max-h-[85vh] overflow-y-auto">
-            <div className="p-4 border-b bg-blue-50 rounded-t-xl flex justify-between items-center sticky top-0 z-10">
-              <h3 className="text-sm font-bold text-slate-800">🌐 新規サイト追加</h3>
-              <button onClick={() => setShowSiteAddModal(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <div className="p-4 border-b bg-brand-50 rounded-t-xl flex justify-between items-center sticky top-0 z-10">
+              <h3 className="text-sm font-bold text-slate-800"><Globe className="w-4 h-4 inline mr-1" /> 新規サイト追加</h3>
+              <button onClick={() => setShowSiteAddModal(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-700">
-                <p className="font-bold mb-1">📋 サイト追加の流れ</p>
+              <div className="bg-brand-50 border border-brand-200 rounded p-3 text-xs text-brand-700">
+                <p className="font-bold mb-1"><ClipboardList className="w-4 h-4 inline mr-1" /> サイト追加の流れ</p>
                 <div className="flex items-center gap-2 text-slate-600">
-                  <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span><span>基本情報入力</span>
+                  <span className="bg-brand-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span><span>基本情報入力</span>
                   <span className="text-slate-300">→</span>
                   <span className="bg-slate-300 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span><span>決済設定</span>
                   <span className="text-slate-300">→</span>
@@ -2018,9 +2025,9 @@ const MasterMerchants = () => {
               </div>
 
               <div>
-                <p className="text-xs font-bold text-slate-700 mb-2">📌 基本情報</p>
+                <p className="text-xs font-bold text-slate-700 mb-2"><Pin className="w-4 h-4 inline mr-1" /> 基本情報</p>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><label className="text-xs font-semibold text-slate-600">加盟店 <span className="text-rose-500">*</span></label>
+                  <div><label className="text-xs font-semibold text-slate-600">加盟店 <span className="text-danger-500">*</span></label>
                     <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
                       <option value="">加盟店を選択...</option>
                       <option>M-001 株式会社ABC商事</option>
@@ -2028,11 +2035,11 @@ const MasterMerchants = () => {
                       <option>M-003 株式会社DEFサービス</option>
                     </select>
                   </div>
-                  <div><label className="text-xs font-semibold text-slate-600">サイト名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: ECサイトB" /></div>
+                  <div><label className="text-xs font-semibold text-slate-600">サイト名 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: ECサイトB" /></div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 mt-2">
-                  <div><label className="text-xs font-semibold text-slate-600">サイトURL <span className="text-rose-500">*</span></label><input type="url" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="https://example.com" /></div>
-                  <div><label className="text-xs font-semibold text-slate-600">ジャンル <span className="text-rose-500">*</span></label>
+                  <div><label className="text-xs font-semibold text-slate-600">サイトURL <span className="text-danger-500">*</span></label><input type="url" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="https://example.com" /></div>
+                  <div><label className="text-xs font-semibold text-slate-600">ジャンル <span className="text-danger-500">*</span></label>
                     <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
                       <option value="">選択...</option>
                       <option>EC（物販）</option><option>EC（デジタル）</option><option>サブスクリプション</option>
@@ -2042,7 +2049,7 @@ const MasterMerchants = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-3 mt-2">
                   <div><label className="text-xs font-semibold text-slate-600">月間予定決済高</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: ¥5,000,000" /></div>
-                  <div><label className="text-xs font-semibold text-slate-600">通知先メール <span className="text-rose-500">*</span></label><input type="email" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="admin@example.com" /></div>
+                  <div><label className="text-xs font-semibold text-slate-600">通知先メール <span className="text-danger-500">*</span></label><input type="email" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="admin@example.com" /></div>
                 </div>
                 <div className="mt-2"><label className="text-xs font-semibold text-slate-600">代理店（任意）</label>
                   <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
@@ -2055,7 +2062,7 @@ const MasterMerchants = () => {
               </div>
 
               <div>
-                <p className="text-xs font-bold text-slate-700 mb-2">💳 決済設定</p>
+                <p className="text-xs font-bold text-slate-700 mb-2"><CreditCard className="w-4 h-4 inline mr-1" /> 決済設定</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 rounded" /><span className="text-slate-700">3DS認証を有効化</span></label>
@@ -2080,7 +2087,7 @@ const MasterMerchants = () => {
               </div>
 
               <div>
-                <p className="text-xs font-bold text-slate-700 mb-2">🔒 セキュリティ</p>
+                <p className="text-xs font-bold text-slate-700 mb-2"><Lock className="w-4 h-4 inline mr-1" /> セキュリティ</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div><label className="text-xs font-semibold text-slate-600">コールバックURL</label><input type="url" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="https://example.com/callback" /></div>
                   <div><label className="text-xs font-semibold text-slate-600">Webhook URL</label><input type="url" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 font-mono" placeholder="https://example.com/webhook" /></div>
@@ -2090,14 +2097,14 @@ const MasterMerchants = () => {
                 </div>
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded p-3 text-xs text-amber-700">
-                <p className="font-bold">⚠️ サイト追加後の流れ</p>
+              <div className="bg-warning-50 border border-warning-200 rounded p-3 text-xs text-warning-700">
+                <p className="font-bold"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> サイト追加後の流れ</p>
                 <p className="mt-1">サイト作成後、M04「既存加盟店サイト追加審査」に審査案件が自動作成されます。AIサイト審査→人間判定→承認の順で審査が行われます。</p>
               </div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end sticky bottom-0 bg-white">
               <button onClick={() => setShowSiteAddModal(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { setShowSiteAddModal(false); toast("サイトを追加しました。サイト追加審査に案件が作成されます", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">サイトを追加して審査申請</button>
+              <button onClick={() => { setShowSiteAddModal(false); toast("サイトを追加しました。サイト追加審査に案件が作成されます", "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">サイトを追加して審査申請</button>
             </div>
           </div>
         </div>
@@ -2151,12 +2158,12 @@ const MasterAIMonitor = () => {
     {/* AI Modules with version info, toggle, trend */}
     <div className="grid grid-cols-2 gap-3">
       {aiModules.map((ai, i) => (
-        <div key={i} className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 cursor-pointer hover:ring-2 hover:ring-blue-200 transition-all" onClick={() => setSelectedModule(ai)}>
+        <div key={i} className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 cursor-pointer hover:ring-2 hover:ring-brand-200 transition-all" onClick={() => setSelectedModule(ai)}>
           <div className="flex justify-between items-center mb-2">
-            <p className="text-xs font-bold text-slate-700">🤖 {ai.name}</p>
+            <p className="text-xs font-bold text-slate-700"><Bot className="w-4 h-4 inline mr-1" /> {ai.name}</p>
             <div className="flex items-center gap-2">
               <span className="text-xs text-slate-400">{ai.version}</span>
-              <div className={`w-8 h-4 rounded-full flex items-center px-0.5 cursor-pointer ${ai.enabled ? "bg-emerald-500 justify-end" : "bg-slate-300 justify-start"}`} onClick={e => e.stopPropagation()}>
+              <div className={`w-8 h-4 rounded-full flex items-center px-0.5 cursor-pointer ${ai.enabled ? "bg-success-500 justify-end" : "bg-slate-300 justify-start"}`} onClick={e => e.stopPropagation()}>
                 <div className="w-3 h-3 bg-white rounded-full shadow" />
               </div>
             </div>
@@ -2177,7 +2184,7 @@ const MasterAIMonitor = () => {
             <p className="text-xs text-slate-400 mb-1">{ai.trend}（直近7日）</p>
             <div className="h-8 flex items-end gap-0.5">
               {ai.trendData.map((v, j) => (
-                <div key={j} className="flex-1 bg-blue-200 rounded-t" style={{ height: `${(v / Math.max(...ai.trendData)) * 28}px` }} />
+                <div key={j} className="flex-1 bg-brand-200 rounded-t" style={{ height: `${(v / Math.max(...ai.trendData)) * 28}px` }} />
               ))}
             </div>
           </div>
@@ -2188,10 +2195,10 @@ const MasterAIMonitor = () => {
     {/* AI vs Human Consistency Analysis */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
-        <p className="text-xs font-bold text-slate-700">📊 AI判定 vs 人間判定 一致率分析</p>
+        <p className="text-xs font-bold text-slate-700"><BarChart3 className="w-4 h-4 inline mr-1" /> AI判定 vs 人間判定 一致率分析</p>
         <div className="flex bg-slate-100 rounded-lg p-1">
           {[{k:"month",l:"今月"},{k:"prev",l:"先月"},{k:"3m",l:"3ヶ月"}].map(p => (
-            <button key={p.k} className={`text-sm px-3 py-1.5 rounded ${aiPeriod === p.k ? "bg-white shadow-sm text-blue-600 font-semibold" : "text-slate-400"}`}
+            <button key={p.k} className={`text-sm px-3 py-1.5 rounded ${aiPeriod === p.k ? "bg-white shadow-sm text-brand-600 font-semibold" : "text-slate-400"}`}
               onClick={() => setAiPeriod(p.k)}>{p.l}</button>
           ))}
         </div>
@@ -2205,13 +2212,13 @@ const MasterAIMonitor = () => {
           <div key={i} className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
             <div className="flex justify-between items-center mb-1">
               <span className="text-xs font-bold text-slate-700">{c.cat}</span>
-              <span className={`text-xs font-bold ${c.ok ? "text-emerald-600" : "text-rose-600"}`}>{c.rate}</span>
+              <span className={`text-xs font-bold ${c.ok ? "text-success-600" : "text-danger-600"}`}>{c.rate}</span>
             </div>
             <div className="space-y-0.5 text-xs">
-              <div className="flex justify-between"><span className="text-emerald-600">✅ AI承認→人間承認</span><span>{c.agree}件</span></div>
-              <div className="flex justify-between"><span className="text-rose-500">⚠️ AI承認→人間拒否(甘い)</span><span>{c.aiYesHumanNo}件</span></div>
-              <div className="flex justify-between"><span className="text-amber-600">⚠️ AI拒否→人間承認(厳しい)</span><span>{c.aiNoHumanYes}件</span></div>
-              <div className="flex justify-between"><span className="text-emerald-600">✅ AI拒否→人間拒否</span><span>{c.disagree}件</span></div>
+              <div className="flex justify-between"><span className="text-success-600"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> AI承認→人間承認</span><span>{c.agree}件</span></div>
+              <div className="flex justify-between"><span className="text-danger-500"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> AI承認→人間拒否(甘い)</span><span>{c.aiYesHumanNo}件</span></div>
+              <div className="flex justify-between"><span className="text-warning-600"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> AI拒否→人間承認(厳しい)</span><span>{c.aiNoHumanYes}件</span></div>
+              <div className="flex justify-between"><span className="text-success-600"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> AI拒否→人間拒否</span><span>{c.disagree}件</span></div>
             </div>
           </div>
         ))}
@@ -2220,7 +2227,7 @@ const MasterAIMonitor = () => {
 
     {/* Claude API Usage & Cost */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-700 mb-2">💰 Claude API 使用量・コスト（今月）</p>
+      <p className="text-xs font-bold text-slate-700 mb-2"><Coins className="w-4 h-4 inline mr-1" /> Claude API 使用量・コスト（今月）</p>
       <div className="flex gap-3 mb-2">
         <div className="flex-1 bg-slate-50 rounded p-2 text-center">
           <p className="text-xs text-slate-400">月間トークン</p>
@@ -2232,7 +2239,7 @@ const MasterAIMonitor = () => {
         </div>
         <div className="flex-1 bg-slate-50 rounded p-2 text-center">
           <p className="text-xs text-slate-400">月間コスト</p>
-          <p className="text-sm font-bold text-blue-700">¥44,200</p>
+          <p className="text-sm font-bold text-brand-700">¥44,200</p>
         </div>
       </div>
       <div className="flex gap-2 text-xs">
@@ -2245,7 +2252,7 @@ const MasterAIMonitor = () => {
           { name: "ルーティングAI", cost: "¥1,400", pct: 2 },
         ].map((m, i) => (
           <div key={i} className="flex-1 text-center">
-            <div className="bg-blue-100 rounded-full h-1.5 mb-1"><div className="bg-blue-500 rounded-full h-1.5" style={{ width: `${m.pct}%` }} /></div>
+            <div className="bg-brand-100 rounded-full h-1.5 mb-1"><div className="bg-brand-500 rounded-full h-1.5" style={{ width: `${m.pct}%` }} /></div>
             <p className="text-slate-500">{m.name}</p>
             <p className="font-semibold">{m.cost}</p>
           </div>
@@ -2255,7 +2262,7 @@ const MasterAIMonitor = () => {
 
     {/* アラート閾値設定 */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-700 mb-2">⚠️ アラート閾値設定</p>
+      <p className="text-xs font-bold text-slate-700 mb-2"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> アラート閾値設定</p>
       <div className="grid grid-cols-4 gap-3">
         {[{ label: "FP率アラート", value: "0.5%", desc: "偽陽性率がこの値を超えたら通知" },
           { label: "自動化率低下", value: "90%", desc: "自動処理率がこの値を下回ったら通知" },
@@ -2264,7 +2271,7 @@ const MasterAIMonitor = () => {
         ].map((a, i) => (
           <div key={i} className="bg-slate-50 rounded p-2 border">
             <p className="text-xs font-bold text-slate-700">{a.label}</p>
-            <p className="text-sm font-bold text-blue-600 my-1">{a.value}</p>
+            <p className="text-sm font-bold text-brand-600 my-1">{a.value}</p>
             <p className="text-xs text-slate-400">{a.desc}</p>
           </div>
         ))}
@@ -2278,12 +2285,12 @@ const MasterAIMonitor = () => {
         <div className="relative bg-white rounded-xl shadow-2xl w-[600px] max-h-[85vh] overflow-y-auto">
           <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-bold">🤖 {selectedModule.name}</p>
+              <p className="text-sm font-bold"><Bot className="w-4 h-4 inline mr-1" /> {selectedModule.name}</p>
               <Badge text={selectedModule.version} color="blue" />
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={e => { e.stopPropagation(); setShowTrainModal(selectedModule); setSelectedModule(null); }} className="text-xs px-3 py-1 bg-purple-50 text-purple-600 rounded border border-purple-200 hover:bg-purple-100">🔄 再学習</button>
-              <button onClick={() => setSelectedModule(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+              <button onClick={e => { e.stopPropagation(); setShowTrainModal(selectedModule); setSelectedModule(null); }} className="text-xs px-3 py-1 bg-purple-50 text-purple-600 rounded border border-purple-200 hover:bg-purple-100"><RefreshCw className="w-4 h-4 inline mr-1" /> 再学習</button>
+              <button onClick={() => setSelectedModule(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
             </div>
           </div>
           <div className="p-4 space-y-4">
@@ -2303,10 +2310,10 @@ const MasterAIMonitor = () => {
               <div>
                 <p className="text-xs font-bold text-slate-700 mb-2">混同行列（今月）</p>
                 <div className="grid grid-cols-2 gap-2 w-64">
-                  <div className="bg-emerald-50 rounded p-2 text-center border border-emerald-200"><p className="text-xs text-slate-500">真陽性(TP)</p><p className="text-lg font-bold text-emerald-600">{selectedModule.confusion.tp}</p></div>
-                  <div className="bg-red-50 rounded p-2 text-center border border-red-200"><p className="text-xs text-slate-500">偽陽性(FP)</p><p className="text-lg font-bold text-red-600">{selectedModule.confusion.fp}</p></div>
-                  <div className="bg-amber-50 rounded p-2 text-center border border-amber-200"><p className="text-xs text-slate-500">偽陰性(FN)</p><p className="text-lg font-bold text-amber-600">{selectedModule.confusion.fn}</p></div>
-                  <div className="bg-emerald-50 rounded p-2 text-center border border-emerald-200"><p className="text-xs text-slate-500">真陰性(TN)</p><p className="text-lg font-bold text-emerald-600">{selectedModule.confusion.tn}</p></div>
+                  <div className="bg-success-50 rounded p-2 text-center border border-success-200"><p className="text-xs text-slate-500">真陽性(TP)</p><p className="text-lg font-bold text-success-600">{selectedModule.confusion.tp}</p></div>
+                  <div className="bg-danger-50 rounded p-2 text-center border border-danger-200"><p className="text-xs text-slate-500">偽陽性(FP)</p><p className="text-lg font-bold text-danger-600">{selectedModule.confusion.fp}</p></div>
+                  <div className="bg-warning-50 rounded p-2 text-center border border-warning-200"><p className="text-xs text-slate-500">偽陰性(FN)</p><p className="text-lg font-bold text-warning-600">{selectedModule.confusion.fn}</p></div>
+                  <div className="bg-success-50 rounded p-2 text-center border border-success-200"><p className="text-xs text-slate-500">真陰性(TN)</p><p className="text-lg font-bold text-success-600">{selectedModule.confusion.tn}</p></div>
                 </div>
               </div>
             )}
@@ -2320,7 +2327,7 @@ const MasterAIMonitor = () => {
                   <Badge text={s.result} color={s.result === "ブロック" || s.result === "エスカレ" ? "red" : s.result === "要確認" ? "yellow" : "green"} />
                   {s.confidence !== "-" && <span className="text-slate-500">信頼度: {s.confidence}</span>}
                   <span className="flex-1 text-slate-400">{s.reason}</span>
-                  <span>{s.correct ? "✅" : "❌"}</span>
+                  <span>{s.correct ? <CheckCircle2 className="w-4 h-4 text-success-600" /> : <XCircle className="w-4 h-4 text-danger-500" />}</span>
                 </div>
               ))}
             </div>
@@ -2335,8 +2342,8 @@ const MasterAIMonitor = () => {
         <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowTrainModal(null)} />
         <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
           <div className="p-4 border-b flex items-center justify-between">
-            <p className="text-sm font-bold">🔄 再学習スケジュール</p>
-            <button onClick={() => setShowTrainModal(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <p className="text-sm font-bold"><RefreshCw className="w-4 h-4 inline mr-1" /> 再学習スケジュール</p>
+            <button onClick={() => setShowTrainModal(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-4 space-y-3">
             <div className="flex items-center gap-2 text-xs"><span className="text-slate-400">対象:</span><span className="font-bold">{showTrainModal.name}</span><Badge text={showTrainModal.version} color="blue" /></div>
@@ -2352,8 +2359,8 @@ const MasterAIMonitor = () => {
               <label className="text-xs text-slate-500">学習データ期間</label>
               <select className="w-full border rounded px-2 py-1.5 text-xs mt-0.5"><option>直近1ヶ月</option><option>直近3ヶ月</option><option>直近6ヶ月</option><option>全期間</option></select>
             </div>
-            <div className="bg-amber-50 border border-amber-200 rounded p-2 text-xs text-amber-700">
-              <p className="font-bold">⚠️ 注意</p>
+            <div className="bg-warning-50 border border-warning-200 rounded p-2 text-xs text-warning-700">
+              <p className="font-bold"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 注意</p>
               <p>再学習中はAI精度が一時的に低下する場合があります。深夜帯の実行を推奨します。</p>
             </div>
             <div className="flex gap-2">
@@ -2410,7 +2417,7 @@ const MerchantDashboard = () => {
       <div className="flex items-center gap-2">
         <div className="flex bg-slate-100 rounded-lg p-1">
           {["今日", "今週", "今月"].map(p => (
-            <button key={p} onClick={() => setPeriod(p)} className={`text-sm px-3 py-1.5 rounded ${period === p ? "bg-white shadow-sm text-blue-600 font-semibold" : "text-slate-500"}`}>{p}</button>
+            <button key={p} onClick={() => setPeriod(p)} className={`text-sm px-3 py-1.5 rounded ${period === p ? "bg-white shadow-sm text-brand-600 font-semibold" : "text-slate-500"}`}>{p}</button>
           ))}
         </div>
         <span className="text-xs text-slate-400">株式会社ABCマート</span>
@@ -2419,13 +2426,13 @@ const MerchantDashboard = () => {
 
     {/* Under Review State (shown when merchant is under review) */}
     {false && (
-      <div className="bg-amber-50 rounded-lg border border-amber-300 p-6 text-center space-y-3">
-        <div className="text-3xl">📋</div>
-        <p className="text-sm font-bold text-amber-800">現在審査中です</p>
-        <p className="text-xs text-amber-700">審査完了後にダッシュボードのデータが表示されます。</p>
+      <div className="bg-warning-50 rounded-lg border border-warning-300 p-6 text-center space-y-3">
+        <div className="text-3xl"><ClipboardList className="w-4 h-4 inline" /></div>
+        <p className="text-sm font-bold text-warning-800">現在審査中です</p>
+        <p className="text-xs text-warning-700">審査完了後にダッシュボードのデータが表示されます。</p>
         <div className="flex items-center justify-center gap-2">
-          <div className="h-2 w-48 bg-slate-200 rounded-full"><div className="h-2 bg-amber-500 rounded-full" style={{width:"60%"}} /></div>
-          <span className="text-xs text-amber-600 font-semibold">60%</span>
+          <div className="h-2 w-48 bg-slate-200 rounded-full"><div className="h-2 bg-warning-500 rounded-full" style={{width:"60%"}} /></div>
+          <span className="text-xs text-warning-600 font-semibold">60%</span>
         </div>
         <p className="text-xs text-slate-500">通常1〜3時間で完了します。結果はメールでお知らせします。</p>
       </div>
@@ -2434,29 +2441,29 @@ const MerchantDashboard = () => {
     {/* お知らせ欄 */}
     {(() => {
       const mNotices = [
-        { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: "🔧" },
-        { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: "🚀" },
-        { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: "⚠️" },
-        { date: "02/12", title: "3Dセキュア2.0 完全移行のお知らせ", type: "お知らせ", tColor: "default", icon: "📌" },
+        { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: <Wrench className="w-4 h-4 inline text-slate-500" /> },
+        { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: <Rocket className="w-4 h-4 inline text-brand-500" /> },
+        { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: <AlertTriangle className="w-4 h-4 inline text-warning-500" /> },
+        { date: "02/12", title: "3Dセキュア2.0 完全移行のお知らせ", type: "お知らせ", tColor: "default", icon: <Pin className="w-4 h-4 inline text-slate-500" /> },
       ];
       const renderMNotice = (n, i) => (
-        <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-blue-50 ${i === 0 ? "border-amber-300 bg-amber-50" : "border-slate-200"}`}>
+        <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-brand-50 ${i === 0 ? "border-warning-300 bg-warning-50" : "border-slate-200"}`}>
           <span>{n.icon}</span>
           <span className="w-12 text-slate-400 shrink-0">{n.date}</span>
           <Badge text={n.type} color={n.tColor} />
-          <span className={`flex-1 ${i === 0 ? "text-amber-800 font-semibold" : "text-slate-700"}`}>{n.title}</span>
+          <span className={`flex-1 ${i === 0 ? "text-warning-800 font-semibold" : "text-slate-700"}`}>{n.title}</span>
         </div>
       );
       return (
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <span>📢</span>
+            <Megaphone className="w-4 h-4 inline" />
             <p className="text-xs font-bold text-slate-600">お知らせ</p>
             {mNotices.length > 3 && <span className="text-xs text-slate-300">({mNotices.length}件)</span>}
           </div>
           {mNotices.length > 3 && (
-            <button className="text-xs text-blue-600 cursor-pointer hover:underline" onClick={() => setShowAllNotices(!showAllNotices)}>
+            <button className="text-xs text-brand-600 cursor-pointer hover:underline" onClick={() => setShowAllNotices(!showAllNotices)}>
               {showAllNotices ? "閉じる ▲" : `すべて見る (${mNotices.length - 3}件) ▼`}
             </button>
           )}
@@ -2473,16 +2480,16 @@ const MerchantDashboard = () => {
       );
     })()}
 
-    <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-lg border border-emerald-200 p-3">
+    <div className="bg-gradient-to-r from-success-50 to-brand-50 rounded-lg border border-success-200 p-3">
       <div className="flex items-center gap-2 mb-1">
-        <span>🤖</span><span className="text-xs font-bold text-emerald-700">AI インサイト</span><span className="text-xs text-slate-400">毎日更新</span>
+        <Bot className="w-4 h-4 inline" /><span className="text-xs font-bold text-success-700">AI インサイト</span><span className="text-xs text-slate-400">毎日更新</span>
       </div>
       <p className="text-xs text-slate-700">昨日の売上は¥412,000で前週比+15%。カード決済が78%を占めています。決済成功率は99.5%と安定。特異なパターンはありません。WEBマネーの導入で、カート離脱率を約8%改善できる可能性があります。</p>
     </div>
 
     <div className="flex gap-3">
       {Object.entries(kpiData).map(([label, d]) => (
-        <div key={label} onClick={() => setShowKpiDetail(label)} className="flex-1 cursor-pointer hover:ring-2 hover:ring-blue-200 rounded-lg transition-all">
+        <div key={label} onClick={() => setShowKpiDetail(label)} className="flex-1 cursor-pointer hover:ring-2 hover:ring-brand-200 rounded-lg transition-all">
           <KPICard label={label} value={d.value} sub={label === "決済成功率" ? "" : "前月比"} trend={d.trend} color={label === "決済成功率" ? "green" : undefined} />
         </div>
       ))}
@@ -2498,7 +2505,7 @@ const MerchantDashboard = () => {
       <div className="w-56 bg-white rounded-lg border border-slate-200 shadow-sm p-3">
         <p className="text-xs font-bold text-slate-600 mb-2">決済手段分布</p>
         <div className="space-y-2">
-          {[{ name: "クレジットカード", pct: 89, color: "bg-blue-500" }, { name: "WEBマネー", pct: 11, color: "bg-purple-500" }].map((m, i) => (
+          {[{ name: "クレジットカード", pct: 89, color: "bg-brand-500" }, { name: "WEBマネー", pct: 11, color: "bg-purple-500" }].map((m, i) => (
             <div key={i}>
               <div className="flex justify-between text-xs"><span className="text-slate-600">{m.name}</span><span className="font-semibold">{m.pct}%</span></div>
               <div className="w-full h-1.5 bg-slate-100 rounded-full mt-0.5"><div className={`h-full ${m.color} rounded-full`} style={{ width: `${m.pct}%` }} /></div>
@@ -2510,16 +2517,16 @@ const MerchantDashboard = () => {
 
     <div className="grid grid-cols-2 gap-3">
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <p className="text-xs font-bold text-slate-600 mb-2">💡 AIからの改善提案</p>
+        <p className="text-xs font-bold text-slate-600 mb-2"><Lightbulb className="w-4 h-4 inline mr-1" /> AIからの改善提案</p>
         <div className="space-y-2">
-          <div className="bg-blue-50 rounded p-2 text-xs text-blue-700">📊 19-21時台の売上が全体の35%を占めています。この時間帯のサーバー応答速度を最適化すると成功率が向上する可能性があります。</div>
-          <div className="bg-emerald-50 rounded p-2 text-xs text-emerald-700">💳 3Dセキュアのフリクションレス率が92%です。チャレンジ率をさらに下げるために、デバイス情報の送信を強化しましょう。</div>
+          <div className="bg-brand-50 rounded p-2 text-xs text-brand-700"><BarChart3 className="w-4 h-4 inline mr-1" /> 19-21時台の売上が全体の35%を占めています。この時間帯のサーバー応答速度を最適化すると成功率が向上する可能性があります。</div>
+          <div className="bg-success-50 rounded p-2 text-xs text-success-700"><CreditCard className="w-4 h-4 inline mr-1" /> 3Dセキュアのフリクションレス率が92%です。チャレンジ率をさらに下げるために、デバイス情報の送信を強化しましょう。</div>
         </div>
       </div>
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs font-bold text-slate-600">直近の取引</p>
-          <span className="text-xs text-blue-600 cursor-pointer">すべて見る →</span>
+          <span className="text-xs text-brand-600 cursor-pointer">すべて見る →</span>
         </div>
         {recentTx.map((tx, i) => (
           <div key={i} className="flex items-center py-1.5 text-xs border-b last:border-0">
@@ -2533,9 +2540,9 @@ const MerchantDashboard = () => {
     </div>
 
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-600 mb-2">⚡ クイックアクション</p>
+      <p className="text-xs font-bold text-slate-600 mb-2"><Zap className="w-4 h-4 inline mr-1" /> クイックアクション</p>
       <div className="flex gap-2">
-        {[["📋 注文一覧", "blue"], ["📊 決済高レポート", "emerald"], ["⚙️ API設定", "slate"], ["💬 AIに相談", "purple"]].map(([label, color], i) => (
+        {[["注文一覧", "blue"], ["決済高レポート", "emerald"], ["API設定", "slate"], ["AIに相談", "purple"]].map(([label, color], i) => (
           <button key={i} onClick={() => toast(`${label}を開きます`, "info")} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100`}>{label}</button>
         ))}
       </div>
@@ -2548,12 +2555,12 @@ const MerchantDashboard = () => {
         <div className="relative bg-white rounded-xl shadow-2xl w-[480px] max-h-[80vh] overflow-y-auto">
           <div className="p-4 border-b flex items-center justify-between">
             <p className="text-sm font-bold">{showKpiDetail} - 詳細</p>
-            <button onClick={() => setShowKpiDetail(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <button onClick={() => setShowKpiDetail(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-4 space-y-4">
             <div className="text-center py-3">
               <p className="text-2xl font-bold text-slate-800">{kpiData[showKpiDetail].value}</p>
-              <p className="text-xs text-emerald-600 mt-1">前月比 +{kpiData[showKpiDetail].trend}%</p>
+              <p className="text-xs text-success-600 mt-1">前月比 +{kpiData[showKpiDetail].trend}%</p>
             </div>
             <div>
               <p className="text-xs font-bold text-slate-700 mb-2">月次推移（直近6ヶ月）</p>
@@ -2564,7 +2571,7 @@ const MerchantDashboard = () => {
                   return (
                     <div key={i} className="flex-1 flex flex-col items-center">
                       <p className="text-xs text-slate-500 mb-1">{typeof v === "number" && v > 1000 ? `${(v/1000).toFixed(0)}K` : v}</p>
-                      <div className={`w-full rounded-t ${i === 5 ? "bg-blue-500" : "bg-blue-200"}`} style={{ height: `${h}%` }} />
+                      <div className={`w-full rounded-t ${i === 5 ? "bg-brand-500" : "bg-brand-200"}`} style={{ height: `${h}%` }} />
                       <p className="text-xs text-slate-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
                     </div>
                   );
@@ -2611,7 +2618,7 @@ const MerchantTransactions = () => {
         <input className="text-xs border rounded px-2 py-1 w-40" placeholder="注文番号 / 金額で検索" />
         <select className="text-xs border rounded px-2 py-1"><option>全ステータス</option><option>成功</option><option>失敗</option><option>返金済</option><option>ブロック</option></select>
         <input type="date" className="text-xs border rounded px-2 py-1" />
-        <button onClick={() => toast("注文一覧をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200" title="出力項目: 決済ID/日時/金額/ステータス/決済手段/注文番号（カード番号等の機密情報は含みません）">📥 CSV出力</button>
+        <button onClick={() => toast("注文一覧をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200" title="出力項目: 決済ID/日時/金額/ステータス/決済手段/注文番号（カード番号等の機密情報は含みません）"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
       </div>
     </div>
     <div className="grid grid-cols-4 gap-3">
@@ -2623,15 +2630,15 @@ const MerchantTransactions = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
       <TableHeader cols={[{ label: "決済ID", w: "w-28" }, { label: "日時", w: "w-32" }, { label: "金額", w: "w-20" }, { label: "ステータス", w: "w-20" }, { label: "決済手段", w: "w-24" }, { label: "カード", w: "w-20" }, { label: "注文番号", w: "flex-1" }, { label: "操作", w: "w-16" }]}>
       {txData.map((tx, i) => (
-        <tr key={i} onClick={() => setSelectedTx(tx)} className={`border-b cursor-pointer hover:bg-blue-50 ${i % 2 ? "bg-slate-50" : ""}`}>
-          <td className="px-4 py-2 whitespace-nowrap w-28 font-mono text-blue-600">{tx.id}</td>
+        <tr key={i} onClick={() => setSelectedTx(tx)} className={`border-b cursor-pointer hover:bg-brand-50 ${i % 2 ? "bg-slate-50" : ""}`}>
+          <td className="px-4 py-2 whitespace-nowrap w-28 font-mono text-brand-600">{tx.id}</td>
           <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{tx.time}</td>
           <td className="px-4 py-2 whitespace-nowrap w-20 font-semibold text-right">{tx.amount}</td>
           <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={tx.status} color={tx.sColor} /></td>
           <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-600">{tx.method}</td>
           <td className="px-4 py-2 whitespace-nowrap w-20 font-mono text-slate-500">{tx.card}</td>
           <td className="px-4 py-2 whitespace-nowrap text-slate-500">{tx.order}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-16"><button onClick={(e) => { e.stopPropagation(); setSelectedTx(tx); }} className="text-xs text-blue-600 hover:underline">詳細</button></td>
+          <td className="px-4 py-2 whitespace-nowrap w-16"><button onClick={(e) => { e.stopPropagation(); setSelectedTx(tx); }} className="text-xs text-brand-600 hover:underline">詳細</button></td>
         </tr>
       ))}
       </TableHeader>
@@ -2643,9 +2650,9 @@ const MerchantTransactions = () => {
       <div className="fixed inset-0 z-50 flex">
         <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedTx(null)} />
         <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
-          <div className="p-4 border-b bg-blue-50 flex justify-between items-center">
+          <div className="p-4 border-b bg-brand-50 flex justify-between items-center">
             <h3 className="text-sm font-bold text-slate-800">取引詳細</h3>
-            <button onClick={() => setSelectedTx(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <button onClick={() => setSelectedTx(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
             <div>
@@ -2677,10 +2684,10 @@ const MerchantTransactions = () => {
               <p className="text-xs text-slate-400 mb-2">イベントタイムライン</p>
               <div className="space-y-2">
                 {[
-                  { time: "14:23:01", event: "決済リクエスト受信", icon: "📥" },
-                  { time: "14:23:02", event: selectedTx.threeD === "認証済" ? "3Dセキュア認証完了" : "3Dセキュア未実施", icon: selectedTx.threeD === "認証済" ? "🔐" : "⚠️" },
-                  { time: "14:23:03", event: "オーソリ承認", icon: "✅" },
-                  { time: "14:23:03", event: selectedTx.status === "成功" ? "売上確定" : selectedTx.status === "返金済" ? "返金処理完了" : "ブロック判定", icon: selectedTx.status === "成功" ? "💰" : selectedTx.status === "返金済" ? "↩️" : "🚫" },
+                  { time: "14:23:01", event: "決済リクエスト受信", icon: <Download className="w-4 h-4 inline text-slate-500" /> },
+                  { time: "14:23:02", event: selectedTx.threeD === "認証済" ? "3Dセキュア認証完了" : "3Dセキュア未実施", icon: selectedTx.threeD === "認証済" ? <ShieldCheck className="w-4 h-4 inline text-success-600" /> : <Shield className="w-4 h-4 inline text-slate-400" /> },
+                  { time: "14:23:03", event: "オーソリ承認", icon: <CheckCircle2 className="w-4 h-4 inline text-success-600" /> },
+                  { time: "14:23:03", event: selectedTx.status === "成功" ? "売上確定" : selectedTx.status === "返金済" ? "返金処理完了" : "ブロック判定", icon: selectedTx.status === "成功" ? <CheckCircle2 className="w-4 h-4 inline text-success-600" /> : selectedTx.status === "返金済" ? <RotateCcw className="w-4 h-4 inline text-brand-500" /> : <Ban className="w-4 h-4 inline text-danger-500" /> },
                 ].map((e, i) => (
                   <div key={i} className="flex items-start gap-2 text-xs">
                     <span>{e.icon}</span>
@@ -2691,7 +2698,7 @@ const MerchantTransactions = () => {
             </div>
             {selectedTx.status === "成功" && (
               <div className="border-t pt-3 flex gap-2">
-                <button onClick={() => setShowRefundModal(true)} className="flex-1 py-1.5 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200 font-bold">↩️ 返金する</button>
+                <button onClick={() => setShowRefundModal(true)} className="flex-1 py-1.5 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200 font-bold"><RotateCcw className="w-4 h-4 inline mr-1" /> 返金する</button>
               </div>
             )}
           </div>
@@ -2705,21 +2712,21 @@ const MerchantTransactions = () => {
         <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowRefundModal(false)} />
         <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
           <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
-            <h3 className="text-sm font-bold text-slate-800">↩️ 返金処理</h3>
-            <button onClick={() => setShowRefundModal(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <h3 className="text-sm font-bold text-slate-800"><RotateCcw className="w-4 h-4 inline mr-1" /> 返金処理</h3>
+            <button onClick={() => setShowRefundModal(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
-            <div className="bg-blue-50 rounded p-3 text-xs">
+            <div className="bg-brand-50 rounded p-3 text-xs">
               <div className="flex justify-between"><span className="text-slate-500">対象取引</span><span className="font-mono font-bold">{selectedTx.id}</span></div>
               <div className="flex justify-between mt-1"><span className="text-slate-500">決済金額</span><span className="font-bold">{selectedTx.amount}</span></div>
             </div>
-            <div><label className="text-xs font-semibold text-slate-600">返金金額 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue={selectedTx.rawAmt} /><p className="text-xs text-slate-400 mt-0.5">一部返金の場合は金額を変更してください</p></div>
-            <div><label className="text-xs font-semibold text-slate-600">返金理由 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>お客様都合</option><option>商品不良・欠品</option><option>重複決済</option><option>不正利用</option><option>その他</option></select></div>
+            <div><label className="text-xs font-semibold text-slate-600">返金金額 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue={selectedTx.rawAmt} /><p className="text-xs text-slate-400 mt-0.5">一部返金の場合は金額を変更してください</p></div>
+            <div><label className="text-xs font-semibold text-slate-600">返金理由 <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>お客様都合</option><option>商品不良・欠品</option><option>重複決済</option><option>不正利用</option><option>その他</option></select></div>
             <div><label className="text-xs font-semibold text-slate-600">備考</label><textarea className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 h-16" placeholder="任意メモ" /></div>
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
             <button onClick={() => setShowRefundModal(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => setShowRefundModal(false)} className="px-4 py-2 text-xs bg-rose-600 text-white rounded font-semibold hover:bg-rose-700">返金を実行</button>
+            <button onClick={() => setShowRefundModal(false)} className="px-4 py-2 text-xs bg-danger-600 text-white rounded font-semibold hover:bg-danger-700">返金を実行</button>
           </div>
         </div>
       </div>
@@ -2746,7 +2753,7 @@ const MerchantAPISettings = () => {
   <div className="p-5 space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-sm font-bold text-slate-800">API設定</h2>
-      <a href="#" className="text-xs text-blue-600 hover:underline">📖 APIドキュメント →</a>
+      <a href="#" className="text-xs text-brand-600 hover:underline"><FileText className="w-4 h-4 inline mr-1" /> APIドキュメント →</a>
     </div>
     <div className="grid grid-cols-2 gap-4">
       {[{ env: "本番環境", badge: "green", pk: "aip_pk_live_xxxxxxxxxxxx...", sk: "aip_sk_live_xxxxxxxxxxxxxxxxxxxxxxxx", key: "live" },
@@ -2755,22 +2762,22 @@ const MerchantAPISettings = () => {
         <div key={e.key} className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
           <div className="flex items-center justify-between mb-2">
             <Badge text={e.env} color={e.badge} />
-            <button onClick={() => setShowRegenerateModal(e.key)} className="text-xs text-red-500 hover:text-red-700">🔄 キーを再発行</button>
+            <button onClick={() => setShowRegenerateModal(e.key)} className="text-xs text-danger-500 hover:text-danger-700"><RefreshCw className="w-4 h-4 inline mr-1" /> キーを再発行</button>
           </div>
           <div className="space-y-2">
             <div>
               <p className="text-xs text-slate-400">API公開キー</p>
               <div className="flex items-center gap-1">
                 <p className="text-xs font-mono bg-slate-50 rounded p-1.5 flex-1">{e.pk}</p>
-                <button onClick={() => toast("クリップボードにコピーしました", "success")} className="text-xs text-blue-600 px-1">📋</button>
+                <button onClick={() => toast("クリップボードにコピーしました", "success")} className="text-xs text-brand-600 px-1"><ClipboardList className="w-4 h-4 inline" /></button>
               </div>
             </div>
             <div>
               <p className="text-xs text-slate-400">APIシークレットキー</p>
               <div className="flex items-center gap-1">
                 <p className="text-xs font-mono bg-slate-50 rounded p-1.5 flex-1">{showKey[e.key] ? e.sk : "sk_" + e.key + "_••••••••••••••••••••"}</p>
-                <button onClick={() => setShowKey(prev => ({ ...prev, [e.key]: !prev[e.key] }))} className="text-xs text-blue-600 px-1">{showKey[e.key] ? "🙈 隠す" : "👁 表示"}</button>
-                <button onClick={() => toast("クリップボードにコピーしました", "success")} className="text-xs text-blue-600 px-1">📋</button>
+                <button onClick={() => setShowKey(prev => ({ ...prev, [e.key]: !prev[e.key] }))} className="text-xs text-brand-600 px-1">{showKey[e.key] ? <><Eye className="w-3.5 h-3.5 inline mr-0.5" /> 隠す</> : "表示"}</button>
+                <button onClick={() => toast("クリップボードにコピーしました", "success")} className="text-xs text-brand-600 px-1"><ClipboardList className="w-4 h-4 inline" /></button>
               </div>
             </div>
             <p className="text-xs text-slate-400">最終使用: 2026-02-11 14:23</p>
@@ -2796,18 +2803,18 @@ const MerchantAPISettings = () => {
             <Badge text="本番" color="green" />
             <span className="text-xs font-mono flex-1">https://api.abc-mart.co.jp/webhooks/payment</span>
             <Badge text="稼働中" color="green" />
-            <button onClick={() => toast("Webhookエンドポイントを編集中", "info")} className="text-xs text-blue-600">編集</button>
+            <button onClick={() => toast("Webhookエンドポイントを編集中", "info")} className="text-xs text-brand-600">編集</button>
           </div>
           <div>
             <p className="text-xs text-slate-400 mb-1">受信イベント:</p>
             <div className="flex flex-wrap gap-1">
               {["payment.succeeded", "payment.failed", "payment.refunded", "chargeback.received", "subscription.created", "subscription.cancelled"].map(e => (
-                <span key={e} className="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">{e}</span>
+                <span key={e} className="text-xs bg-brand-50 text-brand-600 px-1.5 py-0.5 rounded">{e}</span>
               ))}
             </div>
           </div>
           <div className="flex gap-2 pt-1">
-            <button onClick={() => { toast("Webhookテスト送信中...", "info"); setTimeout(() => toast("Webhookテスト送信成功", "success"), 1500); }} className="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded border border-blue-200 hover:bg-blue-100">🧪 テスト送信</button>
+            <button onClick={() => { toast("Webhookテスト送信中...", "info"); setTimeout(() => toast("Webhookテスト送信成功", "success"), 1500); }} className="text-xs px-3 py-1.5 bg-brand-50 text-brand-600 rounded border border-brand-200 hover:bg-brand-100"><FlaskConical className="w-4 h-4 inline mr-1" /> テスト送信</button>
             <button onClick={() => toast("エンドポイントを追加しました", "success")} className="text-xs px-3 py-1.5 bg-slate-50 text-slate-600 rounded border border-slate-200 hover:bg-slate-100">+ エンドポイント追加</button>
           </div>
           <div className="mt-3 pt-3 border-t">
@@ -2815,7 +2822,7 @@ const MerchantAPISettings = () => {
             <div className="flex items-center gap-2">
               <p className="text-xs text-slate-400">署名シークレット:</p>
               <p className="text-xs font-mono bg-slate-50 rounded p-1.5">whsec_••••••••••••••••</p>
-              <button onClick={() => toast("Webhook署名シークレットを表示しました", "warning")} className="text-xs text-blue-600">表示</button>
+              <button onClick={() => toast("Webhook署名シークレットを表示しました", "warning")} className="text-xs text-brand-600">表示</button>
             </div>
           </div>
         </div>
@@ -2825,7 +2832,7 @@ const MerchantAPISettings = () => {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs text-slate-400">配信成功率:</span>
-            <span className="text-xs font-bold text-emerald-600">96.8%</span>
+            <span className="text-xs font-bold text-success-600">96.8%</span>
             <span className="text-xs text-slate-400 ml-2">直近24時間: 245件</span>
           </div>
           <table className="w-full text-xs">
@@ -2837,7 +2844,7 @@ const MerchantAPISettings = () => {
                   <td className="py-1.5 px-2 text-slate-400">{log.time}</td>
                   <td className="py-1.5 px-2"><Badge text={String(log.status)} color={log.sc} /></td>
                   <td className="py-1.5 px-2 text-slate-500">{log.duration}</td>
-                  <td className="py-1.5 px-2"><button onClick={() => toast(`${log.event}を再送しました`, "success")} className="text-blue-600">再送</button></td>
+                  <td className="py-1.5 px-2"><button onClick={() => toast(`${log.event}を再送しました`, "success")} className="text-brand-600">再送</button></td>
                 </tr>
               ))}
             </tbody>
@@ -2855,10 +2862,10 @@ const MerchantAPISettings = () => {
             <span className="font-mono flex-1">{ip}</span>
             <span className="text-slate-400">{label}</span>
             <Badge text="許可" color={color} />
-            <button onClick={() => toast(`${ip}を削除しました`, "warning")} className="text-red-400 hover:text-red-600">✕</button>
+            <button onClick={() => toast(`${ip}を削除しました`, "warning")} className="text-danger-400 hover:text-danger-600"><X className="w-4 h-4" /></button>
           </div>
         ))}
-        <button onClick={() => toast("IPアドレスを追加しました", "success")} className="text-xs text-blue-600 mt-1">+ IPアドレスを追加</button>
+        <button onClick={() => toast("IPアドレスを追加しました", "success")} className="text-xs text-brand-600 mt-1">+ IPアドレスを追加</button>
       </div>
     </div>
 
@@ -2868,11 +2875,11 @@ const MerchantAPISettings = () => {
         <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => { setShowRegenerateModal(null); setConfirmText(""); }} />
         <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
           <div className="p-4 border-b flex items-center justify-between">
-            <p className="text-sm font-bold text-red-600">⚠️ APIキーの再発行</p>
-            <button onClick={() => { setShowRegenerateModal(null); setConfirmText(""); }} className="text-slate-400 hover:text-slate-600">✕</button>
+            <p className="text-sm font-bold text-danger-600"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> APIキーの再発行</p>
+            <button onClick={() => { setShowRegenerateModal(null); setConfirmText(""); }} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-4 space-y-3">
-            <div className="bg-red-50 border border-red-200 rounded p-3 text-xs text-red-700">
+            <div className="bg-danger-50 border border-danger-200 rounded p-3 text-xs text-danger-700">
               <p className="font-bold">この操作は取り消せません</p>
               <p className="mt-1">現在の{showRegenerateModal === "live" ? "本番" : "テスト"}環境のシークレットキーは無効化され、新しいキーが発行されます。既存のAPI連携が停止する可能性があります。</p>
             </div>
@@ -2882,7 +2889,7 @@ const MerchantAPISettings = () => {
             </div>
             <div className="flex gap-2">
               <button onClick={() => { setShowRegenerateModal(null); setConfirmText(""); }} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
-              <button disabled={confirmText !== "再発行"} onClick={() => { setShowRegenerateModal(null); setConfirmText(""); toast("APIキーを再発行しました。新しいキーをコピーしてください", "warning"); }} className={`flex-1 py-2 rounded text-xs font-bold text-white ${confirmText === "再発行" ? "bg-red-500 hover:bg-red-600" : "bg-slate-300 cursor-not-allowed"}`}>キーを再発行する</button>
+              <button disabled={confirmText !== "再発行"} onClick={() => { setShowRegenerateModal(null); setConfirmText(""); toast("APIキーを再発行しました。新しいキーをコピーしてください", "warning"); }} className={`flex-1 py-2 rounded text-xs font-bold text-white ${confirmText === "再発行" ? "bg-danger-500 hover:bg-danger-600" : "bg-slate-300 cursor-not-allowed"}`}>キーを再発行する</button>
             </div>
           </div>
         </div>
@@ -2901,10 +2908,10 @@ const MerchantAIChat = () => {
   <div className="p-4 flex gap-4 h-full">
     <div className="flex-1 bg-white rounded-lg border flex flex-col">
       <div className="p-3 border-b flex justify-between items-center">
-        <p className="text-xs font-bold text-slate-700">🤖 AIサポートチャット</p>
+        <p className="text-xs font-bold text-slate-700"><Bot className="w-4 h-4 inline mr-1" /> AIサポートチャット</p>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowHistory(!showHistory)} className={`text-xs px-2 py-1 rounded border ${showHistory ? "bg-blue-50 text-blue-600 border-blue-200" : "text-slate-400 border-slate-200"}`}>📋 履歴</button>
-          <button onClick={() => toast("新しいチャットを開始しました", "info")} className="text-xs px-2 py-1 rounded border text-slate-400 border-slate-200">🔄 新規</button>
+          <button onClick={() => setShowHistory(!showHistory)} className={`text-xs px-2 py-1 rounded border ${showHistory ? "bg-brand-50 text-brand-600 border-brand-200" : "text-slate-400 border-slate-200"}`}><ClipboardList className="w-4 h-4 inline mr-1" /> 履歴</button>
+          <button onClick={() => toast("新しいチャットを開始しました", "info")} className="text-xs px-2 py-1 rounded border text-slate-400 border-slate-200"><RefreshCw className="w-4 h-4 inline mr-1" /> 新規</button>
         </div>
       </div>
       <div className="flex flex-1 overflow-hidden">
@@ -2912,7 +2919,7 @@ const MerchantAIChat = () => {
           <div className="w-44 border-r bg-slate-50 overflow-y-auto p-2 space-y-1">
             <p className="text-xs font-bold text-slate-500 px-1 mb-2">会話履歴</p>
             {[["売上照会", "今日 14:23"], ["返金処理の依頼", "昨日 16:30"], ["API設定の質問", "2/15 09:00"]].map(([title, time], i) => (
-              <div key={i} className={`p-2 rounded text-xs cursor-pointer ${i === 0 ? "bg-white border border-blue-200" : "hover:bg-white"}`}>
+              <div key={i} className={`p-2 rounded text-xs cursor-pointer ${i === 0 ? "bg-white border border-brand-200" : "hover:bg-white"}`}>
                 <p className="font-bold text-slate-700 truncate">{title}</p>
                 <p className="text-slate-400">{time}</p>
               </div>
@@ -2921,70 +2928,70 @@ const MerchantAIChat = () => {
         )}
         <div className="flex-1 p-3 space-y-3 overflow-y-auto">
           <div className="flex gap-2">
-            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs"><Bot className="w-4 h-4 inline" /></div>
             <div className="bg-slate-100 rounded-lg p-2 max-w-xs">
               <p className="text-xs text-slate-700">こんにちは！ABCマートのサポートAIです。取引の照会、API設定の変更、返金処理など、何でもお手伝いします。</p>
             </div>
           </div>
           <div className="flex gap-2 justify-end">
-            <div className="bg-blue-600 rounded-lg p-2 max-w-xs"><p className="text-xs text-white">昨日の売上を教えて</p></div>
+            <div className="bg-brand-500 rounded-lg p-2 max-w-xs"><p className="text-xs text-white">昨日の売上を教えて</p></div>
           </div>
           <div className="flex gap-2">
-            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs"><Bot className="w-4 h-4 inline" /></div>
             <div className="bg-slate-100 rounded-lg p-2 max-w-sm">
               <p className="text-xs text-slate-700 mb-2">昨日（2/10）の売上サマリーです：</p>
               <div className="bg-white rounded p-2 text-xs space-y-1">
                 <div className="flex justify-between"><span className="text-slate-500">総売上:</span><span className="font-bold">¥412,000</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">取引件数:</span><span>48件</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">成功率:</span><span className="text-emerald-600">99.5%</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">前週比:</span><span className="text-emerald-600">+15%</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">成功率:</span><span className="text-success-600">99.5%</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">前週比:</span><span className="text-success-600">+15%</span></div>
               </div>
               <p className="text-xs text-slate-500 mt-2">詳細レポートが必要でしたら「月次レポートを出して」と言ってください。</p>
               <div className="flex gap-1 mt-2 border-t pt-1.5">
-                <button onClick={() => toast("フィードバックありがとうございます", "success")} className="text-xs text-slate-400 hover:text-emerald-600">👍</button>
-                <button onClick={() => toast("フィードバックを記録しました", "info")} className="text-xs text-slate-400 hover:text-red-600">👎</button>
-                <button onClick={() => toast("メッセージをコピーしました", "success")} className="text-xs text-slate-400 hover:text-blue-600 ml-auto">📋 コピー</button>
+                <button onClick={() => toast("フィードバックありがとうございます", "success")} className="text-xs text-slate-400 hover:text-success-600"><ThumbsUp className="w-3.5 h-3.5 inline" /></button>
+                <button onClick={() => toast("フィードバックを記録しました", "info")} className="text-xs text-slate-400 hover:text-danger-600"><ThumbsDown className="w-3.5 h-3.5 inline" /></button>
+                <button onClick={() => toast("メッセージをコピーしました", "success")} className="text-xs text-slate-400 hover:text-brand-600 ml-auto"><ClipboardList className="w-4 h-4 inline mr-1" /> コピー</button>
               </div>
             </div>
           </div>
           <div className="flex gap-2 justify-end">
-            <div className="bg-blue-600 rounded-lg p-2 max-w-xs"><p className="text-xs text-white">注文番号 ORD-20260210-045 を返金して</p></div>
+            <div className="bg-brand-500 rounded-lg p-2 max-w-xs"><p className="text-xs text-white">注文番号 ORD-20260210-045 を返金して</p></div>
           </div>
           <div className="flex gap-2">
-            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs"><Bot className="w-4 h-4 inline" /></div>
             <div className="bg-slate-100 rounded-lg p-2 max-w-sm">
               <p className="text-xs text-slate-700 mb-2">確認します。以下の取引を返金してよろしいですか？</p>
-              <div className="bg-amber-50 border border-amber-200 rounded p-2 text-xs space-y-1">
+              <div className="bg-warning-50 border border-warning-200 rounded p-2 text-xs space-y-1">
                 <div className="flex justify-between"><span className="text-slate-500">注文番号:</span><span>ORD-20260210-045</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">金額:</span><span className="font-bold">¥3,200</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">カード:</span><span>JCB ****5678</span></div>
               </div>
               <div className="flex gap-2 mt-2">
-                <button onClick={() => toast("ORD-20260210-045 の返金処理を実行しました", "success")} className="px-3 py-1 bg-rose-100 text-rose-700 rounded text-xs font-semibold">返金実行</button>
+                <button onClick={() => toast("ORD-20260210-045 の返金処理を実行しました", "success")} className="px-3 py-1 bg-danger-100 text-danger-700 rounded text-xs font-semibold">返金実行</button>
                 <button onClick={() => toast("返金をキャンセルしました", "info")} className="px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs">キャンセル</button>
               </div>
               <div className="flex gap-1 mt-2 border-t pt-1.5">
-                <button onClick={() => toast("フィードバックありがとうございます", "success")} className="text-xs text-slate-400 hover:text-emerald-600">👍</button>
-                <button onClick={() => toast("フィードバックを記録しました", "info")} className="text-xs text-slate-400 hover:text-red-600">👎</button>
+                <button onClick={() => toast("フィードバックありがとうございます", "success")} className="text-xs text-slate-400 hover:text-success-600"><ThumbsUp className="w-3.5 h-3.5 inline" /></button>
+                <button onClick={() => toast("フィードバックを記録しました", "info")} className="text-xs text-slate-400 hover:text-danger-600"><ThumbsDown className="w-3.5 h-3.5 inline" /></button>
               </div>
             </div>
           </div>
         </div>
       </div>
       <div className="p-3 border-t flex gap-2">
-        <button onClick={() => toast("ファイルを選択してください", "info")} className="px-2 py-2 text-slate-400 border rounded-lg text-xs hover:bg-slate-50" title="画像ファイルを添付">📎</button>
+        <button onClick={() => toast("ファイルを選択してください", "info")} className="px-2 py-2 text-slate-400 border rounded-lg text-xs hover:bg-slate-50" title="画像ファイルを添付"><Paperclip className="w-4 h-4 inline" /></button>
         <input value={inputText} onChange={e => setInputText(e.target.value)} className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="メッセージを入力..." />
-        <button onClick={() => { if (inputText) { toast("メッセージを送信しました", "success"); setInputText(""); } }} className={`px-3 py-2 rounded-lg text-xs font-semibold ${inputText ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-400"}`}>送信</button>
+        <button onClick={() => { if (inputText) { toast("メッセージを送信しました", "success"); setInputText(""); } }} className={`px-3 py-2 rounded-lg text-xs font-semibold ${inputText ? "bg-brand-500 text-white" : "bg-slate-200 text-slate-400"}`}>送信</button>
       </div>
       <div className="px-3 py-1.5 bg-slate-50 border-t text-xs text-slate-400 text-center">
-        🤖 営業時間外はAIが一次対応します。エスカレーションが必要な場合は営業時間内に担当者から回答します。
+        営業時間外はAIが一次対応します。エスカレーションが必要な場合は営業時間内に担当者から回答します。
       </div>
     </div>
     <div className="w-48">
       <p className="text-xs font-bold text-slate-600 mb-2">クイックアクション</p>
       <div className="space-y-1">
         {["昨日の売上は？", "今月のレポートを出して", "決済成功率は？", "Webhook URLを変更したい", "テスト決済をしたい", "APIキーを再発行したい"].map(q => (
-          <button key={q} onClick={() => setInputText(q)} className="w-full text-left text-xs bg-white border rounded p-2 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">{q}</button>
+          <button key={q} onClick={() => setInputText(q)} className="w-full text-left text-xs bg-white border rounded p-2 text-slate-600 hover:bg-brand-50 hover:text-brand-600 transition-all">{q}</button>
         ))}
       </div>
     </div>
@@ -2994,24 +3001,24 @@ const MerchantAIChat = () => {
 
 // ─── M12: ユーザー管理 ───
 const MASTER_MENU_ITEMS = [
-  { id: "M01", label: "ダッシュボード", icon: "📊", group: "概況" },
-  { id: "M02", label: "例外キュー", icon: "⚡", group: "概況" },
-  { id: "M03", label: "リアルタイム監視", icon: "📡", group: "モニタリング" },
-  { id: "M03b", label: "注文検索", icon: "🔍", group: "取引" },
-  { id: "M16", label: "顧客管理", icon: "👥", group: "取引" },
-  { id: "M14", label: "継続課金管理", icon: "🔄", group: "取引" },
-  { id: "M04", label: "加盟店管理", icon: "🏪", group: "加盟店" },
-  { id: "M06", label: "審査・申込", icon: "📝", group: "加盟店" },
-  { id: "M09b", label: "接続先審査", icon: "🔗", group: "加盟店" },
-  { id: "M15", label: "代理店管理", icon: "🤝", group: "加盟店" },
-  { id: "M08", label: "精算・入金管理", icon: "💰", group: "精算" },
-  { id: "M11", label: "レポート", icon: "📄", group: "精算" },
-  { id: "M09", label: "接続先管理", icon: "🖥️", group: "決済インフラ" },
-  { id: "M10", label: "ルーティング", icon: "🔀", group: "決済インフラ" },
-  { id: "M07", label: "不正検知", icon: "🛡️", group: "決済インフラ" },
-  { id: "M05", label: "AI監視", icon: "🤖", group: "運用" },
-  { id: "M12", label: "スタッフ管理", icon: "👤", group: "運用" },
-  { id: "M13", label: "システム設定", icon: "⚙️", group: "運用" },
+  { id: "M01", label: "ダッシュボード", icon: <BarChart3 className="w-4 h-4 inline text-slate-500" />, group: "概況" },
+  { id: "M02", label: "例外キュー", icon: <Zap className="w-4 h-4 inline text-slate-500" />, group: "概況" },
+  { id: "M03", label: "リアルタイム監視", icon: <Radio className="w-4 h-4 inline text-slate-500" />, group: "モニタリング" },
+  { id: "M03b", label: "注文検索", icon: <Search className="w-4 h-4 inline text-slate-500" />, group: "取引" },
+  { id: "M16", label: "顧客管理", icon: <Users className="w-4 h-4 inline text-slate-500" />, group: "取引" },
+  { id: "M14", label: "継続課金管理", icon: <RefreshCw className="w-4 h-4 inline text-brand-500" />, group: "取引" },
+  { id: "M04", label: "加盟店管理", icon: <Building2 className="w-4 h-4 inline text-slate-500" />, group: "加盟店" },
+  { id: "M06", label: "審査・申込", icon: <PenLine className="w-4 h-4 inline text-slate-500" />, group: "加盟店" },
+  { id: "M09b", label: "接続先審査", icon: <Link2 className="w-4 h-4 inline text-slate-500" />, group: "加盟店" },
+  { id: "M15", label: "代理店管理", icon: <Handshake className="w-4 h-4 inline text-slate-500" />, group: "加盟店" },
+  { id: "M08", label: "精算・入金管理", icon: <Coins className="w-4 h-4 inline text-slate-500" />, group: "精算" },
+  { id: "M11", label: "レポート", icon: <FileText className="w-4 h-4 inline text-slate-500" />, group: "精算" },
+  { id: "M09", label: "接続先管理", icon: <Monitor className="w-4 h-4 inline text-slate-500" />, group: "決済インフラ" },
+  { id: "M10", label: "ルーティング", icon: <Shuffle className="w-4 h-4 inline text-slate-500" />, group: "決済インフラ" },
+  { id: "M07", label: "不正検知", icon: <Shield className="w-4 h-4 inline text-slate-500" />, group: "決済インフラ" },
+  { id: "M05", label: "AI監視", icon: <Bot className="w-4 h-4 inline text-slate-500" />, group: "運用" },
+  { id: "M12", label: "スタッフ管理", icon: <User className="w-4 h-4 inline text-slate-500" />, group: "運用" },
+  { id: "M13", label: "システム設定", icon: <Settings className="w-4 h-4 inline text-slate-500" />, group: "運用" },
 ];
 
 const MENU_GROUPS = ["概況", "モニタリング", "取引", "加盟店", "精算", "決済インフラ", "運用"];
@@ -3115,15 +3122,15 @@ const MasterUserManagement = () => {
   <div className="p-5 space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-slate-800">ユーザー管理（運営スタッフ）</h2>
-      <button onClick={() => setShowInviteM04(true)} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold hover:bg-blue-700">📧 スタッフを招待</button>
+      <button onClick={() => setShowInviteM04(true)} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold hover:bg-brand-600"><Mail className="w-4 h-4 inline mr-1" /> スタッフを招待</button>
     </div>
 
     {/* Role Summary */}
     <div className="flex gap-3">
       {[
-        { role: "スーパー管理者", count: staffData.filter(s => s.roleLabel === "スーパー管理者").length, textClass: "text-rose-600", icon: "👑", desc: "全メニュー編集可" },
-        { role: "管理者", count: staffData.filter(s => s.roleLabel === "管理者").length, textClass: "text-blue-600", icon: "🔑", desc: "個別メニュー権限設定可" },
-        { role: "レビュアー", count: staffData.filter(s => s.roleLabel === "レビュアー").length, textClass: "text-purple-600", icon: "📋", desc: "個別メニュー権限設定可" },
+        { role: "スーパー管理者", count: staffData.filter(s => s.roleLabel === "スーパー管理者").length, textClass: "text-danger-600", icon: <ShieldCheck className="w-4 h-4 inline text-danger-500" />, desc: "全メニュー編集可" },
+        { role: "管理者", count: staffData.filter(s => s.roleLabel === "管理者").length, textClass: "text-brand-600", icon: <Key className="w-4 h-4 inline text-slate-500" />, desc: "個別メニュー権限設定可" },
+        { role: "レビュアー", count: staffData.filter(s => s.roleLabel === "レビュアー").length, textClass: "text-purple-600", icon: <ClipboardList className="w-4 h-4 inline text-slate-500" />, desc: "個別メニュー権限設定可" },
       ].map((r, i) => (
         <div key={i} className="flex-1 bg-white rounded-lg border border-slate-200 shadow-sm p-3">
           <div className="flex items-center gap-2 mb-1">
@@ -3141,22 +3148,22 @@ const MasterUserManagement = () => {
       {staffData.map((u, i) => {
         const isExpanded = expandedStaff === u.id;
         return (
-        <div key={u.id} className={`bg-white rounded-lg border shadow-sm ${isExpanded ? "border-blue-300 ring-1 ring-blue-100" : "border-slate-200"}`}>
+        <div key={u.id} className={`bg-white rounded-lg border shadow-sm ${isExpanded ? "border-brand-300 ring-1 ring-brand-100" : "border-slate-200"}`}>
           {/* Accordion Header */}
-          <div className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-50/50 transition-colors ${isExpanded ? "bg-blue-50/30" : ""}`} onClick={() => { setExpandedStaff(isExpanded ? null : u.id); setExpandedSection("permissions"); }}>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center text-sm shrink-0">👤</div>
+          <div className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-brand-50/50 transition-colors ${isExpanded ? "bg-brand-50/30" : ""}`} onClick={() => { setExpandedStaff(isExpanded ? null : u.id); setExpandedSection("permissions"); }}>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-100 to-purple-100 flex items-center justify-center text-sm shrink-0"><User className="w-4 h-4 inline" /></div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-slate-800">{u.name}</span>
                 <Badge text={u.roleLabel} color={u.rColor} />
-                {u.mfa ? <span className="text-xs text-emerald-500">🔒</span> : <span className="text-xs text-rose-400">⚠️MFA無効</span>}
+                {u.mfa ? <Lock className="w-4 h-4 inline" /> : <span className="text-xs text-danger-400 flex items-center gap-0.5"><AlertTriangle className="w-3.5 h-3.5" />MFA無効</span>}
               </div>
               <p className="text-xs text-slate-400">{u.email}</p>
             </div>
             <div className="flex items-center gap-4 shrink-0">
               <div className="flex gap-1.5 text-xs">
-                <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 font-semibold">{permCount(u.permissions, "full")}編集</span>
-                <span className="px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 font-semibold">{permCount(u.permissions, "readonly")}閲覧</span>
+                <span className="px-1.5 py-0.5 rounded bg-success-50 text-success-600 font-semibold">{permCount(u.permissions, "full")}編集</span>
+                <span className="px-1.5 py-0.5 rounded bg-warning-50 text-warning-600 font-semibold">{permCount(u.permissions, "readonly")}閲覧</span>
                 <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-400 font-semibold">{permCount(u.permissions, "none")}非表示</span>
               </div>
               <span className="text-xs text-slate-400">{u.lastLogin}</span>
@@ -3170,19 +3177,19 @@ const MasterUserManagement = () => {
             {/* Inner Tabs */}
             <div className="flex border-b bg-slate-50 px-4">
               {[
-                { key: "permissions", label: "メニュー権限", icon: "🔐" },
-                { key: "activity", label: "操作ログ", icon: "📝" },
-                { key: "sessions", label: "セッション", icon: "💻" },
-                { key: "info", label: "基本情報", icon: "ℹ️" },
+                { key: "permissions", label: "メニュー権限", icon: <ShieldCheck className="w-4 h-4 inline text-slate-500" /> },
+                { key: "activity", label: "操作ログ", icon: <PenLine className="w-4 h-4 inline text-slate-500" /> },
+                { key: "sessions", label: "セッション", icon: <Monitor className="w-4 h-4 inline text-slate-500" /> },
+                { key: "info", label: "基本情報", icon: <Info className="w-4 h-4 inline text-slate-500" /> },
               ].map(tab => (
-                <button key={tab.key} onClick={() => setExpandedSection(tab.key)} className={`px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${expandedSection === tab.key ? "border-blue-500 text-blue-700 bg-white" : "border-transparent text-slate-500 hover:text-slate-700"}`}>
+                <button key={tab.key} onClick={() => setExpandedSection(tab.key)} className={`px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${expandedSection === tab.key ? "border-brand-500 text-brand-700 bg-white" : "border-transparent text-slate-500 hover:text-slate-700"}`}>
                   {tab.icon} {tab.label}
                 </button>
               ))}
               <div className="flex-1" />
               <div className="flex items-center gap-1 py-1" onClick={e => e.stopPropagation()}>
-                <button onClick={() => setActionConfirm({ title: "パスワードリセット", description: `${u.name} にパスワードリセットメールを送信します。`, type: "warning", onConfirm: () => toast(`${u.name} にリセットメールを送信しました`, "success") })} className="px-2 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded text-xs hover:bg-yellow-100">パスワードリセット</button>
-                <button onClick={() => setActionConfirm({ title: "ユーザー無効化", description: `${u.name}（${u.email}）を無効化します。`, warning: "無効化されたユーザーはログインできなくなります。", type: "danger", onConfirm: () => toast(`${u.name} を無効化しました`, "warning") })} className="px-2 py-1 bg-rose-50 text-rose-600 border border-rose-200 rounded text-xs hover:bg-rose-100">無効化</button>
+                <button onClick={() => setActionConfirm({ title: "パスワードリセット", description: `${u.name} にパスワードリセットメールを送信します。`, type: "warning", onConfirm: () => toast(`${u.name} にリセットメールを送信しました`, "success") })} className="px-2 py-1 bg-warning-50 text-warning-700 border border-warning-200 rounded text-xs hover:bg-warning-100">パスワードリセット</button>
+                <button onClick={() => setActionConfirm({ title: "ユーザー無効化", description: `${u.name}（${u.email}）を無効化します。`, warning: "無効化されたユーザーはログインできなくなります。", type: "danger", onConfirm: () => toast(`${u.name} を無効化しました`, "warning") })} className="px-2 py-1 bg-danger-50 text-danger-600 border border-danger-200 rounded text-xs hover:bg-danger-100">無効化</button>
               </div>
             </div>
 
@@ -3201,14 +3208,14 @@ const MasterUserManagement = () => {
                   return (
                   <div key={group}>
                     <p className="text-xs font-bold text-slate-600 mb-1.5 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-400 inline-block" />
                       {group}
                     </p>
                     <div className="grid grid-cols-2 gap-1.5">
                       {items.map(menu => {
                         const perm = u.permissions[menu.id] || "none";
                         return (
-                        <div key={menu.id} className={`flex items-center gap-2 px-3 py-2 rounded border text-xs ${perm === "full" ? "bg-emerald-50 border-emerald-200" : perm === "readonly" ? "bg-amber-50 border-amber-200" : "bg-slate-50 border-slate-200 opacity-60"}`}>
+                        <div key={menu.id} className={`flex items-center gap-2 px-3 py-2 rounded border text-xs ${perm === "full" ? "bg-success-50 border-success-200" : perm === "readonly" ? "bg-warning-50 border-warning-200" : "bg-slate-50 border-slate-200 opacity-60"}`}>
                           <span>{menu.icon}</span>
                           <span className={`flex-1 font-semibold ${perm === "none" ? "text-slate-400 line-through" : "text-slate-700"}`}>{menu.id} {menu.label}</span>
                           <select
@@ -3229,7 +3236,7 @@ const MasterUserManagement = () => {
                 })}
                 {u.roleLabel !== "スーパー管理者" && (
                 <div className="flex gap-2 pt-2 border-t">
-                  <button onClick={() => toast(`${u.name} のメニュー権限を保存しました`, "success")} className="px-4 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">権限を保存</button>
+                  <button onClick={() => toast(`${u.name} のメニュー権限を保存しました`, "success")} className="px-4 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">権限を保存</button>
                   <button className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded text-xs hover:bg-slate-200">全て編集可にする</button>
                   <button className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded text-xs hover:bg-slate-200">全て閲覧のみにする</button>
                 </div>
@@ -3243,7 +3250,7 @@ const MasterUserManagement = () => {
                 {u.activity.map((a, ai) => (
                   <div key={ai} className="flex items-start gap-3">
                     <div className="flex flex-col items-center">
-                      <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5" />
+                      <div className="w-2 h-2 rounded-full bg-brand-400 mt-1.5" />
                       {ai < u.activity.length - 1 && <div className="w-px h-6 bg-slate-200" />}
                     </div>
                     <div className="flex-1">
@@ -3298,9 +3305,9 @@ const MasterUserManagement = () => {
                       <option>レビュアー</option>
                     </select>
                     <input className="flex-1 text-xs border rounded px-2 py-1.5" placeholder="変更理由（監査ログに記録されます）" />
-                    <button onClick={() => toast(`${u.name} のロールを変更しました`, "success")} className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 whitespace-nowrap">変更</button>
+                    <button onClick={() => toast(`${u.name} のロールを変更しました`, "success")} className="px-3 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600 whitespace-nowrap">変更</button>
                   </div>
-                  <p className="text-xs text-amber-600 mt-1">⚠️ ロール変更時はメニュー権限設定も合わせて見直してください。</p>
+                  <p className="text-xs text-warning-600 mt-1"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> ロール変更時はメニュー権限設定も合わせて見直してください。</p>
                 </div>
               </div>
               )}
@@ -3318,15 +3325,15 @@ const MasterUserManagement = () => {
         <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowInviteM04(false)} />
         <div className="relative bg-white rounded-xl shadow-2xl w-[520px] max-h-[85vh] overflow-y-auto">
           <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center sticky top-0 z-10">
-            <h3 className="text-sm font-bold text-slate-800">📧 スタッフを招待</h3>
-            <button onClick={() => setShowInviteM04(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <h3 className="text-sm font-bold text-slate-800"><Mail className="w-4 h-4 inline mr-1" /> スタッフを招待</h3>
+            <button onClick={() => setShowInviteM04(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-xs font-semibold text-slate-600">氏名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 山田 太郎" /></div>
-              <div><label className="text-xs font-semibold text-slate-600">メール <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: yamada@company.jp" /></div>
-              <div><label className="text-xs font-semibold text-slate-600">ロール <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>管理者（admin）</option><option>レビュアー（reviewer）</option></select></div>
-              <div><label className="text-xs font-semibold text-slate-600">MFA <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>必須（推奨）</option><option>任意</option></select></div>
+              <div><label className="text-xs font-semibold text-slate-600">氏名 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 山田 太郎" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">メール <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: yamada@company.jp" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">ロール <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>管理者（admin）</option><option>レビュアー（reviewer）</option></select></div>
+              <div><label className="text-xs font-semibold text-slate-600">MFA <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>必須（推奨）</option><option>任意</option></select></div>
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-600">メニュー権限（招待後に詳細設定可）</label>
@@ -3354,7 +3361,7 @@ const MasterUserManagement = () => {
           </div>
           <div className="p-4 border-t flex gap-2 justify-end sticky bottom-0 bg-white">
             <button onClick={() => setShowInviteM04(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => { setShowInviteM04(false); toast("招待メールを送信しました", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">招待メール送信</button>
+            <button onClick={() => { setShowInviteM04(false); toast("招待メールを送信しました", "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">招待メール送信</button>
           </div>
         </div>
       </div>
@@ -3412,11 +3419,11 @@ const MasterMerchantApplications = () => {
       {/* タブ切替: 新規加盟店申込 / 既存加盟店サイト追加 */}
       <div className="flex gap-1 border-b border-slate-200">
         {[
-          { id: "new_merchant", label: "📋 新規加盟店申込", count: 6 },
-          { id: "site_add", label: "🌐 既存加盟店サイト追加", count: siteAddAppList.length },
+          { id: "new_merchant", label: "新規加盟店申込", count: 6 },
+          { id: "site_add", label: "既存加盟店サイト追加", count: siteAddAppList.length },
         ].map(tab => (
           <button key={tab.id} onClick={() => setAppTab(tab.id)}
-            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-colors ${appTab === tab.id ? "border-blue-500 text-blue-600 bg-blue-50/50" : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
+            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-colors ${appTab === tab.id ? "border-brand-500 text-brand-600 bg-brand-50/50" : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
             {tab.label} <span className="ml-1 text-slate-400">({tab.count})</span>
           </button>
         ))}
@@ -3424,25 +3431,25 @@ const MasterMerchantApplications = () => {
 
       {appTab === "new_merchant" && (<>
       <div className="flex justify-between items-center">
-        <h2 className="text-sm font-bold text-slate-800">加盟店 申込・登録管理 <span className="text-xs text-slate-400 font-normal ml-2">※自社審査のみ管理。接続先審査は「🔌 接続先審査」で管理</span></h2>
+        <h2 className="text-sm font-bold text-slate-800">加盟店 申込・登録管理 <span className="text-xs text-slate-400 font-normal ml-2">※自社審査のみ管理。接続先審査は「接続先審査」で管理</span></h2>
         <div className="flex gap-2">
           {[{ k: "all", label: "全て (12)" }, { k: "ai", label: "AI審査中 (3)" }, { k: "human", label: "人間判定待ち (2)" }, { k: "approved", label: "自社承認済み (5)" }, { k: "rejected", label: "却下 (2)" }].map(f => (
-            <button key={f.k} onClick={() => setAppStatusFilter(f.k)} className={`text-xs px-2 py-1 rounded border ${appStatusFilter === f.k ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-white text-slate-500"}`}>{f.label}</button>
+            <button key={f.k} onClick={() => setAppStatusFilter(f.k)} className={`text-xs px-2 py-1 rounded border ${appStatusFilter === f.k ? "bg-brand-50 text-brand-600 border-brand-200" : "bg-white text-slate-500"}`}>{f.label}</button>
           ))}
         </div>
       </div>
 
       {/* Scope Diagram */}
-      <div className="bg-gradient-to-r from-blue-50 via-white to-gray-50 rounded-lg border p-3">
-        <p className="text-xs font-bold text-slate-600 mb-2">📋 審査フロー全体像（この画面の管轄範囲）</p>
+      <div className="bg-gradient-to-r from-brand-50 via-white to-gray-50 rounded-lg border p-3">
+        <p className="text-xs font-bold text-slate-600 mb-2"><ClipboardList className="w-4 h-4 inline mr-1" /> 審査フロー全体像（この画面の管轄範囲）</p>
         <div className="flex items-center gap-1 text-xs">
-          <div className="bg-blue-100 border-2 border-blue-400 rounded-lg px-3 py-2 text-center">
-            <p className="font-bold text-blue-700">この画面で管理</p>
-            <p className="text-blue-500 mt-1">申込受付 → 書類確認 → AI審査 → 人間判定 → <span className="font-bold">自社承認</span></p>
+          <div className="bg-brand-100 border-2 border-brand-400 rounded-lg px-3 py-2 text-center">
+            <p className="font-bold text-brand-700">この画面で管理</p>
+            <p className="text-brand-500 mt-1">申込受付 → 書類確認 → AI審査 → 人間判定 → <span className="font-bold">自社承認</span></p>
           </div>
           <span className="text-2xl text-slate-300 mx-1">→</span>
           <div className="bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-center">
-            <p className="font-semibold text-slate-500">🔌 接続先審査で管理</p>
+            <p className="font-semibold text-slate-500"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査で管理</p>
             <p className="text-slate-400 mt-1">審査申請 → 書類送付 → 審査 → <span className="font-semibold text-slate-500">条件確定 → 契約 → 決済開始</span></p>
           </div>
         </div>
@@ -3461,10 +3468,10 @@ const MasterMerchantApplications = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setAppConfirmDialog(null)}>
           <div className="bg-white rounded-xl shadow-2xl w-[520px] max-w-[90vw]" onClick={e => e.stopPropagation()}>
             <div className={`p-4 rounded-t-xl border-b ${
-              appConfirmDialog.type === "approve" ? "bg-emerald-50" :
-              appConfirmDialog.type === "reject" ? "bg-rose-50" :
+              appConfirmDialog.type === "approve" ? "bg-success-50" :
+              appConfirmDialog.type === "reject" ? "bg-danger-50" :
               appConfirmDialog.type === "start_proc_review" ? "bg-purple-50" :
-              "bg-blue-50"
+              "bg-brand-50"
             }`}>
               <div className="flex items-center gap-2">
                 <span className="text-lg">{appConfirmDialog.icon}</span>
@@ -3477,11 +3484,11 @@ const MasterMerchantApplications = () => {
                 <div className="flex text-xs"><span className="w-24 text-slate-400">申込ID:</span><span className="font-mono text-slate-700">{appConfirmDialog.appId}</span></div>
                 <div className="flex text-xs"><span className="w-24 text-slate-400">法人名:</span><span className="font-semibold text-slate-700">{appConfirmDialog.merchantName}</span></div>
                 {appConfirmDialog.processorName && (
-                  <div className="flex text-xs"><span className="w-24 text-slate-400">初期接続先:</span><span className="font-semibold text-blue-600">{appConfirmDialog.processorName}</span></div>
+                  <div className="flex text-xs"><span className="w-24 text-slate-400">初期接続先:</span><span className="font-semibold text-brand-600">{appConfirmDialog.processorName}</span></div>
                 )}
               </div>
               {appConfirmDialog.impacts && (
-                <div className={`rounded border p-2 ${appConfirmDialog.type === "reject" ? "bg-rose-50 border-rose-200" : "bg-blue-50 border-blue-200"}`}>
+                <div className={`rounded border p-2 ${appConfirmDialog.type === "reject" ? "bg-danger-50 border-danger-200" : "bg-brand-50 border-brand-200"}`}>
                   <p className="text-xs font-semibold mb-1" style={{color: appConfirmDialog.type === "reject" ? "#b91c1c" : "#1d4ed8"}}>この操作の影響:</p>
                   <ul className="space-y-0.5">
                     {appConfirmDialog.impacts.map((imp, i) => (
@@ -3507,7 +3514,7 @@ const MasterMerchantApplications = () => {
                     <option>楽天銀行（審査 平均12日）</option>
                     <option>TCMS（審査 平均21日）</option>
                   </select>
-                  <p className="text-xs text-slate-400 mt-1">💡 AIの推薦: Simpletransactを初期接続先として開始し、取引実績を積んだ後に直接接続を追加するのが最速です。</p>
+                  <p className="text-xs text-slate-400 mt-1"><Lightbulb className="w-4 h-4 inline mr-1" /> AIの推薦: Simpletransactを初期接続先として開始し、取引実績を積んだ後に直接接続を追加するのが最速です。</p>
                 </div>
               )}
               {appConfirmDialog.type !== "reject" && appConfirmDialog.type !== "start_proc_review" && (
@@ -3520,10 +3527,10 @@ const MasterMerchantApplications = () => {
             <div className="flex justify-end gap-2 p-4 border-t bg-slate-50 rounded-b-xl">
               <button onClick={() => setAppConfirmDialog(null)} className="px-4 py-2 bg-white text-slate-600 rounded border text-xs font-semibold hover:bg-slate-100">キャンセル</button>
               <button onClick={() => { const d = appConfirmDialog; setAppConfirmDialog(null); const msgs = { approve: ["承認しました", "success"], reject: ["却下しました", "warning"], start_proc_review: ["接続先審査を開始しました", "success"], reapply: ["再申込を許可しました", "info"] }; const [msg, type] = msgs[d.type] || ["処理が完了しました", "success"]; toast(`${d.appId} を${msg}`, type); }} className={`px-4 py-2 rounded text-white text-xs font-semibold ${
-                appConfirmDialog.type === "approve" ? "bg-emerald-600 hover:bg-emerald-700" :
-                appConfirmDialog.type === "reject" ? "bg-rose-600 hover:bg-rose-700" :
+                appConfirmDialog.type === "approve" ? "bg-success-600 hover:bg-success-700" :
+                appConfirmDialog.type === "reject" ? "bg-danger-600 hover:bg-danger-700" :
                 appConfirmDialog.type === "start_proc_review" ? "bg-purple-600 hover:bg-purple-700" :
-                "bg-blue-600 hover:bg-blue-700"
+                "bg-brand-500 hover:bg-brand-600"
               }`}>{appConfirmDialog.confirmLabel}</button>
             </div>
           </div>
@@ -3533,10 +3540,10 @@ const MasterMerchantApplications = () => {
       {/* Application Detail */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
         <div className={`p-3 border-b ${
-          selectedAppData?.status === "自社承認済み" ? "bg-emerald-50" :
-          selectedAppData?.status === "人間判定待ち" ? "bg-amber-50" :
-          selectedAppData?.status === "却下" ? "bg-rose-50" :
-          "bg-blue-50"
+          selectedAppData?.status === "自社承認済み" ? "bg-success-50" :
+          selectedAppData?.status === "人間判定待ち" ? "bg-warning-50" :
+          selectedAppData?.status === "却下" ? "bg-danger-50" :
+          "bg-brand-50"
         }`}>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
@@ -3551,11 +3558,11 @@ const MasterMerchantApplications = () => {
           <div className="flex items-center gap-1 mb-3">
             {steps.map((s, i) => (
               <div key={i} className="flex items-center gap-1 flex-1">
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${s.done ? "bg-emerald-500 text-white" : s.active ? "bg-blue-500 text-white animate-pulse" : "bg-slate-200 text-slate-400"}`}>
-                  {s.done ? "✓" : s.active ? "⟳" : i + 1}
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${s.done ? "bg-success-500 text-white" : s.active ? "bg-brand-500 text-white animate-pulse" : "bg-slate-200 text-slate-400"}`}>
+                  {s.done ? <Check className="w-3 h-3" /> : s.active ? "⟳" : i + 1}
                 </div>
-                <span className={`text-xs ${s.done ? "text-emerald-700" : s.active ? "text-blue-700 font-semibold" : "text-slate-400"} ${i === 4 ? "font-bold" : ""}`}>{s.label}</span>
-                {i < 4 && <div className={`flex-1 h-0.5 ${s.done ? "bg-emerald-300" : "bg-slate-200"}`} />}
+                <span className={`text-xs ${s.done ? "text-success-700" : s.active ? "text-brand-700 font-semibold" : "text-slate-400"} ${i === 4 ? "font-bold" : ""}`}>{s.label}</span>
+                {i < 4 && <div className={`flex-1 h-0.5 ${s.done ? "bg-success-300" : "bg-slate-200"}`} />}
               </div>
             ))}
           </div>
@@ -3567,36 +3574,36 @@ const MasterMerchantApplications = () => {
             {selectedAppData?.status === "人間判定待ち" && (
               <>
                 <button onClick={() => setAppConfirmDialog({
-                  type: "approve", icon: "✅", title: "自社承認 — 加盟店を承認", appId: selectedApp, merchantName: selectedAppData.name,
+                  type: "approve", icon: <CheckCircle2 className="w-4 h-4 text-success-600 inline" />, title: "自社承認 — 加盟店を承認", appId: selectedApp, merchantName: selectedAppData.name,
                   description: "AI審査結果を確認の上、この加盟店を自社承認します。承認後、接続先審査の開始が可能になります。",
-                  impacts: ["加盟店ステータスが「自社承認済み」に変更", "加盟店マスターに登録される", "接続先審査の開始ボタンが有効化される", "📧 加盟店担当者に承認通知メール送信（テンプレート: approval_notification）", "📧 担当代理店にも承認通知を送信（代理店紐付がある場合）", "※契約書は接続先審査完了・条件確定後に生成されます"],
-                  confirmLabel: "✅ 自社承認する"
-                })} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700 shadow-sm">✅ 承認</button>
+                  impacts: ["加盟店ステータスが「自社承認済み」に変更", "加盟店マスターに登録される", "接続先審査の開始ボタンが有効化される", "加盟店担当者に承認通知メール送信（テンプレート: approval_notification）", "担当代理店にも承認通知を送信（代理店紐付がある場合）", "※契約書は接続先審査完了・条件確定後に生成されます"],
+                  confirmLabel: "自社承認する"
+                })} className="px-3 py-1.5 bg-success-600 text-white rounded text-xs font-semibold hover:bg-success-700 shadow-sm"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 承認</button>
                 <button onClick={() => setAppConfirmDialog({
-                  type: "reject", icon: "❌", title: "申込却下", appId: selectedApp, merchantName: selectedAppData.name,
+                  type: "reject", icon: <XCircle className="w-4 h-4 inline text-danger-500" />, title: "申込却下", appId: selectedApp, merchantName: selectedAppData.name,
                   description: "この加盟店の申込を却下します。却下理由は加盟店に通知されます。",
-                  impacts: ["加盟店ステータスが「却下」に変更", "📧 加盟店担当者に却下通知メール送信（テンプレート: rejection_notification）", "📧 メールに却下理由が記載される（下記で入力）", "再申請には新規の申込が必要"],
-                  confirmLabel: "❌ 却下する"
-                })} className="px-3 py-1.5 bg-white text-rose-600 border border-rose-300 rounded text-xs font-semibold hover:bg-rose-50">❌ 却下</button>
+                  impacts: ["加盟店ステータスが「却下」に変更", "加盟店担当者に却下通知メール送信（テンプレート: rejection_notification）", "メールに却下理由が記載される（下記で入力）", "再申請には新規の申込が必要"],
+                  confirmLabel: "却下する"
+                })} className="px-3 py-1.5 bg-white text-danger-600 border border-danger-300 rounded text-xs font-semibold hover:bg-danger-50"><XCircle className="w-4 h-4 text-danger-500 inline mr-1" /> 却下</button>
                 <button onClick={() => toast(`${selectedApp} のAI再審査をリクエストしました`, "info")} className="px-3 py-1.5 bg-white text-slate-600 border rounded text-xs hover:bg-slate-100">↩ AI再審査を依頼</button>
               </>
             )}
             {/* AI審査中の場合 — プログレスバー（5段階） */}
             {selectedAppData?.status === "AI審査中" && (
-              <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 w-full">
+              <div className="bg-brand-50 rounded-lg border border-brand-200 p-3 w-full">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-blue-700">🤖 AI審査を実行中...</span>
-                  <span className="text-xs text-blue-500">3/5 ステップ完了 — 60%</span>
+                  <span className="text-xs font-bold text-brand-700"><Bot className="w-4 h-4 inline mr-1" /> AI審査を実行中...</span>
+                  <span className="text-xs text-brand-500">3/5 ステップ完了 — 60%</span>
                 </div>
-                <div className="w-full bg-blue-200 rounded-full h-2 mb-2">
-                  <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: "60%" }} />
+                <div className="w-full bg-brand-200 rounded-full h-2 mb-2">
+                  <div className="bg-brand-500 h-2 rounded-full transition-all" style={{ width: "60%" }} />
                 </div>
                 <div className="space-y-1.5 text-xs">
-                  <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> 反社チェック... 完了 <span className="text-slate-400 ml-auto">5秒</span></div>
-                  <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> 財務分析... 完了 <span className="text-slate-400 ml-auto">8秒</span></div>
-                  <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> サイト分析... 完了 <span className="text-slate-400 ml-auto">25秒</span></div>
-                  <div className="flex items-center gap-2"><span className="text-blue-500 animate-pulse">🔄</span> リスクスコア算出... 実行中</div>
-                  <div className="flex items-center gap-2"><span className="text-slate-300">⏳</span> 総合判定... 待機中</div>
+                  <div className="flex items-center gap-2"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> 反社チェック... 完了 <span className="text-slate-400 ml-auto">5秒</span></div>
+                  <div className="flex items-center gap-2"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> 財務分析... 完了 <span className="text-slate-400 ml-auto">8秒</span></div>
+                  <div className="flex items-center gap-2"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> サイト分析... 完了 <span className="text-slate-400 ml-auto">25秒</span></div>
+                  <div className="flex items-center gap-2"><span className="text-brand-500 animate-pulse"><RefreshCw className="w-4 h-4 inline" /></span> リスクスコア算出... 実行中</div>
+                  <div className="flex items-center gap-2"><span className="text-slate-300"><Clock className="w-4 h-4 inline" /></span> 総合判定... 待機中</div>
                 </div>
                 <p className="text-xs text-slate-400 mt-2">※ 通常30秒〜2分で完了。3分超過でタイムアウト</p>
               </div>
@@ -3605,37 +3612,37 @@ const MasterMerchantApplications = () => {
             {selectedAppData?.status === "自社承認済み" && selectedAppData?.procStatus === "接続先審査待ち" && (
               <>
                 <button onClick={() => setAppConfirmDialog({
-                  type: "start_proc_review", icon: "🔌", title: "接続先審査を開始", appId: selectedApp, merchantName: selectedAppData.name,
+                  type: "start_proc_review", icon: <Plug className="w-4 h-4 inline text-slate-500" />, title: "接続先審査を開始", appId: selectedApp, merchantName: selectedAppData.name,
                   description: "自社承認が完了しました。初期接続先を選択して審査を開始してください。審査に必要な書類は申込データから自動生成されます。",
                   impacts: [
                     "選択した接続先に審査申請が送信される",
                     "申込時の書類（登記簿・本人確認・決算書等）が審査パッケージとして転送される",
                     "接続先審査画面の「審査フロー管理」タブに案件が追加される",
-                    "以降の審査進捗は「🔌 接続先審査」画面で管理"
+                    "以降の審査進捗は「接続先審査」画面で管理"
                   ],
                   processorName: "Simpletransact（AI推薦）",
-                  confirmLabel: "🔌 接続先審査を開始"
-                })} className="px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700 shadow-sm ring-2 ring-purple-300 ring-offset-1">🔌 接続先審査を開始</button>
+                  confirmLabel: "接続先審査を開始"
+                })} className="px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700 shadow-sm ring-2 ring-purple-300 ring-offset-1"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査を開始</button>
                 <span className="text-xs text-slate-400 ml-1">→ 接続先審査画面に審査案件が作成されます</span>
               </>
             )}
             {selectedAppData?.status === "自社承認済み" && selectedAppData?.procStatus === "接続先審査中" && (
               <div className="flex items-center gap-2">
                 <Badge text="接続先審査中" color="blue" />
-                <span className="text-xs text-slate-500">接続先審査は「🔌 接続先審査」画面で進行中です →</span>
-                <button onClick={() => { if (nav.setMasterPage) nav.setMasterPage("processorReview"); toast("接続先審査画面に移動します", "info"); }} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs border border-blue-200 font-semibold hover:bg-blue-200">🔌 接続先審査を開く</button>
+                <span className="text-xs text-slate-500">接続先審査は「接続先審査」画面で進行中です →</span>
+                <button onClick={() => { if (nav.setMasterPage) nav.setMasterPage("processorReview"); toast("接続先審査画面に移動します", "info"); }} className="px-2 py-1 bg-brand-100 text-brand-700 rounded text-xs border border-brand-200 font-semibold hover:bg-brand-200"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査を開く</button>
               </div>
             )}
             {selectedAppData?.status === "却下" && (
               <div className="flex items-center gap-3">
-                <span className="text-xs text-rose-500">この申込は却下されています</span>
+                <span className="text-xs text-danger-500">この申込は却下されています</span>
                 <button onClick={() => setAppConfirmDialog({
-                  type: "reapply", icon: "🔄", title: "再申込を許可",
+                  type: "reapply", icon: <RefreshCw className="w-4 h-4 inline text-brand-500" />, title: "再申込を許可",
                   appId: selectedApp, merchantName: selectedAppData.name,
                   description: "この申込のデータを引き継いで再申込を許可しますか？加盟店に再申込リンクがメール送信されます。",
                   impacts: ["申込フォーム（P01）に既存データがプリセットされた状態で再申込リンクが生成", "加盟店担当者にメール通知"],
-                  confirmLabel: "🔄 再申込を許可する"
-                })} className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold hover:bg-blue-200 border border-blue-200">🔄 再申込を許可</button>
+                  confirmLabel: "再申込を許可する"
+                })} className="px-3 py-1.5 bg-brand-100 text-brand-700 rounded text-xs font-semibold hover:bg-brand-200 border border-brand-200"><RefreshCw className="w-4 h-4 inline mr-1" /> 再申込を許可</button>
               </div>
             )}
           </div>
@@ -3659,16 +3666,16 @@ const MasterMerchantApplications = () => {
                 <div>月間予定決済高: ¥5M</div>
                 <div>平均単価: ¥15,000</div>
                 <div>サイトURL: techshop.jp</div>
-                <div>提出書類: 5/5 完了 ✅</div>
+                <div>提出書類: 5/5 完了</div>
               </div>
             </div>
             <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
               <p className="text-xs font-bold text-slate-600 mb-1">AI審査進捗（自社審査）</p>
               <div className="text-xs space-y-1.5">
-                <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> 反社チェック: クリア</div>
-                <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> サイト内容確認: 問題なし</div>
-                <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> 決算書解析: 財務健全</div>
-                <div className="flex items-center gap-2"><span className="text-blue-500 animate-pulse">⟳</span> 業界リスク評価: 処理中...</div>
+                <div className="flex items-center gap-2"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> 反社チェック: クリア</div>
+                <div className="flex items-center gap-2"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> サイト内容確認: 問題なし</div>
+                <div className="flex items-center gap-2"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> 決算書解析: 財務健全</div>
+                <div className="flex items-center gap-2"><span className="text-brand-500 animate-pulse">⟳</span> 業界リスク評価: 処理中...</div>
                 <div className="flex items-center gap-2"><span className="text-slate-300">○</span> 総合判定: 待機中</div>
               </div>
             </div>
@@ -3676,18 +3683,18 @@ const MasterMerchantApplications = () => {
 
           {/* Post-approval: 接続先審査ステータスサマリー */}
           {selectedAppData?.status === "自社承認済み" && (
-            <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-lg border border-emerald-200 p-3">
+            <div className="bg-gradient-to-r from-success-50 to-brand-50 rounded-lg border border-success-200 p-3">
               <div className="flex items-center justify-between mb-1">
-                <p className="text-xs font-bold text-emerald-700">✅ 自社審査完了 → 接続先審査フェーズ</p>
+                <p className="text-xs font-bold text-success-700"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 自社審査完了 → 接続先審査フェーズ</p>
                 {selectedAppData.procStatus === "接続先審査中" && <Badge text="接続先審査中" color="blue" />}
                 {selectedAppData.procStatus === "接続先審査待ち" && <Badge text="接続先審査未開始" color="yellow" />}
               </div>
               <div className="flex gap-4 text-xs text-slate-600">
                 <div><span className="text-slate-400">自社承認日:</span> 2026-02-10</div>
                 <div><span className="text-slate-400">承認者:</span> admin@aipaymentsys.com</div>
-                <div><span className="text-slate-400">AI判定:</span> <span className="text-emerald-600 font-semibold">承認推薦（信頼度92%）</span></div>
+                <div><span className="text-slate-400">AI判定:</span> <span className="text-success-600 font-semibold">承認推薦（信頼度92%）</span></div>
                 {selectedAppData.procStatus === "接続先審査中" && (
-                  <div><span className="text-slate-400">初期接続先:</span> <span className="text-blue-600 font-semibold">Simpletransact（審査中 — 3日経過）</span></div>
+                  <div><span className="text-slate-400">初期接続先:</span> <span className="text-brand-600 font-semibold">Simpletransact（審査中 — 3日経過）</span></div>
                 )}
               </div>
             </div>
@@ -3696,8 +3703,8 @@ const MasterMerchantApplications = () => {
           {/* メール通知履歴 */}
           <div className="bg-white rounded-lg border border-slate-200 p-3 mt-3">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-bold text-slate-600">📧 メール通知履歴</p>
-              <button onClick={() => toast("通知メールを手動再送しました", "success")} className="text-xs text-blue-600 hover:underline">手動再送</button>
+              <p className="text-xs font-bold text-slate-600"><Mail className="w-4 h-4 inline mr-1" /> メール通知履歴</p>
+              <button onClick={() => toast("通知メールを手動再送しました", "success")} className="text-xs text-brand-600 hover:underline">手動再送</button>
             </div>
             <div className="space-y-1.5 text-xs">
               {[
@@ -3720,7 +3727,7 @@ const MasterMerchantApplications = () => {
               ))}
             </div>
             <div className="mt-2 bg-slate-50 rounded p-2 text-xs text-slate-500">
-              <p className="font-semibold text-slate-600 mb-1">📋 メール配信テンプレート一覧</p>
+              <p className="font-semibold text-slate-600 mb-1"><ClipboardList className="w-4 h-4 inline mr-1" /> メール配信テンプレート一覧</p>
               <div className="grid grid-cols-2 gap-1">
                 {[
                   ["申込受付確認", "申込時に自動送信"],
@@ -3732,7 +3739,7 @@ const MasterMerchantApplications = () => {
                   ["再申込許可通知", "再申込許可時に加盟店へ"],
                   ["代理店通知", "各ステータス変更時に代理店へ"],
                 ].map(([name, desc], i) => (
-                  <div key={i} className="flex gap-1"><span className="text-blue-600">•</span><span className="font-semibold">{name}</span><span className="text-slate-400">— {desc}</span></div>
+                  <div key={i} className="flex gap-1"><span className="text-brand-600">•</span><span className="font-semibold">{name}</span><span className="text-slate-400">— {desc}</span></div>
                 ))}
               </div>
             </div>
@@ -3744,7 +3751,7 @@ const MasterMerchantApplications = () => {
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
         <TableHeader cols={[{ label: "申込ID", w: "w-36" }, { label: "法人名", w: "flex-1" }, { label: "業種", w: "w-24" }, { label: "自社審査", w: "w-24" }, { label: "AI判定", w: "w-24" }, { label: "接続先審査", w: "w-28" }, { label: "申込日", w: "w-24" }, { label: "操作", w: "w-20" }]}>
         {appList.map((a, i) => (
-          <tr key={i} className={`border-b cursor-pointer transition-colors ${selectedApp === a.id ? "bg-blue-50 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"}`}
+          <tr key={i} className={`border-b cursor-pointer transition-colors ${selectedApp === a.id ? "bg-brand-50 border-l-2 border-l-brand-500" : i % 2 ? "bg-slate-50 hover:bg-brand-50" : "hover:bg-brand-50"}`}
                onClick={() => setSelectedApp(a.id)}>
             <td className="px-4 py-2 whitespace-nowrap w-36 font-mono text-slate-500">{a.id}</td>
             <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{a.name}</td>
@@ -3775,7 +3782,7 @@ const MasterMerchantApplications = () => {
 
       {/* サイト追加審査フロー図 */}
       <div className="bg-gradient-to-r from-teal-50 via-white to-gray-50 rounded-lg border p-3">
-        <p className="text-xs font-bold text-slate-600 mb-2">🌐 既存加盟店サイト追加審査フロー（新規加盟店審査との違い）</p>
+        <p className="text-xs font-bold text-slate-600 mb-2"><Globe className="w-4 h-4 inline mr-1" /> 既存加盟店サイト追加審査フロー（新規加盟店審査との違い）</p>
         <div className="flex items-center gap-1 text-xs">
           <div className="bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-center">
             <p className="text-slate-500">スキップ</p>
@@ -3789,7 +3796,7 @@ const MasterMerchantApplications = () => {
           </div>
           <span className="text-2xl text-slate-300 mx-1">→</span>
           <div className="bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-center">
-            <p className="font-semibold text-slate-500">🔌 接続先審査で管理</p>
+            <p className="font-semibold text-slate-500"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査で管理</p>
             <p className="text-slate-400 mt-1">接続先選定 → 条件確定 → 決済開始</p>
           </div>
         </div>
@@ -3807,9 +3814,9 @@ const MasterMerchantApplications = () => {
       {selectedSiteAppData && (
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
         <div className={`p-3 border-b ${
-          selectedSiteAppData.status === "承認済み" ? "bg-emerald-50" :
-          selectedSiteAppData.status === "人間判定待ち" ? "bg-amber-50" :
-          selectedSiteAppData.status === "却下" ? "bg-rose-50" :
+          selectedSiteAppData.status === "承認済み" ? "bg-success-50" :
+          selectedSiteAppData.status === "人間判定待ち" ? "bg-warning-50" :
+          selectedSiteAppData.status === "却下" ? "bg-danger-50" :
           "bg-teal-50"
         }`}>
           <div className="flex justify-between items-center">
@@ -3831,11 +3838,11 @@ const MasterMerchantApplications = () => {
               { label: "承認", done: selectedSiteAppData.status === "承認済み" },
             ].map((s, i) => (
               <div key={i} className="flex items-center gap-1 flex-1">
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${s.done ? "bg-emerald-500 text-white" : s.active ? "bg-teal-500 text-white animate-pulse" : "bg-slate-200 text-slate-400"}`}>
-                  {s.done ? "✓" : s.active ? "⟳" : i + 1}
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${s.done ? "bg-success-500 text-white" : s.active ? "bg-teal-500 text-white animate-pulse" : "bg-slate-200 text-slate-400"}`}>
+                  {s.done ? <Check className="w-3 h-3" /> : s.active ? "⟳" : i + 1}
                 </div>
-                <span className={`text-xs ${s.done ? "text-emerald-700" : s.active ? "text-teal-700 font-semibold" : "text-slate-400"}`}>{s.label}</span>
-                {i < 3 && <div className={`flex-1 h-0.5 ${s.done ? "bg-emerald-300" : "bg-slate-200"}`} />}
+                <span className={`text-xs ${s.done ? "text-success-700" : s.active ? "text-teal-700 font-semibold" : "text-slate-400"}`}>{s.label}</span>
+                {i < 3 && <div className={`flex-1 h-0.5 ${s.done ? "bg-success-300" : "bg-slate-200"}`} />}
               </div>
             ))}
           </div>
@@ -3846,33 +3853,33 @@ const MasterMerchantApplications = () => {
             {selectedSiteAppData.status === "人間判定待ち" && (
               <>
                 <button onClick={() => setAppConfirmDialog({
-                  type: "approve", icon: "✅", title: "サイト追加承認", appId: selectedSiteAppData.id, merchantName: `${selectedSiteAppData.merchantName} — ${selectedSiteAppData.siteName}`,
+                  type: "approve", icon: <CheckCircle2 className="w-4 h-4 text-success-600 inline" />, title: "サイト追加承認", appId: selectedSiteAppData.id, merchantName: `${selectedSiteAppData.merchantName} — ${selectedSiteAppData.siteName}`,
                   description: "AIサイト審査結果を確認の上、この新規サイトの追加を承認します。承認後、接続先の審査・設定を行います。",
-                  impacts: ["サイトが加盟店マスターに追加される", "接続先審査の開始が可能になる", "既存の加盟店契約情報が引き継がれる", "📧 加盟店担当者にサイト追加承認通知メール送信"],
-                  confirmLabel: "✅ サイト追加を承認"
-                })} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700 shadow-sm">✅ 承認</button>
+                  impacts: ["サイトが加盟店マスターに追加される", "接続先審査の開始が可能になる", "既存の加盟店契約情報が引き継がれる", "加盟店担当者にサイト追加承認通知メール送信"],
+                  confirmLabel: "サイト追加を承認"
+                })} className="px-3 py-1.5 bg-success-600 text-white rounded text-xs font-semibold hover:bg-success-700 shadow-sm"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 承認</button>
                 <button onClick={() => setAppConfirmDialog({
-                  type: "reject", icon: "❌", title: "サイト追加却下", appId: selectedSiteAppData.id, merchantName: `${selectedSiteAppData.merchantName} — ${selectedSiteAppData.siteName}`,
+                  type: "reject", icon: <XCircle className="w-4 h-4 inline text-danger-500" />, title: "サイト追加却下", appId: selectedSiteAppData.id, merchantName: `${selectedSiteAppData.merchantName} — ${selectedSiteAppData.siteName}`,
                   description: "このサイト追加申請を却下します。理由は加盟店に通知されます。",
-                  impacts: ["サイト追加が却下される", "📧 加盟店担当者にサイト追加却下通知メール送信（却下理由付き）", "既存サイトの運用には影響なし"],
-                  confirmLabel: "❌ 却下する"
-                })} className="px-3 py-1.5 bg-white text-rose-600 border border-rose-300 rounded text-xs font-semibold hover:bg-rose-50">❌ 却下</button>
+                  impacts: ["サイト追加が却下される", "加盟店担当者にサイト追加却下通知メール送信（却下理由付き）", "既存サイトの運用には影響なし"],
+                  confirmLabel: "却下する"
+                })} className="px-3 py-1.5 bg-white text-danger-600 border border-danger-300 rounded text-xs font-semibold hover:bg-danger-50"><XCircle className="w-4 h-4 text-danger-500 inline mr-1" /> 却下</button>
                 <button onClick={() => toast(`${selectedSiteAppData.id} のAI再審査をリクエストしました`, "info")} className="px-3 py-1.5 bg-white text-slate-600 border rounded text-xs hover:bg-slate-100">↩ AI再審査を依頼</button>
               </>
             )}
             {selectedSiteAppData.status === "AI審査中" && (
               <div className="bg-teal-50 rounded-lg border border-teal-200 p-3 w-full">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-teal-700">🤖 AIサイト審査を実行中...</span>
+                  <span className="text-xs font-bold text-teal-700"><Bot className="w-4 h-4 inline mr-1" /> AIサイト審査を実行中...</span>
                   <span className="text-xs text-teal-500">1/3 ステップ完了 — 33%</span>
                 </div>
                 <div className="w-full bg-teal-200 rounded-full h-2 mb-2">
                   <div className="bg-teal-600 h-2 rounded-full transition-all" style={{ width: "33%" }} />
                 </div>
                 <div className="space-y-1.5 text-xs">
-                  <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> サイトコンテンツ解析... 完了 <span className="text-slate-400 ml-auto">15秒</span></div>
-                  <div className="flex items-center gap-2"><span className="text-teal-500 animate-pulse">🔄</span> ジャンル適合性チェック... 実行中</div>
-                  <div className="flex items-center gap-2"><span className="text-slate-300">⏳</span> リスクスコア算出... 待機中</div>
+                  <div className="flex items-center gap-2"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> サイトコンテンツ解析... 完了 <span className="text-slate-400 ml-auto">15秒</span></div>
+                  <div className="flex items-center gap-2"><span className="text-teal-500 animate-pulse"><RefreshCw className="w-4 h-4 inline" /></span> ジャンル適合性チェック... 実行中</div>
+                  <div className="flex items-center gap-2"><span className="text-slate-300"><Clock className="w-4 h-4 inline" /></span> リスクスコア算出... 待機中</div>
                 </div>
                 <p className="text-xs text-slate-400 mt-2">※ サイト追加審査は反社・財務チェックをスキップ。通常15秒〜1分で完了</p>
               </div>
@@ -3880,32 +3887,32 @@ const MasterMerchantApplications = () => {
             {selectedSiteAppData.status === "承認済み" && selectedSiteAppData.procStatus === "接続先審査待ち" && (
               <>
                 <button onClick={() => setAppConfirmDialog({
-                  type: "start_proc_review", icon: "🔌", title: "接続先審査を開始（サイト追加）", appId: selectedSiteAppData.id, merchantName: `${selectedSiteAppData.merchantName} — ${selectedSiteAppData.siteName}`,
+                  type: "start_proc_review", icon: <Plug className="w-4 h-4 inline text-slate-500" />, title: "接続先審査を開始（サイト追加）", appId: selectedSiteAppData.id, merchantName: `${selectedSiteAppData.merchantName} — ${selectedSiteAppData.siteName}`,
                   description: "サイト追加が承認されました。このサイト用の接続先を選択して審査を開始してください。既存接続先の流用も可能です。",
                   impacts: ["選択した接続先に審査申請が送信される", "既存加盟店の書類情報が自動転送される", "接続先審査画面に案件が追加される"],
                   processorName: "既存接続先流用 or 新規選定",
-                  confirmLabel: "🔌 接続先審査を開始"
-                })} className="px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700 shadow-sm ring-2 ring-purple-300 ring-offset-1">🔌 接続先審査を開始</button>
+                  confirmLabel: "接続先審査を開始"
+                })} className="px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700 shadow-sm ring-2 ring-purple-300 ring-offset-1"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査を開始</button>
                 <span className="text-xs text-slate-400 ml-1">→ 既存接続先の流用 or 新規接続先の審査</span>
               </>
             )}
             {selectedSiteAppData.status === "承認済み" && selectedSiteAppData.procStatus === "接続先審査中" && (
               <div className="flex items-center gap-2">
                 <Badge text="接続先審査中" color="blue" />
-                <span className="text-xs text-slate-500">接続先審査は「🔌 接続先審査」画面で進行中です →</span>
-                <button onClick={() => { if (nav.setMasterPage) nav.setMasterPage("processorReview"); toast("接続先審査画面に移動します", "info"); }} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs border border-blue-200 font-semibold hover:bg-blue-200">🔌 接続先審査を開く</button>
+                <span className="text-xs text-slate-500">接続先審査は「接続先審査」画面で進行中です →</span>
+                <button onClick={() => { if (nav.setMasterPage) nav.setMasterPage("processorReview"); toast("接続先審査画面に移動します", "info"); }} className="px-2 py-1 bg-brand-100 text-brand-700 rounded text-xs border border-brand-200 font-semibold hover:bg-brand-200"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査を開く</button>
               </div>
             )}
             {selectedSiteAppData.status === "却下" && (
               <div className="flex items-center gap-3">
-                <span className="text-xs text-rose-500">このサイト追加申請は却下されています</span>
+                <span className="text-xs text-danger-500">このサイト追加申請は却下されています</span>
                 <button onClick={() => setAppConfirmDialog({
-                  type: "reapply", icon: "🔄", title: "再申請を許可",
+                  type: "reapply", icon: <RefreshCw className="w-4 h-4 inline text-brand-500" />, title: "再申請を許可",
                   appId: selectedSiteAppData.id, merchantName: `${selectedSiteAppData.merchantName} — ${selectedSiteAppData.siteName}`,
                   description: "サイト追加の再申請を許可しますか？加盟店管理画面から再申請が可能になります。",
                   impacts: ["加盟店の「新規サイト申請」から再申請が可能になる", "加盟店担当者にメール通知"],
-                  confirmLabel: "🔄 再申請を許可する"
-                })} className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold hover:bg-blue-200 border border-blue-200">🔄 再申請を許可</button>
+                  confirmLabel: "再申請を許可する"
+                })} className="px-3 py-1.5 bg-brand-100 text-brand-700 rounded text-xs font-semibold hover:bg-brand-200 border border-brand-200"><RefreshCw className="w-4 h-4 inline mr-1" /> 再申請を許可</button>
               </div>
             )}
           </div>
@@ -3914,7 +3921,7 @@ const MasterMerchantApplications = () => {
           {(selectedSiteAppData.status === "人間判定待ち" || selectedSiteAppData.status === "承認済み") && (
             <div className="bg-white rounded p-2 border border-slate-200 mb-3">
               <div className="flex items-center justify-between mb-1">
-                <p className="text-xs font-bold text-slate-600">📝 審査メモ・コメント</p>
+                <p className="text-xs font-bold text-slate-600"><PenLine className="w-4 h-4 inline mr-1" /> 審査メモ・コメント</p>
                 <span className="text-xs text-slate-400">審査時の判断根拠を記録</span>
               </div>
               <div className="flex gap-1">
@@ -3934,12 +3941,12 @@ const MasterMerchantApplications = () => {
             <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
               <p className="text-xs font-bold text-slate-600 mb-1">申請元加盟店</p>
               <div className="text-xs space-y-1 text-slate-600">
-                <div>加盟店ID: <span className="font-mono text-blue-600">{selectedSiteAppData.merchantId}</span></div>
+                <div>加盟店ID: <span className="font-mono text-brand-600">{selectedSiteAppData.merchantId}</span></div>
                 <div>法人名: {selectedSiteAppData.merchantName}</div>
                 <div>既存サイト数: {selectedSiteAppData.existingSites}サイト</div>
-                <div>ステータス: <span className="text-emerald-600 font-semibold">稼働中</span></div>
+                <div>ステータス: <span className="text-success-600 font-semibold">稼働中</span></div>
                 <div className="pt-1 border-t mt-1">
-                  <span className="text-[10px] text-emerald-500">✅ 反社チェック済み ✅ 財務審査済み</span>
+                  <span className="text-[10px] text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 反社チェック済み 財務審査済み</span>
                 </div>
               </div>
             </div>
@@ -3956,21 +3963,21 @@ const MasterMerchantApplications = () => {
             <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
               <p className="text-xs font-bold text-slate-600 mb-1">AIサイト審査（簡易版）</p>
               <div className="text-xs space-y-1.5">
-                <div className="flex items-center gap-2"><span className="text-slate-300 line-through">反社チェック</span> <span className="text-[10px] text-emerald-500 bg-emerald-50 px-1 rounded">登録時済み</span></div>
-                <div className="flex items-center gap-2"><span className="text-slate-300 line-through">財務分析</span> <span className="text-[10px] text-emerald-500 bg-emerald-50 px-1 rounded">登録時済み</span></div>
+                <div className="flex items-center gap-2"><span className="text-slate-300 line-through">反社チェック</span> <span className="text-[10px] text-success-500 bg-success-50 px-1 rounded">登録時済み</span></div>
+                <div className="flex items-center gap-2"><span className="text-slate-300 line-through">財務分析</span> <span className="text-[10px] text-success-500 bg-success-50 px-1 rounded">登録時済み</span></div>
                 {selectedSiteAppData.status === "AI審査中" ? (
                   <>
-                    <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> サイトコンテンツ確認: 完了</div>
+                    <div className="flex items-center gap-2"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> サイトコンテンツ確認: 完了</div>
                     <div className="flex items-center gap-2"><span className="text-teal-500 animate-pulse">⟳</span> ジャンル適合性: 処理中...</div>
                     <div className="flex items-center gap-2"><span className="text-slate-300">○</span> 総合判定: 待機中</div>
                   </>
                 ) : (
                   <>
-                    <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> サイトコンテンツ確認: 問題なし</div>
-                    <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> ジャンル適合性: 適合</div>
+                    <div className="flex items-center gap-2"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> サイトコンテンツ確認: 問題なし</div>
+                    <div className="flex items-center gap-2"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> ジャンル適合性: 適合</div>
                     <div className="flex items-center gap-2">
-                      {selectedSiteAppData.ai === "却下推薦" ? <span className="text-rose-500">❌</span> : <span className="text-emerald-500">✅</span>}
-                      総合判定: <span className={selectedSiteAppData.ai === "却下推薦" ? "text-rose-600 font-semibold" : "text-emerald-600 font-semibold"}>{selectedSiteAppData.ai}</span>
+                      {selectedSiteAppData.ai === "却下推薦" ? <span className="text-danger-500"><XCircle className="w-4 h-4 text-danger-500 inline" /></span> : <span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span>}
+                      総合判定: <span className={selectedSiteAppData.ai === "却下推薦" ? "text-danger-600 font-semibold" : "text-success-600 font-semibold"}>{selectedSiteAppData.ai}</span>
                     </div>
                   </>
                 )}
@@ -3980,17 +3987,17 @@ const MasterMerchantApplications = () => {
 
           {/* 承認済みの場合のサマリー */}
           {selectedSiteAppData.status === "承認済み" && (
-            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-200 p-3">
+            <div className="bg-gradient-to-r from-success-50 to-teal-50 rounded-lg border border-success-200 p-3">
               <div className="flex items-center justify-between mb-1">
-                <p className="text-xs font-bold text-emerald-700">✅ サイト追加承認済み → 接続先設定フェーズ</p>
+                <p className="text-xs font-bold text-success-700"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> サイト追加承認済み → 接続先設定フェーズ</p>
                 {selectedSiteAppData.procStatus === "接続先審査中" && <Badge text="接続先審査中" color="blue" />}
                 {selectedSiteAppData.procStatus === "接続先審査待ち" && <Badge text="接続先審査未開始" color="yellow" />}
               </div>
               <div className="flex gap-4 text-xs text-slate-600">
                 <div><span className="text-slate-400">承認日:</span> 2026-02-10</div>
                 <div><span className="text-slate-400">承認者:</span> admin@aipaymentsys.com</div>
-                <div><span className="text-slate-400">AI判定:</span> <span className="text-emerald-600 font-semibold">{selectedSiteAppData.ai}</span></div>
-                <div><span className="text-slate-400">既存接続先流用:</span> <span className="text-blue-600 font-semibold">可能</span></div>
+                <div><span className="text-slate-400">AI判定:</span> <span className="text-success-600 font-semibold">{selectedSiteAppData.ai}</span></div>
+                <div><span className="text-slate-400">既存接続先流用:</span> <span className="text-brand-600 font-semibold">可能</span></div>
               </div>
             </div>
           )}
@@ -3998,8 +4005,8 @@ const MasterMerchantApplications = () => {
           {/* メール通知履歴（サイト追加審査） */}
           <div className="bg-white rounded-lg border border-slate-200 p-3 mt-3">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-bold text-slate-600">📧 通知・コミュニケーション履歴</p>
-              <button onClick={() => toast("手動で通知メールを再送しました", "success")} className="text-xs text-blue-600 hover:underline">手動再送</button>
+              <p className="text-xs font-bold text-slate-600"><Mail className="w-4 h-4 inline mr-1" /> 通知・コミュニケーション履歴</p>
+              <button onClick={() => toast("手動で通知メールを再送しました", "success")} className="text-xs text-brand-600 hover:underline">手動再送</button>
             </div>
             <div className="space-y-1 text-xs">
               <div className="flex items-center py-1 border-b"><div className="w-28 text-slate-400">{selectedSiteAppData.date}</div><div className="w-36 font-semibold text-slate-700">サイト追加申請受付</div><div className="flex-1 text-slate-500">加盟店担当者に受付確認メール送信</div><Badge text="送信済み" color="green" /></div>
@@ -4065,14 +4072,14 @@ const MasterSettlement = () => {
       <h2 className="text-sm font-bold text-slate-800">精算・入金管理</h2>
       <div className="flex gap-2">
         <select className="text-xs border rounded px-2 py-1"><option>2026年2月</option><option>2026年1月</option></select>
-        <button onClick={() => setShowBatchConfirm(true)} className="text-xs bg-emerald-600 text-white px-3 py-1 rounded font-semibold">精算バッチ実行</button>
+        <button onClick={() => setShowBatchConfirm(true)} className="text-xs bg-success-600 text-white px-3 py-1 rounded font-semibold">精算バッチ実行</button>
       </div>
     </div>
 
     {/* Tabs */}
     <div className="flex gap-1 border-b">
       {[{ id: "settlement", label: "精算・入金" }, { id: "deposit", label: "デポジット管理" }, { id: "chargeback", label: "チャージバック" }].map(tab => (
-        <button key={tab.id} onClick={() => setSettleTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 ${settleTab === tab.id ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-slate-400"}`}>{tab.label}</button>
+        <button key={tab.id} onClick={() => setSettleTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 ${settleTab === tab.id ? "border-brand-500 text-brand-600 font-semibold" : "border-transparent text-slate-400"}`}>{tab.label}</button>
       ))}
     </div>
 
@@ -4106,22 +4113,22 @@ const MasterSettlement = () => {
     {/* Payout Error Details */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex items-center gap-2 mb-2">
-        <p className="text-xs font-bold text-rose-600">⚠ 入金エラー（要対応）</p>
+        <p className="text-xs font-bold text-danger-600"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 入金エラー（要対応）</p>
         <Badge text="2件" color="red" />
       </div>
       {[
         { id: "PAY-0211-019", merchant: "M-019 飲食チェーン店", amount: "¥1,240,000", error: "口座情報不一致（支店コード誤り）", date: "02/11" },
         { id: "PAY-0210-033", merchant: "M-033 サブスクサービス", amount: "¥580,000", error: "入金限度額超過", date: "02/10" },
       ].map((e, i) => (
-        <div key={i} className="bg-rose-50 border border-rose-200 rounded p-2 mb-2">
+        <div key={i} className="bg-danger-50 border border-danger-200 rounded p-2 mb-2">
           <div className="flex justify-between items-center mb-1">
             <span className="text-xs font-semibold text-slate-700">{e.id} - {e.merchant}</span>
-            <span className="text-xs font-bold text-rose-600">{e.amount}</span>
+            <span className="text-xs font-bold text-danger-600">{e.amount}</span>
           </div>
-          <p className="text-xs text-rose-600 mb-2">エラー: {e.error}</p>
+          <p className="text-xs text-danger-600 mb-2">エラー: {e.error}</p>
           <div className="flex gap-2">
-            <button onClick={() => toast(`${e.merchant} に連絡メールを送信しました`, "info")} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">加盟店に連絡</button>
-            <button onClick={() => setActionConfirm({ title: "手動再実行", description: `${e.id} の精算を手動で再実行します。`, type: "info", onConfirm: () => toast(`${e.id} の再実行を開始しました`, "success") })} className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs">手動で再実行</button>
+            <button onClick={() => toast(`${e.merchant} に連絡メールを送信しました`, "info")} className="px-2 py-1 bg-brand-100 text-brand-700 rounded text-xs">加盟店に連絡</button>
+            <button onClick={() => setActionConfirm({ title: "手動再実行", description: `${e.id} の精算を手動で再実行します。`, type: "info", onConfirm: () => toast(`${e.id} の再実行を開始しました`, "success") })} className="px-2 py-1 bg-success-100 text-success-700 rounded text-xs">手動で再実行</button>
             <button onClick={() => toast(`${e.id} を例外キューに送りました`, "info")} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">例外キューに送る</button>
           </div>
         </div>
@@ -4130,12 +4137,12 @@ const MasterSettlement = () => {
 
     {/* Rolling Reserve */}
     <div className="bg-purple-50 rounded-lg border border-purple-200 p-3">
-      <p className="text-xs font-bold text-purple-700 mb-2">🔒 ローリングリザーブ（デポジット）</p>
+      <p className="text-xs font-bold text-purple-700 mb-2"><Lock className="w-4 h-4 inline mr-1" /> ローリングリザーブ（デポジット）</p>
       <div className="grid grid-cols-4 gap-3">
         {[
           { label: "リザーブ総額", value: "¥4,520,000", color: "text-purple-700" },
-          { label: "今月解放予定", value: "¥1,280,000", color: "text-emerald-600" },
-          { label: "来月解放予定", value: "¥1,640,000", color: "text-blue-600" },
+          { label: "今月解放予定", value: "¥1,280,000", color: "text-success-600" },
+          { label: "来月解放予定", value: "¥1,640,000", color: "text-brand-600" },
           { label: "新規留保（今月）", value: "¥2,130,000", color: "text-slate-700" },
         ].map((r, i) => (
           <div key={i} className="bg-white rounded-lg border border-slate-200 p-2.5 text-center">
@@ -4147,7 +4154,7 @@ const MasterSettlement = () => {
       {/* Reserve Search */}
       <div className="flex gap-2 mt-3">
         <div className="flex items-center border rounded bg-white">
-          <span className="text-xs text-slate-400 pl-2">🔍</span>
+          <Search className="w-4 h-4 inline" />
           <input className="text-xs px-2 py-1 w-48 outline-none" placeholder="加盟店ID・名前で検索" />
         </div>
         <select className="text-xs border rounded px-2 py-1 bg-white"><option>全接続先</option><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option><option>ONTHELINE</option><option>Asiabill</option></select>
@@ -4169,7 +4176,7 @@ const MasterSettlement = () => {
             <td className="px-4 py-1.5 whitespace-nowrap w-20 text-center"><Badge text={r.rate} color="purple" /></td>
             <td className="px-4 py-1.5 whitespace-nowrap w-16 text-center text-slate-500">{r.period}</td>
             <td className="px-4 py-1.5 whitespace-nowrap w-24 text-right font-bold text-purple-700">{r.bal}</td>
-            <td className="px-4 py-1.5 whitespace-nowrap w-24 text-right text-emerald-600">{r.next}</td>
+            <td className="px-4 py-1.5 whitespace-nowrap w-24 text-right text-success-600">{r.next}</td>
             <td className="px-4 py-1.5 whitespace-nowrap w-24 text-right text-slate-400">{r.date}</td>
           </tr>
         ))}
@@ -4181,7 +4188,7 @@ const MasterSettlement = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-slate-600">加盟店別 精算内訳</p>
-        <button onClick={() => toast("全加盟店の精算内訳を表示しました", "info")} className="text-xs text-blue-600 hover:underline">全加盟店を表示 →</button>
+        <button onClick={() => toast("全加盟店の精算内訳を表示しました", "info")} className="text-xs text-brand-600 hover:underline">全加盟店を表示 →</button>
       </div>
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
         <TableHeader cols={[{ label: "加盟店", w: "flex-1" }, { label: "決済高", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "CB差引", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-28" }]}>
@@ -4193,10 +4200,10 @@ const MasterSettlement = () => {
           <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
             <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{m.merchant}</td>
             <td className="px-4 py-2 whitespace-nowrap w-28 text-right text-slate-600">{m.sales}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-rose-500">-{m.fee}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-20 text-right text-rose-500">{m.cb !== "¥0" ? `-${m.cb}` : "—"}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-danger-500">-{m.fee}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-20 text-right text-danger-500">{m.cb !== "¥0" ? `-${m.cb}` : "—"}</td>
             <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-purple-500">-{m.hold}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-emerald-500">+{m.release}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-success-500">+{m.release}</td>
             <td className="px-4 py-2 whitespace-nowrap w-28 text-right font-bold text-slate-800">{m.payout}</td>
           </tr>
         ))}
@@ -4208,7 +4215,7 @@ const MasterSettlement = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
       <TableHeader cols={[{ label: "入金ID", w: "w-28" }, { label: "加盟店", w: "flex-1" }, { label: "精算期間", w: "w-36" }, { label: "入金額", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "ステータス", w: "w-24" }, { label: "入金日", w: "w-24" }]}>
       {payoutData.map((p, i) => (
-        <tr key={i} onClick={() => setSelectedPayout(p)} className={`border-b cursor-pointer hover:bg-blue-50 ${i % 2 ? "bg-slate-50" : ""}`}>
+        <tr key={i} onClick={() => setSelectedPayout(p)} className={`border-b cursor-pointer hover:bg-brand-50 ${i % 2 ? "bg-slate-50" : ""}`}>
           <td className="px-4 py-2 whitespace-nowrap w-28 font-mono text-slate-500">{p.id}</td>
           <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{p.merchant}</td>
           <td className="px-4 py-2 whitespace-nowrap w-36 text-slate-500">{p.period}</td>
@@ -4224,7 +4231,7 @@ const MasterSettlement = () => {
     {/* Agent Settlement Section */}
     <div className="bg-orange-50 rounded-lg border border-orange-200 p-3">
       <div className="flex justify-between items-center mb-2">
-        <p className="text-xs font-bold text-orange-700">🤝 代理店精算（決済手数料からの差引）</p>
+        <p className="text-xs font-bold text-orange-700"><Handshake className="w-4 h-4 inline mr-1" /> 代理店精算（決済手数料からの差引）</p>
         <div className="flex gap-2">
           <select className="text-xs border rounded px-2 py-1 bg-white"><option>2026年2月</option><option>2026年1月</option></select>
           <button onClick={() => setActionConfirm({ title: "代理店精算実行", description: "全代理店の精算処理を実行します。", warning: "実行後は取消できません。", type: "warning", onConfirm: () => toast("代理店精算を実行しました", "success") })} className="text-xs bg-orange-600 text-white px-3 py-1 rounded font-semibold">代理店精算を実行</button>
@@ -4233,8 +4240,8 @@ const MasterSettlement = () => {
       <div className="grid grid-cols-3 gap-3 mb-3">
         {[
           { label: "今月の代理店フィー合計", value: "¥3,507,500", color: "text-orange-700" },
-          { label: "支払完了", value: "¥415,000", color: "text-emerald-600" },
-          { label: "未払い", value: "¥3,092,500", color: "text-rose-600" },
+          { label: "支払完了", value: "¥415,000", color: "text-success-600" },
+          { label: "未払い", value: "¥3,092,500", color: "text-danger-600" },
         ].map((r, i) => (
           <div key={i} className="bg-white rounded-lg border border-slate-200 p-2.5 text-center">
             <p className="text-xs text-slate-400">{r.label}</p>
@@ -4255,7 +4262,7 @@ const MasterSettlement = () => {
             <td className="px-4 py-2 w-56 text-xs text-slate-500">{r.breakdown}</td>
             <td className="px-4 py-2 whitespace-nowrap w-24 font-bold text-orange-700">{r.total}</td>
             <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.status === "pending" ? "未払い" : "支払済"} color={r.status === "pending" ? "yellow" : "green"} /></td>
-            <td className="px-4 py-2 whitespace-nowrap w-16">{r.status === "pending" && <button onClick={() => setActionConfirm({ title: "代理店支払実行", description: `${r.agent} に ${r.total} を支払います。`, type: "approve", onConfirm: () => toast(`${r.agent} への支払いを実行しました`, "success") })} className="text-emerald-600 text-xs font-semibold">支払実行</button>}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-16">{r.status === "pending" && <button onClick={() => setActionConfirm({ title: "代理店支払実行", description: `${r.agent} に ${r.total} を支払います。`, type: "approve", onConfirm: () => toast(`${r.agent} への支払いを実行しました`, "success") })} className="text-success-600 text-xs font-semibold">支払実行</button>}</td>
           </tr>
         ))}
         </TableHeader>
@@ -4303,11 +4310,11 @@ const MasterSettlement = () => {
               ].map((r, i) => (
                 <tr key={i} className="border-b">
                   <td className="p-2 font-semibold text-slate-700">{r.merchant}</td>
-                  <td className="p-2 text-center"><span className={`px-2 py-0.5 rounded text-xs font-bold ${r.risk === "high" ? "bg-rose-100 text-rose-700" : r.risk === "mid" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"}`}>{r.rate}</span></td>
+                  <td className="p-2 text-center"><span className={`px-2 py-0.5 rounded text-xs font-bold ${r.risk === "high" ? "bg-danger-100 text-danger-700" : r.risk === "mid" ? "bg-warning-100 text-warning-700" : "bg-brand-100 text-brand-700"}`}>{r.rate}</span></td>
                   <td className="p-2 text-center text-slate-500">{r.period}</td>
                   <td className="p-2 text-right font-bold text-slate-800">{r.balance}</td>
                   <td className="p-2 text-right text-slate-600">{r.held}</td>
-                  <td className="p-2 text-right text-emerald-600">{r.nextRelease}</td>
+                  <td className="p-2 text-right text-success-600">{r.nextRelease}</td>
                   <td className="p-2 text-center">
                     <button onClick={() => toast(`${r.merchant} のリザーブ設定を編集中`, "info")} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">設定</button>
                   </td>
@@ -4341,7 +4348,7 @@ const MasterSettlement = () => {
                   <td className="p-2 text-slate-500">{r.date}</td>
                   <td className="p-2 text-slate-700">{r.merchant}</td>
                   <td className="p-2 text-center"><Badge text={r.type} color={r.type === "留保" ? "blue" : r.type === "解放" ? "green" : "red"} /></td>
-                  <td className={`p-2 text-right font-bold ${r.amount.startsWith("+") ? "text-blue-600" : "text-rose-600"}`}>{r.amount}</td>
+                  <td className={`p-2 text-right font-bold ${r.amount.startsWith("+") ? "text-brand-600" : "text-danger-600"}`}>{r.amount}</td>
                   <td className="p-2 text-right text-slate-600">{r.balance}</td>
                   <td className="p-2 text-slate-500">{r.note}</td>
                 </tr>
@@ -4349,8 +4356,8 @@ const MasterSettlement = () => {
             </tbody>
           </table>
         </div>
-        <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">
-          💡 リザーブ率は加盟店のリスクレベルに応じて5-30%で設定。チャージバック発生時はリザーブから自動充当されます。保持期間満了後に自動解放。
+        <div className="bg-brand-50 rounded border border-brand-200 p-2 text-xs text-brand-700">
+          リザーブ率は加盟店のリスクレベルに応じて5-30%で設定。チャージバック発生時はリザーブから自動充当されます。保持期間満了後に自動解放。
         </div>
       </div>
     )}
@@ -4371,7 +4378,7 @@ const MasterSettlement = () => {
             <div className="flex gap-2">
               <div className="flex gap-1">
                 {["全て","受領","調査中","反論済","確定"].map((s, i) => (
-                  <button key={s} className={`text-xs px-2.5 py-1 rounded ${i === 0 ? "bg-blue-600 text-white font-semibold" : "bg-slate-100 text-slate-500"}`}>{s}</button>
+                  <button key={s} className={`text-xs px-2.5 py-1 rounded ${i === 0 ? "bg-brand-500 text-white font-semibold" : "bg-slate-100 text-slate-500"}`}>{s}</button>
                 ))}
               </div>
               <input className="text-xs border rounded px-2 py-1 w-40" placeholder="ケース番号で検索" />
@@ -4402,18 +4409,18 @@ const MasterSettlement = () => {
                 { case: "CB-2026-0089", merchant: "M-007 ネットプラス", reason: "10.4 不正利用", amount: "¥85,000", brand: "VISA", status: "敗訴", deadline: "-", risk: false, riskNote: "" },
                 { case: "CB-2026-0088", merchant: "M-011 デジタルEC", reason: "13.7 キャンセル品", amount: "¥10,000", brand: "VISA", status: "取下げ", deadline: "-", risk: false, riskNote: "" },
               ].map((c, i) => (
-                <tr key={i} className={`border-b ${c.risk ? "bg-rose-50" : ""}`}>
-                  <td className="p-2 font-mono font-semibold text-blue-700">{c.case}</td>
+                <tr key={i} className={`border-b ${c.risk ? "bg-danger-50" : ""}`}>
+                  <td className="p-2 font-mono font-semibold text-brand-700">{c.case}</td>
                   <td className="p-2 text-slate-700">{c.merchant}</td>
                   <td className="p-2 text-slate-600">{c.reason}</td>
                   <td className="p-2 text-right font-bold text-slate-800">{c.amount}</td>
                   <td className="p-2 text-center"><Badge text={c.brand} color={c.brand === "VISA" ? "blue" : c.brand === "MC" ? "red" : "green"} /></td>
                   <td className="p-2 text-center"><Badge text={c.status} color={c.status === "受領" ? "yellow" : c.status === "調査中" ? "blue" : c.status === "反論提出済" ? "cyan" : c.status === "勝訴" ? "green" : c.status === "敗訴" ? "red" : "slate"} /></td>
                   <td className="p-2 text-slate-500">{c.deadline !== "-" ? c.deadline : <span className="text-slate-300">—</span>}</td>
-                  <td className="p-2 text-center">{c.risk ? <span className="px-2 py-0.5 rounded bg-rose-600 text-white text-xs font-bold">⚠ {c.riskNote}</span> : <span className="text-slate-300">—</span>}</td>
+                  <td className="p-2 text-center">{c.risk ? <span className="px-2 py-0.5 rounded bg-danger-600 text-white text-xs font-bold"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> {c.riskNote}</span> : <span className="text-slate-300">—</span>}</td>
                   <td className="p-2 text-center">
                     {(c.status === "受領" || c.status === "調査中") && (
-                      <button onClick={() => toast(`${c.case} の詳細を表示`, "info")} className="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs font-semibold">対応</button>
+                      <button onClick={() => toast(`${c.case} の詳細を表示`, "info")} className="px-2 py-0.5 bg-brand-100 text-brand-600 rounded text-xs font-semibold">対応</button>
                     )}
                     {c.status === "反論提出済" && (
                       <button onClick={() => toast(`${c.case} の反論状況を確認`, "info")} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">確認</button>
@@ -4425,26 +4432,26 @@ const MasterSettlement = () => {
           </table>
         </div>
         {/* 未収リスクアラート */}
-        <div className="bg-rose-50 rounded-lg border border-rose-300 p-3">
+        <div className="bg-danger-50 rounded-lg border border-danger-300 p-3">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm">🚨</span>
-            <p className="text-xs font-bold text-rose-700">未収リスクアラート</p>
+            <AlertOctagon className="w-4 h-4 text-danger-500 inline" />
+            <p className="text-xs font-bold text-danger-700">未収リスクアラート</p>
           </div>
-          <div className="bg-white rounded border border-rose-200 p-2 text-xs">
+          <div className="bg-white rounded border border-danger-200 p-2 text-xs">
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-bold text-slate-800">CB-2026-0095: M-002 XYZショップ — ¥185,000</p>
-                <p className="text-rose-600 mt-0.5">チャージバック発生時点の取扱高: ¥23,000（リザーブ残高: ¥2,775,000 → 充当可能だがサイト取扱高が極端に低下）</p>
+                <p className="text-danger-600 mt-0.5">チャージバック発生時点の取扱高: ¥23,000（リザーブ残高: ¥2,775,000 → 充当可能だがサイト取扱高が極端に低下）</p>
                 <p className="text-slate-500 mt-0.5">検知理由: 当該サイトの直近30日取扱高が前月比95%減。解約/休止の可能性。</p>
               </div>
               <div className="flex gap-1">
-                <button onClick={() => toast("例外キュー（M02）にエスカレーションしました", "warning")} className="px-3 py-1.5 bg-rose-600 text-white rounded text-xs font-semibold whitespace-nowrap">M02へ送る</button>
+                <button onClick={() => toast("例外キュー（M02）にエスカレーションしました", "warning")} className="px-3 py-1.5 bg-danger-600 text-white rounded text-xs font-semibold whitespace-nowrap">M02へ送る</button>
               </div>
             </div>
           </div>
         </div>
-        <div className="bg-amber-50 rounded border border-amber-200 p-2 text-xs text-amber-800">
-          ⚠️ 管理者権限でリファンド・チャージバックの金額を手動編集できます。編集時は変更前/後金額と理由が操作ログに記録されます。
+        <div className="bg-warning-50 rounded border border-warning-200 p-2 text-xs text-warning-800">
+          管理者権限でリファンド・チャージバックの金額を手動編集できます。編集時は変更前/後金額と理由が操作ログに記録されます。
         </div>
       </div>
     )}
@@ -4456,7 +4463,7 @@ const MasterSettlement = () => {
         <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
             <p className="text-sm font-bold">精算バッチ詳細</p>
-            <button onClick={() => setSelectedBatch(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <button onClick={() => setSelectedBatch(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-4 space-y-4">
             <div className="grid grid-cols-2 gap-2">
@@ -4471,14 +4478,14 @@ const MasterSettlement = () => {
                 {selectedBatch.logs.map((log, i) => (
                   <div key={i} className="flex items-center gap-2 py-1.5 border-b text-xs last:border-0">
                     <span className="font-mono text-slate-400 w-16">{log.time}</span>
-                    <span className={log.st === "error" ? "text-red-600" : log.st === "warn" ? "text-amber-600" : "text-slate-600"}>{log.st === "error" ? "❌" : log.st === "warn" ? "⚠️" : "✅"}</span>
-                    <span className={`flex-1 ${log.st === "error" ? "text-red-600 font-bold" : ""}`}>{log.msg}</span>
+                    <span className={log.st === "error" ? "text-danger-600" : log.st === "warn" ? "text-warning-600" : "text-slate-600"}>{log.st === "error" ? <XCircle className="w-3.5 h-3.5 text-danger-500 inline" /> : log.st === "warn" ? <AlertTriangle className="w-3.5 h-3.5 text-warning-500 inline" /> : <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />}</span>
+                    <span className={`flex-1 ${log.st === "error" ? "text-danger-600 font-bold" : ""}`}>{log.msg}</span>
                   </div>
                 ))}
               </div>
             )}
             {selectedBatch.errors > 0 && (
-              <button onClick={() => { toast(`エラー${selectedBatch.errors}件の再実行を開始しました`, "success"); }} className="w-full py-2 bg-emerald-50 text-emerald-600 rounded text-xs font-bold border border-emerald-200 hover:bg-emerald-100">🔄 エラー分を再実行</button>
+              <button onClick={() => { toast(`エラー${selectedBatch.errors}件の再実行を開始しました`, "success"); }} className="w-full py-2 bg-success-50 text-success-600 rounded text-xs font-bold border border-success-200 hover:bg-success-100"><RefreshCw className="w-4 h-4 inline mr-1" /> エラー分を再実行</button>
             )}
           </div>
         </div>
@@ -4492,22 +4499,22 @@ const MasterSettlement = () => {
         <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
             <p className="text-sm font-bold">{selectedPayout.id}</p>
-            <button onClick={() => setSelectedPayout(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <button onClick={() => setSelectedPayout(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-4 space-y-4">
             <div className="flex items-center gap-2"><Badge text={selectedPayout.status} color={selectedPayout.sColor} /><span className="text-xs text-slate-400">{selectedPayout.period}</span></div>
             <div><p className="text-xs font-bold text-slate-700 mb-2">精算サマリー</p>
               {[["決済高", selectedPayout.sales], ["手数料合計", `-${selectedPayout.fee}`], ["CB差引", selectedPayout.cb !== "¥0" ? `-${selectedPayout.cb}` : "—"], ["リザーブ留保", `-${selectedPayout.reserve}`], ["入金額", selectedPayout.amount]].map(([l, v], i) => (
-                <div key={i} className={`flex text-xs py-1 border-b ${i === 4 ? "font-bold text-slate-800" : ""}`}><span className="flex-1 text-slate-500">{l}</span><span className={i === 1 || i === 2 || i === 3 ? "text-rose-500" : ""}>{v}</span></div>
+                <div key={i} className={`flex text-xs py-1 border-b ${i === 4 ? "font-bold text-slate-800" : ""}`}><span className="flex-1 text-slate-500">{l}</span><span className={i === 1 || i === 2 || i === 3 ? "text-danger-500" : ""}>{v}</span></div>
               ))}
             </div>
             <div><p className="text-xs font-bold text-slate-700 mb-2">ブランド別内訳</p>
               {selectedPayout.brands.map((b, i) => (
-                <div key={i} className="flex text-xs py-1 border-b"><span className="w-14">{b.name}</span><span className="flex-1 text-slate-500">{b.amt}</span><span className="text-rose-500">-{b.fee}</span></div>
+                <div key={i} className="flex text-xs py-1 border-b"><span className="w-14">{b.name}</span><span className="flex-1 text-slate-500">{b.amt}</span><span className="text-danger-500">-{b.fee}</span></div>
               ))}
             </div>
             {/* 接続先別手数料ブレイクダウン */}
-            <div><p className="text-xs font-bold text-slate-700 mb-2">📊 接続先別 TR/CB手数料</p>
+            <div><p className="text-xs font-bold text-slate-700 mb-2"><BarChart3 className="w-4 h-4 inline mr-1" /> 接続先別 TR/CB手数料</p>
               <div className="bg-slate-50 rounded border border-slate-200 p-2 space-y-1 text-xs">
                 {[
                   { proc: "Univa Pay cast", trCount: 85, trFee: "30円", cbCount: 0, cbFee: "3,000円" },
@@ -4523,7 +4530,7 @@ const MasterSettlement = () => {
               </div>
             </div>
             <div><p className="text-xs font-bold text-slate-700 mb-1">振込先口座</p><p className="text-xs text-slate-600 bg-slate-50 rounded p-2">{selectedPayout.bank}</p></div>
-            <button onClick={() => toast("入金明細をダウンロードしました", "success")} className="w-full py-2 bg-blue-50 text-blue-600 rounded text-xs font-bold border border-blue-200">📥 明細をダウンロード</button>
+            <button onClick={() => toast("入金明細をダウンロードしました", "success")} className="w-full py-2 bg-brand-50 text-brand-600 rounded text-xs font-bold border border-brand-200"><Download className="w-4 h-4 inline mr-1" /> 明細をダウンロード</button>
           </div>
         </div>
       </div>
@@ -4538,10 +4545,10 @@ const MasterSettlement = () => {
         <div className="relative bg-white rounded-xl shadow-2xl w-[450px]">
           <div className="p-4 border-b flex items-center justify-between">
             <p className="text-sm font-bold">精算バッチの実行確認</p>
-            <button onClick={() => setShowBatchConfirm(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <button onClick={() => setShowBatchConfirm(false)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-4 space-y-3">
-            <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-700">
+            <div className="bg-brand-50 border border-brand-200 rounded p-3 text-xs text-brand-700">
               <p className="font-bold">実行概要</p>
               <div className="mt-2 space-y-1">
                 <div className="flex justify-between"><span>対象期間:</span><span className="font-bold">2026/02/04 〜 2026/02/10</span></div>
@@ -4556,7 +4563,7 @@ const MasterSettlement = () => {
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowBatchConfirm(false)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
-              <button onClick={() => { setShowBatchConfirm(false); toast("精算バッチの実行を開始しました", "success"); }} className="flex-1 py-2 bg-emerald-600 text-white rounded text-xs font-bold hover:bg-emerald-700">バッチを実行</button>
+              <button onClick={() => { setShowBatchConfirm(false); toast("精算バッチの実行を開始しました", "success"); }} className="flex-1 py-2 bg-success-600 text-white rounded text-xs font-bold hover:bg-success-700">バッチを実行</button>
             </div>
           </div>
         </div>
@@ -4580,7 +4587,7 @@ const MasterSystemSettings = () => {
     {/* Tab navigation */}
     <div className="flex gap-1 border-b">
       {["決済手段", "接続先管理", "通知設定", "API設定", "セキュリティ", "エラーコード", "お知らせ管理", "操作ログ"].map((tab, i) => (
-        <button key={i} onClick={() => setSysTab(i)} className={`text-xs px-3 py-2 border-b-2 ${sysTab === i ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-slate-400 hover:text-slate-600"}`}>{tab}</button>
+        <button key={i} onClick={() => setSysTab(i)} className={`text-xs px-3 py-2 border-b-2 ${sysTab === i ? "border-brand-500 text-brand-600 font-semibold" : "border-transparent text-slate-400 hover:text-slate-600"}`}>{tab}</button>
       ))}
     </div>
 
@@ -4595,7 +4602,7 @@ const MasterSystemSettings = () => {
           { name: "Apple Pay / Google Pay", status: false, processor: "未設定", fee: "-" },
         ].map((m, i) => (
           <div key={i} className="flex items-center gap-3 p-2 rounded border text-xs">
-            <div className={`w-8 h-5 rounded-full relative cursor-pointer ${m.status ? "bg-emerald-500" : "bg-slate-300"}`}>
+            <div className={`w-8 h-5 rounded-full relative cursor-pointer ${m.status ? "bg-success-500" : "bg-slate-300"}`}>
               <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${m.status ? "right-0.5" : "left-0.5"}`} />
             </div>
             <div className="flex-1">
@@ -4643,7 +4650,7 @@ const MasterSystemSettings = () => {
             <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
               <td className="px-2 py-2 text-slate-600">{r.type}</td>
               <td className="px-2 py-2 font-semibold text-slate-700">{r.brand}</td>
-              <td className="px-2 py-2 text-center font-semibold text-blue-700">{r.fee}</td>
+              <td className="px-2 py-2 text-center font-semibold text-brand-700">{r.fee}</td>
               <td className="px-2 py-2 text-center text-slate-500">{r.tr}</td>
               <td className="px-2 py-2 text-center text-slate-500">{r.cb}</td>
               <td className="px-2 py-2 text-center text-slate-500">{r.depo}</td>
@@ -4651,7 +4658,7 @@ const MasterSystemSettings = () => {
               <td className="px-2 py-2 text-center text-slate-500">{r.currency}</td>
               <td className="px-2 py-2 text-center text-slate-500">{r.min}</td>
               <td className="px-2 py-2 text-center text-slate-500">{r.max}</td>
-              <td className="px-2 py-2 text-center">{r.active ? <span className="text-emerald-500">●</span> : <span className="text-slate-300">●</span>}</td>
+              <td className="px-2 py-2 text-center">{r.active ? <span className="text-success-500">●</span> : <span className="text-slate-300">●</span>}</td>
             </tr>
           ))}
           </tbody>
@@ -4665,12 +4672,12 @@ const MasterSystemSettings = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">プロセッサー接続一覧</p>
-        <button onClick={() => setShowAddProcessor(!showAddProcessor)} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">+ 接続先追加</button>
+        <button onClick={() => setShowAddProcessor(!showAddProcessor)} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold">+ 接続先追加</button>
       </div>
 
       {showAddProcessor && (
-        <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 mb-3 space-y-3">
-          <div className="flex justify-between items-center"><p className="text-xs font-bold text-blue-700">🔗 新規接続先追加</p><button onClick={() => setShowAddProcessor(false)} className="text-slate-400 text-sm">✕</button></div>
+        <div className="bg-brand-50 rounded-lg border border-brand-200 p-3 mb-3 space-y-3">
+          <div className="flex justify-between items-center"><p className="text-xs font-bold text-brand-700"><Link2 className="w-4 h-4 inline mr-1" /> 新規接続先追加</p><button onClick={() => setShowAddProcessor(false)} className="text-slate-400 text-sm"><X className="w-4 h-4" /></button></div>
           <div className="grid grid-cols-2 gap-2">
             <div><label className="text-xs text-slate-500">プロセッサー名 *</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option><option>ONTHELINE</option><option>Asiabill</option><option>ビットキャッシュ</option><option>スマートピット</option><option>ネットライドキャッシュ</option><option>セキュリティマネー</option><option>Gマネー</option><option>ペイディ</option><option>ニーハオペイ</option></select></div>
             <div><label className="text-xs text-slate-500">接続タイプ *</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>API</option><option>リダイレクト</option><option>SDK</option></select></div>
@@ -4681,7 +4688,7 @@ const MasterSystemSettings = () => {
           </div>
           <div className="flex gap-2 justify-end">
             <button onClick={() => setShowAddProcessor(false)} className="px-3 py-1.5 text-xs text-slate-500 border rounded">キャンセル</button>
-            <button onClick={() => { setShowAddProcessor(false); toast("接続テストを実行中...", "info"); setTimeout(() => toast("接続テスト成功！接続先を追加しました", "success"), 1500); }} className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded font-semibold">接続テスト実行</button>
+            <button onClick={() => { setShowAddProcessor(false); toast("接続テストを実行中...", "info"); setTimeout(() => toast("接続テスト成功！接続先を追加しました", "success"), 1500); }} className="px-3 py-1.5 text-xs bg-brand-500 text-white rounded font-semibold">接続テスト実行</button>
           </div>
         </div>
       )}
@@ -4700,21 +4707,21 @@ const MasterSystemSettings = () => {
           <tbody>
           {processorList.map((p, i) => (
             <React.Fragment key={p.id}>
-            <tr className={`border-b ${selectedSysProc === p.id ? "bg-blue-50" : i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50 cursor-pointer`} onClick={() => setSelectedSysProc(selectedSysProc === p.id ? null : p.id)}>
+            <tr className={`border-b ${selectedSysProc === p.id ? "bg-brand-50" : i % 2 ? "bg-slate-50" : ""} hover:bg-brand-50 cursor-pointer`} onClick={() => setSelectedSysProc(selectedSysProc === p.id ? null : p.id)}>
               <td className="px-3 py-2 font-semibold text-slate-700">
                 <div className="flex items-center gap-1">
-                  <span className={`text-xs ${selectedSysProc === p.id ? "text-blue-500" : "text-slate-400"}`}>{selectedSysProc === p.id ? "▼" : "▶"}</span>
+                  <span className={`text-xs ${selectedSysProc === p.id ? "text-brand-500" : "text-slate-400"}`}>{selectedSysProc === p.id ? "▼" : "▶"}</span>
                   {p.name}
                 </div>
               </td>
               <td className="px-3 py-2 text-slate-500">{p.type}</td>
               <td className="px-3 py-2 text-center"><div className="flex gap-1 flex-wrap justify-center">{p.brands.map(b => <Badge key={b} text={b} color="blue" />)}</div></td>
               <td className="px-3 py-2 text-center"><Badge text={p.status} color={p.sColor} /></td>
-              <td className="px-3 py-2 text-center text-emerald-600 font-semibold">{p.uptime}</td>
+              <td className="px-3 py-2 text-center text-success-600 font-semibold">{p.uptime}</td>
               <td className="px-3 py-2 text-center text-slate-700 font-semibold">{p.merchants}社</td>
               <td className="px-3 py-2 text-center"><div className="flex gap-1 justify-center">
                 <button className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs" onClick={(e) => e.stopPropagation()}>設定</button>
-                <button className="px-2 py-1 bg-blue-50 text-blue-600 rounded text-xs" onClick={(e) => e.stopPropagation()}>テスト</button>
+                <button className="px-2 py-1 bg-brand-50 text-brand-600 rounded text-xs" onClick={(e) => e.stopPropagation()}>テスト</button>
               </div></td>
             </tr>
             {/* 接続先条件詳細パネル（クリック展開・admin以上編集可） */}
@@ -4722,66 +4729,66 @@ const MasterSystemSettings = () => {
               const isCard = p.type !== "WEBマネー";
               const isEditing = editingSysProc === p.id;
               const editInput = (val, w = "w-20") => isEditing
-                ? <input defaultValue={val} className={`${w} text-xs border border-blue-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400`} onClick={(e) => e.stopPropagation()} />
+                ? <input defaultValue={val} className={`${w} text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-brand-400`} onClick={(e) => e.stopPropagation()} />
                 : <span className="font-semibold">{val}</span>;
               const editInputCenter = (val, w = "w-16") => isEditing
-                ? <input defaultValue={val} className={`${w} text-xs border border-blue-300 rounded px-1.5 py-0.5 bg-white text-center focus:outline-none focus:ring-1 focus:ring-blue-400`} onClick={(e) => e.stopPropagation()} />
-                : <p className={`text-xs font-bold ${val !== "-" ? "text-blue-700" : "text-slate-300"}`}>{val}</p>;
+                ? <input defaultValue={val} className={`${w} text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white text-center focus:outline-none focus:ring-1 focus:ring-brand-400`} onClick={(e) => e.stopPropagation()} />
+                : <p className={`text-xs font-bold ${val !== "-" ? "text-brand-700" : "text-slate-300"}`}>{val}</p>;
               return (
               <tr><td colSpan={7} className="p-0">
-                <div className={`${isEditing ? "bg-amber-50 border-x border-b border-amber-300" : "bg-blue-50 border-x border-b border-blue-200"} p-3 space-y-3`}>
+                <div className={`${isEditing ? "bg-warning-50 border-x border-b border-warning-300" : "bg-brand-50 border-x border-b border-brand-200"} p-3 space-y-3`}>
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
-                      <p className="text-xs font-bold text-slate-700">🔌 {p.name} — 条件詳細</p>
+                      <p className="text-xs font-bold text-slate-700"><Plug className="w-4 h-4 inline mr-1" /> {p.name} — 条件詳細</p>
                       {isEditing && <Badge text="編集中" color="amber" />}
                     </div>
                     <div className="flex items-center gap-2">
                       {isEditing ? (
                         <>
                           <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(null); }} className="px-2.5 py-1 text-xs text-slate-500 border border-slate-300 rounded hover:bg-slate-100">キャンセル</button>
-                          <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(null); toast("接続先設定を保存しました", "success"); }} className="px-2.5 py-1 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">💾 保存</button>
+                          <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(null); toast("接続先設定を保存しました", "success"); }} className="px-2.5 py-1 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600"><Save className="w-4 h-4 inline mr-1" /> 保存</button>
                         </>
                       ) : (
-                        <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(p.id); }} className="px-2.5 py-1 text-xs bg-amber-500 text-white rounded font-semibold hover:bg-amber-600">✏️ 編集（admin）</button>
+                        <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(p.id); }} className="px-2.5 py-1 text-xs bg-warning-500 text-white rounded font-semibold hover:bg-warning-600"><Pencil className="w-4 h-4 inline mr-1" /> 編集（admin）</button>
                       )}
-                      <button onClick={(e) => { e.stopPropagation(); setSelectedSysProc(null); setEditingSysProc(null); }} className="text-xs text-slate-400 hover:text-slate-600">✕ 閉じる</button>
+                      <button onClick={(e) => { e.stopPropagation(); setSelectedSysProc(null); setEditingSysProc(null); }} className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1"><X className="w-3.5 h-3.5" /> 閉じる</button>
                     </div>
                   </div>
                   {isEditing && (
-                    <div className="bg-amber-100 border border-amber-300 rounded p-2 text-xs text-amber-800">
-                      ⚠️ admin以上の権限で編集中です。変更は保存後に全加盟店のデフォルト値に反映されます。
+                    <div className="bg-warning-100 border border-warning-300 rounded p-2 text-xs text-warning-800">
+                      admin以上の権限で編集中です。変更は保存後に全加盟店のデフォルト値に反映されます。
                     </div>
                   )}
                   <div className="grid grid-cols-2 gap-3">
                     {/* 左列: 手数料 */}
                     <div className="space-y-2">
                       <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                        <p className="text-xs font-bold text-slate-600 mb-2">💰 ブランド別手数料率 <span className="text-rose-500 font-normal">（仕入れ原価）</span></p>
+                        <p className="text-xs font-bold text-slate-600 mb-2"><Coins className="w-4 h-4 inline mr-1" /> ブランド別手数料率 <span className="text-danger-500 font-normal">（仕入れ原価）</span></p>
                         <p className="text-[10px] text-slate-400 -mt-1 mb-2">※ 接続先から提示された原価手数料率。加盟店への提示料率は「加盟店管理 → サイト管理」でオーバーライド設定</p>
                         {isCard ? (
                           <div className="grid grid-cols-5 gap-1.5">
                             {[{b:"VISA",k:"visa"},{b:"MC",k:"master"},{b:"JCB",k:"jcb"},{b:"AMEX",k:"amex"},{b:"Diners",k:"diners"}].map(({b,k}) => (
-                              <div key={k} className={`rounded border p-1.5 text-center ${p.fees[k] !== "-" ? "bg-blue-50 border-blue-200" : "bg-slate-50 border-slate-200"}`}>
+                              <div key={k} className={`rounded border p-1.5 text-center ${p.fees[k] !== "-" ? "bg-brand-50 border-brand-200" : "bg-slate-50 border-slate-200"}`}>
                                 <p className="text-xs text-slate-400">{b}</p>
                                 {editInputCenter(p.fees[k])}
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <div className="bg-blue-50 rounded border border-blue-200 p-2 text-center">
-                            <p className="text-xs text-slate-400">WEBマネー手数料 <span className="text-rose-400">（仕入れ）</span></p>
-                            {isEditing ? <input defaultValue={p.fees.webmoney} className="w-20 text-sm border border-blue-300 rounded px-1.5 py-0.5 bg-white text-center font-bold focus:outline-none focus:ring-1 focus:ring-blue-400 mx-auto block" onClick={(e) => e.stopPropagation()} /> : <p className="text-sm font-bold text-blue-700">{p.fees.webmoney}</p>}
+                          <div className="bg-brand-50 rounded border border-brand-200 p-2 text-center">
+                            <p className="text-xs text-slate-400">WEBマネー手数料 <span className="text-danger-400">（仕入れ）</span></p>
+                            {isEditing ? <input defaultValue={p.fees.webmoney} className="w-20 text-sm border border-brand-300 rounded px-1.5 py-0.5 bg-white text-center font-bold focus:outline-none focus:ring-1 focus:ring-brand-400 mx-auto block" onClick={(e) => e.stopPropagation()} /> : <p className="text-sm font-bold text-brand-700">{p.fees.webmoney}</p>}
                           </div>
                         )}
                       </div>
                       {isCard && (
                       <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                        <p className="text-xs font-bold text-slate-600 mb-2">📊 TR手数料</p>
+                        <p className="text-xs font-bold text-slate-600 mb-2"><BarChart3 className="w-4 h-4 inline mr-1" /> TR手数料</p>
                         <div className="grid grid-cols-3 gap-1.5">
                           {[{l:"TR(成功)",v:p.trFees.success},{l:"TR(失敗)",v:p.trFees.fail},{l:"CB手数料",v:p.trFees.cb},{l:"返金",v:p.trFees.refund},{l:"3DS",v:p.trFees.tds},{l:"CB取消",v:p.trFees.cbCancel}].map(({l,v}) => (
                             <div key={l} className="bg-slate-50 rounded border border-slate-200 p-1.5">
                               <p className="text-xs text-slate-400">{l}</p>
-                              {isEditing ? <input defaultValue={v} className="w-full text-xs border border-blue-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 mt-0.5" onClick={(e) => e.stopPropagation()} /> : <p className={`text-xs font-bold ${v !== "-" ? "text-slate-700" : "text-slate-300"}`}>{v}</p>}
+                              {isEditing ? <input defaultValue={v} className="w-full text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-brand-400 mt-0.5" onClick={(e) => e.stopPropagation()} /> : <p className={`text-xs font-bold ${v !== "-" ? "text-slate-700" : "text-slate-300"}`}>{v}</p>}
                             </div>
                           ))}
                         </div>
@@ -4791,16 +4798,16 @@ const MasterSystemSettings = () => {
                     {/* 右列: 条件・制限 */}
                     <div className="space-y-2">
                       <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                        <p className="text-xs font-bold text-slate-600 mb-2">🔒 デポジット・制限</p>
+                        <p className="text-xs font-bold text-slate-600 mb-2"><Lock className="w-4 h-4 inline mr-1" /> デポジット・制限</p>
                         <div className="grid grid-cols-2 gap-2">
                           <div className="bg-purple-50 rounded border border-purple-200 p-2 space-y-1 text-xs">
                             <p className="font-semibold text-purple-700 mb-0.5">留保条件</p>
                             <div className="flex justify-between items-center"><span className="text-slate-400">留保率</span>{editInput(p.deposit.rate)}</div>
                             <div className="flex justify-between items-center"><span className="text-slate-400">期間</span>{editInput(p.deposit.period)}</div>
-                            <div className="flex justify-between items-center"><span className="text-slate-400">タイプ</span>{isEditing ? <select defaultValue={p.deposit.type} className="w-28 text-xs border border-blue-300 rounded px-1 py-0.5 bg-white" onClick={(e) => e.stopPropagation()}><option>ローリングリザーブ</option><option>固定リザーブ</option><option>なし</option></select> : <span className="font-semibold">{p.deposit.type}</span>}</div>
+                            <div className="flex justify-between items-center"><span className="text-slate-400">タイプ</span>{isEditing ? <select defaultValue={p.deposit.type} className="w-28 text-xs border border-brand-300 rounded px-1 py-0.5 bg-white" onClick={(e) => e.stopPropagation()}><option>ローリングリザーブ</option><option>固定リザーブ</option><option>なし</option></select> : <span className="font-semibold">{p.deposit.type}</span>}</div>
                           </div>
-                          <div className="bg-amber-50 rounded border border-amber-200 p-2 space-y-1 text-xs">
-                            <p className="font-semibold text-amber-700 mb-0.5">取引制限</p>
+                          <div className="bg-warning-50 rounded border border-warning-200 p-2 space-y-1 text-xs">
+                            <p className="font-semibold text-warning-700 mb-0.5">取引制限</p>
                             <div className="flex justify-between items-center"><span className="text-slate-400">TR上限</span>{editInput(p.limits.trMax)}</div>
                             <div className="flex justify-between items-center"><span className="text-slate-400">月間上限</span>{editInput(p.limits.monthlyMax)}</div>
                             <div className="flex justify-between items-center"><span className="text-slate-400">回数</span>{editInput(p.limits.countLimit)}</div>
@@ -4808,29 +4815,29 @@ const MasterSystemSettings = () => {
                         </div>
                       </div>
                       <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                        <p className="text-xs font-bold text-slate-600 mb-2">💵 固定費・入金</p>
+                        <p className="text-xs font-bold text-slate-600 mb-2"><Coins className="w-4 h-4 inline" /> 固定費・入金</p>
                         <div className="grid grid-cols-2 gap-2">
-                          <div className="bg-emerald-50 rounded border border-emerald-200 p-2 space-y-1 text-xs">
-                            <p className="font-semibold text-emerald-700 mb-0.5">固定費</p>
+                          <div className="bg-success-50 rounded border border-success-200 p-2 space-y-1 text-xs">
+                            <p className="font-semibold text-success-700 mb-0.5">固定費</p>
                             <div className="flex justify-between items-center"><span className="text-slate-400">初期</span>{editInput(p.fixedCost.initial)}</div>
                             <div className="flex justify-between items-center"><span className="text-slate-400">月額</span>{editInput(p.fixedCost.monthly)}</div>
                           </div>
-                          <div className="bg-blue-50 rounded border border-blue-200 p-2 space-y-1 text-xs">
-                            <p className="font-semibold text-blue-700 mb-0.5">入金情報</p>
-                            <div className="flex justify-between items-center"><span className="text-slate-400">口座</span>{isEditing ? <select defaultValue={p.settlement.account} className="w-28 text-xs border border-blue-300 rounded px-1 py-0.5 bg-white" onClick={(e) => e.stopPropagation()}><option>日本口座（円）</option><option>海外口座（USD）</option><option>海外口座（EUR）</option></select> : <span className="font-semibold">{p.settlement.account}</span>}</div>
+                          <div className="bg-brand-50 rounded border border-brand-200 p-2 space-y-1 text-xs">
+                            <p className="font-semibold text-brand-700 mb-0.5">入金情報</p>
+                            <div className="flex justify-between items-center"><span className="text-slate-400">口座</span>{isEditing ? <select defaultValue={p.settlement.account} className="w-28 text-xs border border-brand-300 rounded px-1 py-0.5 bg-white" onClick={(e) => e.stopPropagation()}><option>日本口座（円）</option><option>海外口座（USD）</option><option>海外口座（EUR）</option></select> : <span className="font-semibold">{p.settlement.account}</span>}</div>
                           </div>
                         </div>
                         <div className="mt-1.5 bg-slate-50 rounded border border-slate-200 p-1.5 text-xs">
-                          <span className="text-slate-400">入金サイクル: </span>{isEditing ? <input defaultValue={p.settlement.cycle} className="w-full text-xs border border-blue-300 rounded px-1.5 py-0.5 bg-white mt-0.5 focus:outline-none focus:ring-1 focus:ring-blue-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold text-slate-700">{p.settlement.cycle}</span>}
+                          <span className="text-slate-400">入金サイクル: </span>{isEditing ? <input defaultValue={p.settlement.cycle} className="w-full text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white mt-0.5 focus:outline-none focus:ring-1 focus:ring-brand-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold text-slate-700">{p.settlement.cycle}</span>}
                         </div>
                       </div>
                       {isCard && (
                       <div className="bg-white rounded-lg border border-slate-200 p-2.5">
-                        <p className="text-xs font-bold text-slate-600 mb-1">🚫 制限事項</p>
+                        <p className="text-xs font-bold text-slate-600 mb-1"><Ban className="w-4 h-4 inline mr-1" /> 制限事項</p>
                         <div className="space-y-1 text-xs">
-                          <div className="flex items-center gap-1"><span className="text-slate-400 w-10">CVV:</span>{isEditing ? <input defaultValue={p.restrictions.cvv} className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold">{p.restrictions.cvv}</span>}</div>
-                          <div className="flex items-center gap-1"><span className="text-slate-400 w-10">NG:</span>{isEditing ? <input defaultValue={p.restrictions.ngGenre} className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold">{p.restrictions.ngGenre}</span>}</div>
-                          <div className="flex items-center gap-1"><span className="text-slate-400 w-10">USD:</span>{isEditing ? <select defaultValue={p.restrictions.usd ? "対応" : "非対応"} className="text-xs border border-blue-300 rounded px-1 py-0.5 bg-white" onClick={(e) => e.stopPropagation()}><option>対応</option><option>非対応</option></select> : <span className="font-semibold">{p.restrictions.usd ? "対応" : "非対応"}</span>}</div>
+                          <div className="flex items-center gap-1"><span className="text-slate-400 w-10">CVV:</span>{isEditing ? <input defaultValue={p.restrictions.cvv} className="flex-1 text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-brand-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold">{p.restrictions.cvv}</span>}</div>
+                          <div className="flex items-center gap-1"><span className="text-slate-400 w-10">NG:</span>{isEditing ? <input defaultValue={p.restrictions.ngGenre} className="flex-1 text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-brand-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold">{p.restrictions.ngGenre}</span>}</div>
+                          <div className="flex items-center gap-1"><span className="text-slate-400 w-10">USD:</span>{isEditing ? <select defaultValue={p.restrictions.usd ? "対応" : "非対応"} className="text-xs border border-brand-300 rounded px-1 py-0.5 bg-white" onClick={(e) => e.stopPropagation()}><option>対応</option><option>非対応</option></select> : <span className="font-semibold">{p.restrictions.usd ? "対応" : "非対応"}</span>}</div>
                         </div>
                       </div>
                       )}
@@ -4862,9 +4869,9 @@ const MasterSystemSettings = () => {
           { rule: "WEBマネー → 各サービス直接（固定ルーティング）", priority: 5, active: true },
         ].map((r, i) => (
           <div key={i} className="flex items-center gap-3 p-2 rounded border text-xs">
-            <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">{r.priority}</span>
+            <span className="w-6 h-6 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold">{r.priority}</span>
             <span className="flex-1 text-slate-700">{r.rule}</span>
-            <div className={`w-8 h-5 rounded-full relative cursor-pointer ${r.active ? "bg-emerald-500" : "bg-slate-300"}`}>
+            <div className={`w-8 h-5 rounded-full relative cursor-pointer ${r.active ? "bg-success-500" : "bg-slate-300"}`}>
               <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${r.active ? "right-0.5" : "left-0.5"}`} />
             </div>
             <button onClick={() => toast(`ルール${r.priority}を編集中`, "info")} className="px-2 py-1 bg-slate-100 text-slate-600 rounded">編集</button>
@@ -4885,11 +4892,11 @@ const MasterSystemSettings = () => {
           <div key={i} className="bg-slate-50 rounded-lg p-3 border">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-bold text-slate-700">{h.name}</span>
-              <span className="text-xs font-bold text-emerald-600">{h.uptime}</span>
+              <span className="text-xs font-bold text-success-600">{h.uptime}</span>
             </div>
             <div className="flex gap-0.5 mb-2">
               {Array.from({ length: 24 }, (_, j) => (
-                <div key={j} className={`flex-1 h-4 rounded-sm ${j === 14 && h.incidents > 0 ? "bg-amber-400" : "bg-emerald-400"}`} title={`${j}:00`} />
+                <div key={j} className={`flex-1 h-4 rounded-sm ${j === 14 && h.incidents > 0 ? "bg-warning-400" : "bg-success-400"}`} title={`${j}:00`} />
               ))}
             </div>
             <div className="flex justify-between text-xs text-slate-400">
@@ -4907,20 +4914,20 @@ const MasterSystemSettings = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">通知チャンネル設定</p>
-        <button onClick={() => toast("通知設定を保存しました", "success")} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">保存</button>
+        <button onClick={() => toast("通知設定を保存しました", "success")} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold">保存</button>
       </div>
 
       {/* Channel configuration */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
-          { ch: "Slack", icon: "💬", config: "Webhook URL", value: "https://hooks.slack.com/...xxxx", channel: "#payment-alerts", status: true },
-          { ch: "Email", icon: "📧", config: "送信先", value: "alert@company.jp, admin@company.jp", channel: "", status: true },
-          { ch: "SMS", icon: "📱", config: "送信先番号", value: "090-xxxx-xxxx, 080-xxxx-xxxx", channel: "", status: true },
+          { ch: "Slack", icon: <MessageSquare className="w-4 h-4 inline text-slate-500" />, config: "Webhook URL", value: "https://hooks.slack.com/...xxxx", channel: "#payment-alerts", status: true },
+          { ch: "Email", icon: <Mail className="w-4 h-4 inline text-slate-500" />, config: "送信先", value: "alert@company.jp, admin@company.jp", channel: "", status: true },
+          { ch: "SMS", icon: <Smartphone className="w-4 h-4 inline text-slate-500" />, config: "送信先番号", value: "090-xxxx-xxxx, 080-xxxx-xxxx", channel: "", status: true },
         ].map((c, i) => (
           <div key={i} className="bg-slate-50 rounded-lg p-3 border">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-bold text-slate-700">{c.icon} {c.ch}</span>
-              <div className={`w-8 h-5 rounded-full relative cursor-pointer ${c.status ? "bg-emerald-500" : "bg-slate-300"}`}>
+              <div className={`w-8 h-5 rounded-full relative cursor-pointer ${c.status ? "bg-success-500" : "bg-slate-300"}`}>
                 <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${c.status ? "right-0.5" : "left-0.5"}`} />
               </div>
             </div>
@@ -4929,7 +4936,7 @@ const MasterSystemSettings = () => {
               <input className="w-full text-xs border rounded px-2 py-1.5" defaultValue={c.value} />
               {c.channel && <><label className="text-xs text-slate-400">チャンネル</label><input className="w-full text-xs border rounded px-2 py-1.5" defaultValue={c.channel} /></>}
             </div>
-            <button onClick={() => { toast(`${c.ch}にテスト送信中...`, "info"); setTimeout(() => toast(`${c.ch}のテスト送信が完了しました`, "success"), 1500); }} className="text-xs text-blue-600 mt-2 hover:underline">テスト送信</button>
+            <button onClick={() => { toast(`${c.ch}にテスト送信中...`, "info"); setTimeout(() => toast(`${c.ch}のテスト送信が完了しました`, "success"), 1500); }} className="text-xs text-brand-600 mt-2 hover:underline">テスト送信</button>
           </div>
         ))}
       </div>
@@ -4980,7 +4987,7 @@ const MasterSystemSettings = () => {
       <p className="text-xs font-bold text-slate-600 mb-3">通知スケジュール</p>
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-slate-50 rounded-lg p-3 border">
-          <p className="text-xs font-bold text-slate-700 mb-2">🔕 サイレント時間帯</p>
+          <p className="text-xs font-bold text-slate-700 mb-2"><Bell className="w-4 h-4 inline text-slate-400" /> サイレント時間帯</p>
           <div className="flex items-center gap-2">
             <input type="time" className="text-xs border rounded px-2 py-1.5" defaultValue="00:00" />
             <span className="text-xs text-slate-400">〜</span>
@@ -4989,7 +4996,7 @@ const MasterSystemSettings = () => {
           <p className="text-xs text-slate-400 mt-1">※ 緊急レベルはサイレント時間中も通知されます</p>
         </div>
         <div className="bg-slate-50 rounded-lg p-3 border">
-          <p className="text-xs font-bold text-slate-700 mb-2">📊 定期レポート</p>
+          <p className="text-xs font-bold text-slate-700 mb-2"><BarChart3 className="w-4 h-4 inline mr-1" /> 定期レポート</p>
           <div className="space-y-1.5">
             <label className="flex items-center gap-2 text-xs"><input type="checkbox" defaultChecked className="w-3.5 h-3.5" /><span className="text-slate-700">日次サマリー（毎朝9:00）</span></label>
             <label className="flex items-center gap-2 text-xs"><input type="checkbox" defaultChecked className="w-3.5 h-3.5" /><span className="text-slate-700">週次レポート（月曜10:00）</span></label>
@@ -5005,7 +5012,7 @@ const MasterSystemSettings = () => {
     {/* AI API Keys */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
-        <p className="text-xs font-bold text-slate-600">🤖 AI API キー設定</p>
+        <p className="text-xs font-bold text-slate-600"><Bot className="w-4 h-4 inline mr-1" /> AI API キー設定</p>
         <Badge text="Claude API" color="purple" />
       </div>
       <div className="space-y-3">
@@ -5043,10 +5050,10 @@ const MasterSystemSettings = () => {
     {/* AI Prompt Configuration */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
-        <p className="text-xs font-bold text-slate-600">📝 AI機能別プロンプト設定</p>
+        <p className="text-xs font-bold text-slate-600"><PenLine className="w-4 h-4 inline mr-1" /> AI機能別プロンプト設定</p>
         <div className="flex gap-2">
           <button onClick={() => toast("プロンプトをデフォルトテンプレートに戻しました", "info")} className="text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded font-semibold">テンプレートに戻す</button>
-          <button onClick={() => toast("全プロンプト設定を保存しました", "success")} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">全て保存</button>
+          <button onClick={() => toast("全プロンプト設定を保存しました", "success")} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold">全て保存</button>
         </div>
       </div>
       <div className="space-y-3">
@@ -5061,11 +5068,11 @@ const MasterSystemSettings = () => {
           <div key={i} className="bg-slate-50 rounded-lg p-3 border border-slate-200">
             <div className="flex justify-between items-center mb-2">
               <div>
-                <span className="text-xs font-bold text-slate-700">🤖 {ai.name}</span>
+                <span className="text-xs font-bold text-slate-700"><Bot className="w-4 h-4 inline mr-1" /> {ai.name}</span>
                 <span className="text-xs text-slate-400 ml-2">{ai.desc}</span>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => { toast(`${ai.name}のテスト実行中...`, "info"); setTimeout(() => toast(`${ai.name}のテスト完了`, "success"), 1500); }} className="text-xs text-blue-600 hover:underline">テスト実行</button>
+                <button onClick={() => { toast(`${ai.name}のテスト実行中...`, "info"); setTimeout(() => toast(`${ai.name}のテスト完了`, "success"), 1500); }} className="text-xs text-brand-600 hover:underline">テスト実行</button>
                 <button onClick={() => toast(`${ai.name}の実行履歴を表示`, "info")} className="text-xs text-slate-500 hover:underline">履歴</button>
               </div>
             </div>
@@ -5085,7 +5092,7 @@ const MasterSystemSettings = () => {
 
     {/* External API Keys (Payment Gateways) */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-600 mb-3">🔑 外部API キー管理</p>
+      <p className="text-xs font-bold text-slate-600 mb-3"><Key className="w-4 h-4 inline mr-1" /> 外部API キー管理</p>
       <table className="w-full text-xs">
         <thead><tr className="bg-slate-50 text-slate-500">
           <th className="px-3 py-2 text-left font-semibold">サービス</th>
@@ -5114,7 +5121,7 @@ const MasterSystemSettings = () => {
             <td className="px-3 py-2 text-center text-slate-400">{k.updated}</td>
             <td className="px-3 py-2 text-center"><div className="flex gap-1 justify-center">
               <button onClick={() => toast(`${k.service} ${k.type}を編集中`, "info")} className="px-2 py-1 bg-slate-100 text-slate-600 rounded">編集</button>
-              <button onClick={() => toast(`${k.service} ${k.type}をローテーションしました`, "success")} className="px-2 py-1 bg-blue-50 text-blue-600 rounded">回転</button>
+              <button onClick={() => toast(`${k.service} ${k.type}をローテーションしました`, "success")} className="px-2 py-1 bg-brand-50 text-brand-600 rounded">回転</button>
             </div></td>
           </tr>
         ))}
@@ -5125,8 +5132,8 @@ const MasterSystemSettings = () => {
     {/* Webhook Settings */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
-        <p className="text-xs font-bold text-slate-600">🔔 Webhook設定</p>
-        <button onClick={() => toast("Webhookを追加しました", "success")} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">+ Webhook追加</button>
+        <p className="text-xs font-bold text-slate-600"><Bell className="w-4 h-4 inline" /> Webhook設定</p>
+        <button onClick={() => toast("Webhookを追加しました", "success")} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold">+ Webhook追加</button>
       </div>
       <div className="space-y-2">
         {[
@@ -5134,13 +5141,13 @@ const MasterSystemSettings = () => {
           { url: "https://api.company.jp/webhook/alert", events: "不正検知, 入金エラー", status: true, lastCall: "5m前", successRate: "100%" },
         ].map((w, i) => (
           <div key={i} className="flex items-center gap-3 p-2 rounded border text-xs">
-            <div className={`w-2 h-2 rounded-full ${w.status ? "bg-emerald-500" : "bg-slate-300"}`} />
+            <div className={`w-2 h-2 rounded-full ${w.status ? "bg-success-500" : "bg-slate-300"}`} />
             <div className="flex-1">
               <p className="font-mono text-slate-700">{w.url}</p>
               <p className="text-slate-400">イベント: {w.events}</p>
             </div>
             <span className="text-slate-400">最終: {w.lastCall}</span>
-            <span className="text-emerald-600 font-semibold">{w.successRate}</span>
+            <span className="text-success-600 font-semibold">{w.successRate}</span>
             <button onClick={() => toast("Webhook設定を開きました", "info")} className="px-2 py-1 bg-slate-100 text-slate-600 rounded">設定</button>
           </div>
         ))}
@@ -5150,13 +5157,13 @@ const MasterSystemSettings = () => {
 
     {/* ─── Tab 4: セキュリティ ─── */}
     {sysTab === 4 && (<>
-    <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700 mb-2">
-      🔒 セキュリティ系設定の変更は <strong>admin申請 → super_admin承認</strong> が必要です。
+    <div className="bg-brand-50 rounded border border-brand-200 p-2 text-xs text-brand-700 mb-2">
+      セキュリティ系設定の変更は <strong>admin申請 → super_admin承認</strong> が必要です。
     </div>
 
     {/* Password Policy */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-600 mb-3">🔐 パスワードポリシー <span className="text-emerald-600 font-normal">PCI DSS v4.0 Req 8.3.6準拠</span></p>
+      <p className="text-xs font-bold text-slate-600 mb-3"><ShieldCheck className="w-4 h-4 inline mr-1" /> パスワードポリシー <span className="text-success-600 font-normal">PCI DSS v4.0 Req 8.3.6準拠</span></p>
       <div className="grid grid-cols-2 gap-3">
         <div><label className="text-xs text-slate-500">最小文字数（PCI DSS: 12以上）</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="12" /></div>
         <div><label className="text-xs text-slate-500">有効期限（日）（PCI DSS: 90日以内）</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="90" /></div>
@@ -5172,7 +5179,7 @@ const MasterSystemSettings = () => {
 
     {/* Two-Factor Authentication */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-600 mb-3">📱 二要素認証（2FA）</p>
+      <p className="text-xs font-bold text-slate-600 mb-3"><Smartphone className="w-4 h-4 inline mr-1" /> 二要素認証（2FA）</p>
       <div className="space-y-2">
         {[
           { role: "super_admin", required: true, method: "TOTP（Google Authenticator）" },
@@ -5183,7 +5190,7 @@ const MasterSystemSettings = () => {
           <div key={i} className="flex items-center gap-3 p-2 rounded border text-xs">
             <Badge text={r.role} color={r.role === "super_admin" ? "purple" : r.role === "admin" ? "blue" : r.role === "operator" ? "green" : "gray"} />
             <span className="flex-1 text-slate-700">方式: {r.method}</span>
-            <div className={`w-8 h-5 rounded-full relative cursor-pointer ${r.required ? "bg-emerald-500" : "bg-slate-300"}`}>
+            <div className={`w-8 h-5 rounded-full relative cursor-pointer ${r.required ? "bg-success-500" : "bg-slate-300"}`}>
               <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${r.required ? "right-0.5" : "left-0.5"}`} />
             </div>
             <span className="text-xs text-slate-400">{r.required ? "必須" : "任意"}</span>
@@ -5195,8 +5202,8 @@ const MasterSystemSettings = () => {
     {/* IP Restrictions */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
-        <p className="text-xs font-bold text-slate-600">🌐 IPアドレス制限</p>
-        <button onClick={() => toast("IPアドレスを追加しました", "success")} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">+ IP追加</button>
+        <p className="text-xs font-bold text-slate-600"><Globe className="w-4 h-4 inline mr-1" /> IPアドレス制限</p>
+        <button onClick={() => toast("IPアドレスを追加しました", "success")} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold">+ IP追加</button>
       </div>
       <table className="w-full text-xs">
         <thead><tr className="bg-slate-50 text-slate-500">
@@ -5219,7 +5226,7 @@ const MasterSystemSettings = () => {
             <td className="px-3 py-2 text-center text-slate-400">{ip.date}</td>
             <td className="px-3 py-2 text-center"><div className="flex gap-1 justify-center">
               <button onClick={() => toast(`${ip.ip}のIP制限を編集中`, "info")} className="px-2 py-1 bg-slate-100 text-slate-600 rounded">編集</button>
-              <button onClick={() => toast(`${ip.ip}のIP制限を削除しました`, "warning")} className="px-2 py-1 bg-rose-50 text-rose-600 rounded">削除</button>
+              <button onClick={() => toast(`${ip.ip}のIP制限を削除しました`, "warning")} className="px-2 py-1 bg-danger-50 text-danger-600 rounded">削除</button>
             </div></td>
           </tr>
         ))}
@@ -5229,7 +5236,7 @@ const MasterSystemSettings = () => {
 
     {/* Session & Rate Limiting */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-600 mb-3">⏱️ セッション・レート制限</p>
+      <p className="text-xs font-bold text-slate-600 mb-3"><Clock className="w-4 h-4 inline mr-1" /> セッション・レート制限</p>
       <div className="grid grid-cols-2 gap-3">
         <div><label className="text-xs text-slate-500">セッションタイムアウト（分）</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="30" /></div>
         <div><label className="text-xs text-slate-500">同時セッション数上限</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="3" /></div>
@@ -5242,7 +5249,7 @@ const MasterSystemSettings = () => {
 
     {/* Encryption & Compliance */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-600 mb-3">🔒 暗号化・コンプライアンス</p>
+      <p className="text-xs font-bold text-slate-600 mb-3"><Lock className="w-4 h-4 inline mr-1" /> 暗号化・コンプライアンス</p>
       <div className="space-y-2 text-xs">
         {[
           { item: "通信暗号化", value: "TLS 1.3", status: "適合" },
@@ -5267,7 +5274,7 @@ const MasterSystemSettings = () => {
     {/* Maintenance Mode */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
-        <p className="text-xs font-bold text-slate-700">🔧 メンテナンスモード</p>
+        <p className="text-xs font-bold text-slate-700"><Wrench className="w-4 h-4 inline mr-1" /> メンテナンスモード</p>
         <div className="flex items-center gap-2">
           <div className="w-8 h-5 rounded-full bg-slate-300 relative cursor-pointer">
             <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow" />
@@ -5275,14 +5282,14 @@ const MasterSystemSettings = () => {
           <span className="text-xs text-slate-400">OFF</span>
         </div>
       </div>
-      <p className="text-xs text-slate-500">ON時: 管理画面・加盟店画面をメンテナンス表示に切替。<span className="font-semibold text-emerald-600">決済処理（Zone A）は停止しません。</span></p>
+      <p className="text-xs text-slate-500">ON時: 管理画面・加盟店画面をメンテナンス表示に切替。<span className="font-semibold text-success-600">決済処理（Zone A）は停止しません。</span></p>
     </div>
 
     {/* Backup Settings */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
-        <p className="text-xs font-bold text-slate-700">💾 バックアップ設定</p>
-        <button onClick={() => { toast("手動バックアップを実行中...", "info"); setTimeout(() => toast("バックアップが完了しました", "success"), 2000); }} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">手動バックアップ実行</button>
+        <p className="text-xs font-bold text-slate-700"><Save className="w-4 h-4 inline mr-1" /> バックアップ設定</p>
+        <button onClick={() => { toast("手動バックアップを実行中...", "info"); setTimeout(() => toast("バックアップが完了しました", "success"), 2000); }} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold">手動バックアップ実行</button>
       </div>
       <div className="space-y-1.5 text-xs">
         {[
@@ -5303,8 +5310,8 @@ const MasterSystemSettings = () => {
     {/* Audit Log */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
-        <p className="text-xs font-bold text-slate-700">📝 設定変更 監査ログ（直近）</p>
-        <button onClick={() => toast("監査ログの全件検索を表示しています", "info")} className="text-xs text-blue-600 hover:underline">全ログ検索 →</button>
+        <p className="text-xs font-bold text-slate-700"><PenLine className="w-4 h-4 inline mr-1" /> 設定変更 監査ログ（直近）</p>
+        <button onClick={() => toast("監査ログの全件検索を表示しています", "info")} className="text-xs text-brand-600 hover:underline">全ログ検索 →</button>
       </div>
       <div className="space-y-1 text-xs">
         {[
@@ -5332,7 +5339,7 @@ const MasterSystemSettings = () => {
         <div className="flex gap-2 items-center">
           <input className="text-xs border rounded px-2 py-1.5 w-56" placeholder="コード or メッセージで検索..." />
           <select className="text-xs border rounded px-2 py-1.5"><option>全カテゴリ</option><option>認証エラー</option><option>通信エラー</option><option>カードエラー</option><option>3DSエラー</option><option>システムエラー</option></select>
-          <button onClick={() => toast("エラーコードを検索しました", "info")} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">検索</button>
+          <button onClick={() => toast("エラーコードを検索しました", "info")} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold">検索</button>
         </div>
       </div>
       <div className="text-xs text-slate-400 mb-2">全 287件 表示: 1-20件（1/15ページ）</div>
@@ -5368,20 +5375,20 @@ const MasterSystemSettings = () => {
             { code: "E091", cat: "システム", msg: "レートリミット超過", fix: "リクエスト頻度を調整", api: true, link: false },
             { code: "E100", cat: "カード", msg: "無効なトークン", fix: "トークンを再取得", api: true, link: false },
           ].map((e, i) => (
-            <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50`}>
-              <td className="p-2 font-mono font-bold text-blue-600">{e.code}</td>
+            <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-brand-50`}>
+              <td className="p-2 font-mono font-bold text-brand-600">{e.code}</td>
               <td className="p-2"><Badge text={e.cat} color={e.cat === "認証" ? "blue" : e.cat === "3DS" ? "purple" : e.cat === "カード" ? "yellow" : e.cat === "通信" ? "red" : "default"} /></td>
               <td className="p-2 text-slate-700">{e.msg}</td>
               <td className="p-2 text-slate-500">{e.fix}</td>
-              <td className="p-2 text-center">{e.api ? "✅" : "—"}</td>
-              <td className="p-2 text-center">{e.link ? "✅" : "—"}</td>
+              <td className="p-2 text-center">{e.api ? <CheckCircle2 className="w-4 h-4 text-success-600 inline" /> : "—"}</td>
+              <td className="p-2 text-center">{e.link ? <CheckCircle2 className="w-4 h-4 text-success-600 inline" /> : "—"}</td>
             </tr>
           ))}
         </tbody>
       </table>
       <div className="flex justify-between items-center mt-3 text-xs">
         <span className="text-slate-400">287件中 1-20件</span>
-        <div className="flex gap-1">{[1,2,3,"...",14,15].map((p,i) => <button key={i} className={`px-2 py-1 rounded ${p === 1 ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>{p}</button>)}</div>
+        <div className="flex gap-1">{[1,2,3,"...",14,15].map((p,i) => <button key={i} className={`px-2 py-1 rounded ${p === 1 ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>{p}</button>)}</div>
       </div>
     </div>
     </>)}
@@ -5391,13 +5398,13 @@ const MasterSystemSettings = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">お知らせ管理</p>
-        <button onClick={() => toast("お知らせを新規作成しています", "info")} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-semibold">+ 新規作成</button>
+        <button onClick={() => toast("お知らせを新規作成しています", "info")} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold">+ 新規作成</button>
       </div>
       <div className="grid grid-cols-4 gap-2 mb-3">
         <div><label className="text-xs text-slate-400">サイトID</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="サイトIDで絞込" /></div>
         <div><label className="text-xs text-slate-400">公開状態</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>公開中</option><option>未公開</option><option>終了</option></select></div>
         <div><label className="text-xs text-slate-400">種別</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>障害</option><option>メンテナンス</option><option>機能リリース</option><option>お知らせ</option></select></div>
-        <div className="flex items-end"><button onClick={() => toast("お知らせを検索しました", "info")} className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
+        <div className="flex items-end"><button onClick={() => toast("お知らせを検索しました", "info")} className="text-xs bg-brand-500 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
       </div>
       <table className="w-full text-xs">
         <thead><tr className="bg-slate-50 border-b">
@@ -5418,14 +5425,14 @@ const MasterSystemSettings = () => {
             { id: "N-005", date: "02/10 16:00", title: "API仕様変更予告（v3.2 → v3.3）", type: "お知らせ", status: "未公開", sColor: "yellow", target: "全体" },
             { id: "N-006", date: "02/08 09:00", title: "年末年始の精算スケジュール変更", type: "お知らせ", status: "終了", sColor: "default", target: "全体" },
           ].map((n, i) => (
-            <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50`}>
+            <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-brand-50`}>
               <td className="p-2 font-mono text-slate-500">{n.id}</td>
               <td className="p-2 text-slate-400">{n.date}</td>
               <td className="p-2 text-slate-700 font-semibold">{n.title}</td>
               <td className="p-2"><Badge text={n.type} color={n.type === "障害" ? "red" : n.type === "メンテ" ? "yellow" : n.type === "リリース" ? "blue" : "default"} /></td>
               <td className="p-2 text-center"><Badge text={n.status} color={n.sColor} /></td>
               <td className="p-2 text-slate-500">{n.target}</td>
-              <td className="p-2 text-center"><button onClick={() => toast(`${n.title}を編集中`, "info")} className="text-blue-600 hover:underline">編集</button></td>
+              <td className="p-2 text-center"><button onClick={() => toast(`${n.title}を編集中`, "info")} className="text-brand-600 hover:underline">編集</button></td>
             </tr>
           ))}
         </tbody>
@@ -5435,9 +5442,9 @@ const MasterSystemSettings = () => {
 
     {/* ─── Tab 7: 操作ログ ─── */}
     {sysTab === 7 && (<>
-    <div className="bg-blue-50 rounded border border-blue-200 p-2 flex items-center gap-2 text-xs">
-      <span>🔒</span>
-      <span className="text-blue-700"><strong>PCI DSS v4.0準拠</strong> — 管理画面の全操作を記録しています。ログは12ヶ月間保持されます（直近3ヶ月: 即時検索 / 3〜12ヶ月: S3アーカイブ）。SIEM自動日次レビュー実施中。</span>
+    <div className="bg-brand-50 rounded border border-brand-200 p-2 flex items-center gap-2 text-xs">
+      <Lock className="w-4 h-4 inline" />
+      <span className="text-brand-700"><strong>PCI DSS v4.0準拠</strong> — 管理画面の全操作を記録しています。ログは12ヶ月間保持されます（直近3ヶ月: 即時検索 / 3〜12ヶ月: S3アーカイブ）。SIEM自動日次レビュー実施中。</span>
     </div>
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-3">
@@ -5452,7 +5459,7 @@ const MasterSystemSettings = () => {
         <div><label className="text-xs text-slate-400">操作日時（From）</label><input type="datetime-local" className="w-full text-xs border rounded px-2 py-1.5" defaultValue="2026-02-10T00:00" /></div>
         <div><label className="text-xs text-slate-400">操作日時（To）</label><input type="datetime-local" className="w-full text-xs border rounded px-2 py-1.5" defaultValue="2026-02-17T23:59" /></div>
         <div><label className="text-xs text-slate-400">URL</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="/admin/..." /></div>
-        <div className="flex items-end"><button onClick={() => toast("操作ログを検索しました", "info")} className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
+        <div className="flex items-end"><button onClick={() => toast("操作ログを検索しました", "info")} className="text-xs bg-brand-500 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
       </div>
       <div className="text-xs text-slate-400 mb-2">検索結果: 1,248件（1/63ページ）</div>
       <table className="w-full text-xs table-fixed">
@@ -5476,7 +5483,7 @@ const MasterSystemSettings = () => {
             { id: 1242, staff: "田中太郎", time: "02/17 11:50:30", ip: "192.168.1.10", type: "画面操作", page: "レポート", url: "/admin/report/daily?month=2026-02" },
             { id: 1241, staff: "鈴木一郎", time: "02/17 11:20:05", ip: "172.16.0.8", type: "データ変更", page: "スタッフ管理", url: "新規スタッフ追加 — yamada@example.com (viewer)" },
           ].map((l, i) => (
-            <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50`}>
+            <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-brand-50`}>
               <td className="p-2 font-mono text-slate-400">{l.id}</td>
               <td className="p-2 text-slate-700 font-semibold">{l.staff}</td>
               <td className="p-2 text-slate-500 font-mono">{l.time}</td>
@@ -5490,7 +5497,7 @@ const MasterSystemSettings = () => {
       </table>
       <div className="flex justify-between items-center mt-3 text-xs">
         <span className="text-slate-400">1,248件中 1-20件</span>
-        <div className="flex gap-1">{[1,2,3,"...",62,63].map((p,i) => <button key={i} className={`px-2 py-1 rounded ${p === 1 ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>{p}</button>)}</div>
+        <div className="flex gap-1">{[1,2,3,"...",62,63].map((p,i) => <button key={i} className={`px-2 py-1 rounded ${p === 1 ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>{p}</button>)}</div>
       </div>
     </div>
     </>)}
@@ -5530,13 +5537,13 @@ const MerchantUserManagement = () => {
       <h2 className="text-sm font-bold text-slate-800">ユーザー管理</h2>
       <div className="flex items-center gap-2">
         <span className="text-xs text-slate-400">スタッフ: <span className="font-bold text-slate-700">{users.length}名</span></span>
-        <button onClick={() => setShowInviteS07(!showInviteS07)} className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded font-semibold hover:bg-emerald-700">+ スタッフを招待</button>
+        <button onClick={() => setShowInviteS07(!showInviteS07)} className="text-xs bg-success-600 text-white px-3 py-1.5 rounded font-semibold hover:bg-success-700">+ スタッフを招待</button>
       </div>
     </div>
 
     {showInviteS07 && (
-      <div className="bg-emerald-50 rounded-lg border border-emerald-200 p-3 space-y-3">
-        <div className="flex justify-between items-center"><p className="text-xs font-bold text-emerald-700">📧 スタッフ招待</p><button onClick={() => setShowInviteS07(false)} className="text-slate-400 text-sm">✕</button></div>
+      <div className="bg-success-50 rounded-lg border border-success-200 p-3 space-y-3">
+        <div className="flex justify-between items-center"><p className="text-xs font-bold text-success-700"><Mail className="w-4 h-4 inline mr-1" /> スタッフ招待</p><button onClick={() => setShowInviteS07(false)} className="text-slate-400 text-sm"><X className="w-4 h-4" /></button></div>
         <div className="grid grid-cols-2 gap-2">
           <div><label className="text-xs text-slate-500">氏名 *</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 田中 花子" /></div>
           <div><label className="text-xs text-slate-500">メール *</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: tanaka@shop.jp" /></div>
@@ -5545,7 +5552,7 @@ const MerchantUserManagement = () => {
         </div>
         <div className="flex gap-2 justify-end">
           <button onClick={() => setShowInviteS07(false)} className="px-3 py-1.5 text-xs text-slate-500 border rounded">キャンセル</button>
-          <button onClick={() => setShowInviteS07(false)} className="px-3 py-1.5 text-xs bg-emerald-600 text-white rounded font-semibold">招待メール送信</button>
+          <button onClick={() => setShowInviteS07(false)} className="px-3 py-1.5 text-xs bg-success-600 text-white rounded font-semibold">招待メール送信</button>
         </div>
       </div>
     )}
@@ -5553,18 +5560,18 @@ const MerchantUserManagement = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
       <TableHeader cols={[{ label: "名前", w: "w-36" }, { label: "メール", w: "flex-1" }, { label: "権限", w: "w-28" }, { label: "MFA", w: "w-14" }, { label: "最終ログイン", w: "w-32" }, { label: "操作", w: "w-28" }]}>
       {users.map((u, i) => (
-        <tr key={i} onClick={() => setSelectedUser(u)} className={`border-b cursor-pointer hover:bg-blue-50 ${i % 2 ? "bg-slate-50" : ""}`}>
+        <tr key={i} onClick={() => setSelectedUser(u)} className={`border-b cursor-pointer hover:bg-brand-50 ${i % 2 ? "bg-slate-50" : ""}`}>
           <td className="px-4 py-2 whitespace-nowrap w-36 font-semibold text-slate-700"><div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-xs">👤</div>
+            <div className="w-6 h-6 rounded-full bg-success-100 flex items-center justify-center text-xs"><User className="w-4 h-4 inline" /></div>
             {u.name}
           </div></td>
           <td className="px-4 py-2 whitespace-nowrap text-slate-500">{u.email}</td>
           <td className="px-4 py-2 whitespace-nowrap w-28"><Badge text={u.role} color={u.rColor} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-14">{u.mfa ? "✅" : "❌"}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-14">{u.mfa ? <CheckCircle2 className="w-4 h-4 text-success-600 inline" /> : <XCircle className="w-4 h-4 text-danger-500 inline" />}</td>
           <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{u.last}</td>
           <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1">
             <button onClick={e => { e.stopPropagation(); setShowEditModal(u); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">編集</button>
-            {u.role !== "オーナー" && <button onClick={e => e.stopPropagation()} className="px-2 py-1 bg-rose-50 text-rose-600 rounded text-xs">削除</button>}
+            {u.role !== "オーナー" && <button onClick={e => e.stopPropagation()} className="px-2 py-1 bg-danger-50 text-danger-600 rounded text-xs">削除</button>}
           </div></td>
         </tr>
       ))}
@@ -5593,7 +5600,7 @@ const MerchantUserManagement = () => {
         ].map((r, i) => (
           <div key={i} className={`flex py-1.5 px-2 ${i % 2 ? "bg-slate-50" : ""}`}>
             <div className="w-36 text-slate-700">{r.feat}</div>
-            {r.perms.map((p, j) => <div key={j} className="w-20 text-center">{p ? "✅" : "—"}</div>)}
+            {r.perms.map((p, j) => <div key={j} className="w-20 text-center">{p ? <CheckCircle2 className="w-4 h-4 text-success-600 inline" /> : "—"}</div>)}
           </div>
         ))}
       </div>
@@ -5606,12 +5613,12 @@ const MerchantUserManagement = () => {
         <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
             <p className="text-sm font-bold">{selectedUser.name}</p>
-            <button onClick={() => setSelectedUser(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <button onClick={() => setSelectedUser(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-4 space-y-4">
             {/* プロフィール */}
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-xl">👤</div>
+              <div className="w-12 h-12 rounded-full bg-success-100 flex items-center justify-center text-xl"><User className="w-4 h-4 inline" /></div>
               <div>
                 <p className="text-sm font-bold text-slate-800">{selectedUser.name}</p>
                 <p className="text-xs text-slate-400">{selectedUser.email}</p>
@@ -5619,7 +5626,7 @@ const MerchantUserManagement = () => {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">権限</p><Badge text={selectedUser.role} color={selectedUser.rColor} /></div>
-              <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">MFA</p><p className="text-xs font-bold">{selectedUser.mfa ? "有効 ✅" : "無効 ❌"}</p></div>
+              <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">MFA</p><p className="text-xs font-bold">{selectedUser.mfa ? "有効" : <>無効 <XCircle className="w-3.5 h-3.5 text-danger-500 inline" /></>}</p></div>
               <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">アクティブセッション</p><p className="text-xs font-bold">{selectedUser.sessions}件</p></div>
               <div className="bg-slate-50 rounded p-2"><p className="text-xs text-slate-400">登録日</p><p className="text-xs font-bold">{selectedUser.created}</p></div>
             </div>
@@ -5640,7 +5647,7 @@ const MerchantUserManagement = () => {
                 {selectedUser.logs.map((log, i) => (
                   <div key={i} className="flex items-start gap-3 py-1.5">
                     <div className="flex flex-col items-center">
-                      <div className="w-2 h-2 rounded-full bg-blue-400 mt-1" />
+                      <div className="w-2 h-2 rounded-full bg-brand-400 mt-1" />
                       {i < selectedUser.logs.length - 1 && <div className="w-0.5 h-4 bg-slate-200" />}
                     </div>
                     <div>
@@ -5654,9 +5661,9 @@ const MerchantUserManagement = () => {
 
             {/* アクションボタン */}
             <div className="space-y-2 pt-2 border-t">
-              <button onClick={() => { setShowEditModal(selectedUser); setSelectedUser(null); }} className="w-full py-2 bg-blue-50 text-blue-600 rounded text-xs font-bold border border-blue-200 hover:bg-blue-100">権限を変更</button>
+              <button onClick={() => { setShowEditModal(selectedUser); setSelectedUser(null); }} className="w-full py-2 bg-brand-50 text-brand-600 rounded text-xs font-bold border border-brand-200 hover:bg-brand-100">権限を変更</button>
               {selectedUser.role !== "オーナー" && (
-                <button onClick={() => { toast(`${selectedUser.name}のアカウントを無効化しました`, "warning"); setSelectedUser(null); }} className="w-full py-2 bg-red-50 text-red-600 rounded text-xs font-bold border border-red-200 hover:bg-red-100">アカウントを無効化</button>
+                <button onClick={() => { toast(`${selectedUser.name}のアカウントを無効化しました`, "warning"); setSelectedUser(null); }} className="w-full py-2 bg-danger-50 text-danger-600 rounded text-xs font-bold border border-danger-200 hover:bg-danger-100">アカウントを無効化</button>
               )}
             </div>
           </div>
@@ -5671,7 +5678,7 @@ const MerchantUserManagement = () => {
         <div className="relative bg-white rounded-xl shadow-2xl w-[400px]">
           <div className="p-4 border-b flex items-center justify-between">
             <p className="text-sm font-bold">権限の変更</p>
-            <button onClick={() => setShowEditModal(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <button onClick={() => setShowEditModal(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-4 space-y-3">
             <div className="flex items-center gap-2 text-xs"><span className="text-slate-400">対象:</span><span className="font-bold">{showEditModal.name}</span><Badge text={showEditModal.role} color={showEditModal.rColor} /></div>
@@ -5687,7 +5694,7 @@ const MerchantUserManagement = () => {
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowEditModal(null)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
-              <button onClick={() => setShowEditModal(null)} className="flex-1 py-2 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700">権限を更新</button>
+              <button onClick={() => setShowEditModal(null)} className="flex-1 py-2 bg-brand-500 text-white rounded text-xs font-bold hover:bg-brand-600">権限を更新</button>
             </div>
           </div>
         </div>
@@ -5760,23 +5767,23 @@ const MerchantPayouts = () => {
     {/* Tab */}
     <div className="flex gap-1 border-b">
       {[{ id: "payout", label: "入金履歴" }, { id: "calendar", label: "入金カレンダー" }, { id: "reserve", label: "リザーブ（デポジット）" }].map(t => (
-        <button key={t.id} onClick={() => setPayoutTab(t.id)} className={`text-xs px-4 py-2 border-b-2 ${payoutTab === t.id ? "border-emerald-500 text-emerald-700 font-semibold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        <button key={t.id} onClick={() => setPayoutTab(t.id)} className={`text-xs px-4 py-2 border-b-2 ${payoutTab === t.id ? "border-success-500 text-success-700 font-semibold" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}
     </div>
 
     {payoutTab === "payout" && (<>
     {/* Next Payout Preview */}
-    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-3">
+    <div className="bg-gradient-to-r from-brand-50 to-indigo-50 rounded-lg border border-brand-200 p-3">
       <div className="flex justify-between items-center mb-2">
-        <p className="text-xs font-bold text-blue-700">💰 次回入金プレビュー</p>
+        <p className="text-xs font-bold text-brand-700"><Coins className="w-4 h-4 inline mr-1" /> 次回入金プレビュー</p>
         <Badge text="2/14（金）振込予定" color="blue" />
       </div>
       <div className="grid grid-cols-5 gap-3 text-xs">
         <div><span className="text-slate-500">精算期間:</span> <span className="font-semibold">02/04 〜 02/10</span></div>
         <div><span className="text-slate-500">総決済高:</span> <span className="font-semibold">¥1,290,000</span></div>
-        <div><span className="text-slate-500">手数料:</span> <span className="text-rose-500">-¥41,280</span></div>
+        <div><span className="text-slate-500">手数料:</span> <span className="text-danger-500">-¥41,280</span></div>
         <div><span className="text-slate-500">リザーブ留保:</span> <span className="text-purple-600">-¥129,000</span></div>
-        <div><span className="text-slate-500">入金額:</span> <span className="font-bold text-blue-700">¥1,119,720</span></div>
+        <div><span className="text-slate-500">入金額:</span> <span className="font-bold text-brand-700">¥1,119,720</span></div>
       </div>
     </div>
 
@@ -5787,24 +5794,24 @@ const MerchantPayouts = () => {
       <input type="date" className="text-xs border rounded px-2 py-1" />
       <span className="text-xs text-slate-400">〜</span>
       <input type="date" className="text-xs border rounded px-2 py-1" />
-      <button onClick={() => toast("入金履歴を検索しました", "info")} className="text-xs bg-emerald-600 text-white px-3 py-1 rounded">検索</button>
-      <button onClick={() => toast("入金明細をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200" title="CSV出力">📥 CSV</button>
+      <button onClick={() => toast("入金履歴を検索しました", "info")} className="text-xs bg-success-600 text-white px-3 py-1 rounded">検索</button>
+      <button onClick={() => toast("入金明細をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200" title="CSV出力"><Download className="w-4 h-4 inline mr-1" /> CSV</button>
     </div>
 
     {/* Payout History */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
       <TableHeader cols={[{ label: "入金日", w: "w-20" }, { label: "精算期間", w: "w-32" }, { label: "総決済高", w: "w-24" }, { label: "手数料", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-24" }, { label: "ステータス", w: "w-20" }, { label: "明細", w: "w-14" }]}>
       {payoutData.map((p, i) => (
-        <tr key={i} className={`border-b cursor-pointer hover:bg-blue-50 ${i % 2 ? "bg-slate-50" : ""}`} onClick={() => setSelectedPayout(p)}>
+        <tr key={i} className={`border-b cursor-pointer hover:bg-brand-50 ${i % 2 ? "bg-slate-50" : ""}`} onClick={() => setSelectedPayout(p)}>
           <td className="px-4 py-2 whitespace-nowrap w-20 text-slate-600">{p.date}</td>
           <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{p.period}</td>
           <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-slate-600">{p.sales}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-20 text-right text-rose-500">{p.fee}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-20 text-right text-danger-500">{p.fee}</td>
           <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-purple-500">{p.hold}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-emerald-600">{p.release}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-success-600">{p.release}</td>
           <td className="px-4 py-2 whitespace-nowrap w-24 text-right font-semibold text-slate-700">{p.payout}</td>
           <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={p.status} color={p.sColor} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-14"><button onClick={e => { e.stopPropagation(); setSelectedPayout(p); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">📄</button></td>
+          <td className="px-4 py-2 whitespace-nowrap w-14"><button onClick={e => { e.stopPropagation(); setSelectedPayout(p); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200"><FileText className="w-4 h-4 inline" /></button></td>
         </tr>
       ))}
       </TableHeader>
@@ -5815,10 +5822,10 @@ const MerchantPayouts = () => {
     <div className="space-y-3">
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
         <div className="flex justify-between items-center mb-3">
-          <p className="text-xs font-bold text-slate-700">📅 2026年2月 入金カレンダー</p>
+          <p className="text-xs font-bold text-slate-700"><Calendar className="w-4 h-4 inline mr-1" />2026年2月 入金カレンダー</p>
           <div className="flex gap-3 text-xs">
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-emerald-500" /> 入金日</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-500" /> 今日</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-success-500" /> 入金日</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-brand-500" /> 今日</span>
           </div>
         </div>
         <div className="grid grid-cols-7 gap-1 text-center mb-1">
@@ -5831,11 +5838,11 @@ const MerchantPayouts = () => {
           {[null, null, null, null, null, null].map((_, i) => <div key={`empty-${i}`} />)}
           {calendarDays.map((d, i) => (
             <div key={i} className={`text-xs p-2 rounded text-center cursor-pointer transition-colors
-              ${d.isToday ? "bg-blue-500 text-white font-bold" : d.isPayout ? "bg-emerald-100 text-emerald-700 font-semibold border border-emerald-300 hover:bg-emerald-200" : "hover:bg-slate-100 text-slate-600"}`}
+              ${d.isToday ? "bg-brand-500 text-white font-bold" : d.isPayout ? "bg-success-100 text-success-700 font-semibold border border-success-300 hover:bg-success-200" : "hover:bg-slate-100 text-slate-600"}`}
               onClick={() => d.isPayout && setSelectedPayout(payoutData[0])}
             >
               {d.day}
-              {d.isPayout && <div className="text-xs mt-0.5" style={{fontSize: "7px"}}>💰</div>}
+              {d.isPayout && <div className="text-xs mt-0.5" style={{fontSize: "7px"}}><Coins className="w-4 h-4 inline" /></div>}
             </div>
           ))}
         </div>
@@ -5850,12 +5857,12 @@ const MerchantPayouts = () => {
     <div className="space-y-3">
       {/* Reserve Summary */}
       <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200 p-3">
-        <p className="text-xs font-bold text-purple-700 mb-2">🔒 ローリングリザーブ（デポジット）</p>
+        <p className="text-xs font-bold text-purple-700 mb-2"><Lock className="w-4 h-4 inline mr-1" /> ローリングリザーブ（デポジット）</p>
         <div className="grid grid-cols-4 gap-3">
           {[
             { label: "現在のリザーブ残高", value: "¥620,000", color: "text-purple-700" },
-            { label: "今月解放予定", value: "¥180,000", color: "text-emerald-600" },
-            { label: "来月解放予定", value: "¥210,000", color: "text-blue-600" },
+            { label: "今月解放予定", value: "¥180,000", color: "text-success-600" },
+            { label: "来月解放予定", value: "¥210,000", color: "text-brand-600" },
             { label: "今月新規留保", value: "¥263,000", color: "text-slate-700" },
           ].map((r, i) => (
             <div key={i} className="bg-white rounded-lg border border-slate-200 p-2.5 text-center">
@@ -5908,7 +5915,7 @@ const MerchantPayouts = () => {
             <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.type} color={r.tColor} /></td>
             <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-600">{r.proc}</td>
             <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{r.target}</td>
-            <td className={`px-4 py-2 whitespace-nowrap w-24 text-right font-semibold ${r.type === "解放" ? "text-emerald-600" : "text-purple-600"}`}>{r.amount}</td>
+            <td className={`px-4 py-2 whitespace-nowrap w-24 text-right font-semibold ${r.type === "解放" ? "text-success-600" : "text-purple-600"}`}>{r.amount}</td>
             <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-slate-700">{r.balance}</td>
           </tr>
         ))}
@@ -5923,8 +5930,8 @@ const MerchantPayouts = () => {
         <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedPayout(null)} />
         <div className="w-[440px] bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
-            <h3 className="text-sm font-bold text-slate-800">💰 入金明細</h3>
-            <button onClick={() => setSelectedPayout(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <h3 className="text-sm font-bold text-slate-800"><Coins className="w-4 h-4 inline mr-1" /> 入金明細</h3>
+            <button onClick={() => setSelectedPayout(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
             {/* Summary */}
@@ -5943,16 +5950,16 @@ const MerchantPayouts = () => {
               <div className="space-y-1.5 text-xs">
                 <div className="flex justify-between"><span className="text-slate-500">精算期間</span><span className="font-semibold">{selectedPayout.period}</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">総決済高</span><span className="font-semibold">{selectedPayout.sales}</span></div>
-                <div className="flex justify-between"><span className="text-rose-500">手数料</span><span className="text-rose-500">{selectedPayout.fee}</span></div>
+                <div className="flex justify-between"><span className="text-danger-500">手数料</span><span className="text-danger-500">{selectedPayout.fee}</span></div>
                 <div className="flex justify-between"><span className="text-purple-500">リザーブ留保</span><span className="text-purple-500">{selectedPayout.hold}</span></div>
-                <div className="flex justify-between"><span className="text-emerald-600">リザーブ解放</span><span className="text-emerald-600">{selectedPayout.release}</span></div>
+                <div className="flex justify-between"><span className="text-success-600">リザーブ解放</span><span className="text-success-600">{selectedPayout.release}</span></div>
                 <div className="flex justify-between border-t pt-1.5"><span className="font-bold text-slate-700">入金額</span><span className="font-bold text-slate-800">{selectedPayout.payout}</span></div>
               </div>
             </div>
 
             {/* Brand Breakdown */}
             <div>
-              <p className="text-xs font-bold text-slate-700 mb-2">💳 ブランド別内訳</p>
+              <p className="text-xs font-bold text-slate-700 mb-2"><CreditCard className="w-4 h-4 inline mr-1" /> ブランド別内訳</p>
               <table className="w-full text-xs">
                 <thead><tr className="bg-slate-50 border-b">
                   <th className="text-left px-2 py-1 font-semibold text-slate-600">ブランド</th>
@@ -5963,15 +5970,15 @@ const MerchantPayouts = () => {
                 </tr></thead>
                 <tbody>
                   {selectedPayout.breakdown.map((b, i) => (
-                    <tr key={i} className="border-b"><td className="px-2 py-1">{b.brand}</td><td className="px-2 py-1 text-right">{b.count}</td><td className="px-2 py-1 text-right">{b.amount}</td><td className="px-2 py-1 text-right text-rose-500">{b.fee}</td><td className="px-2 py-1 text-right text-slate-400">{b.rate}</td></tr>
+                    <tr key={i} className="border-b"><td className="px-2 py-1">{b.brand}</td><td className="px-2 py-1 text-right">{b.count}</td><td className="px-2 py-1 text-right">{b.amount}</td><td className="px-2 py-1 text-right text-danger-500">{b.fee}</td><td className="px-2 py-1 text-right text-slate-400">{b.rate}</td></tr>
                   ))}
                 </tbody>
               </table>
             </div>
 
             {/* Bank Info */}
-            <div className="bg-blue-50 rounded border border-blue-200 p-3">
-              <p className="text-xs font-bold text-blue-700 mb-2">🏦 振込先口座</p>
+            <div className="bg-brand-50 rounded border border-brand-200 p-3">
+              <p className="text-xs font-bold text-brand-700 mb-2"><Landmark className="w-4 h-4 inline mr-1" /> 振込先口座</p>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div><span className="text-slate-400">銀行名: </span><span className="text-slate-700">{selectedPayout.bank.name}</span></div>
                 <div><span className="text-slate-400">支店: </span><span className="text-slate-700">{selectedPayout.bank.branch}</span></div>
@@ -5983,7 +5990,7 @@ const MerchantPayouts = () => {
 
             {/* Actions */}
             <div className="flex gap-2 pt-2 border-t">
-              <button onClick={() => toast("入金明細をダウンロードしました", "success")} className="flex-1 px-3 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">📥 明細ダウンロード</button>
+              <button onClick={() => toast("入金明細をダウンロードしました", "success")} className="flex-1 px-3 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600"><Download className="w-4 h-4 inline mr-1" /> 明細ダウンロード</button>
               <button onClick={() => setSelectedPayout(null)} className="px-3 py-2 bg-slate-100 text-slate-600 rounded text-xs border hover:bg-slate-200">閉じる</button>
             </div>
           </div>
@@ -6004,14 +6011,14 @@ const MerchantApplicationForm = () => {
     return (
       <div className="min-h-full bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
         <div className="max-w-md text-center py-16">
-          <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center text-2xl mx-auto mb-4">✅</div>
+          <div className="w-16 h-16 rounded-full bg-success-100 flex items-center justify-center text-2xl mx-auto mb-4"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></div>
           <h2 className="text-lg font-bold text-slate-800 mb-2">申込を受付しました</h2>
-          <p className="text-xs text-slate-500 mb-3">申込番号: <span className="font-mono font-bold text-blue-600">APP-2026-0211-009</span></p>
-          <div className="bg-blue-50 rounded-lg border border-blue-200 p-4 mb-4 text-left">
-            <p className="text-xs font-bold text-blue-700 mb-2">🤖 AI審査を開始しました <span className="font-normal text-blue-500 animate-pulse">● リアルタイム更新中（WebSocket）</span></p>
+          <p className="text-xs text-slate-500 mb-3">申込番号: <span className="font-mono font-bold text-brand-600">APP-2026-0211-009</span></p>
+          <div className="bg-brand-50 rounded-lg border border-brand-200 p-4 mb-4 text-left">
+            <p className="text-xs font-bold text-brand-700 mb-2"><Bot className="w-4 h-4 inline mr-1" /> AI審査を開始しました <span className="font-normal text-brand-500 animate-pulse">● リアルタイム更新中（WebSocket）</span></p>
             <div className="text-xs text-slate-600 space-y-1.5">
-              <div className="flex items-center gap-2"><span className="text-blue-500 animate-pulse">⟳</span> 反社チェック... 照合中</div>
-              <div className="flex items-center gap-2"><span className="text-blue-500 animate-pulse">⟳</span> Webサイト解析... クロール中</div>
+              <div className="flex items-center gap-2"><span className="text-brand-500 animate-pulse">⟳</span> 反社チェック... 照合中</div>
+              <div className="flex items-center gap-2"><span className="text-brand-500 animate-pulse">⟳</span> Webサイト解析... クロール中</div>
               <div className="flex items-center gap-2"><span className="text-slate-300">○</span> 決算書解析... 待機中</div>
               <div className="flex items-center gap-2"><span className="text-slate-300">○</span> 業界リスク評価... 待機中</div>
               <div className="flex items-center gap-2"><span className="text-slate-300">○</span> 総合判定... 待機中</div>
@@ -6029,14 +6036,14 @@ const MerchantApplicationForm = () => {
       <div className="max-w-2xl mx-auto py-6 px-4">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg mb-3">
+          <div className="inline-flex items-center gap-2 bg-brand-500 text-white px-4 py-2 rounded-lg mb-3">
             <span className="text-lg font-bold">⬡</span>
             <span className="text-sm font-bold">AI Payment</span>
           </div>
           <h1 className="text-base font-bold text-slate-800">加盟店 新規申込フォーム</h1>
           <p className="text-xs text-slate-500 mt-1">AI審査により、最短即日で審査が完了します</p>
-          <div className="mt-2 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs px-3 py-1 rounded-full border border-emerald-200">
-            <span>💾</span> 入力内容はステップごとに自動保存されます。途中で閉じても再開できます。
+          <div className="mt-2 inline-flex items-center gap-1.5 bg-success-50 text-success-700 text-xs px-3 py-1 rounded-full border border-success-200">
+            <span><Save className="w-4 h-4 inline" /></span> 入力内容はステップごとに自動保存されます。途中で閉じても再開できます。
           </div>
         </div>
 
@@ -6046,14 +6053,14 @@ const MerchantApplicationForm = () => {
             <div key={i} className="flex items-center gap-1 flex-1">
               <div
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold cursor-pointer transition-all ${
-                  i < step ? "bg-emerald-500 text-white" : i === step ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-400"
+                  i < step ? "bg-success-500 text-white" : i === step ? "bg-brand-500 text-white" : "bg-slate-200 text-slate-400"
                 }`}
                 onClick={() => i <= step && setStep(i)}
               >
-                {i < step ? "✓" : i + 1}
+                {i < step ? <Check className="w-3 h-3" /> : i + 1}
               </div>
-              <span className={`text-xs ${i < step ? "text-emerald-600" : i === step ? "text-blue-600 font-semibold" : "text-slate-400"}`}>{s}</span>
-              {i < 4 && <div className={`flex-1 h-0.5 ${i < step ? "bg-emerald-300" : "bg-slate-200"}`} />}
+              <span className={`text-xs ${i < step ? "text-success-600" : i === step ? "text-brand-600 font-semibold" : "text-slate-400"}`}>{s}</span>
+              {i < 4 && <div className={`flex-1 h-0.5 ${i < step ? "bg-success-300" : "bg-slate-200"}`} />}
             </div>
           ))}
         </div>
@@ -6112,11 +6119,11 @@ const MerchantApplicationForm = () => {
                 <span className="text-xs text-slate-400 mt-0.5">※ サイトがまだない場合は空欄でも申込可能です</span>
               </div>
             </div>
-            <div className="bg-blue-50 rounded p-2 border border-blue-200">
-              <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI審査のポイント:</span> 法人番号を入力すると、国税庁データベースと自動照合します。WebサイトURLが入力されている場合、サイト内容のAI解析も自動で行います。</p>
+            <div className="bg-brand-50 rounded p-2 border border-brand-200">
+              <p className="text-xs text-brand-700"><Bot className="w-4 h-4 inline mr-1" /> <span className="font-semibold">AI審査のポイント:</span> 法人番号を入力すると、国税庁データベースと自動照合します。WebサイトURLが入力されている場合、サイト内容のAI解析も自動で行います。</p>
             </div>
             <div className="flex justify-end gap-2 pt-2 border-t">
-              <button onClick={() => setStep(1)} className="px-6 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">次へ: 事業内容 →</button>
+              <button onClick={() => setStep(1)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">次へ: 事業内容 →</button>
             </div>
           </div>
         )}
@@ -6181,12 +6188,12 @@ const MerchantApplicationForm = () => {
                 </div>
               </div>
             </div>
-            <div className="bg-blue-50 rounded p-2 border border-blue-200">
-              <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI審査のポイント:</span> 業種と取扱商品の組み合わせでリスクレベルを自動判定します。詳しく記載いただくと審査がスムーズに進みます。</p>
+            <div className="bg-brand-50 rounded p-2 border border-brand-200">
+              <p className="text-xs text-brand-700"><Bot className="w-4 h-4 inline mr-1" /> <span className="font-semibold">AI審査のポイント:</span> 業種と取扱商品の組み合わせでリスクレベルを自動判定します。詳しく記載いただくと審査がスムーズに進みます。</p>
             </div>
             <div className="flex justify-between pt-2 border-t">
               <button onClick={() => setStep(0)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">← 戻る</button>
-              <button onClick={() => setStep(2)} className="px-6 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">次へ: 決済設定 →</button>
+              <button onClick={() => setStep(2)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">次へ: 決済設定 →</button>
             </div>
           </div>
         )}
@@ -6200,12 +6207,12 @@ const MerchantApplicationForm = () => {
               <label className="text-xs text-slate-500 block mb-2">利用したい決済手段 *（複数選択可）</label>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { name: "VISA / Mastercard", icon: "💳", desc: "手数料 3.0%〜", checked: true },
-                  { name: "JCB", icon: "💳", desc: "手数料 3.3%〜", checked: true },
-                  { name: "American Express", icon: "💳", desc: "手数料 3.5%〜", checked: false },
-                  { name: "WEBマネー（7種）", icon: "💰", desc: "手数料 3.5%〜5.0%", checked: false },
+                  { name: "VISA / Mastercard", icon: <CreditCard className="w-4 h-4 inline text-slate-500" />, desc: "手数料 3.0%〜", checked: true },
+                  { name: "JCB", icon: <CreditCard className="w-4 h-4 inline text-slate-500" />, desc: "手数料 3.3%〜", checked: true },
+                  { name: "American Express", icon: <CreditCard className="w-4 h-4 inline text-slate-500" />, desc: "手数料 3.5%〜", checked: false },
+                  { name: "WEBマネー（7種）", icon: <Coins className="w-4 h-4 inline text-slate-500" />, desc: "手数料 3.5%〜5.0%", checked: false },
                 ].map((m, i) => (
-                  <label key={i} className={`flex items-center gap-2 text-xs p-2.5 rounded border cursor-pointer transition-all ${m.checked ? "bg-blue-50 border-blue-300" : "bg-white border-slate-200 hover:border-slate-300"}`}>
+                  <label key={i} className={`flex items-center gap-2 text-xs p-2.5 rounded border cursor-pointer transition-all ${m.checked ? "bg-brand-50 border-brand-300" : "bg-white border-slate-200 hover:border-slate-300"}`}>
                     <input type="checkbox" defaultChecked={m.checked} className="w-3.5 h-3.5" />
                     <span>{m.icon}</span>
                     <div>
@@ -6251,13 +6258,13 @@ const MerchantApplicationForm = () => {
               </div>
             </div>
 
-            <div className="bg-blue-50 rounded p-2 border border-blue-200">
-              <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI審査のポイント:</span> 口座名義と法人名の照合を自動で行います。法人名義と一致しない場合、確認の連絡をさせていただく場合があります。</p>
+            <div className="bg-brand-50 rounded p-2 border border-brand-200">
+              <p className="text-xs text-brand-700"><Bot className="w-4 h-4 inline mr-1" /> <span className="font-semibold">AI審査のポイント:</span> 口座名義と法人名の照合を自動で行います。法人名義と一致しない場合、確認の連絡をさせていただく場合があります。</p>
             </div>
 
             <div className="flex justify-between pt-2 border-t">
               <button onClick={() => setStep(1)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">← 戻る</button>
-              <button onClick={() => setStep(3)} className="px-6 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">次へ: 書類提出 →</button>
+              <button onClick={() => setStep(3)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">次へ: 書類提出 →</button>
             </div>
           </div>
         )}
@@ -6275,28 +6282,28 @@ const MerchantApplicationForm = () => {
                 { name: "サイトの特定商取引法表記のスクリーンショット", required: true, desc: "特定商取引法に基づく表記ページ", status: "pending" },
                 { name: "古物商許可証（該当する場合）", required: false, desc: "中古品を取り扱う場合のみ", status: "na" },
               ].map((doc, i) => (
-                <div key={i} className={`rounded border p-3 ${doc.status === "uploaded" ? "bg-emerald-50 border-emerald-200" : doc.status === "na" ? "bg-slate-50 border-slate-200" : "bg-white"}`}>
+                <div key={i} className={`rounded border p-3 ${doc.status === "uploaded" ? "bg-success-50 border-success-200" : doc.status === "na" ? "bg-slate-50 border-slate-200" : "bg-white"}`}>
                   <div className="flex justify-between items-start mb-1">
                     <div>
                       <span className="text-xs font-semibold text-slate-700">{doc.name}</span>
-                      {doc.required && <span className="text-rose-500 text-xs ml-1">*</span>}
+                      {doc.required && <span className="text-danger-500 text-xs ml-1">*</span>}
                       {!doc.required && <span className="text-slate-400 text-xs ml-1">(任意)</span>}
                     </div>
-                    {doc.status === "uploaded" && <Badge text="✅ アップロード済" color="green" />}
+                    {doc.status === "uploaded" && <Badge text="アップロード済" color="green" />}
                     {doc.status === "pending" && <Badge text="⬆ 未提出" color="yellow" />}
                     {doc.status === "na" && <Badge text="— 該当なし" color="gray" />}
                   </div>
                   <p className="text-xs text-slate-400 mb-2">{doc.desc}</p>
                   {doc.status === "uploaded" && (
-                    <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-100 rounded px-2 py-1">
-                      <span>📎 {doc.fileName}</span>
-                      <span className="text-emerald-500">🛡️ スキャン済</span>
-                      <button onClick={() => toast("ファイルを削除しました", "warning")} className="text-rose-500 hover:text-rose-700 ml-auto">削除</button>
+                    <div className="flex items-center gap-2 text-xs text-success-700 bg-success-100 rounded px-2 py-1">
+                      <span><Paperclip className="w-4 h-4 inline mr-1" /> {doc.fileName}</span>
+                      <span className="text-success-500"><Shield className="w-4 h-4 inline mr-1" /> スキャン済</span>
+                      <button onClick={() => toast("ファイルを削除しました", "warning")} className="text-danger-500 hover:text-danger-700 ml-auto">削除</button>
                     </div>
                   )}
                   {doc.status === "pending" && (
-                    <div className="border-2 border-dashed border-slate-300 rounded p-3 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all">
-                      <p className="text-xs text-slate-400">📁 クリックまたはドラッグ&ドロップでアップロード</p>
+                    <div className="border-2 border-dashed border-slate-300 rounded p-3 text-center cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-all">
+                      <p className="text-xs text-slate-400"><FolderOpen className="w-4 h-4 inline mr-1" /> クリックまたはドラッグ&ドロップでアップロード</p>
                       <p className="text-xs text-slate-300 mt-0.5">PDF / JPG / PNG（最大10MB）</p>
                     </div>
                   )}
@@ -6304,13 +6311,13 @@ const MerchantApplicationForm = () => {
               ))}
             </div>
 
-            <div className="bg-blue-50 rounded p-2 border border-blue-200">
-              <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI審査のポイント:</span> アップロードされた書類はAI-OCRで自動読取され、申込内容との整合性を確認します。決算書からは財務健全性スコアを自動算出します。</p>
+            <div className="bg-brand-50 rounded p-2 border border-brand-200">
+              <p className="text-xs text-brand-700"><Bot className="w-4 h-4 inline mr-1" /> <span className="font-semibold">AI審査のポイント:</span> アップロードされた書類はAI-OCRで自動読取され、申込内容との整合性を確認します。決算書からは財務健全性スコアを自動算出します。</p>
             </div>
 
             <div className="flex justify-between pt-2 border-t">
               <button onClick={() => setStep(2)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">← 戻る</button>
-              <button onClick={() => setStep(4)} className="px-6 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">次へ: 確認・申込 →</button>
+              <button onClick={() => setStep(4)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">次へ: 確認・申込 →</button>
             </div>
           </div>
         )}
@@ -6324,8 +6331,8 @@ const MerchantApplicationForm = () => {
             <div className="space-y-2">
               <div className="bg-slate-50 rounded p-3">
                 <div className="flex justify-between items-center mb-2">
-                  <p className="text-xs font-bold text-slate-600">📋 企業情報</p>
-                  <button onClick={() => setStep(0)} className="text-xs text-blue-600 hover:underline">編集</button>
+                  <p className="text-xs font-bold text-slate-600"><ClipboardList className="w-4 h-4 inline mr-1" /> 企業情報</p>
+                  <button onClick={() => setStep(0)} className="text-xs text-brand-600 hover:underline">編集</button>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-xs text-slate-600">
                   <div><span className="text-slate-400">法人名:</span> 株式会社テックショップ</div>
@@ -6339,8 +6346,8 @@ const MerchantApplicationForm = () => {
 
               <div className="bg-slate-50 rounded p-3">
                 <div className="flex justify-between items-center mb-2">
-                  <p className="text-xs font-bold text-slate-600">🏢 事業内容</p>
-                  <button onClick={() => setStep(1)} className="text-xs text-blue-600 hover:underline">編集</button>
+                  <p className="text-xs font-bold text-slate-600"><Building2 className="w-4 h-4 inline mr-1" /> 事業内容</p>
+                  <button onClick={() => setStep(1)} className="text-xs text-brand-600 hover:underline">編集</button>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-xs text-slate-600">
                   <div><span className="text-slate-400">業種:</span> 物販EC（家電・ガジェット）</div>
@@ -6353,8 +6360,8 @@ const MerchantApplicationForm = () => {
 
               <div className="bg-slate-50 rounded p-3">
                 <div className="flex justify-between items-center mb-2">
-                  <p className="text-xs font-bold text-slate-600">💳 決済設定</p>
-                  <button onClick={() => setStep(2)} className="text-xs text-blue-600 hover:underline">編集</button>
+                  <p className="text-xs font-bold text-slate-600"><CreditCard className="w-4 h-4 inline mr-1" /> 決済設定</p>
+                  <button onClick={() => setStep(2)} className="text-xs text-brand-600 hover:underline">編集</button>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
                   <div><span className="text-slate-400">決済手段:</span> VISA / MC / JCB / WEBマネー</div>
@@ -6366,14 +6373,14 @@ const MerchantApplicationForm = () => {
 
               <div className="bg-slate-50 rounded p-3">
                 <div className="flex justify-between items-center mb-2">
-                  <p className="text-xs font-bold text-slate-600">📁 書類提出</p>
-                  <button onClick={() => setStep(3)} className="text-xs text-blue-600 hover:underline">編集</button>
+                  <p className="text-xs font-bold text-slate-600"><FolderOpen className="w-4 h-4 inline mr-1" /> 書類提出</p>
+                  <button onClick={() => setStep(3)} className="text-xs text-brand-600 hover:underline">編集</button>
                 </div>
                 <div className="text-xs space-y-1">
-                  <div className="flex items-center gap-2 text-slate-600"><span className="text-emerald-500">✅</span> 登記簿謄本 — tokibo_20260205.pdf</div>
-                  <div className="flex items-center gap-2 text-slate-600"><span className="text-emerald-500">✅</span> 本人確認書類 — id_tanaka.jpg</div>
-                  <div className="flex items-center gap-2 text-amber-600"><span className="text-amber-500">⚠</span> 決算書 — <span className="font-semibold">未提出（審査中にアップロード可）</span></div>
-                  <div className="flex items-center gap-2 text-amber-600"><span className="text-amber-500">⚠</span> 特定商取引法表記 — <span className="font-semibold">未提出（審査中にアップロード可）</span></div>
+                  <div className="flex items-center gap-2 text-slate-600"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> 登記簿謄本 — tokibo_20260205.pdf</div>
+                  <div className="flex items-center gap-2 text-slate-600"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> 本人確認書類 — id_tanaka.jpg</div>
+                  <div className="flex items-center gap-2 text-warning-600"><span className="text-warning-500"><AlertTriangle className="w-4 h-4 text-warning-500 inline" /></span> 決算書 — <span className="font-semibold">未提出（審査中にアップロード可）</span></div>
+                  <div className="flex items-center gap-2 text-warning-600"><span className="text-warning-500"><AlertTriangle className="w-4 h-4 text-warning-500 inline" /></span> 特定商取引法表記 — <span className="font-semibold">未提出（審査中にアップロード可）</span></div>
                 </div>
               </div>
             </div>
@@ -6383,20 +6390,20 @@ const MerchantApplicationForm = () => {
               <label className="flex items-start gap-2 text-xs cursor-pointer">
                 <input type="checkbox" className="w-3.5 h-3.5 mt-0.5" defaultChecked />
                 <span className="text-slate-600">
-                  <span className="text-blue-600 underline">利用規約</span>および
-                  <span className="text-blue-600 underline">プライバシーポリシー</span>に同意します。
+                  <span className="text-brand-600 underline">利用規約</span>および
+                  <span className="text-brand-600 underline">プライバシーポリシー</span>に同意します。
                   申込内容に虚偽がないことを確認し、AI審査による自動判定が行われることに同意します。
                 </span>
               </label>
             </div>
 
-            <div className="bg-emerald-50 rounded p-2 border border-emerald-200">
-              <p className="text-xs text-emerald-700">🤖 申込後、AIが自動的に審査を開始します。通常1〜3時間で結果をメールでお知らせします。人間による追加確認が必要な場合は、別途ご連絡いたします。</p>
+            <div className="bg-success-50 rounded p-2 border border-success-200">
+              <p className="text-xs text-success-700"><Bot className="w-4 h-4 inline mr-1" /> 申込後、AIが自動的に審査を開始します。通常1〜3時間で結果をメールでお知らせします。人間による追加確認が必要な場合は、別途ご連絡いたします。</p>
             </div>
 
             <div className="flex justify-between pt-2 border-t">
               <button onClick={() => setStep(3)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">← 戻る</button>
-              <button onClick={() => setSubmitted(true)} className="px-8 py-2.5 bg-emerald-600 text-white rounded text-xs font-bold hover:bg-emerald-700 shadow-sm">✓ この内容で申込む</button>
+              <button onClick={() => setSubmitted(true)} className="px-8 py-2.5 bg-success-600 text-white rounded text-xs font-bold hover:bg-success-700 shadow-sm"><Check className="w-4 h-4 inline mr-1" /> この内容で申込む</button>
             </div>
           </div>
         )}
@@ -6415,13 +6422,13 @@ const AgentApplicationForm = () => {
     return (
       <div className="min-h-full bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
         <div className="max-w-md text-center py-16">
-          <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center text-2xl mx-auto mb-4">✅</div>
+          <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center text-2xl mx-auto mb-4"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></div>
           <h2 className="text-lg font-bold text-slate-800 mb-2">代理店申込を受付しました</h2>
           <p className="text-xs text-slate-500 mb-3">申込番号: <span className="font-mono font-bold text-orange-600">AGT-2026-0211-004</span></p>
           <div className="bg-orange-50 rounded-lg border border-orange-200 p-4 mb-4 text-left">
-            <p className="text-xs font-bold text-orange-700 mb-2">📋 今後の流れ</p>
+            <p className="text-xs font-bold text-orange-700 mb-2"><ClipboardList className="w-4 h-4 inline mr-1" /> 今後の流れ</p>
             <div className="text-xs text-slate-600 space-y-1.5">
-              <div className="flex items-center gap-2"><span className="text-emerald-500">✅</span> ① 申込受付 — 完了</div>
+              <div className="flex items-center gap-2"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> ① 申込受付 — 完了</div>
               <div className="flex items-center gap-2"><span className="text-orange-500 animate-pulse">⟳</span> ② 審査（反社チェック・企業調査）— 進行中</div>
               <div className="flex items-center gap-2"><span className="text-slate-300">○</span> ③ 契約条件の提示・合意</div>
               <div className="flex items-center gap-2"><span className="text-slate-300">○</span> ④ 契約書の締結</div>
@@ -6454,7 +6461,7 @@ const AgentApplicationForm = () => {
           {steps.map((s, i) => (
             <div key={i} className="flex items-center gap-1 flex-1">
               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 cursor-pointer ${i < step ? "bg-orange-500 text-white" : i === step ? "bg-orange-600 text-white ring-2 ring-orange-300" : "bg-slate-200 text-slate-400"}`} onClick={() => i < step && setStep(i)}>
-                {i < step ? "✓" : i + 1}
+                {i < step ? <Check className="w-3 h-3" /> : i + 1}
               </div>
               <span className={`text-xs whitespace-nowrap ${i === step ? "text-orange-700 font-bold" : "text-slate-400"}`}>{s}</span>
               {i < steps.length - 1 && <div className={`flex-1 h-px mx-1 ${i < step ? "bg-orange-400" : "bg-slate-200"}`} />}
@@ -6534,7 +6541,7 @@ const AgentApplicationForm = () => {
               <textarea className="w-full text-xs border rounded px-3 py-2 h-16" placeholder="過去の営業実績やネットワークについてご記入ください" />
             </div>
             <div className="bg-orange-50 rounded p-2 border border-orange-200">
-              <p className="text-xs text-orange-700">💡 <span className="font-semibold">ご注意:</span> 代理店フィー（報酬率）は決済種別ごとに運営が設定します。契約時に条件をご提示いたします。</p>
+              <p className="text-xs text-orange-700"><Lightbulb className="w-4 h-4 inline mr-1" /> <span className="font-semibold">ご注意:</span> 代理店フィー（報酬率）は決済種別ごとに運営が設定します。契約時に条件をご提示いたします。</p>
             </div>
             <div className="flex justify-between pt-2 border-t">
               <button onClick={() => setStep(0)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">← 戻る</button>
@@ -6559,8 +6566,8 @@ const AgentApplicationForm = () => {
               <div><label className="text-xs text-slate-500 block mb-1">口座番号 *</label><input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 1234567" /></div>
             </div>
             <div><label className="text-xs text-slate-500 block mb-1">口座名義（カナ） *</label><input className="w-full text-xs border rounded px-3 py-2" placeholder="例: カ）サンプル" /></div>
-            <div className="bg-amber-50 rounded p-2 border border-amber-200">
-              <p className="text-xs text-amber-700">⚠ 口座名義は法人名義と一致する必要があります。個人口座は受付できません。</p>
+            <div className="bg-warning-50 rounded p-2 border border-warning-200">
+              <p className="text-xs text-warning-700"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 口座名義は法人名義と一致する必要があります。個人口座は受付できません。</p>
             </div>
             <div className="flex justify-between pt-2 border-t">
               <button onClick={() => setStep(1)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">← 戻る</button>
@@ -6576,7 +6583,7 @@ const AgentApplicationForm = () => {
             <div className="space-y-2">
               <div className="bg-slate-50 rounded p-3">
                 <div className="flex justify-between items-center mb-2">
-                  <p className="text-xs font-bold text-slate-600">📋 企業情報</p>
+                  <p className="text-xs font-bold text-slate-600"><ClipboardList className="w-4 h-4 inline mr-1" /> 企業情報</p>
                   <button onClick={() => setStep(0)} className="text-xs text-orange-600 hover:underline">編集</button>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
@@ -6588,7 +6595,7 @@ const AgentApplicationForm = () => {
               </div>
               <div className="bg-slate-50 rounded p-3">
                 <div className="flex justify-between items-center mb-2">
-                  <p className="text-xs font-bold text-slate-600">🤝 代理店情報</p>
+                  <p className="text-xs font-bold text-slate-600"><Handshake className="w-4 h-4 inline mr-1" /> 代理店情報</p>
                   <button onClick={() => setStep(1)} className="text-xs text-orange-600 hover:underline">編集</button>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
@@ -6600,7 +6607,7 @@ const AgentApplicationForm = () => {
               </div>
               <div className="bg-slate-50 rounded p-3">
                 <div className="flex justify-between items-center mb-2">
-                  <p className="text-xs font-bold text-slate-600">🏦 口座情報</p>
+                  <p className="text-xs font-bold text-slate-600"><Landmark className="w-4 h-4 inline mr-1" /> 口座情報</p>
                   <button onClick={() => setStep(2)} className="text-xs text-orange-600 hover:underline">編集</button>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
@@ -6621,7 +6628,7 @@ const AgentApplicationForm = () => {
             </div>
             <div className="flex justify-between pt-2 border-t">
               <button onClick={() => setStep(2)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">← 戻る</button>
-              <button onClick={() => setSubmitted(true)} className="px-8 py-2.5 bg-orange-600 text-white rounded text-xs font-bold hover:bg-orange-700 shadow-sm">✓ この内容で申込む</button>
+              <button onClick={() => setSubmitted(true)} className="px-8 py-2.5 bg-orange-600 text-white rounded text-xs font-bold hover:bg-orange-700 shadow-sm"><Check className="w-4 h-4 inline mr-1" /> この内容で申込む</button>
             </div>
           </div>
         )}
@@ -6653,7 +6660,7 @@ const MasterRouting = () => {
 
       <div className="flex gap-1 border-b">
         {[{ id: "config", label: "ルーティング設定" }, { id: "bulk", label: "一括変更" }].map(t => (
-          <button key={t.id} onClick={() => setRouteTab(t.id)} className={`text-xs px-3 py-2 border-b-2 ${routeTab === t.id ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+          <button key={t.id} onClick={() => setRouteTab(t.id)} className={`text-xs px-3 py-2 border-b-2 ${routeTab === t.id ? "border-brand-500 text-brand-600 font-semibold" : "border-transparent text-slate-400"}`}>{t.label}</button>
         ))}
       </div>
 
@@ -6694,11 +6701,11 @@ const MasterRouting = () => {
                 ))}
               </tbody>
             </table>
-            <div className="bg-amber-50 rounded border border-amber-200 p-2 text-xs text-amber-700 mb-3">
-              ⚠️ <strong>影響範囲:</strong> 対象サイト 3件 / 影響取引 約 1,200件/日。変更は即時反映されます。
+            <div className="bg-warning-50 rounded border border-warning-200 p-2 text-xs text-warning-700 mb-3">
+              <strong>影響範囲:</strong> 対象サイト 3件 / 影響取引 約 1,200件/日。変更は即時反映されます。
             </div>
             <div className="flex gap-2">
-              <button onClick={() => setActionConfirm({ title: "一括変更実行", description: "選択したルーティング変更を一括実行します。", warning: "対象サイト 3件 / 影響取引 約 1,200件/日。変更は即時反映されます。", type: "warning", onConfirm: () => toast("ルーティング一括変更を実行しました", "success") })} className="text-xs bg-blue-600 text-white px-4 py-2 rounded font-semibold">一括変更を実行</button>
+              <button onClick={() => setActionConfirm({ title: "一括変更実行", description: "選択したルーティング変更を一括実行します。", warning: "対象サイト 3件 / 影響取引 約 1,200件/日。変更は即時反映されます。", type: "warning", onConfirm: () => toast("ルーティング一括変更を実行しました", "success") })} className="text-xs bg-brand-500 text-white px-4 py-2 rounded font-semibold">一括変更を実行</button>
               <button onClick={() => toast("プレビューを表示しました", "info")} className="text-xs bg-slate-100 text-slate-600 px-4 py-2 rounded border">プレビュー</button>
             </div>
           </div>
@@ -6725,7 +6732,7 @@ const MasterRouting = () => {
                     <td className="p-2 text-slate-600">{h.count}</td>
                     <td className="p-2 text-slate-700">{h.detail}</td>
                     <td className="p-2 text-slate-600">{h.user}</td>
-                    <td className="p-2 text-center"><button onClick={() => setActionConfirm({ title: "ルーティング変更を戻す", description: `${h.date} の変更「${h.detail}」を元に戻します。`, type: "warning", onConfirm: () => toast("ルーティング変更を元に戻しました", "success") })} className="text-amber-600 hover:underline text-xs">戻す</button></td>
+                    <td className="p-2 text-center"><button onClick={() => setActionConfirm({ title: "ルーティング変更を戻す", description: `${h.date} の変更「${h.detail}」を元に戻します。`, type: "warning", onConfirm: () => toast("ルーティング変更を元に戻しました", "success") })} className="text-warning-600 hover:underline text-xs">戻す</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -6741,7 +6748,7 @@ const MasterRouting = () => {
         <div className="flex gap-2 items-center">
           <div className="relative">
             <div className="flex items-center border rounded bg-white">
-              <span className="text-xs text-slate-400 pl-2">🔍</span>
+              <Search className="w-4 h-4 inline" />
               <input
                 className="text-xs px-2 py-1 w-64 outline-none"
                 placeholder="加盟店を検索（ID・名前）"
@@ -6750,7 +6757,7 @@ const MasterRouting = () => {
                 onFocus={() => setShowMerchantDropdown(true)}
               />
               {selectedMerchant && (
-                <button className="text-xs text-slate-400 pr-2 hover:text-rose-400" onClick={() => { setSelectedMerchant(""); setMerchantSearch(""); }}>✕</button>
+                <button className="text-xs text-slate-400 pr-2 hover:text-danger-400" onClick={() => { setSelectedMerchant(""); setMerchantSearch(""); }}><X className="w-4 h-4" /></button>
               )}
             </div>
             {showMerchantDropdown && (
@@ -6759,13 +6766,13 @@ const MasterRouting = () => {
                   {filteredMerchants.length}件 / {merchantData.filter(m => m.status === "有効").length}社
                 </div>
                 <button
-                  className={`w-full text-left px-3 py-2 text-xs hover:bg-blue-50 border-b ${!selectedMerchant ? "bg-blue-50 font-bold" : ""}`}
+                  className={`w-full text-left px-3 py-2 text-xs hover:bg-brand-50 border-b ${!selectedMerchant ? "bg-brand-50 font-bold" : ""}`}
                   onClick={() => { setSelectedMerchant(""); setMerchantSearch(""); setShowMerchantDropdown(false); }}
                 >--- グローバル設定 ---</button>
                 {filteredMerchants.map(m => (
                   <button
                     key={m.id}
-                    className={`w-full text-left px-3 py-2 text-xs hover:bg-blue-50 border-b flex items-center justify-between ${selectedMerchant === m.id ? "bg-blue-50 font-bold" : ""}`}
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-brand-50 border-b flex items-center justify-between ${selectedMerchant === m.id ? "bg-brand-50 font-bold" : ""}`}
                     onClick={() => { setSelectedMerchant(m.id); setMerchantSearch(m.name); setShowMerchantDropdown(false); }}
                   >
                     <span><span className="font-mono text-slate-400">{m.id}</span> {m.name}</span>
@@ -6782,11 +6789,11 @@ const MasterRouting = () => {
       </div>
 
       {/* Core Concept */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-3">
-        <p className="text-xs font-bold text-blue-700 mb-1">🤖 AIルーティングの仕組み</p>
+      <div className="bg-gradient-to-r from-brand-50 to-purple-50 rounded-lg border border-brand-200 p-3">
+        <p className="text-xs font-bold text-brand-700 mb-1"><Bot className="w-4 h-4 inline mr-1" /> AIルーティングの仕組み</p>
         <p className="text-xs text-slate-600">
-          決済リクエスト受信 → <span className="font-semibold text-blue-700">加盟店の承認済み接続先を取得</span> → ルーティングルールを適用 → AI最適化 → 接続先決定。
-          加盟店ごとに<span className="font-semibold text-rose-600">審査通過済みの接続先からのみ</span>ルーティングされます。接続先が1つの場合、その接続先に固定されます。
+          決済リクエスト受信 → <span className="font-semibold text-brand-700">加盟店の承認済み接続先を取得</span> → ルーティングルールを適用 → AI最適化 → 接続先決定。
+          加盟店ごとに<span className="font-semibold text-danger-600">審査通過済みの接続先からのみ</span>ルーティングされます。接続先が1つの場合、その接続先に固定されます。
         </p>
       </div>
 
@@ -6794,7 +6801,7 @@ const MasterRouting = () => {
       {currentMerchant && (
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-bold text-slate-700">🔌 {currentMerchant.name} — 利用可能な接続先</p>
+            <p className="text-xs font-bold text-slate-700"><Plug className="w-4 h-4 inline mr-1" /> {currentMerchant.name} — 利用可能な接続先</p>
             <div className="flex gap-1">
               <Badge text={`承認済: ${approvedProcs.length}`} color="green" />
               <Badge text={`審査中: ${currentMerchant.processors.filter(p=>p.status==="reviewing").length}`} color="blue" />
@@ -6806,9 +6813,9 @@ const MasterRouting = () => {
               const st = PROC_STATUS[proc.status];
               return (
                 <div key={i} className={`flex-1 rounded border p-2 text-xs ${
-                  proc.status === "approved" ? "bg-emerald-50 border-emerald-200" :
-                  proc.status === "reviewing" ? "bg-blue-50 border-blue-200 opacity-60" :
-                  proc.status === "suspended" ? "bg-rose-50 border-rose-200 opacity-40" :
+                  proc.status === "approved" ? "bg-success-50 border-success-200" :
+                  proc.status === "reviewing" ? "bg-brand-50 border-brand-200 opacity-60" :
+                  proc.status === "suspended" ? "bg-danger-50 border-danger-200 opacity-40" :
                   "bg-slate-50 border-slate-200 opacity-40"
                 }`}>
                   <div className="font-semibold text-slate-700">{proc.name}</div>
@@ -6820,8 +6827,8 @@ const MasterRouting = () => {
             })}
           </div>
           {approvedProcs.length <= 1 && (
-            <div className="bg-amber-50 rounded border border-amber-200 p-2 mt-2">
-              <p className="text-xs text-amber-700">⚠️ <span className="font-semibold">接続先が{approvedProcs.length}つのみ:</span> フェイルオーバー・コスト最適化が利用できません。接続先を追加すると、障害時の自動切替やAI最適ルーティングが有効になります。</p>
+            <div className="bg-warning-50 rounded border border-warning-200 p-2 mt-2">
+              <p className="text-xs text-warning-700"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> <span className="font-semibold">接続先が{approvedProcs.length}つのみ:</span> フェイルオーバー・コスト最適化が利用できません。接続先を追加すると、障害時の自動切替やAI最適ルーティングが有効になります。</p>
             </div>
           )}
         </div>
@@ -6830,8 +6837,8 @@ const MasterRouting = () => {
       {/* Routing Rules */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-bold text-slate-700">📋 ルーティングルール（優先順位順）</p>
-          <button onClick={() => setShowAddRouteRule(true)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">+ ルール追加</button>
+          <p className="text-xs font-bold text-slate-700"><ClipboardList className="w-4 h-4 inline mr-1" /> ルーティングルール（優先順位順）</p>
+          <button onClick={() => setShowAddRouteRule(true)} className="text-xs bg-brand-500 text-white px-2 py-1 rounded hover:bg-brand-600">+ ルール追加</button>
         </div>
         <div className="space-y-2">
           {[
@@ -6847,14 +6854,14 @@ const MasterRouting = () => {
           ].map((rule, i) => (
             <div key={i} className={`flex items-center gap-3 p-2 rounded border text-xs ${rule.locked ? "bg-slate-50 border-slate-300" : ""}`}>
               <span className="w-6 h-6 flex items-center justify-center bg-slate-100 rounded text-slate-500 font-bold">{rule.priority}</span>
-              <div className={`w-8 h-5 rounded-full relative cursor-pointer ${rule.enabled ? "bg-emerald-500" : "bg-slate-300"} ${rule.locked ? "opacity-60" : ""}`}>
+              <div className={`w-8 h-5 rounded-full relative cursor-pointer ${rule.enabled ? "bg-success-500" : "bg-slate-300"} ${rule.locked ? "opacity-60" : ""}`}>
                 <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${rule.enabled ? "right-0.5" : "left-0.5"}`} />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-slate-700">{rule.name}</span>
                   <Badge text={rule.type} color={rule.type === "AI" ? "purple" : rule.type === "システム" ? "blue" : "gray"} />
-                  {rule.locked && <span className="text-slate-400">🔒</span>}
+                  {rule.locked && <Lock className="w-4 h-4 inline" />}
                 </div>
                 <p className="text-slate-400 mt-0.5">{rule.desc}</p>
               </div>
@@ -6867,21 +6874,21 @@ const MasterRouting = () => {
 
       {/* Routing Flow Diagram */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <p className="text-xs font-bold text-slate-700 mb-2">🔀 ルーティング判定フロー</p>
+        <p className="text-xs font-bold text-slate-700 mb-2"><Shuffle className="w-4 h-4 inline mr-1" /> ルーティング判定フロー</p>
         <div className="bg-slate-50 rounded p-3">
           <div className="flex items-center justify-center gap-1 text-xs flex-wrap">
             {[
               { label: "決済リクエスト", color: "bg-slate-200 text-slate-700" },
               { label: "→" },
-              { label: "①加盟店の承認済み\n接続先を取得", color: "bg-rose-100 text-rose-700 border border-rose-300" },
+              { label: "①加盟店の承認済み\n接続先を取得", color: "bg-danger-100 text-danger-700 border border-danger-300" },
               { label: "→" },
-              { label: "②ブランド\nマッピング", color: "bg-blue-100 text-blue-700" },
+              { label: "②ブランド\nマッピング", color: "bg-brand-100 text-brand-700" },
               { label: "→" },
-              { label: "③固定/閾値\nルール適用", color: "bg-blue-100 text-blue-700" },
+              { label: "③固定/閾値\nルール適用", color: "bg-brand-100 text-brand-700" },
               { label: "→" },
               { label: "④AI最適化\n(コスト/成功率)", color: "bg-purple-100 text-purple-700" },
               { label: "→" },
-              { label: "⑤接続先決定", color: "bg-emerald-100 text-emerald-700" },
+              { label: "⑤接続先決定", color: "bg-success-100 text-success-700" },
             ].map((step, i) => (
               step.color ? (
                 <div key={i} className={`${step.color} rounded px-2 py-1.5 text-center whitespace-pre-line font-semibold`}>{step.label}</div>
@@ -6898,7 +6905,7 @@ const MasterRouting = () => {
 
       {/* Routing Performance */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <p className="text-xs font-bold text-slate-700 mb-2">📊 ルーティング実績（直近7日）</p>
+        <p className="text-xs font-bold text-slate-700 mb-2"><BarChart3 className="w-4 h-4 inline mr-1" /> ルーティング実績（直近7日）</p>
         <div className="flex gap-3 mb-3">
           <KPICard label="総決済件数" value="8,729件" sub="前週比" trend={6} />
           <KPICard label="AI最適化適用率" value="42.3%" sub="接続先2+の加盟店" color="purple" />
@@ -6910,12 +6917,12 @@ const MasterRouting = () => {
             <p className="text-xs text-slate-500 mb-1">接続先別トラフィック分布</p>
             <div className="space-y-1.5">
               {[
-                { name: "Univa Pay cast", pct: 28, count: "2,444件", color: "bg-blue-500" },
-                { name: "楽天銀行", pct: 22, count: "1,920件", color: "bg-emerald-500" },
+                { name: "Univa Pay cast", pct: 28, count: "2,444件", color: "bg-brand-500" },
+                { name: "楽天銀行", pct: 22, count: "1,920件", color: "bg-success-500" },
                 { name: "TCMS", pct: 15, count: "1,309件", color: "bg-purple-500" },
                 { name: "Worldpay", pct: 12, count: "1,047件", color: "bg-cyan-500" },
                 { name: "ペイディ", pct: 8, count: "698件", color: "bg-orange-500" },
-                { name: "ビットキャッシュ", pct: 6, count: "524件", color: "bg-amber-500" },
+                { name: "ビットキャッシュ", pct: 6, count: "524件", color: "bg-warning-500" },
                 { name: "その他", pct: 9, count: "787件", color: "bg-slate-400" },
               ].map((p, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs">
@@ -6951,7 +6958,7 @@ const MasterRouting = () => {
 
       {/* Cascade / Failover Config */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <p className="text-xs font-bold text-slate-700 mb-2">⚡ フェイルオーバー / カスケード設定</p>
+        <p className="text-xs font-bold text-slate-700 mb-2"><Zap className="w-4 h-4 inline mr-1" /> フェイルオーバー / カスケード設定</p>
         <div className="space-y-2">
           {[
             { primary: "Univa Pay cast", pFee: "V3.55%", secondary: "Worldpay", sFee: "V3.42%", tertiary: "—", trigger: "HTTP 5xx / タイムアウト 10秒", retries: 2, status: "稼働中", sColor: "green", costDiff: "+0.13%" },
@@ -6961,13 +6968,13 @@ const MasterRouting = () => {
           ].map((f, i) => (
             <div key={i} className="flex items-center gap-2 p-2 rounded border text-xs">
               <div className="flex items-center gap-1">
-                <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-semibold">{f.primary}</span>
-                <span className="text-blue-500 text-xs">{f.pFee}</span>
+                <span className="bg-brand-100 text-brand-700 px-2 py-0.5 rounded font-semibold">{f.primary}</span>
+                <span className="text-brand-500 text-xs">{f.pFee}</span>
                 {f.secondary !== "—" && <><span className="text-slate-300">→</span><span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">{f.secondary}</span><span className="text-slate-400 text-xs">{f.sFee}</span></>}
                 {f.tertiary !== "—" && <><span className="text-slate-300">→</span><span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded">{f.tertiary}</span></>}
               </div>
               <span className="text-slate-400 flex-1 truncate">{f.trigger}</span>
-              {f.costDiff !== "-" && <span className={`px-1.5 py-0.5 rounded text-xs font-semibold ${parseFloat(f.costDiff) > 0 ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600"}`}>FB時 {f.costDiff}</span>}
+              {f.costDiff !== "-" && <span className={`px-1.5 py-0.5 rounded text-xs font-semibold ${parseFloat(f.costDiff) > 0 ? "bg-danger-50 text-danger-600" : "bg-success-50 text-success-600"}`}>FB時 {f.costDiff}</span>}
               <Badge text={f.status} color={f.sColor} />
               <button onClick={() => toast(`${f.name} の編集モードを開きました`, "info")} className="px-2 py-1 bg-slate-100 text-slate-600 rounded">編集</button>
             </div>
@@ -6976,16 +6983,16 @@ const MasterRouting = () => {
       </div>
 
       {/* Simulation */}
-      <div className="bg-amber-50 rounded-lg border border-amber-300 p-3">
+      <div className="bg-warning-50 rounded-lg border border-warning-300 p-3">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-bold text-amber-800">🧪 ルール変更シミュレーション</p>
-          <button onClick={() => toast("ルーティングシミュレーションを開始しました（過去30日データ）", "info")} className="text-xs bg-amber-600 text-white px-3 py-1 rounded font-semibold">過去30日データで実行</button>
+          <p className="text-xs font-bold text-warning-800"><FlaskConical className="w-4 h-4 inline mr-1" /> ルール変更シミュレーション</p>
+          <button onClick={() => toast("ルーティングシミュレーションを開始しました（過去30日データ）", "info")} className="text-xs bg-warning-600 text-white px-3 py-1 rounded font-semibold">過去30日データで実行</button>
         </div>
-        <p className="text-xs text-amber-700 mb-2">ルール変更前に、過去取引データでの影響を確認できます。</p>
+        <p className="text-xs text-warning-700 mb-2">ルール変更前に、過去取引データでの影響を確認できます。</p>
         <div className="bg-white rounded-lg border border-slate-200 p-2.5 grid grid-cols-4 gap-2 text-xs">
-          <div className="text-center"><span className="text-slate-400">接続先振り分け変更</span><p className="font-bold text-blue-700">Univa Pay cast +12% / 楽天銀行 -12%</p></div>
-          <div className="text-center"><span className="text-slate-400">コスト差分</span><p className="font-bold text-emerald-700">-¥23,400/月</p></div>
-          <div className="text-center"><span className="text-slate-400">成功率変化</span><p className="font-bold text-emerald-700">98.2% → 98.5%</p></div>
+          <div className="text-center"><span className="text-slate-400">接続先振り分け変更</span><p className="font-bold text-brand-700">Univa Pay cast +12% / 楽天銀行 -12%</p></div>
+          <div className="text-center"><span className="text-slate-400">コスト差分</span><p className="font-bold text-success-700">-¥23,400/月</p></div>
+          <div className="text-center"><span className="text-slate-400">成功率変化</span><p className="font-bold text-success-700">98.2% → 98.5%</p></div>
           <div className="text-center"><span className="text-slate-400">影響加盟店</span><p className="font-bold text-slate-700">5社</p></div>
         </div>
       </div>
@@ -6993,7 +7000,7 @@ const MasterRouting = () => {
       {/* Maintenance Mode */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
         <div className="flex justify-between items-center mb-2">
-          <p className="text-xs font-bold text-slate-700">🔧 接続先メンテナンスモード</p>
+          <p className="text-xs font-bold text-slate-700"><Wrench className="w-4 h-4 inline mr-1" /> 接続先メンテナンスモード</p>
           <span className="text-xs text-slate-400">メンテ中の接続先はルーティング対象から自動除外されます</span>
         </div>
         <div className="space-y-1.5">
@@ -7006,12 +7013,12 @@ const MasterRouting = () => {
             { name: "ONTHELINE", status: false },
             { name: "Asiabill", status: true },
           ].map((p, i) => (
-            <div key={i} className={`flex items-center gap-3 p-2 rounded border text-xs ${p.status ? "bg-blue-50 border-blue-200" : ""}`}>
-              <div className={`w-8 h-5 rounded-full relative cursor-pointer ${p.status ? "bg-blue-500" : "bg-slate-300"}`}>
+            <div key={i} className={`flex items-center gap-3 p-2 rounded border text-xs ${p.status ? "bg-brand-50 border-brand-200" : ""}`}>
+              <div className={`w-8 h-5 rounded-full relative cursor-pointer ${p.status ? "bg-brand-500" : "bg-slate-300"}`}>
                 <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${p.status ? "right-0.5" : "left-0.5"}`} />
               </div>
               <span className="font-semibold text-slate-700">{p.name}</span>
-              {p.status && <Badge text="🔵 メンテナンス中" color="blue" />}
+              {p.status && <Badge text="メンテナンス中" color="blue" />}
               {!p.status && <Badge text="稼働中" color="green" />}
             </div>
           ))}
@@ -7021,8 +7028,8 @@ const MasterRouting = () => {
       {/* Routing Log */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 overflow-x-auto">
         <div className="flex justify-between items-center mb-2">
-          <p className="text-xs font-bold text-slate-700">📊 ルーティングログ（直近）</p>
-          <button className="text-xs text-blue-600 hover:underline">全ログ検索 →</button>
+          <p className="text-xs font-bold text-slate-700"><BarChart3 className="w-4 h-4 inline mr-1" /> ルーティングログ（直近）</p>
+          <button className="text-xs text-brand-600 hover:underline">全ログ検索 →</button>
         </div>
         <TableHeader cols={[{ label: "日時", w: "w-28" }, { label: "取引ID", w: "w-36" }, { label: "加盟店", w: "w-32" }, { label: "ブランド", w: "w-16" }, { label: "AI判定", w: "flex-1" }, { label: "選択", w: "w-24" }, { label: "結果", w: "w-16" }, { label: "F/O", w: "w-12" }]}>
         {[
@@ -7039,7 +7046,7 @@ const MasterRouting = () => {
             <td className="px-4 py-2 whitespace-nowrap text-slate-500 font-mono">{l.ai}</td>
             <td className="px-4 py-2 whitespace-nowrap w-24 font-semibold text-slate-700">{l.selected}</td>
             <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={l.result} color={l.result === "成功" ? "green" : "red"} /></td>
-            <td className="px-4 py-2 whitespace-nowrap w-12 text-center">{l.fo !== "—" ? <span className="text-amber-600 font-semibold">{l.fo}</span> : "—"}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-12 text-center">{l.fo !== "—" ? <span className="text-warning-600 font-semibold">{l.fo}</span> : "—"}</td>
           </tr>
         ))}
         </TableHeader>
@@ -7052,13 +7059,13 @@ const MasterRouting = () => {
           <div className="relative bg-white rounded-xl shadow-2xl w-[520px] max-h-[85vh] overflow-y-auto">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">ルーティングルール追加</h3>
-              <button onClick={() => setShowAddRouteRule(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <button onClick={() => setShowAddRouteRule(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
-              <div><label className="text-xs font-semibold text-slate-600">ルール名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 高額取引はUniva Pay cast優先" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">ルール名 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 高額取引はUniva Pay cast優先" /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-xs font-semibold text-slate-600">条件タイプ <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>金額範囲</option><option>ブランド</option><option>加盟店</option><option>時間帯</option><option>地域</option></select></div>
-                <div><label className="text-xs font-semibold text-slate-600">優先接続先 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option><option>ONTHELINE</option><option>Asiabill</option></select></div>
+                <div><label className="text-xs font-semibold text-slate-600">条件タイプ <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>金額範囲</option><option>ブランド</option><option>加盟店</option><option>時間帯</option><option>地域</option></select></div>
+                <div><label className="text-xs font-semibold text-slate-600">優先接続先 <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option><option>ONTHELINE</option><option>Asiabill</option></select></div>
               </div>
               <div className="bg-slate-50 rounded-lg border border-slate-200 p-3 space-y-2">
                 <p className="text-xs font-bold text-slate-600">条件詳細</p>
@@ -7067,7 +7074,7 @@ const MasterRouting = () => {
                   <div><label className="text-xs text-slate-500">演算子</label><select className="w-full text-xs border rounded px-2 py-1"><option>≧（以上）</option><option>＜（未満）</option><option>＝</option></select></div>
                   <div><label className="text-xs text-slate-500">値</label><input className="w-full text-xs border rounded px-2 py-1" placeholder="500000" /></div>
                 </div>
-                <button onClick={() => toast("AND条件を追加しました", "info")} className="text-xs text-blue-600 hover:underline">+ AND条件を追加</button>
+                <button onClick={() => toast("AND条件を追加しました", "info")} className="text-xs text-brand-600 hover:underline">+ AND条件を追加</button>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="text-xs font-semibold text-slate-600">フォールバック先</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>自動（AI判定）</option><option>Worldpay</option><option>Simpletransact</option><option>ONTHELINE</option></select></div>
@@ -7076,7 +7083,7 @@ const MasterRouting = () => {
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowAddRouteRule(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { setShowAddRouteRule(false); toast("ルーティングルールを作成しました", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">ルールを作成</button>
+              <button onClick={() => { setShowAddRouteRule(false); toast("ルーティングルールを作成しました", "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">ルールを作成</button>
             </div>
           </div>
         </div>
@@ -7328,7 +7335,7 @@ const MasterProcessors = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-sm font-bold text-slate-800">接続先審査</h2>
         <div className="flex gap-2">
-          <button onClick={() => setShowAddProc(true)} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold hover:bg-blue-700">+ 接続先追加</button>
+          <button onClick={() => setShowAddProc(true)} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold hover:bg-brand-600">+ 接続先追加</button>
         </div>
       </div>
 
@@ -7340,9 +7347,9 @@ const MasterProcessors = () => {
           { id: "history", label: "審査完了履歴", badge: null },
           { id: "documents", label: "審査資料管理", badge: 1 },
         ].map((tab) => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 flex items-center gap-1 ${activeTab === tab.id ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-slate-400 hover:text-slate-600"}`}>
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 flex items-center gap-1 ${activeTab === tab.id ? "border-brand-500 text-brand-600 font-semibold" : "border-transparent text-slate-400 hover:text-slate-600"}`}>
             {tab.label}
-            {tab.badge && <span className="bg-rose-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{tab.badge}</span>}
+            {tab.badge && <span className="bg-danger-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{tab.badge}</span>}
           </button>
         ))}
       </div>
@@ -7360,12 +7367,12 @@ const MasterProcessors = () => {
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "接続先ID", w: "w-24" }, { label: "接続先名", w: "w-36" }, { label: "種別", w: "w-36" }, { label: "対応ブランド", w: "w-32" }, { label: "稼働率", w: "w-20" }, { label: "承認済加盟店", w: "w-24" }, { label: "審査中", w: "w-16" }, { label: "状態", w: "w-20" }, { label: "操作", w: "w-16" }]}>
             {processorList.map((p, i) => (
-              <tr key={p.id} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50 cursor-pointer`} onClick={() => setSelectedProc(selectedProc === p.id ? null : p.id)}>
+              <tr key={p.id} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-brand-50 cursor-pointer`} onClick={() => setSelectedProc(selectedProc === p.id ? null : p.id)}>
                 <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-slate-500">{p.id}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-36 font-semibold text-slate-700">{p.name}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-36 text-slate-500">{p.type}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-32"><div className="flex gap-1 flex-wrap">{p.brands.map(b => <Badge key={b} text={b} color="blue" />)}</div></td>
-                <td className="px-4 py-2 whitespace-nowrap w-20 text-emerald-600 font-semibold">{p.uptime}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-20 text-success-600 font-semibold">{p.uptime}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-24 text-center text-slate-700 font-semibold">{p.merchants}社</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{p.reviewing > 0 ? <Badge text={`${p.reviewing}件`} color="yellow" /> : <span className="text-slate-300">—</span>}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={p.status} color={p.sColor} /></td>
@@ -7381,28 +7388,28 @@ const MasterProcessors = () => {
             const linkedMerchants = merchantData.filter(m => m.processors.some(mp => mp.name === p.name));
             const isCard = p.type !== "WEBマネー";
             return (
-              <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 space-y-3">
+              <div className="bg-brand-50 rounded-lg border border-brand-200 p-3 space-y-3">
                 <div className="flex justify-between items-center">
-                  <p className="text-xs font-bold text-slate-700">🔌 {p.name} — 接続先詳細</p>
-                  <button onClick={() => setSelectedProc(null)} className="text-xs text-slate-400 hover:text-slate-600">✕ 閉じる</button>
+                  <p className="text-xs font-bold text-slate-700"><Plug className="w-4 h-4 inline mr-1" /> {p.name} — 接続先詳細</p>
+                  <button onClick={() => setSelectedProc(null)} className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1"><X className="w-3.5 h-3.5" /> 閉じる</button>
                 </div>
 
                 {/* 3-A: ブランド別手数料マトリクス */}
                 <div className="bg-white rounded-lg border border-slate-200 p-3">
-                  <p className="text-xs font-bold text-slate-600 mb-2">💰 ブランド別原価手数料率（デフォルト）</p>
+                  <p className="text-xs font-bold text-slate-600 mb-2"><Coins className="w-4 h-4 inline mr-1" /> ブランド別原価手数料率（デフォルト）</p>
                   {isCard ? (
                     <div className="grid grid-cols-5 gap-2">
                       {[{b:"VISA",k:"visa"},{b:"MC",k:"master"},{b:"JCB",k:"jcb"},{b:"AMEX",k:"amex"},{b:"Diners",k:"diners"}].map(({b,k}) => (
-                        <div key={k} className={`rounded-lg border p-2 text-center ${p.fees[k] !== "-" ? "bg-blue-50 border-blue-200" : "bg-slate-50 border-slate-200"}`}>
+                        <div key={k} className={`rounded-lg border p-2 text-center ${p.fees[k] !== "-" ? "bg-brand-50 border-brand-200" : "bg-slate-50 border-slate-200"}`}>
                           <p className="text-xs text-slate-400 mb-0.5">{b}</p>
-                          <p className={`text-sm font-bold ${p.fees[k] !== "-" ? "text-blue-700" : "text-slate-300"}`}>{p.fees[k]}</p>
+                          <p className={`text-sm font-bold ${p.fees[k] !== "-" ? "text-brand-700" : "text-slate-300"}`}>{p.fees[k]}</p>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="bg-blue-50 rounded-lg border border-blue-200 p-2 text-center">
+                    <div className="bg-brand-50 rounded-lg border border-brand-200 p-2 text-center">
                       <p className="text-xs text-slate-400 mb-0.5">WEBマネー手数料</p>
-                      <p className="text-lg font-bold text-blue-700">{p.fees.webmoney}</p>
+                      <p className="text-lg font-bold text-brand-700">{p.fees.webmoney}</p>
                     </div>
                   )}
                 </div>
@@ -7410,7 +7417,7 @@ const MasterProcessors = () => {
                 {/* 3-B: トランザクション手数料ブレイクダウン */}
                 {isCard && (
                 <div className="bg-white rounded-lg border border-slate-200 p-3">
-                  <p className="text-xs font-bold text-slate-600 mb-2">📊 トランザクション手数料</p>
+                  <p className="text-xs font-bold text-slate-600 mb-2"><BarChart3 className="w-4 h-4 inline mr-1" /> トランザクション手数料</p>
                   <div className="grid grid-cols-3 gap-2">
                     {[{l:"TR(成功)",v:p.trFees.success,c:"emerald"},{l:"TR(失敗)",v:p.trFees.fail,c:"amber"},{l:"CB手数料",v:p.trFees.cb,c:"rose"},
                       {l:"返金手数料",v:p.trFees.refund,c:"purple"},{l:"3DS認証料",v:p.trFees.tds,c:"blue"},{l:"CB取消",v:p.trFees.cbCancel,c:"slate"}
@@ -7426,10 +7433,10 @@ const MasterProcessors = () => {
 
                 {/* 3-C: 制限・条件 */}
                 <div className="bg-white rounded-lg border border-slate-200 p-3">
-                  <p className="text-xs font-bold text-slate-600 mb-2">⚙️ 条件・制限</p>
+                  <p className="text-xs font-bold text-slate-600 mb-2"><Settings className="w-4 h-4 inline mr-1" /> 条件・制限</p>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <p className="text-xs font-semibold text-purple-700 mb-1">🔒 デポジット（留保）</p>
+                      <p className="text-xs font-semibold text-purple-700 mb-1"><Lock className="w-4 h-4 inline mr-1" /> デポジット（留保）</p>
                       <div className="bg-purple-50 rounded border border-purple-200 p-2 space-y-1 text-xs">
                         <div className="flex justify-between"><span className="text-slate-400">留保率</span><span className="font-semibold">{p.deposit.rate}</span></div>
                         <div className="flex justify-between"><span className="text-slate-400">期間</span><span className="font-semibold">{p.deposit.period}</span></div>
@@ -7437,23 +7444,23 @@ const MasterProcessors = () => {
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-amber-700 mb-1">📏 取引制限</p>
-                      <div className="bg-amber-50 rounded border border-amber-200 p-2 space-y-1 text-xs">
+                      <p className="text-xs font-semibold text-warning-700 mb-1"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 取引制限</p>
+                      <div className="bg-warning-50 rounded border border-warning-200 p-2 space-y-1 text-xs">
                         <div className="flex justify-between"><span className="text-slate-400">TR上限額</span><span className="font-semibold">{p.limits.trMax}</span></div>
                         <div className="flex justify-between"><span className="text-slate-400">月間上限</span><span className="font-semibold">{p.limits.monthlyMax}</span></div>
                         <div className="flex justify-between"><span className="text-slate-400">回数制限</span><span className="font-semibold">{p.limits.countLimit}</span></div>
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-emerald-700 mb-1">💵 固定費</p>
-                      <div className="bg-emerald-50 rounded border border-emerald-200 p-2 space-y-1 text-xs">
+                      <p className="text-xs font-semibold text-success-700 mb-1"><Coins className="w-4 h-4 inline" /> 固定費</p>
+                      <div className="bg-success-50 rounded border border-success-200 p-2 space-y-1 text-xs">
                         <div className="flex justify-between"><span className="text-slate-400">初期費用</span><span className="font-semibold">{p.fixedCost.initial}</span></div>
                         <div className="flex justify-between"><span className="text-slate-400">月額費用</span><span className="font-semibold">{p.fixedCost.monthly}</span></div>
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-blue-700 mb-1">🏦 入金情報</p>
-                      <div className="bg-blue-50 rounded border border-blue-200 p-2 space-y-1 text-xs">
+                      <p className="text-xs font-semibold text-brand-700 mb-1"><Landmark className="w-4 h-4 inline mr-1" /> 入金情報</p>
+                      <div className="bg-brand-50 rounded border border-brand-200 p-2 space-y-1 text-xs">
                         <div className="flex justify-between"><span className="text-slate-400">入金サイクル</span><span className="font-semibold text-right flex-1 ml-2">{p.settlement.cycle}</span></div>
                         <div className="flex justify-between"><span className="text-slate-400">口座</span><span className="font-semibold">{p.settlement.account}</span></div>
                       </div>
@@ -7461,7 +7468,7 @@ const MasterProcessors = () => {
                   </div>
                   {isCard && (
                     <div className="mt-2 bg-slate-50 rounded border border-slate-200 p-2">
-                      <p className="text-xs font-semibold text-slate-600 mb-1">🚫 制限事項</p>
+                      <p className="text-xs font-semibold text-slate-600 mb-1"><Ban className="w-4 h-4 inline mr-1" /> 制限事項</p>
                       <div className="grid grid-cols-3 gap-2 text-xs">
                         <div><span className="text-slate-400">CVV: </span><span className="font-semibold">{p.restrictions.cvv}</span></div>
                         <div><span className="text-slate-400">NGジャンル: </span><span className="font-semibold">{p.restrictions.ngGenre}</span></div>
@@ -7473,7 +7480,7 @@ const MasterProcessors = () => {
 
                 {/* 3-E: サイト別加盟店接続一覧 */}
                 <div className="bg-white rounded-lg border border-slate-200 p-3">
-                  <p className="text-xs font-bold text-slate-600 mb-2">🏪 接続加盟店・サイト一覧</p>
+                  <p className="text-xs font-bold text-slate-600 mb-2"><Building2 className="w-4 h-4 inline mr-1" /> 接続加盟店・サイト一覧</p>
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">
                       <thead><tr className="bg-slate-50 text-slate-500 border-b">
@@ -7495,16 +7502,16 @@ const MasterProcessors = () => {
                           const st = PROC_STATUS[mp.status];
                           const hasOverride = mp.feeOverride && Object.values(mp.feeOverride).some(v => v);
                           return (
-                            <tr key={`${m.id}-${site.siteId}`} className="border-b hover:bg-blue-50">
+                            <tr key={`${m.id}-${site.siteId}`} className="border-b hover:bg-brand-50">
                               <td className="px-2 py-1.5 font-semibold text-slate-700">{m.name}</td>
                               <td className="px-2 py-1.5 font-mono text-slate-500">{site.siteId}</td>
                               <td className="px-2 py-1.5 text-slate-600">{site.siteName}</td>
                               <td className="px-2 py-1.5 text-center font-mono text-slate-500">{mp.mid || "—"}</td>
                               <td className="px-2 py-1.5 text-center"><Badge text={st.label} color={st.color} /></td>
-                              {isCard && <td className={`px-2 py-1.5 text-center font-semibold ${hasOverride && mp.feeOverride?.visa ? "text-amber-600 bg-amber-50" : "text-slate-500"}`}>{mp.feeOverride?.visa || p.fees.visa}</td>}
-                              {isCard && <td className={`px-2 py-1.5 text-center font-semibold ${hasOverride && mp.feeOverride?.master ? "text-amber-600 bg-amber-50" : "text-slate-500"}`}>{mp.feeOverride?.master || p.fees.master}</td>}
-                              {!isCard && <td className={`px-2 py-1.5 text-center font-semibold ${hasOverride && mp.feeOverride?.webmoney ? "text-amber-600 bg-amber-50" : "text-slate-500"}`}>{mp.feeOverride?.webmoney || p.fees.webmoney}</td>}
-                              <td className={`px-2 py-1.5 text-center ${mp.depositOverride?.rate ? "text-amber-600 bg-amber-50 font-semibold" : "text-slate-500"}`}>{mp.depositOverride?.rate || p.deposit.rate}</td>
+                              {isCard && <td className={`px-2 py-1.5 text-center font-semibold ${hasOverride && mp.feeOverride?.visa ? "text-warning-600 bg-warning-50" : "text-slate-500"}`}>{mp.feeOverride?.visa || p.fees.visa}</td>}
+                              {isCard && <td className={`px-2 py-1.5 text-center font-semibold ${hasOverride && mp.feeOverride?.master ? "text-warning-600 bg-warning-50" : "text-slate-500"}`}>{mp.feeOverride?.master || p.fees.master}</td>}
+                              {!isCard && <td className={`px-2 py-1.5 text-center font-semibold ${hasOverride && mp.feeOverride?.webmoney ? "text-warning-600 bg-warning-50" : "text-slate-500"}`}>{mp.feeOverride?.webmoney || p.fees.webmoney}</td>}
+                              <td className={`px-2 py-1.5 text-center ${mp.depositOverride?.rate ? "text-warning-600 bg-warning-50 font-semibold" : "text-slate-500"}`}>{mp.depositOverride?.rate || p.deposit.rate}</td>
                               <td className="px-2 py-1.5 text-center text-slate-600">{mp.txnCount > 0 ? mp.txnCount.toLocaleString() + "件" : "—"}</td>
                             </tr>
                           );
@@ -7513,7 +7520,7 @@ const MasterProcessors = () => {
                       </tbody>
                     </table>
                   </div>
-                  <p className="text-xs text-amber-600 mt-1">※ オレンジ背景はデフォルトからのオーバーライド値</p>
+                  <p className="text-xs text-warning-600 mt-1">※ オレンジ背景はデフォルトからのオーバーライド値</p>
                 </div>
               </div>
             );
@@ -7525,12 +7532,12 @@ const MasterProcessors = () => {
       {activeTab === "reviews" && (
         <div className="space-y-3">
           {/* Alert: 追加書類要求 */}
-          <div className="bg-amber-50 rounded-lg border border-amber-300 p-3">
+          <div className="bg-warning-50 rounded-lg border border-warning-300 p-3">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm">⚠️</span>
-              <span className="text-xs font-bold text-amber-800">追加書類要求あり（対応期限: 2026-02-13）</span>
+              <AlertTriangle className="w-4 h-4 text-warning-500 inline" />
+              <span className="text-xs font-bold text-warning-800">追加書類要求あり（対応期限: 2026-02-13）</span>
             </div>
-            <p className="text-xs text-amber-700">Asiabill → 株式会社トラベルプラス: 旅行業登録証の写し、過去6ヶ月のCB実績レポート が要求されています。</p>
+            <p className="text-xs text-warning-700">Asiabill → 株式会社トラベルプラス: 旅行業登録証の写し、過去6ヶ月のCB実績レポート が要求されています。</p>
           </div>
 
           {/* Confirmation Dialog */}
@@ -7539,21 +7546,21 @@ const MasterProcessors = () => {
               <div className="bg-white rounded-xl shadow-2xl w-[520px] max-w-[90vw]" onClick={e => e.stopPropagation()}>
                 {/* Dialog Header */}
                 <div className={`p-4 rounded-t-xl border-b ${
-                  confirmDialog.type === "approve" ? "bg-emerald-50" :
-                  confirmDialog.type === "reject" ? "bg-rose-50" :
-                  confirmDialog.type === "send_docs" ? "bg-blue-50" :
-                  confirmDialog.type === "request_docs" ? "bg-amber-50" :
+                  confirmDialog.type === "approve" ? "bg-success-50" :
+                  confirmDialog.type === "reject" ? "bg-danger-50" :
+                  confirmDialog.type === "send_docs" ? "bg-brand-50" :
+                  confirmDialog.type === "request_docs" ? "bg-warning-50" :
                   confirmDialog.type === "conditions" ? "bg-indigo-50" :
                   "bg-slate-50"
                 }`}>
                   <div className="flex items-center gap-2">
                     <span className="text-lg">{
-                      confirmDialog.type === "approve" ? "✅" :
-                      confirmDialog.type === "reject" ? "❌" :
-                      confirmDialog.type === "send_docs" ? "📤" :
-                      confirmDialog.type === "request_docs" ? "📩" :
-                      confirmDialog.type === "conditions" ? "📋" :
-                      "⚡"
+                      confirmDialog.type === "approve" ? <CheckCircle2 className="w-5 h-5 text-success-600" /> :
+                      confirmDialog.type === "reject" ? <XCircle className="w-5 h-5 text-danger-500" /> :
+                      confirmDialog.type === "send_docs" ? <Upload className="w-5 h-5 text-brand-500" /> :
+                      confirmDialog.type === "request_docs" ? <FileText className="w-5 h-5 text-amber-500" /> :
+                      confirmDialog.type === "conditions" ? <ClipboardList className="w-5 h-5 text-brand-500" /> :
+                      <Info className="w-5 h-5 text-slate-500" />
                     }</span>
                     <h3 className="text-sm font-bold text-slate-800">{confirmDialog.title}</h3>
                   </div>
@@ -7567,19 +7574,19 @@ const MasterProcessors = () => {
                   <div className="bg-slate-50 rounded-lg border border-slate-200 p-3 space-y-1">
                     <div className="flex text-xs"><span className="w-24 text-slate-400">加盟店:</span><span className="font-semibold text-slate-700">{confirmDialog.merchantName}</span></div>
                     <div className="flex text-xs"><span className="w-24 text-slate-400">接続先:</span><span className="font-semibold text-slate-700">{confirmDialog.processorName}</span></div>
-                    <div className="flex text-xs"><span className="w-24 text-slate-400">現在ステップ:</span><span className="text-blue-600">{confirmDialog.currentStep}</span></div>
+                    <div className="flex text-xs"><span className="w-24 text-slate-400">現在ステップ:</span><span className="text-brand-600">{confirmDialog.currentStep}</span></div>
                     {confirmDialog.nextStep && (
-                      <div className="flex text-xs"><span className="w-24 text-slate-400">次のステップ:</span><span className="font-semibold text-emerald-600">{confirmDialog.nextStep}</span></div>
+                      <div className="flex text-xs"><span className="w-24 text-slate-400">次のステップ:</span><span className="font-semibold text-success-600">{confirmDialog.nextStep}</span></div>
                     )}
                   </div>
 
                   {/* 影響範囲 */}
                   {confirmDialog.impacts && (
-                    <div className="bg-blue-50 rounded border border-blue-200 p-2">
-                      <p className="text-xs font-semibold text-blue-700 mb-1">この操作の影響:</p>
+                    <div className="bg-brand-50 rounded border border-brand-200 p-2">
+                      <p className="text-xs font-semibold text-brand-700 mb-1">この操作の影響:</p>
                       <ul className="space-y-0.5">
                         {confirmDialog.impacts.map((imp, i) => (
-                          <li key={i} className="text-xs text-blue-600 flex items-center gap-1">
+                          <li key={i} className="text-xs text-brand-600 flex items-center gap-1">
                             <span>→</span> {imp}
                           </li>
                         ))}
@@ -7600,7 +7607,7 @@ const MasterProcessors = () => {
                     <div className="space-y-2">
                       <p className="text-xs font-semibold text-slate-600">接続先から提示された条件:</p>
                       <div className="bg-slate-50 rounded-lg border border-slate-200 p-3 space-y-2">
-                        <p className="text-xs font-semibold text-blue-700">💰 ブランド別手数料率</p>
+                        <p className="text-xs font-semibold text-brand-700"><Coins className="w-4 h-4 inline mr-1" /> ブランド別手数料率</p>
                         <div className="grid grid-cols-5 gap-2">
                           <div><label className="text-xs text-slate-500 block mb-0.5">VISA (%)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="3.25" defaultValue="3.25" /></div>
                           <div><label className="text-xs text-slate-500 block mb-0.5">MC (%)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="3.25" defaultValue="3.25" /></div>
@@ -7608,7 +7615,7 @@ const MasterProcessors = () => {
                           <div><label className="text-xs text-slate-500 block mb-0.5">AMEX (%)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="" defaultValue="" /></div>
                           <div><label className="text-xs text-slate-500 block mb-0.5">Diners (%)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="" defaultValue="" /></div>
                         </div>
-                        <p className="text-xs font-semibold text-emerald-700 mt-2">📊 トランザクション手数料</p>
+                        <p className="text-xs font-semibold text-success-700 mt-2"><BarChart3 className="w-4 h-4 inline mr-1" /> トランザクション手数料</p>
                         <div className="grid grid-cols-3 gap-2">
                           <div><label className="text-xs text-slate-500 block mb-0.5">TR(成功) (円/件)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 30" defaultValue="30" /></div>
                           <div><label className="text-xs text-slate-500 block mb-0.5">TR(失敗) (円/件)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 30" defaultValue="30" /></div>
@@ -7617,7 +7624,7 @@ const MasterProcessors = () => {
                           <div><label className="text-xs text-slate-500 block mb-0.5">返金手数料 (円/件)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 100" defaultValue="100" /></div>
                           <div><label className="text-xs text-slate-500 block mb-0.5">月額固定費 (円)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 0" defaultValue="0" /></div>
                         </div>
-                        <p className="text-xs font-semibold text-purple-700 mt-2">🔒 デポジット・制限</p>
+                        <p className="text-xs font-semibold text-purple-700 mt-2"><Lock className="w-4 h-4 inline mr-1" /> デポジット・制限</p>
                         <div className="grid grid-cols-3 gap-2">
                           <div><label className="text-xs text-slate-500 block mb-0.5">デポジット率 (%)</label><input className="w-full border rounded p-1.5 text-xs" placeholder="例: 10" defaultValue="10" /></div>
                           <div><label className="text-xs text-slate-500 block mb-0.5">デポジット期間</label>
@@ -7628,7 +7635,7 @@ const MasterProcessors = () => {
                           <div><label className="text-xs text-slate-500 block mb-0.5">CVV要否</label>
                             <select className="w-full border rounded p-1.5 text-xs"><option>必須</option><option>任意</option><option>不要</option></select></div>
                         </div>
-                        <p className="text-xs font-semibold text-blue-700 mt-2">🏦 入金情報</p>
+                        <p className="text-xs font-semibold text-brand-700 mt-2"><Landmark className="w-4 h-4 inline mr-1" /> 入金情報</p>
                         <div className="grid grid-cols-2 gap-2">
                           <div><label className="text-xs text-slate-500 block mb-0.5">入金サイクル</label>
                             <select className="w-full border rounded p-1.5 text-xs">
@@ -7642,9 +7649,9 @@ const MasterProcessors = () => {
                         <div><label className="text-xs text-slate-500 block mb-0.5">特記事項・個別条件</label>
                           <textarea className="w-full border rounded p-1.5 text-xs h-14" placeholder="接続先から提示された個別条件があれば記載（例: 初年度は手数料0.25%割引、CB率0.7%以下厳守、NGジャンル: FX/ギャンブル 等）" /></div>
                       </div>
-                      <div className="bg-blue-50 rounded border border-blue-200 p-2">
-                        <p className="text-xs text-blue-600">💡 ここで登録した条件は以下に自動反映されます:</p>
-                        <ul className="text-xs text-blue-500 ml-3 mt-1 space-y-0.5">
+                      <div className="bg-brand-50 rounded border border-brand-200 p-2">
+                        <p className="text-xs text-brand-600"><Lightbulb className="w-4 h-4 inline mr-1" /> ここで登録した条件は以下に自動反映されます:</p>
+                        <ul className="text-xs text-brand-500 ml-3 mt-1 space-y-0.5">
                           <li>→ 契約書PDF（次のステップで自動生成）</li>
                           <li>→ ルーティングエンジンのコスト最適化パラメータ</li>
                           <li>→ 精算エンジンの入金スケジュール</li>
@@ -7663,13 +7670,13 @@ const MasterProcessors = () => {
 
                   {/* 警告 */}
                   {confirmDialog.type === "approve" && (
-                    <div className="bg-amber-50 rounded border border-amber-200 p-2">
-                      <p className="text-xs text-amber-700">⚠️ 審査完了後、この加盟店の接続先は<span className="font-bold">ルーティング対象に追加</span>されます。承認済み接続先が複数になる場合、AIルーティングが自動的に有効化されます。</p>
+                    <div className="bg-warning-50 rounded border border-warning-200 p-2">
+                      <p className="text-xs text-warning-700"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 審査完了後、この加盟店の接続先は<span className="font-bold">ルーティング対象に追加</span>されます。承認済み接続先が複数になる場合、AIルーティングが自動的に有効化されます。</p>
                     </div>
                   )}
                   {confirmDialog.type === "reject" && (
-                    <div className="bg-rose-50 rounded border border-rose-200 p-2">
-                      <p className="text-xs text-rose-700">⚠️ 却下すると、この接続先の審査ステータスが<span className="font-bold">「rejected」に変更</span>され、ルーティング対象から除外されます。再申請には新規の審査プロセスが必要です。</p>
+                    <div className="bg-danger-50 rounded border border-danger-200 p-2">
+                      <p className="text-xs text-danger-700"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 却下すると、この接続先の審査ステータスが<span className="font-bold">「rejected」に変更</span>され、ルーティング対象から除外されます。再申請には新規の審査プロセスが必要です。</p>
                     </div>
                   )}
                 </div>
@@ -7680,10 +7687,10 @@ const MasterProcessors = () => {
                   <button
                     onClick={() => setConfirmDialog(null)}
                     className={`px-4 py-2 rounded text-white text-xs font-semibold ${
-                      confirmDialog.type === "approve" ? "bg-emerald-600 hover:bg-emerald-700" :
-                      confirmDialog.type === "reject" ? "bg-rose-600 hover:bg-rose-700" :
+                      confirmDialog.type === "approve" ? "bg-success-600 hover:bg-success-700" :
+                      confirmDialog.type === "reject" ? "bg-danger-600 hover:bg-danger-700" :
                       confirmDialog.type === "conditions" ? "bg-indigo-600 hover:bg-indigo-700" :
-                      "bg-blue-600 hover:bg-blue-700"
+                      "bg-brand-500 hover:bg-brand-600"
                     }`}
                   >
                     {confirmDialog.confirmLabel}
@@ -7696,7 +7703,7 @@ const MasterProcessors = () => {
           {reviewFlowData.map((review, ri) => (
             <div key={ri} className="bg-white rounded-lg border border-slate-200 shadow-sm">
               {/* Header */}
-              <div className={`p-3 border-b ${review.status === "additional_docs" ? "bg-amber-50" : review.reviewType === "site_add" ? "bg-teal-50" : "bg-blue-50"}`}>
+              <div className={`p-3 border-b ${review.status === "additional_docs" ? "bg-warning-50" : review.reviewType === "site_add" ? "bg-teal-50" : "bg-brand-50"}`}>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <Badge text={review.reviewType === "site_add" ? "サイト追加" : "初回法人"} color={review.reviewType === "site_add" ? "teal" : "purple"} />
@@ -7714,30 +7721,30 @@ const MasterProcessors = () => {
               <div className="p-3">
                 {/* Timeline with Action Buttons */}
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-bold text-slate-600">📋 審査フロー</p>
-                  <p className="text-xs text-slate-400">💡 各ステップのボタンをクリックしてフローを進行</p>
+                  <p className="text-xs font-bold text-slate-600"><ClipboardList className="w-4 h-4 inline mr-1" /> 審査フロー</p>
+                  <p className="text-xs text-slate-400"><Lightbulb className="w-4 h-4 inline mr-1" /> 各ステップのボタンをクリックしてフローを進行</p>
                 </div>
                 <div className="space-y-2 mb-4">
                   {review.timeline.map((step, si) => (
                     <div key={si} className={`flex items-center gap-3 p-2 rounded-lg border ${
-                      step.status === "done" ? "bg-emerald-50 border-emerald-200" :
-                      step.status === "active" ? "bg-blue-50 border-blue-300 shadow-sm" :
+                      step.status === "done" ? "bg-success-50 border-success-200" :
+                      step.status === "active" ? "bg-brand-50 border-brand-300 shadow-sm" :
                       "bg-slate-50 border-slate-200"
                     }`}>
                       {/* Step indicator */}
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                        step.status === "done" ? "bg-emerald-500 text-white" :
-                        step.status === "active" ? "bg-blue-500 text-white ring-2 ring-blue-300 ring-offset-1" :
+                        step.status === "done" ? "bg-success-500 text-white" :
+                        step.status === "active" ? "bg-brand-500 text-white ring-2 ring-brand-300 ring-offset-1" :
                         "bg-slate-200 text-slate-400"
                       }`}>
-                        {step.status === "done" ? "✓" : si + 1}
+                        {step.status === "done" ? <Check className="w-3 h-3" /> : si + 1}
                       </div>
 
                       {/* Step info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className={`text-xs font-semibold ${step.status === "done" ? "text-emerald-700" : step.status === "active" ? "text-blue-700" : "text-slate-400"}`}>{step.step}</p>
-                          {step.status === "done" && <span className="text-xs text-emerald-500">{step.date}</span>}
+                          <p className={`text-xs font-semibold ${step.status === "done" ? "text-success-700" : step.status === "active" ? "text-brand-700" : "text-slate-400"}`}>{step.step}</p>
+                          {step.status === "done" && <span className="text-xs text-success-500">{step.date}</span>}
                           {step.status === "active" && <Badge text="現在のステップ" color="blue" />}
                         </div>
                         {step.note && <p className="text-xs text-slate-400 mt-0.5">{step.note}</p>}
@@ -7752,7 +7759,7 @@ const MasterProcessors = () => {
                             merchantName: review.merchantName, processorName: review.processorName, currentStep: "審査申請", nextStep: "書類送付",
                             impacts: ["審査申請書（PDF）を自動生成", "審査ステータスが reviewing に変更", "接続先の審査部門に通知が送信される"],
                             confirmLabel: "審査申請を実行"
-                          })} className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 shadow-sm">▶ 審査申請を実行</button>
+                          })} className="px-3 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600 shadow-sm">▶ 審査申請を実行</button>
                         )}
 
                         {/* Step 2: 書類送付 */}
@@ -7761,8 +7768,8 @@ const MasterProcessors = () => {
                             type: "send_docs", title: "書類を接続先に送付", description: "準備済みの審査資料を接続先の審査部門に送付します。送付前に書類の内容を確認してください。",
                             merchantName: review.merchantName, processorName: review.processorName, currentStep: "書類送付", nextStep: "接続先審査中",
                             impacts: ["全書類が接続先審査部門に送付される", "送付日時が記録される", "接続先側の審査プロセスが開始される"],
-                            confirmLabel: "📤 書類を送付する"
-                          })} className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 shadow-sm">📤 書類を送付</button>
+                            confirmLabel: "書類を送付する"
+                          })} className="px-3 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600 shadow-sm"><Upload className="w-4 h-4 inline mr-1" /> 書類を送付</button>
                         )}
 
                         {/* Step 3: 接続先審査中 → 審査結果を記録 */}
@@ -7772,20 +7779,20 @@ const MasterProcessors = () => {
                               type: "advance", title: "一次審査通過を記録", description: "接続先から一次審査通過の連絡を受けた場合、次のステップに進めます。追加書類の要求がある場合は「追加書類要求」を選択してください。",
                               merchantName: review.merchantName, processorName: review.processorName, currentStep: "接続先審査中", nextStep: "追加書類対応 or 審査完了",
                               impacts: ["審査進捗が更新される", "タイムライン上の日時が記録される"],
-                              confirmLabel: "✓ 一次審査通過を記録"
-                            })} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700 shadow-sm">✓ 審査通過</button>
+                              confirmLabel: "一次審査通過を記録"
+                            })} className="px-3 py-1.5 bg-success-600 text-white rounded text-xs font-semibold hover:bg-success-700 shadow-sm"><Check className="w-4 h-4 inline mr-1" /> 審査通過</button>
                             <button onClick={() => setConfirmDialog({
                               type: "request_docs", title: "追加書類要求を登録", description: "接続先から追加書類の提出を求められた場合に登録します。要求された書類と期限を記録します。",
                               merchantName: review.merchantName, processorName: review.processorName, currentStep: "接続先審査中", nextStep: "追加書類対応",
                               impacts: ["追加書類要求がシステムに登録される", "対応期限が設定される", "担当者にアラート通知が送信される"],
-                              confirmLabel: "📩 追加要求を登録"
-                            })} className="px-3 py-1.5 bg-amber-500 text-white rounded text-xs font-semibold hover:bg-amber-600 shadow-sm">📩 追加書類要求</button>
+                              confirmLabel: "追加要求を登録"
+                            })} className="px-3 py-1.5 bg-warning-500 text-white rounded text-xs font-semibold hover:bg-warning-600 shadow-sm"><MailOpen className="w-4 h-4 inline mr-1" /> 追加書類要求</button>
                             <button onClick={() => setConfirmDialog({
                               type: "reject", title: "審査却下を記録", description: "接続先から審査却下の通知を受けた場合に記録します。却下理由の入力が必要です。",
                               merchantName: review.merchantName, processorName: review.processorName, currentStep: "接続先審査中", nextStep: "—（審査終了）",
                               impacts: ["審査ステータスが rejected に変更", "ルーティング対象から除外", "加盟店にメール通知が送信される"],
-                              confirmLabel: "❌ 却下を記録"
-                            })} className="px-2 py-1.5 bg-white text-rose-600 border border-rose-300 rounded text-xs font-semibold hover:bg-rose-50">✕ 却下</button>
+                              confirmLabel: "却下を記録"
+                            })} className="px-2 py-1.5 bg-white text-danger-600 border border-danger-300 rounded text-xs font-semibold hover:bg-danger-50 flex items-center gap-1"><X className="w-3.5 h-3.5" /> 却下</button>
                           </>
                         )}
 
@@ -7796,14 +7803,14 @@ const MasterProcessors = () => {
                               type: "send_docs", title: "追加書類を送付", description: "追加で要求された書類をアップロード・送付します。全ての要求書類が揃っていることを確認してください。",
                               merchantName: review.merchantName, processorName: review.processorName, currentStep: "追加書類対応", nextStep: "接続先で再審査",
                               impacts: ["追加書類が接続先に送付される", "追加要求のステータスが completed に変更", "接続先側の再審査が開始される"],
-                              confirmLabel: "📤 追加書類を送付"
-                            })} className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 shadow-sm">📤 追加書類を送付</button>
+                              confirmLabel: "追加書類を送付"
+                            })} className="px-3 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600 shadow-sm"><Upload className="w-4 h-4 inline mr-1" /> 追加書類を送付</button>
                             <button onClick={() => setConfirmDialog({
                               type: "advance", title: "追加審査の結果を記録", description: "追加書類送付後、接続先からの審査結果を記録します。",
                               merchantName: review.merchantName, processorName: review.processorName, currentStep: "追加書類対応", nextStep: "審査完了",
                               impacts: ["審査フローが次のステップに進む"],
-                              confirmLabel: "✓ 結果を記録"
-                            })} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700 shadow-sm">✓ 審査通過</button>
+                              confirmLabel: "結果を記録"
+                            })} className="px-3 py-1.5 bg-success-600 text-white rounded text-xs font-semibold hover:bg-success-700 shadow-sm"><Check className="w-4 h-4 inline mr-1" /> 審査通過</button>
                           </>
                         )}
 
@@ -7814,8 +7821,8 @@ const MasterProcessors = () => {
                               type: "conditions", title: "接続先の条件を登録", description: "接続先から提示された取引条件を登録します。これらの条件は契約書に反映されます。接続先ごとに条件が異なるため、提示された内容を正確に入力してください。",
                               merchantName: review.merchantName, processorName: review.processorName, currentStep: "条件確定", nextStep: "契約書送付",
                               impacts: ["入力した条件が契約書に自動反映される", "手数料率がルーティングのコスト最適化計算に使用される", "入金サイクルが精算エンジンに登録される"],
-                              confirmLabel: "📋 条件を確定・登録"
-                            })} className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 shadow-sm">📋 条件を登録</button>
+                              confirmLabel: "条件を確定・登録"
+                            })} className="px-3 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600 shadow-sm"><ClipboardList className="w-4 h-4 inline mr-1" /> 条件を登録</button>
                           </>
                         )}
 
@@ -7826,9 +7833,9 @@ const MasterProcessors = () => {
                               type: "advance", title: "契約書を生成・送付", description: "接続先の条件（手数料率・入金サイクル等）を反映した契約書を生成し、加盟店に送付します。加盟店の署名を待ちます。",
                               merchantName: review.merchantName, processorName: review.processorName, currentStep: "契約書送付", nextStep: "加盟店署名待ち → 決済開始",
                               impacts: ["条件を反映した契約書PDFが自動生成される", "加盟店にメール通知 + 電子署名リクエストが送信される", "加盟店の署名完了後、決済開始ステップに進行可能"],
-                              confirmLabel: "📄 契約書を生成・送付"
-                            })} className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 shadow-sm">📄 契約書を生成・送付</button>
-                            <button className="px-2 py-1.5 bg-white text-slate-600 border rounded text-xs hover:bg-slate-100">👁 契約書プレビュー</button>
+                              confirmLabel: "契約書を生成・送付"
+                            })} className="px-3 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600 shadow-sm"><FileText className="w-4 h-4 inline mr-1" /> 契約書を生成・送付</button>
+                            <button className="px-2 py-1.5 bg-white text-slate-600 border rounded text-xs hover:bg-slate-100"><Eye className="w-4 h-4 inline mr-1" /> 契約書プレビュー</button>
                           </>
                         )}
 
@@ -7836,7 +7843,7 @@ const MasterProcessors = () => {
                         {si === 6 && step.status === "active" && (
                           <>
                             <button onClick={() => setConfirmDialog({
-                              type: "approve", title: "🎉 決済開始 — 接続先を有効化", description: "加盟店が契約書に署名済みであることを確認し、この接続先を有効化します。有効化後、決済トラフィックがこの接続先にもルーティングされるようになります。",
+                              type: "approve", title: "決済開始 — 接続先を有効化", description: "加盟店が契約書に署名済みであることを確認し、この接続先を有効化します。有効化後、決済トラフィックがこの接続先にもルーティングされるようになります。",
                               merchantName: review.merchantName, processorName: review.processorName, currentStep: "決済開始", nextStep: "ルーティング有効化",
                               impacts: [
                                 "merchant_processors のステータスが approved に変更",
@@ -7846,20 +7853,20 @@ const MasterProcessors = () => {
                                 "確定した手数料率がコスト最適化ルーティングに反映される",
                                 "審査書類・契約書が完了履歴に移動"
                               ],
-                              confirmLabel: "🎉 決済開始・接続先を有効化"
-                            })} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-bold hover:bg-emerald-700 shadow-sm ring-2 ring-emerald-300 ring-offset-1">🎉 決済開始・有効化</button>
+                              confirmLabel: "決済開始・接続先を有効化"
+                            })} className="px-3 py-1.5 bg-success-600 text-white rounded text-xs font-bold hover:bg-success-700 shadow-sm ring-2 ring-success-300 ring-offset-1"><Sparkles className="w-4 h-4 inline mr-1" /> 決済開始・有効化</button>
                             <button onClick={() => setConfirmDialog({
                               type: "reject", title: "契約不成立", description: "条件が折り合わない等の理由で契約不成立とします。",
                               merchantName: review.merchantName, processorName: review.processorName, currentStep: "決済開始", nextStep: "—（審査終了）",
                               impacts: ["審査ステータスが rejected に変更", "ルーティング対象から除外", "加盟店にメール通知が送信される"],
-                              confirmLabel: "❌ 契約不成立"
-                            })} className="px-2 py-1.5 bg-white text-rose-600 border border-rose-300 rounded text-xs font-semibold hover:bg-rose-50">✕ 契約不成立</button>
+                              confirmLabel: "契約不成立"
+                            })} className="px-2 py-1.5 bg-white text-danger-600 border border-danger-300 rounded text-xs font-semibold hover:bg-danger-50 flex items-center gap-1"><X className="w-3.5 h-3.5" /> 契約不成立</button>
                           </>
                         )}
 
                         {/* Done steps: 完了ラベル */}
                         {step.status === "done" && (
-                          <span className="text-xs text-emerald-500 px-2 py-1">完了 {step.date}</span>
+                          <span className="text-xs text-success-500 px-2 py-1">完了 {step.date}</span>
                         )}
                         {/* Pending steps: まだ到達していない */}
                         {step.status === "pending" && (
@@ -7872,8 +7879,8 @@ const MasterProcessors = () => {
 
                 {/* Additional document requests */}
                 {review.additionalRequests.length > 0 && (
-                  <div className="bg-amber-50 rounded border border-amber-200 p-2 mb-3">
-                    <p className="text-xs font-bold text-amber-800 mb-1">📩 接続先からの追加書類要求</p>
+                  <div className="bg-warning-50 rounded border border-warning-200 p-2 mb-3">
+                    <p className="text-xs font-bold text-warning-800 mb-1"><MailOpen className="w-4 h-4 inline mr-1" /> 接続先からの追加書類要求</p>
                     {review.additionalRequests.map((req, qi) => (
                       <div key={qi} className="text-xs">
                         <div className="flex items-center gap-2 mb-1">
@@ -7884,9 +7891,9 @@ const MasterProcessors = () => {
                         </div>
                         <ul className="ml-4 space-y-0.5">
                           {req.items.map((item, ii) => (
-                            <li key={ii} className="text-amber-700 flex items-center gap-1">
-                              <span>📎</span> {item}
-                              <button className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">アップロード</button>
+                            <li key={ii} className="text-warning-700 flex items-center gap-1">
+                              <Paperclip className="w-4 h-4 inline" /> {item}
+                              <button className="ml-2 px-2 py-0.5 bg-brand-100 text-brand-700 rounded text-xs">アップロード</button>
                             </li>
                           ))}
                         </ul>
@@ -7896,15 +7903,15 @@ const MasterProcessors = () => {
                 )}
 
                 {/* Documents */}
-                <p className="text-xs font-bold text-slate-600 mb-1">📄 審査資料一覧</p>
+                <p className="text-xs font-bold text-slate-600 mb-1"><FileText className="w-4 h-4 inline mr-1" /> 審査資料一覧</p>
                 <div className="bg-slate-50 rounded-lg border border-slate-200">
                   <div className="flex bg-slate-100 border-b text-xs font-semibold text-slate-500 px-3 py-1">
                     <div className="w-48">書類名</div><div className="w-24">種別</div><div className="w-16">形式</div><div className="w-16">サイズ</div><div className="w-20">送付日</div><div className="w-20">状態</div><div className="flex-1">操作</div>
                   </div>
                   {review.documents.map((doc, di) => (
-                    <div key={di} className={`flex items-center px-3 py-1 text-xs border-b last:border-0 ${doc.status === "waiting" ? "bg-amber-50" : ""}`}>
+                    <div key={di} className={`flex items-center px-3 py-1 text-xs border-b last:border-0 ${doc.status === "waiting" ? "bg-warning-50" : ""}`}>
                       <div className="w-48 text-slate-700 flex items-center gap-1">
-                        {doc.auto && <span className="text-blue-500" title="申込データから自動生成">🤖</span>}
+                        {doc.auto && <Bot className="w-4 h-4 inline" />}
                         {doc.name}
                       </div>
                       <div className="w-24"><Badge text={doc.type} color={doc.auto ? "blue" : doc.type === "追加要求" ? "yellow" : "gray"} /></div>
@@ -7915,16 +7922,16 @@ const MasterProcessors = () => {
                         <Badge text={doc.status === "sent" ? "送付済" : "未提出"} color={doc.status === "sent" ? "green" : "yellow"} />
                       </div>
                       <div className="flex-1 flex gap-1">
-                        {doc.status === "sent" && <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">⬇ DL</button>}
-                        {doc.status === "sent" && <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">👁 プレビュー</button>}
-                        {doc.status === "waiting" && <button className="px-2 py-0.5 bg-blue-500 text-white rounded text-xs">📎 アップロード</button>}
+                        {doc.status === "sent" && <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs"><ArrowDownRight className="w-4 h-4 inline" /> DL</button>}
+                        {doc.status === "sent" && <button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs"><Eye className="w-4 h-4 inline mr-1" /> プレビュー</button>}
+                        {doc.status === "waiting" && <button className="px-2 py-0.5 bg-brand-500 text-white rounded text-xs"><Paperclip className="w-4 h-4 inline mr-1" /> アップロード</button>}
                       </div>
                     </div>
                   ))}
                 </div>
                 <div className="flex gap-2 mt-2 justify-end">
-                  <button className="px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs border">📦 全書類を一括DL（ZIP）</button>
-                  <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs border border-blue-200">📤 接続先向け審査パッケージ生成</button>
+                  <button className="px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs border"><Package className="w-4 h-4 inline mr-1" /> 全書類を一括DL（ZIP）</button>
+                  <button className="px-3 py-1 bg-brand-100 text-brand-700 rounded text-xs border border-brand-200"><Upload className="w-4 h-4 inline mr-1" /> 接続先向け審査パッケージ生成</button>
                 </div>
               </div>
             </div>
@@ -7932,7 +7939,7 @@ const MasterProcessors = () => {
 
           {/* 審査フロー操作ログ */}
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-            <p className="text-xs font-bold text-slate-700 mb-2">📝 操作ログ（直近の審査フロー操作）</p>
+            <p className="text-xs font-bold text-slate-700 mb-2"><PenLine className="w-4 h-4 inline mr-1" /> 操作ログ（直近の審査フロー操作）</p>
             <div className="space-y-1">
               {[
                 { time: "02/11 10:32", user: "admin@aipaymentsys.com", action: "書類送付", target: "XYZショップ → Univa Pay cast", detail: "審査資料6件を送付" },
@@ -7977,16 +7984,16 @@ const MasterProcessors = () => {
                 <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-500">{h.approvedAt}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-20 text-center"><Badge text={`${h.reviewDays}日`} color={h.reviewDays <= 7 ? "green" : h.reviewDays <= 14 ? "blue" : "yellow"} /></td>
                 <td className="px-4 py-2 whitespace-nowrap w-20 text-center text-slate-500">{h.docs}件</td>
-                <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text="✅ 承認" color="green" /></td>
-                <td className="px-4 py-2 whitespace-nowrap w-20"><button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">📄 DL</button></td>
+                <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text="承認" color="green" /></td>
+                <td className="px-4 py-2 whitespace-nowrap w-20"><button className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs"><FileText className="w-4 h-4 inline mr-1" /> DL</button></td>
               </tr>
             ))}
             </TableHeader>
           </div>
 
           {/* AI insight */}
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-3">
-            <p className="text-xs font-bold text-blue-700 mb-1">🤖 AI分析: 審査傾向</p>
+          <div className="bg-gradient-to-r from-brand-50 to-purple-50 rounded-lg border border-brand-200 p-3">
+            <p className="text-xs font-bold text-brand-700 mb-1"><Bot className="w-4 h-4 inline mr-1" /> AI分析: 審査傾向</p>
             <div className="grid grid-cols-3 gap-3 text-xs text-slate-600">
               <div>Simpletransactは審査が最速（平均7日）で、カードプロセッサー経由のため審査基準が比較的緩やか。新規加盟店の初期接続先として最適。</div>
               <div>アクワイアラー直接接続（TCMS/ONTHELINE/Asiabill）は審査が厳格（18〜25日）。取引実績が十分に蓄積された加盟店に推薦。</div>
@@ -8000,17 +8007,17 @@ const MasterProcessors = () => {
       {activeTab === "documents" && (
         <div className="space-y-3">
           {/* Storage Architecture */}
-          <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg border p-3">
-            <p className="text-xs font-bold text-slate-700 mb-2">📁 審査資料ストレージ構成</p>
+          <div className="bg-gradient-to-r from-gray-50 to-brand-50 rounded-lg border p-3">
+            <p className="text-xs font-bold text-slate-700 mb-2"><FolderOpen className="w-4 h-4 inline mr-1" /> 審査資料ストレージ構成</p>
             <div className="flex gap-4 text-xs">
               <div className="flex-1 bg-white rounded-lg border border-slate-200 p-2.5">
-                <p className="font-semibold text-blue-600 mb-1">☁️ S3（ファイル本体）</p>
+                <p className="font-semibold text-brand-600 mb-1"><Globe className="w-4 h-4 inline mr-1" /> S3（ファイル本体）</p>
                 <p className="text-slate-500">s3://aipayment-documents-prod/</p>
                 <p className="text-slate-400 mt-1">AES-256暗号化 / バージョニング有効 / ライフサイクル: 7年保管</p>
               </div>
               <div className="text-slate-300 flex items-center">⟷</div>
               <div className="flex-1 bg-white rounded-lg border border-slate-200 p-2.5">
-                <p className="font-semibold text-emerald-600 mb-1">🗄️ RDS（メタデータ）</p>
+                <p className="font-semibold text-success-600 mb-1"><Archive className="w-4 h-4 inline mr-1" /> RDS（メタデータ）</p>
                 <p className="text-slate-500">review_documents テーブル</p>
                 <p className="text-slate-400 mt-1">ファイルパス / ステータス / アップロード日時 / 送付日時 / 種別</p>
               </div>
@@ -8020,8 +8027,8 @@ const MasterProcessors = () => {
           {/* Document type templates */}
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
             <div className="flex justify-between items-center mb-2">
-              <p className="text-xs font-bold text-slate-700">📋 審査書類テンプレート（接続先への送付パッケージ）</p>
-              <button className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded border border-blue-200">テンプレート編集</button>
+              <p className="text-xs font-bold text-slate-700"><ClipboardList className="w-4 h-4 inline mr-1" /> 審査書類テンプレート（接続先への送付パッケージ）</p>
+              <button className="text-xs bg-brand-100 text-brand-700 px-2 py-1 rounded border border-brand-200">テンプレート編集</button>
             </div>
             <div className="space-y-1.5">
               {[
@@ -8034,11 +8041,11 @@ const MasterProcessors = () => {
                 { name: "古物商許可証", source: "申込時アップロード（任意）", desc: "中古品販売の場合のみ必要", required: false, auto: false },
               ].map((t, i) => (
                 <div key={i} className="flex items-center gap-2 p-2 rounded border text-xs hover:bg-slate-50">
-                  <span className={`w-5 text-center ${t.auto ? "text-blue-500" : "text-slate-400"}`}>{t.auto ? "🤖" : "📎"}</span>
+                  <span className={`w-5 text-center ${t.auto ? "text-brand-500" : "text-slate-400"}`}>{t.auto ? "" : ""}</span>
                   <div className="w-40 font-semibold text-slate-700">{t.name}</div>
                   <Badge text={t.source} color={t.auto ? "blue" : "gray"} />
                   <span className="flex-1 text-slate-400">{t.desc}</span>
-                  <span className={t.required ? "text-rose-500" : "text-slate-300"}>{t.required ? "必須" : "任意"}</span>
+                  <span className={t.required ? "text-danger-500" : "text-slate-300"}>{t.required ? "必須" : "任意"}</span>
                 </div>
               ))}
             </div>
@@ -8046,28 +8053,28 @@ const MasterProcessors = () => {
 
           {/* Data model reference */}
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-            <p className="text-xs font-bold text-slate-700 mb-2">🗄️ review_documents テーブル定義</p>
+            <p className="text-xs font-bold text-slate-700 mb-2"><Archive className="w-4 h-4 inline mr-1" /> review_documents テーブル定義</p>
             <div className="bg-slate-50 rounded-lg border border-slate-200">
               <div className="flex bg-slate-100 border-b text-xs font-semibold text-slate-500 px-3 py-1">
                 <div className="w-36">カラム</div><div className="w-28">型</div><div className="w-12">必須</div><div className="flex-1">説明</div>
               </div>
               {[
-                ["id", "UUID", "✅", "ドキュメントID（PK）"],
-                ["merchant_id", "UUID", "✅", "加盟店ID（FK → merchants）"],
-                ["processor_id", "UUID", "✅", "接続先ID（FK → processors）"],
-                ["document_type", "ENUM", "✅", "application_form / registration / id_doc / financial / screenshot / stl / license / additional"],
-                ["file_path", "TEXT", "✅", "S3上のファイルパス（s3://bucket/merchant_id/processor_id/filename）"],
-                ["file_name", "TEXT", "✅", "オリジナルファイル名"],
-                ["file_size", "INTEGER", "✅", "ファイルサイズ（bytes）"],
-                ["mime_type", "TEXT", "✅", "application/pdf, image/jpeg 等"],
-                ["source", "ENUM", "✅", "auto_generated / merchant_upload / additional_request"],
-                ["status", "ENUM", "✅", "draft / ready / sent / received / verified"],
-                ["uploaded_at", "TIMESTAMP", "✅", "アップロード日時"],
+                ["id", "UUID", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "ドキュメントID（PK）"],
+                ["merchant_id", "UUID", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "加盟店ID（FK → merchants）"],
+                ["processor_id", "UUID", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "接続先ID（FK → processors）"],
+                ["document_type", "ENUM", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "application_form / registration / id_doc / financial / screenshot / stl / license / additional"],
+                ["file_path", "TEXT", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "S3上のファイルパス（s3://bucket/merchant_id/processor_id/filename）"],
+                ["file_name", "TEXT", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "オリジナルファイル名"],
+                ["file_size", "INTEGER", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "ファイルサイズ（bytes）"],
+                ["mime_type", "TEXT", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "application/pdf, image/jpeg 等"],
+                ["source", "ENUM", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "auto_generated / merchant_upload / additional_request"],
+                ["status", "ENUM", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "draft / ready / sent / received / verified"],
+                ["uploaded_at", "TIMESTAMP", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "アップロード日時"],
                 ["sent_at", "TIMESTAMP", "", "接続先への送付日時"],
                 ["request_id", "UUID", "", "追加要求ID（追加書類の場合のみ FK → additional_requests）"],
               ].map((row, i) => (
                 <div key={i} className={`flex items-center px-3 py-1 text-xs border-b last:border-0 ${i % 2 ? "bg-slate-50" : ""}`}>
-                  <div className="w-36 font-mono text-blue-600">{row[0]}</div>
+                  <div className="w-36 font-mono text-brand-600">{row[0]}</div>
                   <div className="w-28 text-slate-500">{row[1]}</div>
                   <div className="w-12">{row[2]}</div>
                   <div className="flex-1 text-slate-600">{row[3]}</div>
@@ -8078,23 +8085,23 @@ const MasterProcessors = () => {
 
           {/* additional_requests table */}
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-            <p className="text-xs font-bold text-slate-700 mb-2">🗄️ additional_requests テーブル定義</p>
+            <p className="text-xs font-bold text-slate-700 mb-2"><Archive className="w-4 h-4 inline mr-1" /> additional_requests テーブル定義</p>
             <div className="bg-slate-50 rounded-lg border border-slate-200">
               <div className="flex bg-slate-100 border-b text-xs font-semibold text-slate-500 px-3 py-1">
                 <div className="w-36">カラム</div><div className="w-28">型</div><div className="w-12">必須</div><div className="flex-1">説明</div>
               </div>
               {[
-                ["id", "UUID", "✅", "追加要求ID（PK）"],
-                ["merchant_processor_id", "UUID", "✅", "加盟店×接続先の組合せID（FK → merchant_processors）"],
-                ["requested_by", "TEXT", "✅", "要求元（接続先の審査部門名等）"],
-                ["requested_at", "TIMESTAMP", "✅", "要求日時"],
+                ["id", "UUID", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "追加要求ID（PK）"],
+                ["merchant_processor_id", "UUID", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "加盟店×接続先の組合せID（FK → merchant_processors）"],
+                ["requested_by", "TEXT", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "要求元（接続先の審査部門名等）"],
+                ["requested_at", "TIMESTAMP", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "要求日時"],
                 ["deadline", "DATE", "", "対応期限"],
-                ["items", "JSONB", "✅", "要求された書類リスト（配列）"],
-                ["status", "ENUM", "✅", "open / partially_submitted / completed / expired"],
+                ["items", "JSONB", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "要求された書類リスト（配列）"],
+                ["status", "ENUM", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "open / partially_submitted / completed / expired"],
                 ["completed_at", "TIMESTAMP", "", "全書類提出完了日時"],
               ].map((row, i) => (
                 <div key={i} className={`flex items-center px-3 py-1 text-xs border-b last:border-0 ${i % 2 ? "bg-slate-50" : ""}`}>
-                  <div className="w-36 font-mono text-blue-600">{row[0]}</div>
+                  <div className="w-36 font-mono text-brand-600">{row[0]}</div>
                   <div className="w-28 text-slate-500">{row[1]}</div>
                   <div className="w-12">{row[2]}</div>
                   <div className="flex-1 text-slate-600">{row[3]}</div>
@@ -8112,19 +8119,19 @@ const MasterProcessors = () => {
           <div className="relative bg-white rounded-xl shadow-2xl w-[520px] max-h-[85vh] overflow-y-auto">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">接続先を追加</h3>
-              <button onClick={() => setShowAddProc(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <button onClick={() => setShowAddProc(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
-              <div><label className="text-xs font-semibold text-slate-600">接続先名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: Univa Pay cast" /></div>
-              <div><label className="text-xs font-semibold text-slate-600">接続種別 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>アクワイアラ</option><option>PSP（決済代行）</option><option>ウォレット</option></select></div>
+              <div><label className="text-xs font-semibold text-slate-600">接続先名 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: Univa Pay cast" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">接続種別 <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>アクワイアラ</option><option>PSP（決済代行）</option><option>ウォレット</option></select></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-xs font-semibold text-slate-600">対応ブランド <span className="text-rose-500">*</span></label>
+                <div><label className="text-xs font-semibold text-slate-600">対応ブランド <span className="text-danger-500">*</span></label>
                   <div className="flex flex-wrap gap-2 mt-1">{["VISA","Mastercard","JCB","AMEX","Diners"].map((b,i) => <label key={i} className="flex items-center gap-1 text-xs"><input type="checkbox" defaultChecked={i<3} />{b}</label>)}</div>
                 </div>
-                <div><label className="text-xs font-semibold text-slate-600">通貨 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>JPY</option><option>USD</option><option>EUR</option></select></div>
+                <div><label className="text-xs font-semibold text-slate-600">通貨 <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>JPY</option><option>USD</option><option>EUR</option></select></div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-xs font-semibold text-slate-600">API Base URL <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="https://api.example.com/v1" /></div>
+                <div><label className="text-xs font-semibold text-slate-600">API Base URL <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="https://api.example.com/v1" /></div>
                 <div><label className="text-xs font-semibold text-slate-600">API認証方式</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>Bearer Token</option><option>Basic Auth</option><option>HMAC署名</option></select></div>
               </div>
               <div><label className="text-xs font-semibold text-slate-600">担当者メール</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="contact@processor.jp" /></div>
@@ -8132,7 +8139,7 @@ const MasterProcessors = () => {
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowAddProc(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setShowAddProc(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">接続先を追加</button>
+              <button onClick={() => setShowAddProc(false)} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">接続先を追加</button>
             </div>
           </div>
         </div>
@@ -8164,7 +8171,7 @@ const MasterTransactionMonitor = () => {
     <div className="p-5 space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-sm font-bold text-slate-800">リアルタイム監視</h2>
-        <span className="flex items-center gap-1.5 text-xs"><span className="w-2 h-2 bg-rose-500 rounded-full animate-pulse" />LIVE</span>
+        <span className="flex items-center gap-1.5 text-xs"><span className="w-2 h-2 bg-danger-500 rounded-full animate-pulse" />LIVE</span>
       </div>
 
       {/* ===== REALTIME CONTENT ===== */}
@@ -8182,12 +8189,12 @@ const MasterTransactionMonitor = () => {
           {/* Live indicator + Filter */}
           <div className="flex justify-between items-center">
             <div className="flex gap-2 items-center">
-              <span className="w-2 h-2 bg-rose-500 rounded-full animate-pulse" /><span className="text-xs text-rose-600 font-bold">🔴 LIVE</span>
+              <span className="w-2 h-2 bg-danger-500 rounded-full animate-pulse" /><span className="text-xs text-danger-600 font-bold"><Circle className="w-3 h-3 fill-danger-500 text-danger-500 inline" /> LIVE</span>
               <span className="text-xs text-slate-400">5秒ごと更新</span>
             </div>
             <div className="flex gap-1">
               {[{ id: "all", label: "全て", count: 8 }, { id: "成功", label: "成功", count: 5 }, { id: "失敗", label: "失敗", count: 1 }, { id: "3DS待ち", label: "3DS待ち", count: 1 }, { id: "不正検知", label: "不正検知", count: 1 }].map(f => (
-                <button key={f.id} onClick={() => setFilterStatus(f.id)} className={`text-xs px-2 py-1 rounded border ${filterStatus === f.id ? "bg-blue-50 text-blue-600 border-blue-200 font-semibold" : "bg-white text-slate-500"}`}>
+                <button key={f.id} onClick={() => setFilterStatus(f.id)} className={`text-xs px-2 py-1 rounded border ${filterStatus === f.id ? "bg-brand-50 text-brand-600 border-brand-200 font-semibold" : "bg-white text-slate-500"}`}>
                   {f.label} ({f.count})
                 </button>
               ))}
@@ -8196,10 +8203,10 @@ const MasterTransactionMonitor = () => {
 
           {/* Alert */}
           {txnData.some(t => t.status === "失敗") && (
-            <div className="bg-rose-50 rounded-lg border border-rose-300 p-2 flex items-center gap-2">
-              <span className="text-sm">🚨</span>
-              <span className="text-xs text-rose-700 font-semibold">Univa Pay castでタイムアウトが発生（14:51:40）— フェイルオーバーでWorldpayにリトライ済み</span>
-              <button className="ml-auto text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded border border-rose-200">詳細を確認</button>
+            <div className="bg-danger-50 rounded-lg border border-danger-300 p-2 flex items-center gap-2">
+              <AlertOctagon className="w-4 h-4 text-danger-500 inline" />
+              <span className="text-xs text-danger-700 font-semibold">Univa Pay castでタイムアウトが発生（14:51:40）— フェイルオーバーでWorldpayにリトライ済み</span>
+              <button className="ml-auto text-xs bg-danger-100 text-danger-700 px-2 py-1 rounded border border-danger-200">詳細を確認</button>
             </div>
           )}
 
@@ -8208,7 +8215,7 @@ const MasterTransactionMonitor = () => {
             <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "w-36" }, { label: "購入者", w: "w-32" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "接続先", w: "w-28" }, { label: "ルーティング", w: "w-28" }, { label: "応答", w: "w-16" }, { label: "3DS", w: "w-10" }, { label: "状態", w: "w-20" }, { label: "時刻", w: "w-20" }]}>
             {filtered.map((t, i) => (
               <React.Fragment key={t.id}>
-              <tr className={`border-b cursor-pointer transition-colors ${selectedTxn === t.id ? "bg-blue-100 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"} ${t.status === "失敗" || t.status === "不正検知" ? "bg-rose-50" : ""}`}
+              <tr className={`border-b cursor-pointer transition-colors ${selectedTxn === t.id ? "bg-brand-100 border-l-2 border-l-brand-500" : i % 2 ? "bg-slate-50 hover:bg-brand-50" : "hover:bg-brand-50"} ${t.status === "失敗" || t.status === "不正検知" ? "bg-danger-50" : ""}`}
                    onClick={() => setSelectedTxn(selectedTxn === t.id ? null : t.id)}>
                 <td className="px-4 py-2 whitespace-nowrap w-40 font-mono text-slate-500">{t.id}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-36 text-slate-700">{t.merchant}</td>
@@ -8221,17 +8228,17 @@ const MasterTransactionMonitor = () => {
                 <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-500">{t.processor}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-28"><Badge text={t.routing} color={t.routing.includes("AI") ? "purple" : "gray"} /></td>
                 <td className="px-4 py-2 whitespace-nowrap w-16 text-slate-400">{t.responseMs ? t.responseMs + "ms" : "—"}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-10 text-center">{t.is3ds ? "🔒" : "—"}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-10 text-center">{t.is3ds ? <CheckCircle2 className="w-4 h-4 text-success-600 inline" /> : "—"}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={t.status} color={t.sColor} /></td>
                 <td className="px-4 py-2 whitespace-nowrap w-20 text-slate-400 font-mono">{t.time}</td>
               </tr>
               {/* アコーディオン詳細 */}
               {selectedTxn === t.id && (
                 <tr><td colSpan={11} className="p-0">
-                  <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                  <div className="px-4 py-3 bg-brand-50 border-b border-l-2 border-l-brand-500">
                     <div className="flex justify-between items-center mb-2">
-                      <p className="text-xs font-bold text-slate-700">🔍 取引詳細 — {t.id}</p>
-                      <span className="text-xs text-blue-600 cursor-pointer hover:underline">注文検索で詳細を確認 →</span>
+                      <p className="text-xs font-bold text-slate-700"><Search className="w-4 h-4 inline mr-1" /> 取引詳細 — {t.id}</p>
+                      <span className="text-xs text-brand-600 cursor-pointer hover:underline">注文検索で詳細を確認 →</span>
                     </div>
                     <div className="grid grid-cols-5 gap-3 text-xs">
                       <div className="bg-white rounded-lg border border-slate-200 p-2.5">
@@ -8274,8 +8281,8 @@ const MasterTransactionMonitor = () => {
                         <div className="space-y-0.5 text-slate-500">
                           <div>レスポンスタイム: {t.responseMs ? t.responseMs + "ms" : "—"}</div>
                           <div>コード: {t.status === "成功" ? "00（正常完了）" : t.error ? "TO（タイムアウト）" : "—"}</div>
-                          {t.error && <div className="text-rose-600">{t.error}</div>}
-                          {t.failover && <div className="text-emerald-600">{t.failover}</div>}
+                          {t.error && <div className="text-danger-600">{t.error}</div>}
+                          {t.failover && <div className="text-success-600">{t.failover}</div>}
                         </div>
                       </div>
                     </div>
@@ -8293,11 +8300,11 @@ const MasterTransactionMonitor = () => {
               <p className="text-xs font-bold text-slate-600 mb-2">接続先別 レスポンスタイム</p>
               <div className="space-y-1.5">
                 {[
-                  { name: "ペイディ", avg: 75, color: "bg-emerald-500" },
-                  { name: "楽天銀行", avg: 85, color: "bg-emerald-500" },
-                  { name: "TCMS", avg: 95, color: "bg-emerald-500" },
-                  { name: "Worldpay", avg: 110, color: "bg-emerald-500" },
-                  { name: "Univa Pay cast", avg: 120, color: "bg-emerald-500" },
+                  { name: "ペイディ", avg: 75, color: "bg-success-500" },
+                  { name: "楽天銀行", avg: 85, color: "bg-success-500" },
+                  { name: "TCMS", avg: 95, color: "bg-success-500" },
+                  { name: "Worldpay", avg: 110, color: "bg-success-500" },
+                  { name: "Univa Pay cast", avg: 120, color: "bg-success-500" },
                 ].map((p, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs">
                     <span className="w-20 text-slate-600">{p.name}</span>
@@ -8311,11 +8318,11 @@ const MasterTransactionMonitor = () => {
               <p className="text-xs font-bold text-slate-600 mb-2">ブランド別 決済件数</p>
               <div className="space-y-1.5">
                 {[
-                  { brand: "VISA", count: 823, pct: 44.5, color: "bg-blue-500" },
-                  { brand: "MC", count: 412, pct: 22.3, color: "bg-rose-500" },
-                  { brand: "JCB", count: 356, pct: 19.3, color: "bg-emerald-500" },
+                  { brand: "VISA", count: 823, pct: 44.5, color: "bg-brand-500" },
+                  { brand: "MC", count: 412, pct: 22.3, color: "bg-danger-500" },
+                  { brand: "JCB", count: 356, pct: 19.3, color: "bg-success-500" },
                   { brand: "AMEX", count: 134, pct: 7.3, color: "bg-purple-500" },
-                  { brand: "WEBマネー", count: 122, pct: 6.6, color: "bg-amber-500" },
+                  { brand: "WEBマネー", count: 122, pct: 6.6, color: "bg-warning-500" },
                 ].map((b, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs">
                     <span className="w-12 text-slate-600 font-semibold">{b.brand}</span>
@@ -8330,7 +8337,7 @@ const MasterTransactionMonitor = () => {
               <div className="flex items-end gap-1 h-20">
                 {[20, 15, 8, 5, 3, 4, 12, 45, 78, 95, 110, 125, 130, 118, 105].map((v, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center">
-                    <div className="bg-blue-400 rounded-t w-full" style={{ height: `${(v / 130) * 64}px` }} />
+                    <div className="bg-brand-400 rounded-t w-full" style={{ height: `${(v / 130) * 64}px` }} />
                     <span className="text-slate-400 mt-0.5" style={{fontSize: "7px"}}>{i}時</span>
                   </div>
                 ))}
@@ -8363,12 +8370,12 @@ const MasterOrderSearch = () => {
     <div className="p-5 space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-sm font-bold text-slate-800">注文検索</h2>
-        <button className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">📥 CSVエクスポート</button>
+        <button className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSVエクスポート</button>
       </div>
 
       {/* Search Form */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <p className="text-xs font-bold text-slate-600 mb-2">🔍 検索条件</p>
+        <p className="text-xs font-bold text-slate-600 mb-2"><Search className="w-4 h-4 inline mr-1" /> 検索条件</p>
         <div className="grid grid-cols-4 gap-2">
           <div><label className="text-xs text-slate-400">取引ID</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="TXN-..." /></div>
           <div><label className="text-xs text-slate-400">加盟店名</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="加盟店名で検索" /></div>
@@ -8398,7 +8405,7 @@ const MasterOrderSearch = () => {
           </div>
           <div className="flex gap-2">
             <button className="text-xs text-slate-400 hover:text-slate-600">検索条件をクリア</button>
-            <button className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold">検索</button>
+            <button className="text-xs bg-brand-500 text-white px-4 py-1.5 rounded font-semibold">検索</button>
           </div>
         </div>
       </div>
@@ -8409,13 +8416,13 @@ const MasterOrderSearch = () => {
           <span className="text-xs text-slate-500">検索結果: 5件（1/1ページ）</span>
           <div className="flex gap-1 text-xs">
             <span className="text-slate-400">表示:</span>
-            {["20","50","100"].map(n => <button key={n} className={`px-1.5 py-0.5 rounded ${n === "20" ? "bg-blue-100 text-blue-600" : "text-slate-400"}`}>{n}件</button>)}
+            {["20","50","100"].map(n => <button key={n} className={`px-1.5 py-0.5 rounded ${n === "20" ? "bg-brand-100 text-brand-600" : "text-slate-400"}`}>{n}件</button>)}
           </div>
         </div>
         <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "w-36" }, { label: "購入者", w: "w-32" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "ステータス", w: "w-20" }, { label: "日時", w: "w-36" }, { label: "操作", w: "w-36" }]}>
         {searchResults.map((t, i) => (
           <React.Fragment key={t.id}>
-          <tr className={`border-b cursor-pointer transition-colors ${expandedOrderId === t.id ? "bg-blue-100 border-l-2 border-l-blue-500" : i % 2 ? "bg-slate-50 hover:bg-blue-50" : "hover:bg-blue-50"}`} onClick={() => setExpandedOrderId(expandedOrderId === t.id ? null : t.id)}>
+          <tr className={`border-b cursor-pointer transition-colors ${expandedOrderId === t.id ? "bg-brand-100 border-l-2 border-l-brand-500" : i % 2 ? "bg-slate-50 hover:bg-brand-50" : "hover:bg-brand-50"}`} onClick={() => setExpandedOrderId(expandedOrderId === t.id ? null : t.id)}>
             <td className="px-4 py-2 whitespace-nowrap w-40 font-mono text-slate-500">{t.id}</td>
             <td className="px-4 py-2 whitespace-nowrap w-36 text-slate-700">{t.merchant}</td>
             <td className="px-4 py-2 whitespace-nowrap w-32">
@@ -8429,7 +8436,7 @@ const MasterOrderSearch = () => {
             <td className="px-4 py-2 whitespace-nowrap w-36" onClick={e => e.stopPropagation()}><div className="flex gap-1">
               {t.status === "成功" && (<>
                 <button onClick={() => setRefundDialog({ ...t, type: "full" })} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs border border-purple-200">返金</button>
-                <button onClick={() => setRefundDialog({ ...t, type: "cancel" })} className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs border border-rose-200">キャンセル</button>
+                <button onClick={() => setRefundDialog({ ...t, type: "cancel" })} className="px-2 py-1 bg-danger-100 text-danger-700 rounded text-xs border border-danger-200">キャンセル</button>
               </>)}
               {t.status === "返金済" && <span className="text-xs text-purple-500">返金済 ¥{t.refundAmount?.toLocaleString()}</span>}
               {t.status === "キャンセル" && <span className="text-xs text-slate-400">キャンセル済</span>}
@@ -8438,9 +8445,9 @@ const MasterOrderSearch = () => {
           {/* アコーディオン詳細 */}
           {expandedOrderId === t.id && (
             <tr><td colSpan={8} className="p-0">
-              <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+              <div className="px-4 py-3 bg-brand-50 border-b border-l-2 border-l-brand-500">
                 <div className="flex justify-between items-center mb-2">
-                  <p className="text-xs font-bold text-slate-700">🔍 注文詳細 — {t.id}</p>
+                  <p className="text-xs font-bold text-slate-700"><Search className="w-4 h-4 inline mr-1" /> 注文詳細 — {t.id}</p>
                   <Badge text={t.status} color={t.sColor} />
                 </div>
                 <div className="grid grid-cols-4 gap-3 text-xs">
@@ -8479,10 +8486,10 @@ const MasterOrderSearch = () => {
                   <div className="bg-white rounded-lg border border-slate-200 p-2.5">
                     <p className="font-semibold text-slate-600 mb-1">処理ログ</p>
                     <div className="space-y-1 text-slate-500">
-                      <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />{t.date.split(" ")[1]} 受付</div>
-                      <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />{t.date.split(" ")[1]} 3DS認証</div>
-                      <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />{t.date.split(" ")[1]} オーソリ</div>
-                      <div className="flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full shrink-0 ${t.status === "成功" ? "bg-emerald-500" : t.status === "返金済" ? "bg-purple-500" : "bg-slate-400"}`} />{t.date.split(" ")[1]} {t.status === "成功" ? "売上確定" : t.status === "返金済" ? "返金処理" : t.status}</div>
+                      <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-success-500 shrink-0" />{t.date.split(" ")[1]} 受付</div>
+                      <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-success-500 shrink-0" />{t.date.split(" ")[1]} 3DS認証</div>
+                      <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-success-500 shrink-0" />{t.date.split(" ")[1]} オーソリ</div>
+                      <div className="flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full shrink-0 ${t.status === "成功" ? "bg-success-500" : t.status === "返金済" ? "bg-purple-500" : "bg-slate-400"}`} />{t.date.split(" ")[1]} {t.status === "成功" ? "売上確定" : t.status === "返金済" ? "返金処理" : t.status}</div>
                     </div>
                   </div>
                 </div>
@@ -8495,15 +8502,15 @@ const MasterOrderSearch = () => {
       </div>
 
       <div className="bg-slate-50 rounded-lg border border-slate-200 p-2.5 flex items-center gap-2 text-xs text-slate-400">
-        <span>🔒</span><span>返金・キャンセル操作は super_admin / admin のみ。reviewer は閲覧のみです。</span>
+        <Lock className="w-4 h-4 inline" /><span>返金・キャンセル操作は super_admin / admin のみ。reviewer は閲覧のみです。</span>
       </div>
 
       {/* Refund/Cancel Dialog */}
       {refundDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setRefundDialog(null)}>
           <div className="bg-white rounded-xl shadow-2xl w-[440px]" onClick={e => e.stopPropagation()}>
-            <div className={`p-4 rounded-t-xl border-b ${refundDialog.type === "cancel" ? "bg-rose-50" : "bg-purple-50"}`}>
-              <h3 className="text-sm font-bold text-slate-800">{refundDialog.type === "cancel" ? "🚫 取引キャンセル" : "💜 返金処理"}</h3>
+            <div className={`p-4 rounded-t-xl border-b ${refundDialog.type === "cancel" ? "bg-danger-50" : "bg-purple-50"}`}>
+              <h3 className="text-sm font-bold text-slate-800">{refundDialog.type === "cancel" ? "取引キャンセル" : <><RotateCcw className="w-4 h-4 inline mr-1" /> 返金処理</>}</h3>
             </div>
             <div className="p-5 space-y-4">
               <div className="bg-slate-50 rounded-lg border border-slate-200 p-2.5 space-y-1 text-xs">
@@ -8525,7 +8532,7 @@ const MasterOrderSearch = () => {
             </div>
             <div className="flex justify-end gap-2 p-4 border-t">
               <button onClick={() => setRefundDialog(null)} className="px-4 py-2 text-xs text-slate-600 border rounded">キャンセル</button>
-              <button onClick={() => setRefundDialog(null)} className={`px-4 py-2 text-xs text-white rounded font-semibold ${refundDialog.type === "cancel" ? "bg-rose-600" : "bg-purple-600"}`}>
+              <button onClick={() => setRefundDialog(null)} className={`px-4 py-2 text-xs text-white rounded font-semibold ${refundDialog.type === "cancel" ? "bg-danger-600" : "bg-purple-600"}`}>
                 {refundDialog.type === "cancel" ? "キャンセルする" : "返金する"}
               </button>
             </div>
@@ -8540,7 +8547,7 @@ const MasterOrderSearch = () => {
           <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
             <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">注文詳細</h3>
-              <button onClick={() => setSearchSlide(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <button onClick={() => setSearchSlide(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-4 space-y-3 text-xs">
               <div className="space-y-1.5">
@@ -8556,7 +8563,7 @@ const MasterOrderSearch = () => {
                 <div className="space-y-1.5">
                   <div className="flex justify-between"><span className="text-slate-400">ユーザー名</span><span className="font-semibold">{searchSlide.userName}</span></div>
                   <div className="flex justify-between"><span className="text-slate-400">ユーザーID</span><span className="font-mono">{searchSlide.userId}</span></div>
-                  <div className="flex justify-between"><span className="text-slate-400">メール</span><span className="text-blue-600">{searchSlide.userEmail}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400">メール</span><span className="text-brand-600">{searchSlide.userEmail}</span></div>
                   <div className="flex justify-between"><span className="text-slate-400">カード名義</span><span>TARO TANAKA</span></div>
                 </div>
               </div>
@@ -8653,16 +8660,16 @@ const ConditionBuilder = ({ conditions, onChange }) => {
             {gi > 0 && (
               <div className="flex items-center gap-2 my-1.5">
                 <div className="flex-1 border-t border-slate-200" />
-                <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-bold">AND</span>
+                <span className="px-2 py-0.5 rounded bg-brand-100 text-brand-700 text-xs font-bold">AND</span>
                 <div className="flex-1 border-t border-slate-200" />
               </div>
             )}
-            <div className={`rounded-lg border p-2.5 ${conditions.length > 1 ? "border-blue-200 bg-blue-50/30" : "border-slate-200 bg-slate-50/50"}`}>
+            <div className={`rounded-lg border p-2.5 ${conditions.length > 1 ? "border-brand-200 bg-brand-50/30" : "border-slate-200 bg-slate-50/50"}`}>
               {group.rules.length > 1 && (
                 <div className="flex items-center gap-1.5 mb-2">
                   <span className="text-xs text-slate-500">グループ内条件:</span>
                   {["AND","OR"].map(l => (
-                    <button key={l} onClick={() => updateGroupLogic(gi, l)} className={`px-2 py-0.5 rounded text-xs font-bold ${group.logic === l ? (l === "AND" ? "bg-blue-600 text-white" : "bg-amber-500 text-white") : "bg-white text-slate-400 border"}`}>{l}</button>
+                    <button key={l} onClick={() => updateGroupLogic(gi, l)} className={`px-2 py-0.5 rounded text-xs font-bold ${group.logic === l ? (l === "AND" ? "bg-brand-500 text-white" : "bg-warning-500 text-white") : "bg-white text-slate-400 border"}`}>{l}</button>
                   ))}
                   <span className="text-xs text-slate-400 ml-1">{group.logic === "AND" ? "（すべて満たす）" : "（いずれか満たす）"}</span>
                 </div>
@@ -8674,7 +8681,7 @@ const ConditionBuilder = ({ conditions, onChange }) => {
                   return (
                     <div key={ri} className="flex items-center gap-1.5 bg-white rounded border border-slate-200 p-1.5">
                       {ri > 0 && group.rules.length > 1 && (
-                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${group.logic === "AND" ? "bg-blue-100 text-blue-600" : "bg-amber-100 text-amber-600"}`}>{group.logic}</span>
+                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${group.logic === "AND" ? "bg-brand-100 text-brand-600" : "bg-warning-100 text-warning-600"}`}>{group.logic}</span>
                       )}
                       <select value={rule.field} onChange={e => updateRule(gi, ri, "field", e.target.value)} className="text-xs border rounded px-1.5 py-1 bg-white min-w-[130px]">
                         {fieldDefs.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
@@ -8707,20 +8714,20 @@ const ConditionBuilder = ({ conditions, onChange }) => {
                           {TIME_WINDOWS.map(t => <option key={t} value={t}>{t}以内</option>)}
                         </select>
                       )}
-                      <button onClick={() => removeRule(gi, ri)} className="text-slate-300 hover:text-rose-500 text-sm px-1" title="条件を削除">✕</button>
+                      <button onClick={() => removeRule(gi, ri)} className="text-slate-300 hover:text-danger-500 text-sm px-1" title="条件を削除"><X className="w-4 h-4" /></button>
                     </div>
                   );
                 })}
               </div>
               <div className="flex items-center gap-2 mt-1.5">
-                <button onClick={() => addRule(gi)} className="text-xs text-blue-600 hover:text-blue-800 font-semibold">+ 条件を追加</button>
-                {conditions.length > 1 && <button onClick={() => removeGroup(gi)} className="text-xs text-rose-400 hover:text-rose-600 ml-auto">グループ削除</button>}
+                <button onClick={() => addRule(gi)} className="text-xs text-brand-600 hover:text-brand-800 font-semibold">+ 条件を追加</button>
+                {conditions.length > 1 && <button onClick={() => removeGroup(gi)} className="text-xs text-danger-400 hover:text-danger-600 ml-auto">グループ削除</button>}
               </div>
             </div>
           </div>
         );
       })}
-      <button onClick={addGroup} className="text-xs text-blue-600 hover:text-blue-800 font-semibold border border-dashed border-blue-300 rounded-lg px-3 py-1.5 w-full hover:bg-blue-50 transition-colors">+ ANDグループを追加</button>
+      <button onClick={addGroup} className="text-xs text-brand-600 hover:text-brand-800 font-semibold border border-dashed border-brand-300 rounded-lg px-3 py-1.5 w-full hover:bg-brand-50 transition-colors">+ ANDグループを追加</button>
     </div>
   );
 };
@@ -8792,8 +8799,8 @@ const MasterFraudSettings = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-sm font-bold text-slate-800">不正検知設定</h2>
         <div className="flex gap-2">
-          <button onClick={() => setTestMode(!testMode)} className={`text-xs px-3 py-1 rounded border font-semibold ${testMode ? "bg-amber-500 text-white border-yellow-500" : "bg-amber-100 text-amber-700 border-amber-300"}`}>{testMode ? "🧪 テスト中" : "🧪 テストモード"}</button>
-          <button onClick={() => setShowAddRule(true)} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ ルール追加</button>
+          <button onClick={() => setTestMode(!testMode)} className={`text-xs px-3 py-1 rounded border font-semibold ${testMode ? "bg-warning-500 text-white border-warning-500" : "bg-warning-100 text-warning-700 border-warning-300"}`}>{testMode ? "テスト中" : "テストモード"}</button>
+          <button onClick={() => setShowAddRule(true)} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold">+ ルール追加</button>
         </div>
       </div>
 
@@ -8809,7 +8816,7 @@ const MasterFraudSettings = () => {
       {/* Tabs */}
       <div className="flex gap-1 border-b">
         {[{ id: "rules", label: "ルール管理" }, { id: "ai", label: "AIモデル設定" }, { id: "lists", label: "ブロック/ホワイトリスト" }, { id: "import", label: "CSVインポート" }, { id: "ng_list", label: "制限登録禁止リスト" }, { id: "candidates", label: "候補" }, { id: "log", label: "検知ログ" }, { id: "merchant", label: "加盟店別設定" }].map(tab => (
-          <button key={tab.id} onClick={() => setRuleTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 ${ruleTab === tab.id ? "border-blue-500 text-blue-600 font-semibold" : "border-transparent text-slate-400"}`}>{tab.label}</button>
+          <button key={tab.id} onClick={() => setRuleTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 ${ruleTab === tab.id ? "border-brand-500 text-brand-600 font-semibold" : "border-transparent text-slate-400"}`}>{tab.label}</button>
         ))}
       </div>
 
@@ -8817,14 +8824,14 @@ const MasterFraudSettings = () => {
       {ruleTab === "rules" && (
         <div className="space-y-3">
           {/* Approval Flow Notice */}
-          <div className="bg-blue-50 rounded border border-blue-200 p-2 flex items-center gap-2 text-xs">
-            <span>🔒</span>
-            <span className="text-blue-700">ルール変更は <strong>admin → super_admin の2段階承認</strong>が必要です。super_adminは直接変更可能。</span>
+          <div className="bg-brand-50 rounded border border-brand-200 p-2 flex items-center gap-2 text-xs">
+            <Lock className="w-4 h-4 inline" />
+            <span className="text-brand-700">ルール変更は <strong>admin → super_admin の2段階承認</strong>が必要です。super_adminは直接変更可能。</span>
           </div>
           {/* ルールアコーディオン */}
           <div className="space-y-2">
             {fraudRules.map((r) => (
-              <div key={r.id} className={`bg-white rounded-lg border shadow-sm ${!r.enabled ? "opacity-60" : ""} ${expandedRule === r.id ? "border-blue-300 ring-1 ring-blue-100" : "border-slate-200"}`}>
+              <div key={r.id} className={`bg-white rounded-lg border shadow-sm ${!r.enabled ? "opacity-60" : ""} ${expandedRule === r.id ? "border-brand-300 ring-1 ring-brand-100" : "border-slate-200"}`}>
                 {/* ヘッダー（クリックで開閉） */}
                 <button onClick={() => setExpandedRule(expandedRule === r.id ? null : r.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-slate-50 transition-colors rounded-lg">
                   <span className={`text-xs transition-transform ${expandedRule === r.id ? "rotate-90" : ""}`}>▶</span>
@@ -8835,7 +8842,7 @@ const MasterFraudSettings = () => {
                   <Badge text={r.action} color={r.action.includes("ブロック") ? "red" : "yellow"} />
                   <span className="text-xs text-slate-500 w-16 text-right">優先: {r.priority}</span>
                   <span className="text-xs text-slate-500 w-16 text-right">{r.hits30d}件/30d</span>
-                  {r.enabled ? <span className="text-emerald-500 text-xs">●有効</span> : <span className="text-slate-300 text-xs">○無効</span>}
+                  {r.enabled ? <span className="text-success-500 text-xs">●有効</span> : <span className="text-slate-300 text-xs">○無効</span>}
                 </button>
                 {/* 展開コンテンツ */}
                 {expandedRule === r.id && (
@@ -8874,15 +8881,15 @@ const MasterFraudSettings = () => {
                         </select>
                       </div>
                     </div>
-                    <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">
+                    <div className="bg-brand-50 rounded border border-brand-200 p-2 text-xs text-brand-700">
                       <div className="flex justify-between"><span>30日間の検知数: <strong>{r.hits30d}件</strong></span><span>作成者: admin</span><span>最終更新: 2026-02-10</span></div>
                     </div>
                     <div className="flex items-center justify-between pt-1">
                       <div className="flex gap-2">
-                        <button onClick={() => toast(`${r.id} のルールテストを開始しました`, "info")} className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded text-xs font-semibold border border-amber-200">🧪 テスト実行</button>
-                        <button onClick={() => setActionConfirm({ title: "ルール削除", description: `${r.id} "${r.name}" を削除します。`, warning: "削除後、このルールによる検知は行われなくなります。検知ログは保持されます。", type: "danger", onConfirm: () => { setExpandedRule(null); toast(`${r.id} を削除しました`, "warning"); } })} className="px-3 py-1.5 bg-rose-100 text-rose-600 rounded text-xs border border-rose-200">削除</button>
+                        <button onClick={() => toast(`${r.id} のルールテストを開始しました`, "info")} className="px-3 py-1.5 bg-warning-100 text-warning-700 rounded text-xs font-semibold border border-warning-200"><FlaskConical className="w-4 h-4 inline mr-1" /> テスト実行</button>
+                        <button onClick={() => setActionConfirm({ title: "ルール削除", description: `${r.id} "${r.name}" を削除します。`, warning: "削除後、このルールによる検知は行われなくなります。検知ログは保持されます。", type: "danger", onConfirm: () => { setExpandedRule(null); toast(`${r.id} を削除しました`, "warning"); } })} className="px-3 py-1.5 bg-danger-100 text-danger-600 rounded text-xs border border-danger-200">削除</button>
                       </div>
-                      <button onClick={() => setActionConfirm({ title: "ルール変更の保存", description: `${r.id} "${r.name}" の変更を保存します。`, warning: "ルール変更は即座に反映されます。admin権限の場合はsuper_adminの承認後に適用されます。", type: "warning", onConfirm: () => { setExpandedRule(null); toast(`${r.id} "${r.name}" を保存しました`, "success"); } })} className="px-4 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">💾 変更を保存</button>
+                      <button onClick={() => setActionConfirm({ title: "ルール変更の保存", description: `${r.id} "${r.name}" の変更を保存します。`, warning: "ルール変更は即座に反映されます。admin権限の場合はsuper_adminの承認後に適用されます。", type: "warning", onConfirm: () => { setExpandedRule(null); toast(`${r.id} "${r.name}" を保存しました`, "success"); } })} className="px-4 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600"><Save className="w-4 h-4 inline mr-1" /> 変更を保存</button>
                     </div>
                   </div>
                 )}
@@ -8890,18 +8897,18 @@ const MasterFraudSettings = () => {
             ))}
           </div>
           {/* Simulation Panel */}
-          <div className="bg-amber-50 rounded-lg border border-amber-300 p-3">
+          <div className="bg-warning-50 rounded-lg border border-warning-300 p-3">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-bold text-amber-800">🧪 シミュレーション実行</p>
-              <button onClick={() => toast("シミュレーションを開始しました（過去30日データ）", "info")} className="text-xs bg-amber-600 text-white px-3 py-1 rounded font-semibold">過去30日データで実行</button>
+              <p className="text-xs font-bold text-warning-800"><FlaskConical className="w-4 h-4 inline mr-1" /> シミュレーション実行</p>
+              <button onClick={() => toast("シミュレーションを開始しました（過去30日データ）", "info")} className="text-xs bg-warning-600 text-white px-3 py-1 rounded font-semibold">過去30日データで実行</button>
             </div>
-            <p className="text-xs text-amber-700 mb-2">ルール変更前に、過去30日の取引データに対して変更後のルールを適用し、影響を確認できます。</p>
+            <p className="text-xs text-warning-700 mb-2">ルール変更前に、過去30日の取引データに対して変更後のルールを適用し、影響を確認できます。</p>
             <div className="bg-white rounded-lg border border-slate-200 p-2.5">
               <p className="text-xs text-slate-500 mb-1">シミュレーション結果（例）:</p>
               <div className="grid grid-cols-3 gap-2 text-xs">
-                <div className="bg-emerald-50 rounded p-1.5 text-center"><span className="text-slate-400">ブロック増加</span><p className="font-bold text-emerald-700">+8件</p></div>
-                <div className="bg-rose-50 rounded p-1.5 text-center"><span className="text-slate-400">ブロック減少</span><p className="font-bold text-rose-700">-2件</p></div>
-                <div className="bg-blue-50 rounded p-1.5 text-center"><span className="text-slate-400">影響加盟店</span><p className="font-bold text-blue-700">3社</p></div>
+                <div className="bg-success-50 rounded p-1.5 text-center"><span className="text-slate-400">ブロック増加</span><p className="font-bold text-success-700">+8件</p></div>
+                <div className="bg-danger-50 rounded p-1.5 text-center"><span className="text-slate-400">ブロック減少</span><p className="font-bold text-danger-700">-2件</p></div>
+                <div className="bg-brand-50 rounded p-1.5 text-center"><span className="text-slate-400">影響加盟店</span><p className="font-bold text-brand-700">3社</p></div>
               </div>
             </div>
           </div>
@@ -8913,7 +8920,7 @@ const MasterFraudSettings = () => {
         <div className="space-y-3">
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
             <div className="flex justify-between items-center mb-3">
-              <p className="text-xs font-bold text-slate-700">🤖 不正検知AIモデル</p>
+              <p className="text-xs font-bold text-slate-700"><Bot className="w-4 h-4 inline mr-1" /> 不正検知AIモデル</p>
               <Badge text="v2.1 稼働中" color="green" />
             </div>
             <div className="grid grid-cols-3 gap-4">
@@ -8921,12 +8928,12 @@ const MasterFraudSettings = () => {
                 <p className="text-xs font-semibold text-slate-600 mb-2">閾値設定</p>
                 <div className="space-y-2">
                   <div>
-                    <div className="flex justify-between text-xs mb-1"><span className="text-slate-500">自動ブロック閾値</span><span className="font-semibold text-rose-600">0.80</span></div>
-                    <div className="w-full bg-slate-200 rounded h-2"><div className="bg-rose-500 rounded h-2" style={{ width: "80%" }} /></div>
+                    <div className="flex justify-between text-xs mb-1"><span className="text-slate-500">自動ブロック閾値</span><span className="font-semibold text-danger-600">0.80</span></div>
+                    <div className="w-full bg-slate-200 rounded h-2"><div className="bg-danger-500 rounded h-2" style={{ width: "80%" }} /></div>
                   </div>
                   <div>
-                    <div className="flex justify-between text-xs mb-1"><span className="text-slate-500">要確認閾値</span><span className="font-semibold text-amber-600">0.60</span></div>
-                    <div className="w-full bg-slate-200 rounded h-2"><div className="bg-amber-500 rounded h-2" style={{ width: "60%" }} /></div>
+                    <div className="flex justify-between text-xs mb-1"><span className="text-slate-500">要確認閾値</span><span className="font-semibold text-warning-600">0.60</span></div>
+                    <div className="w-full bg-slate-200 rounded h-2"><div className="bg-warning-500 rounded h-2" style={{ width: "60%" }} /></div>
                   </div>
                   <p className="text-xs text-slate-400 mt-2">閾値を下げると検知率↑ 誤検知率↑</p>
                   <p className="text-xs text-slate-400">閾値を上げると検知率↓ 誤検知率↓</p>
@@ -8935,11 +8942,11 @@ const MasterFraudSettings = () => {
               <div className="bg-slate-50 rounded-lg border border-slate-200 p-2.5">
                 <p className="text-xs font-semibold text-slate-600 mb-2">モデル性能</p>
                 <div className="space-y-1.5 text-xs text-slate-600">
-                  <div className="flex justify-between"><span>精度（Accuracy）</span><span className="text-emerald-600 font-semibold">96.8%</span></div>
-                  <div className="flex justify-between"><span>適合率（Precision）</span><span className="text-emerald-600 font-semibold">95.8%</span></div>
-                  <div className="flex justify-between"><span>再現率（Recall）</span><span className="text-blue-600 font-semibold">91.2%</span></div>
-                  <div className="flex justify-between"><span>F1スコア</span><span className="text-blue-600 font-semibold">93.5%</span></div>
-                  <div className="flex justify-between"><span>誤検知率（FPR）</span><span className="text-emerald-600 font-semibold">4.2%</span></div>
+                  <div className="flex justify-between"><span>精度（Accuracy）</span><span className="text-success-600 font-semibold">96.8%</span></div>
+                  <div className="flex justify-between"><span>適合率（Precision）</span><span className="text-success-600 font-semibold">95.8%</span></div>
+                  <div className="flex justify-between"><span>再現率（Recall）</span><span className="text-brand-600 font-semibold">91.2%</span></div>
+                  <div className="flex justify-between"><span>F1スコア</span><span className="text-brand-600 font-semibold">93.5%</span></div>
+                  <div className="flex justify-between"><span>誤検知率（FPR）</span><span className="text-success-600 font-semibold">4.2%</span></div>
                   <div className="flex justify-between"><span>学習データ</span><span className="text-slate-500">125,000件</span></div>
                   <div className="flex justify-between"><span>最終学習</span><span className="text-slate-500">2026-02-01</span></div>
                 </div>
@@ -8956,7 +8963,7 @@ const MasterFraudSettings = () => {
                   ].map((f, i) => (
                     <div key={i} className="flex items-center gap-2 text-xs">
                       <span className="w-40 text-slate-600">{f.name}</span>
-                      <div className="flex-1 bg-slate-200 rounded h-2"><div className="bg-blue-500 rounded h-2" style={{ width: `${f.imp * 400}%` }} /></div>
+                      <div className="flex-1 bg-slate-200 rounded h-2"><div className="bg-brand-500 rounded h-2" style={{ width: `${f.imp * 400}%` }} /></div>
                       <span className="w-10 text-right text-slate-500">{(f.imp * 100).toFixed(0)}%</span>
                     </div>
                   ))}
@@ -8964,36 +8971,36 @@ const MasterFraudSettings = () => {
               </div>
             </div>
           </div>
-          <div className="bg-amber-50 rounded-lg border border-amber-300 p-3">
-            <p className="text-xs font-bold text-amber-800 mb-1">🧪 テストモード（シャドーモード）</p>
-            <p className="text-xs text-amber-700 mb-2">シャドーモード: 判定するが実際の取引には影響しません。新ルールやモデルの影響を安全にテストできます。</p>
+          <div className="bg-warning-50 rounded-lg border border-warning-300 p-3">
+            <p className="text-xs font-bold text-warning-800 mb-1"><FlaskConical className="w-4 h-4 inline mr-1" /> テストモード（シャドーモード）</p>
+            <p className="text-xs text-warning-700 mb-2">シャドーモード: 判定するが実際の取引には影響しません。新ルールやモデルの影響を安全にテストできます。</p>
           </div>
           {/* Auto Retrain Schedule */}
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
             <div className="flex justify-between items-center mb-2">
-              <p className="text-xs font-bold text-slate-700">🔄 自動再学習スケジュール</p>
+              <p className="text-xs font-bold text-slate-700"><RefreshCw className="w-4 h-4 inline mr-1" /> 自動再学習スケジュール</p>
               <Badge text="毎週日曜 AM3:00" color="blue" />
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-3 text-xs">
-                <div className="flex items-center gap-1.5"><span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs">1</span><span className="text-slate-600">自動再学習</span></div>
+                <div className="flex items-center gap-1.5"><span className="w-5 h-5 rounded-full bg-success-100 text-success-600 flex items-center justify-center text-xs">1</span><span className="text-slate-600">自動再学習</span></div>
                 <span className="text-slate-300">→</span>
-                <div className="flex items-center gap-1.5"><span className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs">2</span><span className="text-slate-600">シャドーモード 1週間</span></div>
+                <div className="flex items-center gap-1.5"><span className="w-5 h-5 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-xs">2</span><span className="text-slate-600">シャドーモード 1週間</span></div>
                 <span className="text-slate-300">→</span>
-                <div className="flex items-center gap-1.5"><span className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs">3</span><span className="text-slate-600">精度比較レポート</span></div>
+                <div className="flex items-center gap-1.5"><span className="w-5 h-5 rounded-full bg-warning-100 text-warning-600 flex items-center justify-center text-xs">3</span><span className="text-slate-600">精度比較レポート</span></div>
                 <span className="text-slate-300">→</span>
                 <div className="flex items-center gap-1.5"><span className="w-5 h-5 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs">4</span><span className="text-slate-600 font-semibold">人間が切替判断</span></div>
               </div>
               {/* New model ready banner */}
-              <div className="bg-emerald-50 rounded border border-emerald-300 p-2">
+              <div className="bg-success-50 rounded border border-success-300 p-2">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-xs font-bold text-emerald-800">✅ 新モデル v2.4 が準備できました</p>
-                    <p className="text-xs text-emerald-700 mt-0.5">偽陽性率: <span className="font-semibold">0.3% → 0.2%</span>（改善）/ 検知率: 96.8% → 97.1%（改善）</p>
+                    <p className="text-xs font-bold text-success-800"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 新モデル v2.4 が準備できました</p>
+                    <p className="text-xs text-success-700 mt-0.5">偽陽性率: <span className="font-semibold">0.3% → 0.2%</span>（改善）/ 検知率: 96.8% → 97.1%（改善）</p>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => setActionConfirm({ title: "新モデル却下", description: "新モデル v2.4 を却下します。現行モデル v2.3 が継続使用されます。", type: "warning", onConfirm: () => toast("新モデル v2.4 を却下しました", "warning") })} className="px-3 py-1.5 bg-white text-slate-600 rounded text-xs border">却下</button>
-                    <button onClick={() => setActionConfirm({ title: "本番モデル切替", description: "不正検知AIモデルを v2.3 → v2.4 に切り替えます。", warning: "切替後は即時反映されます。問題発生時は手動でロールバックが必要です。", type: "approve", onConfirm: () => toast("不正検知AIモデルを v2.4 に切り替えました", "success") })} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-semibold">✅ 本番に切替</button>
+                    <button onClick={() => setActionConfirm({ title: "本番モデル切替", description: "不正検知AIモデルを v2.3 → v2.4 に切り替えます。", warning: "切替後は即時反映されます。問題発生時は手動でロールバックが必要です。", type: "approve", onConfirm: () => toast("不正検知AIモデルを v2.4 に切り替えました", "success") })} className="px-3 py-1.5 bg-success-600 text-white rounded text-xs font-semibold"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 本番に切替</button>
                   </div>
                 </div>
               </div>
@@ -9011,8 +9018,8 @@ const MasterFraudSettings = () => {
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
             <div className="flex justify-between items-center mb-2">
-              <p className="text-xs font-bold text-rose-600">🚫 ブロックリスト</p>
-              <button onClick={() => setShowAddBlock("block")} className="text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded border border-rose-200">+ 追加</button>
+              <p className="text-xs font-bold text-danger-600"><Ban className="w-4 h-4 inline mr-1" /> ブロックリスト</p>
+              <button onClick={() => setShowAddBlock("block")} className="text-xs bg-danger-100 text-danger-700 px-2 py-1 rounded border border-danger-200">+ 追加</button>
             </div>
             <div className="space-y-1">
               {[
@@ -9025,15 +9032,15 @@ const MasterFraudSettings = () => {
                   <span className="font-mono text-slate-700">{b.value}</span>
                   <span className="text-slate-400 flex-1">{b.reason}</span>
                   <span className="text-slate-400">{b.added}</span>
-                  <button onClick={() => toast(`ブロックリストから ${b.value} を削除しました`, "warning")} className="text-rose-400 hover:text-rose-600">✕</button>
+                  <button onClick={() => toast(`ブロックリストから ${b.value} を削除しました`, "warning")} className="text-danger-400 hover:text-danger-600"><X className="w-4 h-4" /></button>
                 </div>
               ))}
             </div>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
             <div className="flex justify-between items-center mb-2">
-              <p className="text-xs font-bold text-emerald-600">✅ ホワイトリスト</p>
-              <button onClick={() => setShowAddBlock("white")} className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded border border-emerald-200">+ 追加</button>
+              <p className="text-xs font-bold text-success-600"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> ホワイトリスト</p>
+              <button onClick={() => setShowAddBlock("white")} className="text-xs bg-success-100 text-success-700 px-2 py-1 rounded border border-success-200">+ 追加</button>
             </div>
             <div className="space-y-1">
               {[
@@ -9045,7 +9052,7 @@ const MasterFraudSettings = () => {
                   <span className="font-mono text-slate-700">{w.value}</span>
                   <span className="text-slate-400 flex-1">{w.reason}</span>
                   <span className="text-slate-400">{w.added}</span>
-                  <button onClick={() => toast(`ホワイトリストから ${w.value} を削除しました`, "warning")} className="text-rose-400 hover:text-rose-600">✕</button>
+                  <button onClick={() => toast(`ホワイトリストから ${w.value} を削除しました`, "warning")} className="text-danger-400 hover:text-danger-600"><X className="w-4 h-4" /></button>
                 </div>
               ))}
             </div>
@@ -9057,20 +9064,20 @@ const MasterFraudSettings = () => {
       {ruleTab === "import" && (
         <div className="space-y-3">
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-            <p className="text-xs font-bold text-slate-600 mb-3">📤 決済制限CSVインポート</p>
-            <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center bg-slate-50 hover:bg-blue-50 hover:border-blue-300 transition-colors cursor-pointer">
-              <p className="text-2xl mb-2">📁</p>
+            <p className="text-xs font-bold text-slate-600 mb-3"><Upload className="w-4 h-4 inline mr-1" /> 決済制限CSVインポート</p>
+            <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center bg-slate-50 hover:bg-brand-50 hover:border-brand-300 transition-colors cursor-pointer">
+              <p className="text-2xl mb-2"><FolderOpen className="w-4 h-4 inline" /></p>
               <p className="text-xs font-semibold text-slate-600">CSVファイルをドラッグ＆ドロップ、またはクリックして選択</p>
               <p className="text-xs text-slate-400 mt-1">対応形式: CSV（UTF-8）/ 最大10,000行</p>
             </div>
-            <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200 text-xs text-blue-700">
+            <div className="mt-3 p-2 bg-brand-50 rounded border border-brand-200 text-xs text-brand-700">
               <p className="font-semibold mb-1">CSVフォーマット:</p>
               <p className="font-mono">対象項目,対象値,制限種別,制限金額,備考</p>
-              <p className="mt-1 text-blue-500">対象項目: メールアドレス / カード番号 / IPアドレス / BIN</p>
-              <p className="text-blue-500">制限種別: 決済不可 / 金額制限</p>
+              <p className="mt-1 text-brand-500">対象項目: メールアドレス / カード番号 / IPアドレス / BIN</p>
+              <p className="text-brand-500">制限種別: 決済不可 / 金額制限</p>
             </div>
             <div className="flex gap-2 mt-3">
-              <button onClick={() => toast("CSVインポートを実行しました（3件成功 / 0件失敗）", "success")} className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold">インポート実行</button>
+              <button onClick={() => toast("CSVインポートを実行しました（3件成功 / 0件失敗）", "success")} className="text-xs bg-brand-500 text-white px-4 py-1.5 rounded font-semibold">インポート実行</button>
               <button onClick={() => toast("テンプレートCSVをダウンロードしました", "success")} className="text-xs bg-slate-100 text-slate-600 px-4 py-1.5 rounded border">テンプレートDL</button>
             </div>
           </div>
@@ -9096,8 +9103,8 @@ const MasterFraudSettings = () => {
                     <td className="p-2 text-slate-400 font-mono">{h.date}</td>
                     <td className="p-2 text-slate-700 font-semibold">{h.file}</td>
                     <td className="p-2 text-center">{h.total}</td>
-                    <td className="p-2 text-center text-emerald-600 font-semibold">{h.ok}</td>
-                    <td className="p-2 text-center text-rose-600 font-semibold">{h.ng}</td>
+                    <td className="p-2 text-center text-success-600 font-semibold">{h.ok}</td>
+                    <td className="p-2 text-center text-danger-600 font-semibold">{h.ng}</td>
                     <td className="p-2 text-slate-600">{h.user}</td>
                     <td className="p-2 text-center"><Badge text={h.status} color={h.sColor} /></td>
                   </tr>
@@ -9111,19 +9118,19 @@ const MasterFraudSettings = () => {
       {/* Tab: 制限登録禁止リスト */}
       {ruleTab === "ng_list" && (
         <div className="space-y-3">
-          <div className="bg-amber-50 rounded border border-amber-200 p-2 text-xs text-amber-700">
-            ⚠️ この「禁止リスト」に登録された値は、決済制限に追加できなくなります。誤ブロック防止のためのホワイトリストです。
+          <div className="bg-warning-50 rounded border border-warning-200 p-2 text-xs text-warning-700">
+            この「禁止リスト」に登録された値は、決済制限に追加できなくなります。誤ブロック防止のためのホワイトリストです。
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
             <div className="flex justify-between items-center mb-3">
               <p className="text-xs font-bold text-slate-600">制限登録禁止リスト検索</p>
-              <button onClick={() => setShowAddBlock("ng")} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ 新規登録</button>
+              <button onClick={() => setShowAddBlock("ng")} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold">+ 新規登録</button>
             </div>
             <div className="grid grid-cols-4 gap-2 mb-3">
               <div><label className="text-xs text-slate-400">対象項目</label><select className="w-full text-xs border rounded px-2 py-1.5"><option>全て</option><option>メールアドレス</option><option>カード番号</option><option>IPアドレス</option><option>BIN</option></select></div>
               <div><label className="text-xs text-slate-400">対象値</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="値で検索" /></div>
               <div><label className="text-xs text-slate-400">登録日</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5" /></div>
-              <div className="flex items-end"><button onClick={() => toast("検索条件を適用しました", "info")} className="text-xs bg-blue-600 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
+              <div className="flex items-end"><button onClick={() => toast("検索条件を適用しました", "info")} className="text-xs bg-brand-500 text-white px-4 py-1.5 rounded font-semibold w-full">検索</button></div>
             </div>
             <table className="w-full text-xs">
               <thead><tr className="bg-slate-50 border-b">
@@ -9142,14 +9149,14 @@ const MasterFraudSettings = () => {
                   { id: 3, item: "カード番号", value: "4111-****-****-1111", reason: "テストカード", user: "田中太郎", date: "01/10 10:00" },
                   { id: 4, item: "BIN", value: "411111", reason: "VISAテストBIN", user: "鈴木一郎", date: "12/25 16:00" },
                 ].map((r, i) => (
-                  <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-blue-50`}>
+                  <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-brand-50`}>
                     <td className="p-2 font-mono text-slate-400">{r.id}</td>
                     <td className="p-2"><Badge text={r.item} color={r.item === "メールアドレス" ? "blue" : r.item === "IPアドレス" ? "purple" : r.item === "カード番号" ? "yellow" : "default"} /></td>
                     <td className="p-2 font-mono text-slate-700">{r.value}</td>
                     <td className="p-2 text-slate-500">{r.reason}</td>
                     <td className="p-2 text-slate-600">{r.user}</td>
                     <td className="p-2 text-slate-400 font-mono">{r.date}</td>
-                    <td className="p-2 text-center"><button onClick={() => setActionConfirm({ title: "禁止リスト項目削除", description: `${r.item}: ${r.value} を禁止リストから削除します。`, warning: "削除後、この値は制限登録の対象になります。", type: "danger", onConfirm: () => toast(`${r.value} を禁止リストから削除しました`, "warning") })} className="text-rose-500 hover:text-rose-700">削除</button></td>
+                    <td className="p-2 text-center"><button onClick={() => setActionConfirm({ title: "禁止リスト項目削除", description: `${r.item}: ${r.value} を禁止リストから削除します。`, warning: "削除後、この値は制限登録の対象になります。", type: "danger", onConfirm: () => toast(`${r.value} を禁止リストから削除しました`, "warning") })} className="text-danger-500 hover:text-danger-700">削除</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -9161,8 +9168,8 @@ const MasterFraudSettings = () => {
       {/* Tab: 候補（制限候補の自動検知→採用/不採用） */}
       {ruleTab === "candidates" && (
         <div className="space-y-3">
-          <div className="bg-amber-50 rounded border border-amber-200 p-2 text-xs text-amber-800">
-            🤖 AI/ルールベースで不正の疑いがあるエンティティを自動検出しています。内容を確認し「採用」（ブロック追加）または「不採用」（除外）を判断してください。
+          <div className="bg-warning-50 rounded border border-warning-200 p-2 text-xs text-warning-800">
+            AI/ルールベースで不正の疑いがあるエンティティを自動検出しています。内容を確認し「採用」（ブロック追加）または「不採用」（除外）を判断してください。
           </div>
           <div className="flex gap-3">
             <KPICard label="未処理" value="12件" sub="要確認" color="yellow" />
@@ -9174,7 +9181,7 @@ const MasterFraudSettings = () => {
             <div className="flex items-center gap-3 mb-3">
               <div className="flex gap-1">
                 {["全て","未処理","採用済","不採用"].map((s, i) => (
-                  <button key={s} className={`text-xs px-2.5 py-1 rounded ${i === 1 ? "bg-amber-500 text-white font-semibold" : "bg-slate-100 text-slate-500"}`}>{s}</button>
+                  <button key={s} className={`text-xs px-2.5 py-1 rounded ${i === 1 ? "bg-warning-500 text-white font-semibold" : "bg-slate-100 text-slate-500"}`}>{s}</button>
                 ))}
               </div>
               <select className="text-xs border rounded px-2 py-1"><option>全種別</option><option>カードBIN</option><option>IPアドレス</option><option>メールアドレス</option><option>メールドメイン</option><option>デバイス</option></select>
@@ -9204,18 +9211,18 @@ const MasterFraudSettings = () => {
                   { date: "2026-02-19 16:55", type: "メールアドレス", value: "test***@gmail.com", reason: "同一メールで5加盟店に決済", score: 62, txns: 5, status: "不採用" },
                   { date: "2026-02-19 08:20", type: "カードBIN", value: "601100", reason: "AIスコア平均0.82", score: 74, txns: 31, status: "採用済" },
                 ].map((c, i) => (
-                  <tr key={i} className={`border-b ${c.status === "未処理" ? "bg-amber-50/50" : ""}`}>
+                  <tr key={i} className={`border-b ${c.status === "未処理" ? "bg-warning-50/50" : ""}`}>
                     <td className="p-2 text-slate-500">{c.date}</td>
                     <td className="p-2"><Badge text={c.type} color={c.type === "カードBIN" ? "blue" : c.type === "IPアドレス" ? "purple" : c.type.includes("メール") ? "cyan" : "slate"} /></td>
                     <td className="p-2 font-mono font-semibold text-slate-700">{c.value}</td>
                     <td className="p-2 text-slate-600">{c.reason}</td>
-                    <td className="p-2 text-center"><span className={`inline-block px-2 py-0.5 rounded-full font-bold ${c.score >= 90 ? "bg-rose-100 text-rose-700" : c.score >= 70 ? "bg-amber-100 text-amber-700" : "bg-yellow-100 text-yellow-700"}`}>{c.score}</span></td>
+                    <td className="p-2 text-center"><span className={`inline-block px-2 py-0.5 rounded-full font-bold ${c.score >= 90 ? "bg-danger-100 text-danger-700" : c.score >= 70 ? "bg-warning-100 text-warning-700" : "bg-warning-100 text-warning-700"}`}>{c.score}</span></td>
                     <td className="p-2 text-center text-slate-600">{c.txns}件</td>
                     <td className="p-2 text-center"><Badge text={c.status} color={c.status === "未処理" ? "yellow" : c.status === "採用済" ? "red" : "green"} /></td>
                     <td className="p-2 text-center">
                       {c.status === "未処理" ? (
                         <div className="flex gap-1 justify-center">
-                          <button onClick={() => toast(`${c.type} ${c.value} をブロックリストに追加しました`, "warning")} className="px-2 py-0.5 bg-rose-600 text-white rounded text-xs font-semibold">採用</button>
+                          <button onClick={() => toast(`${c.type} ${c.value} をブロックリストに追加しました`, "warning")} className="px-2 py-0.5 bg-danger-600 text-white rounded text-xs font-semibold">採用</button>
                           <button onClick={() => toast(`${c.type} ${c.value} を不採用にしました`, "info")} className="px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-xs">不採用</button>
                         </div>
                       ) : (
@@ -9228,7 +9235,7 @@ const MasterFraudSettings = () => {
             </table>
           </div>
           <div className="bg-slate-50 rounded border border-slate-200 p-2 text-xs text-slate-500">
-            💡 候補は検出から30日間未処理の場合、自動的に期限切れとなります。採用された候補はM07「ブロック/ホワイトリスト」タブに自動追加されます。
+            候補は検出から30日間未処理の場合、自動的に期限切れとなります。採用された候補はM07「ブロック/ホワイトリスト」タブに自動追加されます。
           </div>
         </div>
       )}
@@ -9261,20 +9268,20 @@ const MasterFraudSettings = () => {
       {/* Tab: 加盟店別設定 */}
       {ruleTab === "merchant" && (
         <div className="space-y-3">
-          <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">
-            💡 加盟店ごとにグローバルルールの閾値をオーバーライドできます。業態に合わせた柔軟な設定で<strong>健全な決済を止めない</strong>ことが目的です。
+          <div className="bg-brand-50 rounded border border-brand-200 p-2 text-xs text-brand-700">
+            加盟店ごとにグローバルルールの閾値をオーバーライドできます。業態に合わせた柔軟な設定で<strong>健全な決済を止めない</strong>ことが目的です。
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
             <div className="flex items-center gap-3 mb-3">
               <label className="text-xs font-bold text-slate-600">加盟店選択:</label>
               <div className="relative">
                 <div className="flex items-center border rounded bg-white">
-                  <span className="text-xs text-slate-400 pl-2">🔍</span>
+                  <Search className="w-4 h-4 inline" />
                   <input className="text-xs px-2 py-1.5 w-56 outline-none" placeholder="ID・名前で検索" />
                 </div>
               </div>
               <Badge text="M-001 株式会社ABCマート" color="blue" />
-              <button onClick={() => setShowAddBlock("custom")} className="text-xs bg-blue-600 text-white px-3 py-1 rounded">+ カスタム設定を追加</button>
+              <button onClick={() => setShowAddBlock("custom")} className="text-xs bg-brand-500 text-white px-3 py-1 rounded">+ カスタム設定を追加</button>
             </div>
             <table className="w-full text-xs">
               <thead>
@@ -9294,19 +9301,19 @@ const MasterFraudSettings = () => {
                   { rule: "AIスコア ブロック閾値", global: "0.70", custom: "0.80", diff: "↑ 緩和" },
                 ].map((r, i) => (
                   <tr key={i} className="border-b">
-                    <td className="p-2 font-semibold text-slate-700">{r.rule} <span className="text-amber-500">⚠️</span></td>
+                    <td className="p-2 font-semibold text-slate-700">{r.rule} <AlertTriangle className="w-4 h-4 text-warning-500 inline" /></td>
                     <td className="p-2 text-center text-slate-400">{r.global}</td>
-                    <td className="p-2 text-center font-bold text-blue-700">{r.custom}</td>
-                    <td className="p-2 text-center font-semibold text-blue-600">{r.diff}</td>
-                    <td className="p-2 text-center"><button onClick={() => toast(`${r.rule} のカスタム設定を編集中`, "info")} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">編集</button> <button onClick={() => setActionConfirm({ title: "カスタム設定削除", description: `${r.rule} のカスタム設定を削除します。グローバル値 ${r.global} に戻ります。`, type: "danger", onConfirm: () => toast(`${r.rule} のカスタム設定を削除しました`, "warning") })} className="px-2 py-0.5 bg-rose-100 text-rose-600 rounded text-xs">削除</button></td>
+                    <td className="p-2 text-center font-bold text-brand-700">{r.custom}</td>
+                    <td className="p-2 text-center font-semibold text-brand-600">{r.diff}</td>
+                    <td className="p-2 text-center"><button onClick={() => toast(`${r.rule} のカスタム設定を編集中`, "info")} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">編集</button> <button onClick={() => setActionConfirm({ title: "カスタム設定削除", description: `${r.rule} のカスタム設定を削除します。グローバル値 ${r.global} に戻ります。`, type: "danger", onConfirm: () => toast(`${r.rule} のカスタム設定を削除しました`, "warning") })} className="px-2 py-0.5 bg-danger-100 text-danger-600 rounded text-xs">削除</button></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <div className="bg-amber-50 rounded border border-amber-300 p-2 flex items-center justify-between">
-            <span className="text-xs text-amber-800">🧪 この加盟店の過去取引データでシミュレーションを実行できます</span>
-            <button onClick={() => toast("加盟店別シミュレーションを開始しました", "info")} className="text-xs bg-amber-600 text-white px-3 py-1 rounded font-semibold">シミュレーション実行</button>
+          <div className="bg-warning-50 rounded border border-warning-300 p-2 flex items-center justify-between">
+            <span className="text-xs text-warning-800"><FlaskConical className="w-4 h-4 inline mr-1" /> この加盟店の過去取引データでシミュレーションを実行できます</span>
+            <button onClick={() => toast("加盟店別シミュレーションを開始しました", "info")} className="text-xs bg-warning-600 text-white px-3 py-1 rounded font-semibold">シミュレーション実行</button>
           </div>
         </div>
       )}
@@ -9318,20 +9325,20 @@ const MasterFraudSettings = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowAddBlock(null)} />
           <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
-            <div className={`p-4 border-b rounded-t-xl flex justify-between items-center ${showAddBlock === "block" ? "bg-rose-50" : "bg-emerald-50"}`}>
-              <h3 className="text-sm font-bold text-slate-800">{showAddBlock === "block" ? "🚫 ブロックリストに追加" : "✅ ホワイトリストに追加"}</h3>
-              <button onClick={() => setShowAddBlock(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <div className={`p-4 border-b rounded-t-xl flex justify-between items-center ${showAddBlock === "block" ? "bg-danger-50" : "bg-success-50"}`}>
+              <h3 className="text-sm font-bold text-slate-800">{showAddBlock === "block" ? "ブロックリストに追加" : "ホワイトリストに追加"}</h3>
+              <button onClick={() => setShowAddBlock(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
-              <div><label className="text-xs font-semibold text-slate-600">種別 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>BIN（カード番号先頭6桁）</option><option>IPアドレス</option><option>デバイスID</option><option>メールアドレス</option></select></div>
-              <div><label className="text-xs font-semibold text-slate-600">値 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 411111 / 192.168.1.1" /></div>
-              <div><label className="text-xs font-semibold text-slate-600">理由 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="追加理由を入力" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">種別 <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>BIN（カード番号先頭6桁）</option><option>IPアドレス</option><option>デバイスID</option><option>メールアドレス</option></select></div>
+              <div><label className="text-xs font-semibold text-slate-600">値 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 411111 / 192.168.1.1" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">理由 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="追加理由を入力" /></div>
               <div><label className="text-xs font-semibold text-slate-600">有効期限</label><div className="flex gap-2 mt-0.5"><select className="text-xs border rounded px-2 py-1.5"><option>永久</option><option>日時指定</option></select><input type="date" className="text-xs border rounded px-2 py-1.5" /></div></div>
-              <div className="bg-slate-50 rounded-lg border border-slate-200 p-2.5 text-xs text-slate-500">💡 CSVで一括追加する場合は「ブロック/ホワイトリスト」タブのCSVアップロード機能をご利用ください</div>
+              <div className="bg-slate-50 rounded-lg border border-slate-200 p-2.5 text-xs text-slate-500"><Lightbulb className="w-4 h-4 inline mr-1" /> CSVで一括追加する場合は「ブロック/ホワイトリスト」タブのCSVアップロード機能をご利用ください</div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowAddBlock(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { const type = showAddBlock === "block" ? "ブロックリスト" : showAddBlock === "white" ? "ホワイトリスト" : showAddBlock === "ng" ? "禁止リスト" : "カスタム設定"; setShowAddBlock(null); toast(`${type}に追加しました`, "success"); }} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showAddBlock === "block" ? "bg-rose-600 hover:bg-rose-700" : "bg-emerald-600 hover:bg-emerald-700"}`}>追加する</button>
+              <button onClick={() => { const type = showAddBlock === "block" ? "ブロックリスト" : showAddBlock === "white" ? "ホワイトリスト" : showAddBlock === "ng" ? "禁止リスト" : "カスタム設定"; setShowAddBlock(null); toast(`${type}に追加しました`, "success"); }} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showAddBlock === "block" ? "bg-danger-600 hover:bg-danger-700" : "bg-success-600 hover:bg-success-700"}`}>追加する</button>
             </div>
           </div>
         </div>
@@ -9345,12 +9352,12 @@ const MasterFraudSettings = () => {
           <div className="relative bg-white rounded-xl shadow-2xl w-[560px] max-h-[85vh] overflow-y-auto">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">不正検知ルール追加</h3>
-              <button onClick={() => setShowAddRule(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <button onClick={() => setShowAddRule(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               {/* ルール種別 */}
               <div>
-                <label className="text-xs font-semibold text-slate-600">ルール種別 <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-semibold text-slate-600">ルール種別 <span className="text-danger-500">*</span></label>
                 <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
                   <option>選択してください</option>
                   <option>金額閾値</option>
@@ -9365,21 +9372,21 @@ const MasterFraudSettings = () => {
               </div>
               {/* ルール名 */}
               <div>
-                <label className="text-xs font-semibold text-slate-600">ルール名 <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-semibold text-slate-600">ルール名 <span className="text-danger-500">*</span></label>
                 <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 高額取引チェック" />
               </div>
               {/* 条件設定 */}
               <div className="bg-slate-50 rounded-lg border border-slate-200 p-3 space-y-2">
-                <p className="text-xs font-bold text-slate-600">条件設定 <span className="text-rose-500">*</span></p>
+                <p className="text-xs font-bold text-slate-600">条件設定 <span className="text-danger-500">*</span></p>
                 <ConditionBuilder conditions={newRuleConditions} onChange={setNewRuleConditions} />
               </div>
               {/* アクション */}
               <div>
-                <label className="text-xs font-semibold text-slate-600">検知時のアクション <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-semibold text-slate-600">検知時のアクション <span className="text-danger-500">*</span></label>
                 <div className="flex gap-3 mt-1">
                   {[
-                    { label: "自動ブロック", desc: "即時ブロック", color: "border-rose-300 bg-rose-50" },
-                    { label: "例外キュー送り", desc: "目視確認", color: "border-amber-300 bg-amber-50" },
+                    { label: "自動ブロック", desc: "即時ブロック", color: "border-danger-300 bg-danger-50" },
+                    { label: "例外キュー送り", desc: "目視確認", color: "border-warning-300 bg-warning-50" },
                     { label: "フラグのみ", desc: "記録のみ", color: "border-slate-300 bg-slate-50" },
                   ].map((a, i) => (
                     <label key={i} className={`flex-1 rounded border-2 p-2 text-center cursor-pointer text-xs ${i === 1 ? a.color + " font-bold" : a.color}`}>
@@ -9393,7 +9400,7 @@ const MasterFraudSettings = () => {
               {/* 優先順位 */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600">優先順位 <span className="text-rose-500">*</span></label>
+                  <label className="text-xs font-semibold text-slate-600">優先順位 <span className="text-danger-500">*</span></label>
                   <input type="number" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="9" min="1" max="99" />
                   <p className="text-xs text-slate-400 mt-0.5">数字が小さいほど先に評価</p>
                 </div>
@@ -9406,12 +9413,12 @@ const MasterFraudSettings = () => {
                 </div>
               </div>
               {/* テストモード */}
-              <div className="bg-blue-50 rounded border border-blue-200 p-2 flex items-center justify-between">
+              <div className="bg-brand-50 rounded border border-brand-200 p-2 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-blue-700">🧪 テストモードで作成</p>
-                  <p className="text-xs text-blue-500">実際のブロックは行わず、検知ログにのみ記録します</p>
+                  <p className="text-xs font-bold text-brand-700"><FlaskConical className="w-4 h-4 inline mr-1" /> テストモードで作成</p>
+                  <p className="text-xs text-brand-500">実際のブロックは行わず、検知ログにのみ記録します</p>
                 </div>
-                <div className="w-10 h-5 rounded-full bg-blue-500 relative cursor-pointer">
+                <div className="w-10 h-5 rounded-full bg-brand-500 relative cursor-pointer">
                   <div className="absolute top-0.5 right-0.5 w-4 h-4 bg-white rounded-full shadow" />
                 </div>
               </div>
@@ -9419,7 +9426,7 @@ const MasterFraudSettings = () => {
             {/* Footer */}
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowAddRule(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setActionConfirm({ title: "ルール作成の確認", description: "新しい不正検知ルールを作成します。", warning: "作成後、admin権限の場合はsuper_adminの承認待ちになります。super_adminの場合は即座に有効化されます。", type: "approve", onConfirm: () => { setShowAddRule(false); setNewRuleConditions([{ logic: "AND", rules: [{ field: "amount", operator: ">", value: "", timeWindow: "" }] }]); toast("不正検知ルールを作成しました（承認待ち）", "success"); } })} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">ルールを作成</button>
+              <button onClick={() => setActionConfirm({ title: "ルール作成の確認", description: "新しい不正検知ルールを作成します。", warning: "作成後、admin権限の場合はsuper_adminの承認待ちになります。super_adminの場合は即座に有効化されます。", type: "approve", onConfirm: () => { setShowAddRule(false); setNewRuleConditions([{ logic: "AND", rules: [{ field: "amount", operator: ">", value: "", timeWindow: "" }] }]); toast("不正検知ルールを作成しました（承認待ち）", "success"); } })} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">ルールを作成</button>
             </div>
           </div>
         </div>
@@ -9437,12 +9444,12 @@ const MasterReport = () => {
   const [showDeliveryLog, setShowDeliveryLog] = useState(false);
 
   const reportTemplates = [
-    { name: "日次精算レポート", icon: "💰", desc: "日別の精算金額・件数・手数料", schedule: "毎日 9:00", formats: ["PDF", "CSV"], type: "daily" },
-    { name: "月次サマリーレポート", icon: "📊", desc: "月次の売上・トレンド・KPI", schedule: "毎月1日 9:00", formats: ["PDF", "Excel"], type: "monthly" },
-    { name: "加盟店別レポート", icon: "🏢", desc: "加盟店ごとの取引・精算・CB状況", schedule: "手動", formats: ["PDF", "CSV"], type: "merchant" },
-    { name: "接続先別パフォーマンス", icon: "🔌", desc: "接続先の成功率・レスポンス・コスト", schedule: "週次（月曜）", formats: ["PDF"], type: "processor" },
-    { name: "チャージバックレポート", icon: "🔄", desc: "CB発生状況・勝率・金額", schedule: "手動", formats: ["PDF", "CSV"], type: "chargeback" },
-    { name: "不正検知レポート", icon: "🛡️", desc: "検知件数・誤検知率・AIモデル精度", schedule: "週次（月曜）", formats: ["PDF"], type: "fraud" },
+    { name: "日次精算レポート", icon: <Coins className="w-4 h-4 inline text-slate-500" />, desc: "日別の精算金額・件数・手数料", schedule: "毎日 9:00", formats: ["PDF", "CSV"], type: "daily" },
+    { name: "月次サマリーレポート", icon: <BarChart3 className="w-4 h-4 inline text-slate-500" />, desc: "月次の売上・トレンド・KPI", schedule: "毎月1日 9:00", formats: ["PDF", "Excel"], type: "monthly" },
+    { name: "加盟店別レポート", icon: <Building2 className="w-4 h-4 inline text-slate-500" />, desc: "加盟店ごとの取引・精算・CB状況", schedule: "手動", formats: ["PDF", "CSV"], type: "merchant" },
+    { name: "接続先別パフォーマンス", icon: <Plug className="w-4 h-4 inline text-slate-500" />, desc: "接続先の成功率・レスポンス・コスト", schedule: "週次（月曜）", formats: ["PDF"], type: "processor" },
+    { name: "チャージバックレポート", icon: <RefreshCw className="w-4 h-4 inline text-brand-500" />, desc: "CB発生状況・勝率・金額", schedule: "手動", formats: ["PDF", "CSV"], type: "chargeback" },
+    { name: "不正検知レポート", icon: <Shield className="w-4 h-4 inline text-slate-500" />, desc: "検知件数・誤検知率・AIモデル精度", schedule: "週次（月曜）", formats: ["PDF"], type: "fraud" },
   ];
 
   const recentReports = [
@@ -9469,8 +9476,8 @@ const MasterReport = () => {
     <div className="flex justify-between items-center">
       <h2 className="text-sm font-bold text-slate-800">レポート</h2>
       <div className="flex gap-2">
-        <button onClick={() => setShowDeliveryLog(!showDeliveryLog)} className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded border border-slate-200">📨 配信ログ</button>
-        <button onClick={() => setShowReportModal("generate")} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ レポート生成</button>
+        <button onClick={() => setShowDeliveryLog(!showDeliveryLog)} className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded border border-slate-200"><Mail className="w-4 h-4 inline mr-1" /> 配信ログ</button>
+        <button onClick={() => setShowReportModal("generate")} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold">+ レポート生成</button>
       </div>
     </div>
 
@@ -9485,8 +9492,8 @@ const MasterReport = () => {
     {showDeliveryLog && (
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
         <div className="flex justify-between items-center p-3 border-b">
-          <p className="text-xs font-bold text-slate-700">📨 配信ログ（直近）</p>
-          <button onClick={() => setShowDeliveryLog(false)} className="text-xs text-slate-400 hover:text-slate-600">✕ 閉じる</button>
+          <p className="text-xs font-bold text-slate-700"><Mail className="w-4 h-4 inline mr-1" /> 配信ログ（直近）</p>
+          <button onClick={() => setShowDeliveryLog(false)} className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1"><X className="w-3.5 h-3.5" /> 閉じる</button>
         </div>
         <TableHeader cols={[{ label: "配信日時", w: "w-28" }, { label: "レポート名", w: "flex-1" }, { label: "方法", w: "w-16" }, { label: "宛先", w: "w-40" }, { label: "ステータス", w: "w-20" }, { label: "所要時間", w: "w-20" }]}>
         {deliveryLogs.map((d, i) => (
@@ -9505,10 +9512,10 @@ const MasterReport = () => {
 
     {/* Report Templates */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-700 mb-2">📄 レポートテンプレート <span className="text-slate-400 font-normal">（クリックで自動入力して生成）</span></p>
+      <p className="text-xs font-bold text-slate-700 mb-2"><FileText className="w-4 h-4 inline mr-1" /> レポートテンプレート <span className="text-slate-400 font-normal">（クリックで自動入力して生成）</span></p>
       <div className="grid grid-cols-3 gap-2">
         {reportTemplates.map((t, i) => (
-          <div key={i} onClick={() => setShowReportModal(t.type)} className="border rounded-lg p-3 hover:bg-blue-50 hover:border-blue-300 cursor-pointer transition-colors">
+          <div key={i} onClick={() => setShowReportModal(t.type)} className="border rounded-lg p-3 hover:bg-brand-50 hover:border-brand-300 cursor-pointer transition-colors">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-sm">{t.icon}</span>
               <span className="text-xs font-bold text-slate-700">{t.name}</span>
@@ -9524,29 +9531,29 @@ const MasterReport = () => {
     </div>
 
     {/* AI Summary example */}
-    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-3">
-      <p className="text-xs font-bold text-blue-700 mb-1">🤖 AI要約（月次サマリー 2026年1月）</p>
+    <div className="bg-gradient-to-r from-brand-50 to-purple-50 rounded-lg border border-brand-200 p-3">
+      <p className="text-xs font-bold text-brand-700 mb-1"><Bot className="w-4 h-4 inline mr-1" /> AI要約（月次サマリー 2026年1月）</p>
       <p className="text-xs text-slate-600 leading-relaxed">1月の決済総額は前月比+12%の¥180.5Mでした。成功率は98.5%で目標を達成。Univa Pay cast経由の取引が全体の28%を占め、コスト最適化ルーティングにより推定¥120Kの手数料削減を実現しました。チャージバック率は0.8%で業界平均を下回っています。注意点として、月末にかけてAsiabill経由のタイムアウトが増加傾向（P99: 1200ms）にあり、接続先への確認を推奨します。</p>
     </div>
 
     {/* Recent Reports */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
       <div className="flex justify-between items-center p-3 border-b">
-        <p className="text-xs font-bold text-slate-700">📂 生成済みレポート（直近）</p>
-        <button onClick={() => toast("全レポート一覧を表示しています", "info")} className="text-xs text-blue-600">すべて表示 →</button>
+        <p className="text-xs font-bold text-slate-700"><FolderOpen className="w-4 h-4 inline" /> 生成済みレポート（直近）</p>
+        <button onClick={() => toast("全レポート一覧を表示しています", "info")} className="text-xs text-brand-600">すべて表示 →</button>
       </div>
       <TableHeader cols={[{ label: "生成日", w: "w-28" }, { label: "レポート名", w: "flex-1" }, { label: "期間", w: "w-32" }, { label: "形式", w: "w-16" }, { label: "AI要約", w: "w-16" }, { label: "生成者", w: "w-28" }, { label: "操作", w: "w-28" }]}>
       {recentReports.map((r, i) => (
-        <tr key={i} className={`border-b hover:bg-blue-50 cursor-pointer ${i % 2 ? "bg-slate-50" : ""}`} onClick={() => setPreviewReport(r)}>
+        <tr key={i} className={`border-b hover:bg-brand-50 cursor-pointer ${i % 2 ? "bg-slate-50" : ""}`} onClick={() => setPreviewReport(r)}>
           <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400">{r.date}</td>
           <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{r.name}</td>
           <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{r.period}</td>
           <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.format} color="blue" /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r.ai ? "🤖" : "—"}</td>
+          <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r.ai ? "" : "—"}</td>
           <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400">{r.by}</td>
           <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1" onClick={e => e.stopPropagation()}>
-            <button onClick={() => toast(`${r.name}をダウンロードしました`, "success")} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">⬇ DL</button>
-            <button onClick={() => setPreviewReport(r)} className="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs hover:bg-blue-200">👁 プレビュー</button>
+            <button onClick={() => toast(`${r.name}をダウンロードしました`, "success")} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200"><ArrowDownRight className="w-4 h-4 inline" /> DL</button>
+            <button onClick={() => setPreviewReport(r)} className="px-2 py-0.5 bg-brand-100 text-brand-600 rounded text-xs hover:bg-brand-200"><Eye className="w-4 h-4 inline mr-1" /> プレビュー</button>
           </div></td>
         </tr>
       ))}
@@ -9557,7 +9564,7 @@ const MasterReport = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-slate-700">⏰ 定期配信スケジュール</p>
-        <button onClick={() => setShowReportModal("schedule")} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded border border-blue-200">+ スケジュール追加</button>
+        <button onClick={() => setShowReportModal("schedule")} className="text-xs bg-brand-100 text-brand-700 px-2 py-1 rounded border border-brand-200">+ スケジュール追加</button>
       </div>
       <div className="space-y-1">
         {[
@@ -9567,7 +9574,7 @@ const MasterReport = () => {
           { name: "不正検知レポート", schedule: "毎週月曜 9:00", recipients: "admin@..., security@...", format: "PDF", enabled: true },
         ].map((s, i) => (
           <div key={i} className="flex items-center gap-3 text-xs p-2 border rounded">
-            <span className={`w-2 h-2 rounded-full ${s.enabled ? "bg-emerald-500" : "bg-slate-300"}`} />
+            <span className={`w-2 h-2 rounded-full ${s.enabled ? "bg-success-500" : "bg-slate-300"}`} />
             <span className="w-44 font-semibold text-slate-700">{s.name}</span>
             <span className="w-32 text-slate-500">{s.schedule}</span>
             <span className="flex-1 text-slate-400">{s.recipients}</span>
@@ -9582,23 +9589,23 @@ const MasterReport = () => {
         <label className="flex items-center gap-1"><input type="checkbox" defaultChecked className="w-3 h-3" /> Slack</label>
         <span className="text-slate-300">|</span>
         <span className="text-slate-400">Slack Webhook:</span>
-        <span className="text-emerald-600">✅ 設定済み</span>
+        <span className="text-success-600"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 設定済み</span>
       </div>
-      <div className="mt-2 bg-rose-50 rounded border border-rose-200 p-2 text-xs text-rose-700">
-        ⚠️ 自動生成失敗時はadminにメール+Slack通知。リトライは手動で再実行してください。
+      <div className="mt-2 bg-danger-50 rounded border border-danger-200 p-2 text-xs text-danger-700">
+        自動生成失敗時はadminにメール+Slack通知。リトライは手動で再実行してください。
       </div>
     </div>
 
     {/* Custom Report Builder */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
       <div className="flex justify-between items-center mb-2">
-        <p className="text-xs font-bold text-slate-700">🛠️ カスタムレポート作成</p>
-        <button onClick={() => setShowReportModal("custom")} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ 新規レポート作成</button>
+        <p className="text-xs font-bold text-slate-700"><Wrench className="w-4 h-4 inline" /> カスタムレポート作成</p>
+        <button onClick={() => setShowReportModal("custom")} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold">+ 新規レポート作成</button>
       </div>
       <p className="text-xs text-slate-500 mb-2">テンプレートの項目を自由に組み合わせて独自レポートを作成できます。定期配信にも設定可能。</p>
       <div className="flex gap-2 flex-wrap">
         {["取引サマリー", "精算明細", "CB分析", "接続先別パフォーマンス", "ブランド別分析", "時間帯別分析", "加盟店別内訳", "URL決済分析"].map(item => (
-          <label key={item} className="text-xs flex items-center gap-1 px-2 py-1 border rounded cursor-pointer hover:bg-blue-50">
+          <label key={item} className="text-xs flex items-center gap-1 px-2 py-1 border rounded cursor-pointer hover:bg-brand-50">
             <input type="checkbox" className="w-3 h-3" />
             {item}
           </label>
@@ -9613,12 +9620,12 @@ const MasterReport = () => {
         <div className="relative bg-white rounded-xl shadow-2xl w-[680px] max-h-[85vh] flex flex-col">
           <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
             <div>
-              <h3 className="text-sm font-bold text-slate-800">📄 レポートプレビュー</h3>
+              <h3 className="text-sm font-bold text-slate-800"><FileText className="w-4 h-4 inline mr-1" /> レポートプレビュー</h3>
               <p className="text-xs text-slate-400 mt-0.5">{previewReport.name} — {previewReport.period}</p>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => { toast("レポートをダウンロードしました", "success"); }} className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">⬇ ダウンロード</button>
-              <button onClick={() => setPreviewReport(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <button onClick={() => { toast("レポートをダウンロードしました", "success"); }} className="px-3 py-1 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600"><ArrowDownRight className="w-4 h-4 inline" /> ダウンロード</button>
+              <button onClick={() => setPreviewReport(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
           </div>
           <div className="flex-1 overflow-y-auto p-6 bg-slate-100">
@@ -9631,7 +9638,7 @@ const MasterReport = () => {
                     <p className="text-xs text-slate-400 mt-1">対象期間: {previewReport.period}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-bold text-blue-600">AI Payment System</p>
+                    <p className="text-xs font-bold text-brand-600">AI Payment System</p>
                     <p className="text-xs text-slate-400">生成日: {previewReport.date}</p>
                     <p className="text-xs text-slate-400">{previewReport.pages}ページ / {previewReport.size}</p>
                   </div>
@@ -9651,7 +9658,7 @@ const MasterReport = () => {
                     <div key={i} className="bg-slate-50 rounded p-2 text-center">
                       <p className="text-xs text-slate-400">{s.label}</p>
                       <p className="text-sm font-bold text-slate-800">{s.value}</p>
-                      <p className="text-xs text-emerald-600">{s.change}</p>
+                      <p className="text-xs text-success-600">{s.change}</p>
                     </div>
                   ))}
                 </div>
@@ -9663,7 +9670,7 @@ const MasterReport = () => {
                 <div className="bg-slate-50 rounded border p-4 text-center">
                   <div className="flex items-end justify-center gap-1 h-20">
                     {[35, 42, 38, 50, 55, 48, 62, 58, 70, 65, 72, 78].map((v, i) => (
-                      <div key={i} className="w-6 bg-blue-400 rounded-t" style={{ height: `${v}%` }} />
+                      <div key={i} className="w-6 bg-brand-400 rounded-t" style={{ height: `${v}%` }} />
                     ))}
                   </div>
                   <p className="text-xs text-slate-400 mt-2">月次取引金額推移（直近12ヶ月）</p>
@@ -9695,8 +9702,8 @@ const MasterReport = () => {
 
               {/* AI Summary in preview */}
               {previewReport.ai && (
-                <div className="bg-blue-50 rounded border border-blue-200 p-3">
-                  <p className="text-xs font-bold text-blue-700 mb-1">🤖 AI要約</p>
+                <div className="bg-brand-50 rounded border border-brand-200 p-3">
+                  <p className="text-xs font-bold text-brand-700 mb-1"><Bot className="w-4 h-4 inline mr-1" /> AI要約</p>
                   <p className="text-xs text-slate-600 leading-relaxed">対象期間の決済は順調に推移。VISA比率が最も高く安定。チャージバック率は目標範囲内。特記事項なし。</p>
                 </div>
               )}
@@ -9717,16 +9724,16 @@ const MasterReport = () => {
         <div className="relative bg-white rounded-xl shadow-2xl w-[520px]">
           <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
             <h3 className="text-sm font-bold text-slate-800">
-              {showReportModal === "generate" ? "📊 レポート生成" : showReportModal === "schedule" ? "📅 スケジュール追加" : showReportModal === "custom" ? "📝 新規レポート作成" : `📊 ${(reportTemplates.find(t => t.type === showReportModal) || {}).name || "レポート生成"}`}
+              {showReportModal === "generate" ? "レポート生成" : showReportModal === "schedule" ? <><Calendar className="w-4 h-4 inline mr-1" />スケジュール追加</> : showReportModal === "custom" ? "新規レポート作成" : `${(reportTemplates.find(t => t.type === showReportModal) || {}).name || "レポート生成"}`}
             </h3>
-            <button onClick={() => setShowReportModal(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <button onClick={() => setShowReportModal(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
             {(showReportModal === "generate" || (!["schedule", "custom"].includes(showReportModal))) && (<>
-              <div><label className="text-xs font-semibold text-slate-600">レポート種別 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue={showReportModal !== "generate" ? showReportModal : "daily"}><option value="daily">日次サマリー</option><option value="monthly">月次レポート</option><option value="fraud">不正検知レポート</option><option value="chargeback">精算レポート</option><option value="merchant">加盟店別レポート</option><option value="processor">接続先別パフォーマンス</option></select></div>
+              <div><label className="text-xs font-semibold text-slate-600">レポート種別 <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue={showReportModal !== "generate" ? showReportModal : "daily"}><option value="daily">日次サマリー</option><option value="monthly">月次レポート</option><option value="fraud">不正検知レポート</option><option value="chargeback">精算レポート</option><option value="merchant">加盟店別レポート</option><option value="processor">接続先別パフォーマンス</option></select></div>
               {showReportModal !== "generate" && (
-                <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">
-                  💡 テンプレート「{(reportTemplates.find(t => t.type === showReportModal) || {}).name}」から自動入力しました
+                <div className="bg-brand-50 rounded border border-brand-200 p-2 text-xs text-brand-700">
+                  テンプレート「{(reportTemplates.find(t => t.type === showReportModal) || {}).name}」から自動入力しました
                 </div>
               )}
               <div className="grid grid-cols-2 gap-3">
@@ -9738,22 +9745,22 @@ const MasterReport = () => {
               <div className="flex items-center gap-2"><input type="checkbox" defaultChecked className="w-3 h-3" /><span className="text-xs text-slate-600">AI要約を含める</span></div>
             </>)}
             {showReportModal === "schedule" && (<>
-              <div><label className="text-xs font-semibold text-slate-600">レポート種別 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>日次サマリー</option><option>週次レポート</option><option>月次レポート</option></select></div>
-              <div><label className="text-xs font-semibold text-slate-600">スケジュール <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>毎日 09:00</option><option>毎週月曜 09:00</option><option>毎月1日 09:00</option></select></div>
+              <div><label className="text-xs font-semibold text-slate-600">レポート種別 <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>日次サマリー</option><option>週次レポート</option><option>月次レポート</option></select></div>
+              <div><label className="text-xs font-semibold text-slate-600">スケジュール <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>毎日 09:00</option><option>毎週月曜 09:00</option><option>毎月1日 09:00</option></select></div>
               <div><label className="text-xs font-semibold text-slate-600">送信先メール</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="admin@company.jp" /></div>
               <div><label className="text-xs font-semibold text-slate-600">Slack通知</label><div className="flex items-center gap-2 mt-1"><input type="checkbox" className="w-3 h-3" /><span className="text-xs text-slate-500">Slackにも配信する</span></div></div>
             </>)}
             {showReportModal === "custom" && (<>
-              <div><label className="text-xs font-semibold text-slate-600">レポート名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="カスタムレポート名" /></div>
-              <div><label className="text-xs font-semibold text-slate-600">含める項目 <span className="text-rose-500">*</span></label>
-                <div className="flex flex-wrap gap-2 mt-1">{["取引数","決済高","手数料","CB件数","不正検知","接続先別","加盟店別","時間帯別"].map((c,i) => <label key={i} className="flex items-center gap-1 text-xs border rounded px-2 py-1 cursor-pointer hover:bg-blue-50"><input type="checkbox" defaultChecked={i<4} />{c}</label>)}</div>
+              <div><label className="text-xs font-semibold text-slate-600">レポート名 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="カスタムレポート名" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">含める項目 <span className="text-danger-500">*</span></label>
+                <div className="flex flex-wrap gap-2 mt-1">{["取引数","決済高","手数料","CB件数","不正検知","接続先別","加盟店別","時間帯別"].map((c,i) => <label key={i} className="flex items-center gap-1 text-xs border rounded px-2 py-1 cursor-pointer hover:bg-brand-50"><input type="checkbox" defaultChecked={i<4} />{c}</label>)}</div>
               </div>
               <div><label className="text-xs font-semibold text-slate-600">グラフ種別</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>折れ線グラフ</option><option>棒グラフ</option><option>円グラフ</option><option>表のみ</option></select></div>
             </>)}
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
             <button onClick={() => setShowReportModal(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => { const label = showReportModal === "schedule" ? "スケジュールを登録" : showReportModal === "custom" ? "カスタムレポートを作成" : "レポートを生成開始"; setShowReportModal(null); toast(`${label}しました`, "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">{showReportModal === "schedule" ? "スケジュール登録" : showReportModal === "custom" ? "レポート作成" : "生成する"}</button>
+            <button onClick={() => { const label = showReportModal === "schedule" ? "スケジュールを登録" : showReportModal === "custom" ? "カスタムレポートを作成" : "レポートを生成開始"; setShowReportModal(null); toast(`${label}しました`, "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">{showReportModal === "schedule" ? "スケジュール登録" : showReportModal === "custom" ? "レポート作成" : "生成する"}</button>
           </div>
         </div>
       </div>
@@ -9779,11 +9786,11 @@ const MerchantSiteApplication = () => {
 
     {/* 申請フォーム */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-      <p className="text-xs font-bold text-slate-700 mb-3 border-b pb-2">📝 新規サイト審査申請</p>
+      <p className="text-xs font-bold text-slate-700 mb-3 border-b pb-2"><PenLine className="w-4 h-4 inline mr-1" /> 新規サイト審査申請</p>
       {submitted ? (
         <div className="text-center py-8">
-          <div className="text-3xl mb-2">✅</div>
-          <p className="text-sm font-bold text-emerald-600">申請が送信されました！</p>
+          <div className="text-3xl mb-2"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></div>
+          <p className="text-sm font-bold text-success-600">申請が送信されました！</p>
           <p className="text-xs text-slate-500 mt-1">運営による審査が開始されます。通常1〜3営業日で結果をお知らせします。</p>
           <button onClick={() => setSubmitted(false)} className="mt-3 px-4 py-1.5 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">新しい申請を作成</button>
         </div>
@@ -9838,11 +9845,11 @@ const MerchantSiteApplication = () => {
             <label className="text-xs text-slate-500 block mb-1">取扱商品・サービスの説明</label>
             <textarea className="w-full text-xs border rounded px-3 py-2 h-16 resize-none" placeholder="新サイトで扱う商品やサービスの概要を記入してください" />
           </div>
-          <div className="bg-blue-50 rounded p-2 border border-blue-200">
-            <p className="text-xs text-blue-700">🤖 <span className="font-semibold">AI審査:</span> 申請後、サイトURLが入力されている場合はAIによるサイト内容の自動解析が行われます。審査結果は通常1〜3営業日でお知らせします。</p>
+          <div className="bg-brand-50 rounded p-2 border border-brand-200">
+            <p className="text-xs text-brand-700"><Bot className="w-4 h-4 inline mr-1" /> <span className="font-semibold">AI審査:</span> 申請後、サイトURLが入力されている場合はAIによるサイト内容の自動解析が行われます。審査結果は通常1〜3営業日でお知らせします。</p>
           </div>
           <div className="flex justify-end gap-2 pt-2 border-t">
-            <button onClick={() => setSubmitted(true)} className="px-6 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">🚀 審査を申請する</button>
+            <button onClick={() => setSubmitted(true)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600"><Rocket className="w-4 h-4 inline mr-1" /> 審査を申請する</button>
           </div>
         </div>
       )}
@@ -9850,7 +9857,7 @@ const MerchantSiteApplication = () => {
 
     {/* 申請履歴 */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-      <p className="text-xs font-bold text-slate-700 mb-3">📋 サイト申請履歴</p>
+      <p className="text-xs font-bold text-slate-700 mb-3"><ClipboardList className="w-4 h-4 inline mr-1" /> サイト申請履歴</p>
       <table className="w-full text-xs">
         <thead><tr className="border-b text-left text-slate-500">
           <th className="pb-2 px-2">申請ID</th><th className="pb-2 px-2">サイト名</th><th className="pb-2 px-2">URL</th><th className="pb-2 px-2">ジャンル</th><th className="pb-2 px-2">申請日</th><th className="pb-2 px-2">ステータス</th>
@@ -9858,7 +9865,7 @@ const MerchantSiteApplication = () => {
         <tbody>
           {siteHistory.map((s, i) => (
             <tr key={i} className="border-b hover:bg-slate-50">
-              <td className="py-2 px-2 text-blue-600 font-mono">{s.id}</td>
+              <td className="py-2 px-2 text-brand-600 font-mono">{s.id}</td>
               <td className="py-2 px-2 font-semibold">{s.name}</td>
               <td className="py-2 px-2 text-slate-400">{s.url}</td>
               <td className="py-2 px-2">{s.genre}</td>
@@ -9892,8 +9899,8 @@ const MerchantSalesReport = () => {
       <div className="flex gap-2">
         <select className="text-xs border rounded px-2 py-1" value={period} onChange={e => setPeriod(e.target.value)}><option value="thisMonth">今月（2026年2月）</option><option value="lastMonth">先月（2026年1月）</option><option value="custom">カスタム</option></select>
         {period === "custom" && <><input type="date" className="text-xs border rounded px-2 py-1" /><span className="text-xs text-slate-400">〜</span><input type="date" className="text-xs border rounded px-2 py-1" /></>}
-        <button onClick={() => setShowExportModal("csv")} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">📥 CSV</button>
-        <button onClick={() => setShowExportModal("pdf")} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">📄 PDF出力</button>
+        <button onClick={() => setShowExportModal("csv")} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSV</button>
+        <button onClick={() => setShowExportModal("pdf")} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold"><FileText className="w-4 h-4 inline mr-1" /> PDF出力</button>
       </div>
     </div>
 
@@ -9908,12 +9915,12 @@ const MerchantSalesReport = () => {
 
     {/* Daily Chart */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-700 mb-2">📊 日別決済高推移（2026年2月）</p>
+      <p className="text-xs font-bold text-slate-700 mb-2"><BarChart3 className="w-4 h-4 inline mr-1" /> 日別決済高推移（2026年2月）</p>
       <div className="flex items-end gap-1 h-32">
         {[320, 410, 380, 520, 480, 120, 90, 450, 510, 490, 560].map((v, i) => (
           <div key={i} className="flex-1 flex flex-col items-center">
             <span className="text-xs text-slate-400 mb-1" style={{fontSize: "8px"}}>¥{(v/100).toFixed(0)}万</span>
-            <div className="bg-blue-400 hover:bg-blue-500 rounded-t w-full cursor-pointer transition-colors" style={{ height: `${(v / 560) * 100}px` }} />
+            <div className="bg-brand-400 hover:bg-brand-500 rounded-t w-full cursor-pointer transition-colors" style={{ height: `${(v / 560) * 100}px` }} />
             <span className="text-xs text-slate-400 mt-1" style={{fontSize: "9px"}}>{i + 1}日</span>
           </div>
         ))}
@@ -9923,14 +9930,14 @@ const MerchantSalesReport = () => {
     {/* Brand breakdown + Payout schedule */}
     <div className="grid grid-cols-2 gap-3">
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <p className="text-xs font-bold text-slate-700 mb-2">💳 ブランド別内訳</p>
+        <p className="text-xs font-bold text-slate-700 mb-2"><CreditCard className="w-4 h-4 inline mr-1" /> ブランド別内訳</p>
         <div className="space-y-2">
           {[
-            { brand: "VISA", count: 152, amount: "¥2.14M", pct: 44.5, color: "bg-blue-500" },
-            { brand: "Mastercard", count: 78, amount: "¥1.09M", pct: 22.8, color: "bg-rose-500" },
-            { brand: "JCB", count: 65, amount: "¥0.92M", pct: 19.0, color: "bg-emerald-500" },
+            { brand: "VISA", count: 152, amount: "¥2.14M", pct: 44.5, color: "bg-brand-500" },
+            { brand: "Mastercard", count: 78, amount: "¥1.09M", pct: 22.8, color: "bg-danger-500" },
+            { brand: "JCB", count: 65, amount: "¥0.92M", pct: 19.0, color: "bg-success-500" },
             { brand: "AMEX", count: 25, amount: "¥0.41M", pct: 8.5, color: "bg-purple-500" },
-            { brand: "WEBマネー", count: 22, amount: "¥0.24M", pct: 5.2, color: "bg-amber-500" },
+            { brand: "WEBマネー", count: 22, amount: "¥0.24M", pct: 5.2, color: "bg-warning-500" },
           ].map((b, i) => (
             <div key={i} className="flex items-center gap-2 text-xs">
               <span className="w-20 text-slate-700 font-semibold">{b.brand}</span>
@@ -9942,14 +9949,14 @@ const MerchantSalesReport = () => {
         </div>
       </div>
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <p className="text-xs font-bold text-slate-700 mb-2">💰 入金予定</p>
+        <p className="text-xs font-bold text-slate-700 mb-2"><Coins className="w-4 h-4 inline mr-1" /> 入金予定</p>
         <div className="space-y-2">
-          <div className="bg-emerald-50 rounded border border-emerald-200 p-2">
+          <div className="bg-success-50 rounded border border-success-200 p-2">
             <div className="flex justify-between text-xs mb-0.5">
-              <span className="text-emerald-700 font-semibold">次回入金</span>
-              <span className="text-emerald-800 font-bold">¥3,245,600</span>
+              <span className="text-success-700 font-semibold">次回入金</span>
+              <span className="text-success-800 font-bold">¥3,245,600</span>
             </div>
-            <div className="flex justify-between text-xs text-emerald-600">
+            <div className="flex justify-between text-xs text-success-600">
               <span>2026年2月28日（金）</span>
               <span>1月分精算</span>
             </div>
@@ -9980,7 +9987,7 @@ const MerchantSalesReport = () => {
       </div>
       <TableHeader cols={[{ label: "取引ID", w: "w-36" }, { label: "日時", w: "w-32" }, { label: "カード", w: "w-28" }, { label: "ブランド", w: "w-16" }, { label: "金額", w: "w-24" }, { label: "状態", w: "w-16" }, { label: "操作", w: "w-16" }]}>
       {txData.map((t, i) => (
-        <tr key={i} className={`border-b cursor-pointer hover:bg-blue-50 ${i % 2 ? "bg-slate-50" : ""}`} onClick={() => setSelectedTx(t)}>
+        <tr key={i} className={`border-b cursor-pointer hover:bg-brand-50 ${i % 2 ? "bg-slate-50" : ""}`} onClick={() => setSelectedTx(t)}>
           <td className="px-4 py-2 whitespace-nowrap w-36 font-mono text-slate-500">{t.id}</td>
           <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{t.time}</td>
           <td className="px-4 py-2 whitespace-nowrap w-28 font-mono text-slate-500">{t.card}</td>
@@ -10000,10 +10007,10 @@ const MerchantSalesReport = () => {
         <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
           <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
             <div>
-              <h3 className="text-sm font-bold text-slate-800">💳 取引詳細</h3>
+              <h3 className="text-sm font-bold text-slate-800"><CreditCard className="w-4 h-4 inline mr-1" /> 取引詳細</h3>
               <p className="text-xs text-slate-400 mt-0.5">{selectedTx.id}</p>
             </div>
-            <button onClick={() => setSelectedTx(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <button onClick={() => setSelectedTx(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
             <div className="flex justify-between items-center">
@@ -10031,10 +10038,10 @@ const MerchantSalesReport = () => {
               <p className="text-xs font-bold text-slate-700 mb-2">タイムライン</p>
               <div className="space-y-1.5">
                 {[
-                  { time: selectedTx.time, event: "決済リクエスト受信", icon: "🔵" },
-                  { time: selectedTx.time, event: "3DS認証完了", icon: "🟢" },
-                  { time: selectedTx.time, event: "オーソリ承認", icon: "🟢" },
-                  { time: selectedTx.time, event: "売上確定", icon: "✅" },
+                  { time: selectedTx.time, event: "決済リクエスト受信", icon: <Circle className="w-3 h-3 fill-brand-500 text-brand-500 inline" /> },
+                  { time: selectedTx.time, event: "3DS認証完了", icon: <Circle className="w-3 h-3 fill-success-500 text-success-500 inline" /> },
+                  { time: selectedTx.time, event: "オーソリ承認", icon: <Circle className="w-3 h-3 fill-success-500 text-success-500 inline" /> },
+                  { time: selectedTx.time, event: "売上確定", icon: <CheckCircle2 className="w-4 h-4 text-success-600 inline" /> },
                 ].map((e, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs">
                     <span>{e.icon}</span>
@@ -10058,8 +10065,8 @@ const MerchantSalesReport = () => {
         <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowExportModal(null)} />
         <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
           <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
-            <h3 className="text-sm font-bold text-slate-800">{showExportModal === "csv" ? "📥 CSVエクスポート" : "📄 PDFエクスポート"}</h3>
-            <button onClick={() => setShowExportModal(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <h3 className="text-sm font-bold text-slate-800">{showExportModal === "csv" ? "CSVエクスポート" : "PDFエクスポート"}</h3>
+            <button onClick={() => setShowExportModal(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -10080,7 +10087,7 @@ const MerchantSalesReport = () => {
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
             <button onClick={() => setShowExportModal(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => setShowExportModal(null)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">{showExportModal === "csv" ? "CSVダウンロード" : "PDF生成"}</button>
+            <button onClick={() => setShowExportModal(null)} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">{showExportModal === "csv" ? "CSVダウンロード" : "PDF生成"}</button>
           </div>
         </div>
       </div>
@@ -10101,15 +10108,15 @@ const MerchantAccountSettings = () => {
 
       <div className="flex gap-1 border-b">
         {[{ id: "company", label: "会社情報" }, { id: "bank", label: "振込先口座" }, { id: "api", label: "APIキー" }, { id: "security", label: "セキュリティ" }, { id: "members", label: "メンバー管理" }, { id: "notifications", label: "通知設定" }, { id: "contract", label: "契約情報" }].map(tab => (
-          <button key={tab.id} onClick={() => setAccTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 ${accTab === tab.id ? "border-emerald-500 text-emerald-600 font-semibold" : "border-transparent text-slate-400"}`}>{tab.label}</button>
+          <button key={tab.id} onClick={() => setAccTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 ${accTab === tab.id ? "border-success-500 text-success-600 font-semibold" : "border-transparent text-slate-400"}`}>{tab.label}</button>
         ))}
       </div>
 
       {/* Tab: 会社情報 */}
       {accTab === "company" && (
         <div className="bg-white rounded-lg border p-4 max-w-2xl">
-          <div className="bg-amber-50 rounded border border-amber-200 p-2 mb-3 text-xs text-amber-700">
-            ⚠️ 会社情報の変更は<strong>運営の承認が必要</strong>です。変更内容によっては書類再提出（登記簿等）をお願いする場合があります。
+          <div className="bg-warning-50 rounded border border-warning-200 p-2 mb-3 text-xs text-warning-700">
+            会社情報の変更は<strong>運営の承認が必要</strong>です。変更内容によっては書類再提出（登記簿等）をお願いする場合があります。
           </div>
           <div className="space-y-3">
             {[
@@ -10128,7 +10135,7 @@ const MerchantAccountSettings = () => {
               </div>
             ))}
             <div className="flex justify-end mt-3">
-              <button onClick={() => toast("変更申請を送信しました", "success")} className="px-4 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">変更申請を送信</button>
+              <button onClick={() => toast("変更申請を送信しました", "success")} className="px-4 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">変更申請を送信</button>
             </div>
           </div>
         </div>
@@ -10137,8 +10144,8 @@ const MerchantAccountSettings = () => {
       {/* Tab: 振込先口座 */}
       {accTab === "bank" && (
         <div className="space-y-3 max-w-2xl">
-          <div className="bg-amber-50 rounded-lg border border-amber-300 p-2">
-            <p className="text-xs text-amber-700">⚠️ 口座情報の変更には本人確認が必要です。変更申請後、審査完了まで1〜3営業日かかります。</p>
+          <div className="bg-warning-50 rounded-lg border border-warning-300 p-2">
+            <p className="text-xs text-warning-700"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 口座情報の変更には本人確認が必要です。変更申請後、審査完了まで1〜3営業日かかります。</p>
           </div>
           <div className="bg-white rounded-lg border p-4">
             <p className="text-xs font-bold text-slate-700 mb-3">現在の振込先口座</p>
@@ -10156,7 +10163,7 @@ const MerchantAccountSettings = () => {
                 </div>
               ))}
             </div>
-            <button onClick={() => toast("口座変更申請を送信しました。審査まで1〜3営業日かかります", "info")} className="mt-3 px-3 py-1.5 bg-amber-100 text-amber-700 rounded text-xs font-semibold border border-amber-300">🔄 口座変更を申請</button>
+            <button onClick={() => toast("口座変更申請を送信しました。審査まで1〜3営業日かかります", "info")} className="mt-3 px-3 py-1.5 bg-warning-100 text-warning-700 rounded text-xs font-semibold border border-warning-300"><RefreshCw className="w-4 h-4 inline mr-1" /> 口座変更を申請</button>
           </div>
         </div>
       )}
@@ -10175,7 +10182,7 @@ const MerchantAccountSettings = () => {
                 <div className="flex items-center gap-2">
                   <input className="flex-1 border rounded px-3 py-1.5 text-xs font-mono bg-slate-50" value="sk_test_4eC39HqLyjWDarjtT1zdp7dc" readOnly />
                   <button onClick={() => toast("APIキーをコピーしました", "success")} className="px-2 py-1.5 bg-slate-100 text-slate-600 rounded text-xs border">コピー</button>
-                  <button onClick={() => toast("テスト環境のAPIキーを再発行しました", "warning")} className="px-2 py-1.5 bg-rose-100 text-rose-600 rounded text-xs border border-rose-200">再発行</button>
+                  <button onClick={() => toast("テスト環境のAPIキーを再発行しました", "warning")} className="px-2 py-1.5 bg-danger-100 text-danger-600 rounded text-xs border border-danger-200">再発行</button>
                 </div>
               </div>
               <div className="border rounded p-3">
@@ -10186,14 +10193,14 @@ const MerchantAccountSettings = () => {
                 <div className="flex items-center gap-2">
                   <input className="flex-1 border rounded px-3 py-1.5 text-xs font-mono bg-slate-50" value="sk_live_••••••••••••••••••••••dc" readOnly />
                   <button onClick={() => toast("本番APIキーを表示しました（セキュリティ注意）", "warning")} className="px-2 py-1.5 bg-slate-100 text-slate-600 rounded text-xs border">表示</button>
-                  <button onClick={() => toast("本番環境のAPIキーを再発行しました", "warning")} className="px-2 py-1.5 bg-rose-100 text-rose-600 rounded text-xs border border-rose-200">再発行</button>
+                  <button onClick={() => toast("本番環境のAPIキーを再発行しました", "warning")} className="px-2 py-1.5 bg-danger-100 text-danger-600 rounded text-xs border border-danger-200">再発行</button>
                 </div>
               </div>
               <div className="border rounded p-3">
                 <p className="text-xs font-semibold text-slate-700 mb-1">Webhook URL</p>
                 <div className="flex items-center gap-2">
                   <input className="flex-1 border rounded px-3 py-1.5 text-xs" defaultValue="https://abcmart-ec.jp/webhook/payment" />
-                  <button onClick={() => toast("Webhook URLを保存しました", "success")} className="px-2 py-1.5 bg-blue-600 text-white rounded text-xs font-semibold">保存</button>
+                  <button onClick={() => toast("Webhook URLを保存しました", "success")} className="px-2 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold">保存</button>
                   <button onClick={() => { toast("Webhookテスト送信中...", "info"); setTimeout(() => toast("テスト送信成功", "success"), 1500); }} className="px-2 py-1.5 bg-slate-100 text-slate-600 rounded text-xs border">テスト送信</button>
                 </div>
               </div>
@@ -10206,11 +10213,11 @@ const MerchantAccountSettings = () => {
       {accTab === "security" && (
         <div className="space-y-3 max-w-2xl">
           <div className="bg-white rounded-lg border p-4">
-            <p className="text-xs font-bold text-slate-700 mb-3">🔐 2段階認証（MFA）</p>
-            <div className="flex items-center justify-between p-3 bg-emerald-50 rounded border border-emerald-200">
+            <p className="text-xs font-bold text-slate-700 mb-3"><ShieldCheck className="w-4 h-4 inline mr-1" /> 2段階認証（MFA）</p>
+            <div className="flex items-center justify-between p-3 bg-success-50 rounded border border-success-200">
               <div>
-                <p className="text-xs font-semibold text-emerald-700">有効（認証アプリ連携済み）</p>
-                <p className="text-xs text-emerald-600 mt-0.5">Google Authenticator で設定済み</p>
+                <p className="text-xs font-semibold text-success-700">有効（認証アプリ連携済み）</p>
+                <p className="text-xs text-success-600 mt-0.5">Google Authenticator で設定済み</p>
               </div>
               <button onClick={() => toast("MFA設定を変更中", "info")} className="px-3 py-1 bg-white text-slate-600 rounded text-xs border">設定変更</button>
             </div>
@@ -10221,7 +10228,7 @@ const MerchantAccountSettings = () => {
               <input className="w-full border rounded px-3 py-1.5 text-xs" type="password" placeholder="現在のパスワード" />
               <input className="w-full border rounded px-3 py-1.5 text-xs" type="password" placeholder="新しいパスワード" />
               <input className="w-full border rounded px-3 py-1.5 text-xs" type="password" placeholder="新しいパスワード（確認）" />
-              <button onClick={() => toast("パスワードを変更しました", "success")} className="px-4 py-2 bg-blue-600 text-white rounded text-xs font-semibold">パスワードを変更</button>
+              <button onClick={() => toast("パスワードを変更しました", "success")} className="px-4 py-2 bg-brand-500 text-white rounded text-xs font-semibold">パスワードを変更</button>
             </div>
           </div>
           <div className="bg-white rounded-lg border p-4">
@@ -10248,7 +10255,7 @@ const MerchantAccountSettings = () => {
       {accTab === "members" && (
         <div className="space-y-3">
           <div className="flex justify-end">
-            <button onClick={() => setShowInviteS08(true)} className="text-xs bg-blue-600 text-white px-3 py-1 rounded font-semibold">+ メンバー招待</button>
+            <button onClick={() => setShowInviteS08(true)} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold">+ メンバー招待</button>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "名前", w: "flex-1" }, { label: "メール", w: "w-48" }, { label: "権限", w: "w-20" }, { label: "MFA", w: "w-14" }, { label: "最終ログイン", w: "w-28" }, { label: "操作", w: "w-20" }]}>
@@ -10261,7 +10268,7 @@ const MerchantAccountSettings = () => {
                 <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{m.name}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-48 text-slate-500">{m.email}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={m.role} color={m.role === "管理者" ? "blue" : "gray"} /></td>
-                <td className="px-4 py-2 whitespace-nowrap w-14 text-center">{m.mfa ? <span className="text-emerald-500">●</span> : <span className="text-rose-400">○</span>}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-14 text-center">{m.mfa ? <span className="text-success-500">●</span> : <span className="text-danger-400">○</span>}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400">{m.last}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-20"><button onClick={() => toast(`${m.name}の権限を編集中`, "info")} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">編集</button></td>
               </tr>
@@ -10289,7 +10296,7 @@ const MerchantAccountSettings = () => {
                   <p className="text-xs font-semibold text-slate-700">{n.label}</p>
                   <p className="text-xs text-slate-400">{n.desc}</p>
                 </div>
-                <div className={`w-10 h-5 rounded-full cursor-pointer flex items-center px-0.5 ${n.enabled ? "bg-blue-500 justify-end" : "bg-slate-300 justify-start"}`}>
+                <div className={`w-10 h-5 rounded-full cursor-pointer flex items-center px-0.5 ${n.enabled ? "bg-brand-500 justify-end" : "bg-slate-300 justify-start"}`}>
                   <div className="w-4 h-4 bg-white rounded-full shadow" />
                 </div>
               </div>
@@ -10317,13 +10324,13 @@ const MerchantAccountSettings = () => {
               ))}
             </div>
             <div className="mt-3 p-2 bg-slate-50 rounded-lg border border-slate-200">
-              <p className="text-xs text-slate-400">💡 手数料率・入金サイクル等の契約条件の詳細は、契約書PDFをご確認ください。条件変更をご希望の場合はお問い合わせください。</p>
+              <p className="text-xs text-slate-400"><Lightbulb className="w-4 h-4 inline mr-1" /> 手数料率・入金サイクル等の契約条件の詳細は、契約書PDFをご確認ください。条件変更をご希望の場合はお問い合わせください。</p>
             </div>
-            <button onClick={() => toast("契約書PDFをダウンロードしました", "success")} className="mt-2 px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs border">📄 契約書PDFをダウンロード</button>
+            <button onClick={() => toast("契約書PDFをダウンロードしました", "success")} className="mt-2 px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs border"><FileText className="w-4 h-4 inline mr-1" /> 契約書PDFをダウンロード</button>
             <div className="mt-4 pt-3 border-t">
-              <p className="text-xs font-bold text-rose-600 mb-1">アカウント解約</p>
+              <p className="text-xs font-bold text-danger-600 mb-1">アカウント解約</p>
               <p className="text-xs text-slate-500 mb-2">解約申請後、運営にて対応いたします。未精算の処理完了後に解約が確定します。</p>
-              <button onClick={() => toast("解約申請を送信しました。運営にて対応いたします", "warning")} className="px-3 py-1.5 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200 hover:bg-rose-100">解約申請を送信</button>
+              <button onClick={() => toast("解約申請を送信しました。運営にて対応いたします", "warning")} className="px-3 py-1.5 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200 hover:bg-danger-100">解約申請を送信</button>
             </div>
           </div>
         </div>
@@ -10335,17 +10342,17 @@ const MerchantAccountSettings = () => {
           <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowInviteS08(false)} />
           <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
-              <h3 className="text-sm font-bold text-slate-800">📧 メンバー招待</h3>
-              <button onClick={() => setShowInviteS08(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <h3 className="text-sm font-bold text-slate-800"><Mail className="w-4 h-4 inline mr-1" /> メンバー招待</h3>
+              <button onClick={() => setShowInviteS08(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
-              <div><label className="text-xs font-semibold text-slate-600">メールアドレス <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: member@company.jp" /></div>
-              <div><label className="text-xs font-semibold text-slate-600">権限 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>管理者</option><option>スタッフ</option><option>閲覧のみ</option></select></div>
+              <div><label className="text-xs font-semibold text-slate-600">メールアドレス <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: member@company.jp" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">権限 <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>管理者</option><option>スタッフ</option><option>閲覧のみ</option></select></div>
               <div><label className="text-xs font-semibold text-slate-600">MFA設定</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>必須（推奨）</option><option>任意</option></select></div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowInviteS08(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setShowInviteS08(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">招待メール送信</button>
+              <button onClick={() => setShowInviteS08(false)} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">招待メール送信</button>
             </div>
           </div>
         </div>
@@ -10372,14 +10379,14 @@ const MerchantPaymentLinks = () => {
         <h2 className="text-sm font-bold text-slate-800">決済リンク管理</h2>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
-        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-emerald-500 text-emerald-700 bg-emerald-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-success-500 text-success-700 bg-success-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}</div>
       {tab === "create" && (
         <div className="bg-white rounded-lg border p-4 space-y-4">
           <p className="text-xs font-bold text-slate-600">決済タイプを選択</p>
           <div className="grid grid-cols-3 gap-3">
-            {[{ icon: "💴", name: "固定金額", desc: "指定した金額で決済" }, { icon: "✏️", name: "金額入力型", desc: "顧客が金額を入力" }, { icon: "📋", name: "金額選択型", desc: "選択肢から選ぶ" }].map((t, i) => (
-              <div key={i} className={`border-2 rounded-lg p-3 text-center cursor-pointer hover:border-emerald-400 ${i === 0 ? "border-emerald-500 bg-emerald-50" : "border-slate-200"}`}>
+            {[{ icon: <Coins className="w-4 h-4 inline text-slate-500" />, name: "固定金額", desc: "指定した金額で決済" }, { icon: <Pencil className="w-4 h-4 inline text-slate-500" />, name: "金額入力型", desc: "顧客が金額を入力" }, { icon: <ClipboardList className="w-4 h-4 inline text-slate-500" />, name: "金額選択型", desc: "選択肢から選ぶ" }].map((t, i) => (
+              <div key={i} className={`border-2 rounded-lg p-3 text-center cursor-pointer hover:border-success-400 ${i === 0 ? "border-success-500 bg-success-50" : "border-slate-200"}`}>
                 <p className="text-xl">{t.icon}</p>
                 <p className="text-xs font-bold mt-1">{t.name}</p>
                 <p className="text-xs text-slate-400 mt-0.5">{t.desc}</p>
@@ -10396,15 +10403,15 @@ const MerchantPaymentLinks = () => {
             <span className="ml-4">利用可能回数:</span><input className="border rounded px-2 py-1 w-16 text-xs" placeholder="無制限" />
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setShowPreview(!showPreview)} className="flex-1 py-2 bg-slate-100 text-slate-600 rounded text-xs font-bold border hover:bg-slate-200">👁 プレビュー</button>
-            <button onClick={() => setShowGenerated(true)} className="flex-1 py-2 bg-emerald-600 text-white rounded text-xs font-bold hover:bg-emerald-700">🔗 決済リンクを生成</button>
+            <button onClick={() => setShowPreview(!showPreview)} className="flex-1 py-2 bg-slate-100 text-slate-600 rounded text-xs font-bold border hover:bg-slate-200"><Eye className="w-4 h-4 inline mr-1" /> プレビュー</button>
+            <button onClick={() => setShowGenerated(true)} className="flex-1 py-2 bg-success-600 text-white rounded text-xs font-bold hover:bg-success-700"><Link2 className="w-4 h-4 inline mr-1" /> 決済リンクを生成</button>
           </div>
-          <div className="bg-emerald-50 border border-emerald-200 rounded p-3 text-xs">
-            <p className="font-bold text-emerald-700">✅ 決済リンクが生成されました！</p>
+          <div className="bg-success-50 border border-success-200 rounded p-3 text-xs">
+            <p className="font-bold text-success-700"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 決済リンクが生成されました！</p>
             <div className="flex items-center gap-2 mt-2">
               <input className="flex-1 border rounded px-2 py-1 bg-white text-xs" value="https://pay.aipayment.jp/l/abc123xyz" readOnly />
-              <button onClick={() => toast("決済リンクをコピーしました", "success")} className="px-2 py-1 bg-emerald-600 text-white rounded text-xs">📋 コピー</button>
-              <button onClick={() => toast("メールで決済リンクを送信しました", "success")} className="px-2 py-1 bg-slate-100 rounded text-xs border">📧 メール</button>
+              <button onClick={() => toast("決済リンクをコピーしました", "success")} className="px-2 py-1 bg-success-600 text-white rounded text-xs"><ClipboardList className="w-4 h-4 inline mr-1" /> コピー</button>
+              <button onClick={() => toast("メールで決済リンクを送信しました", "success")} className="px-2 py-1 bg-slate-100 rounded text-xs border"><Mail className="w-4 h-4 inline mr-1" /> メール</button>
               <button onClick={() => toast("QRコードを生成しました", "success")} className="px-2 py-1 bg-slate-100 rounded text-xs border">QR</button>
             </div>
           </div>
@@ -10422,17 +10429,17 @@ const MerchantPaymentLinks = () => {
             { id: "LNK-003", name: "コース選択", type: "選択", amt: "選択式", uses: "3/10", st: "有効", stc: "green", url: "https://pay.aipayment.jp/l/course03", created: "2026-02-01", expires: "2026-03-31", successRate: "100%", totalSales: "¥29,400", recentTx: [{ date: "02/09 10:00", amount: "¥9,800", status: "成功" }] },
             { id: "LNK-004", name: "キャンペーン", type: "固定", amt: "¥1,980", uses: "100/100", st: "上限到達", stc: "yellow", url: "https://pay.aipayment.jp/l/camp04", created: "2026-01-20", expires: "2026-02-28", successRate: "97.0%", totalSales: "¥198,000", recentTx: [{ date: "02/08 11:00", amount: "¥1,980", status: "成功" }] }
           ].map((r, i) => (
-            <tr key={i} className="border-b hover:bg-blue-50 cursor-pointer" onClick={() => setSelectedLink(r)}>
-              <td className="px-4 py-2 whitespace-nowrap w-24 text-blue-600 font-mono">{r.id}</td>
+            <tr key={i} className="border-b hover:bg-brand-50 cursor-pointer" onClick={() => setSelectedLink(r)}>
+              <td className="px-4 py-2 whitespace-nowrap w-24 text-brand-600 font-mono">{r.id}</td>
               <td className="px-4 py-2 whitespace-nowrap">{r.name}</td>
               <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.type} color="blue" /></td>
               <td className="px-4 py-2 whitespace-nowrap w-20">{r.amt}</td>
               <td className="px-4 py-2 whitespace-nowrap w-16">{r.uses}</td>
               <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st} color={r.stc} /></td>
               <td className="px-4 py-2 whitespace-nowrap w-24" onClick={e => e.stopPropagation()}><div className="flex gap-1">
-                <button onClick={() => toast(`${r.url}をコピーしました`, "success")} className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border hover:bg-slate-200">📋</button>
+                <button onClick={() => toast(`${r.url}をコピーしました`, "success")} className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border hover:bg-slate-200"><ClipboardList className="w-4 h-4 inline" /></button>
                 <button onClick={() => toast("QRコードを生成しました", "info")} className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border hover:bg-slate-200">QR</button>
-                <button onClick={() => toast(`${r.name}のリンクを一時停止しました`, "warning")} className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border hover:bg-slate-200">⏸</button>
+                <button onClick={() => toast(`${r.name}のリンクを一時停止しました`, "warning")} className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border hover:bg-slate-200"><Pause className="w-3.5 h-3.5 inline" /></button>
               </div></td>
             </tr>
           ))}
@@ -10452,7 +10459,7 @@ const MerchantPaymentLinks = () => {
             <TableHeader cols={[{ label: "商品名", w: "flex-1" }, { label: "利用回数", w: "w-20" }, { label: "決済高", w: "w-24" }, { label: "成功率", w: "w-16" }, { label: "最終利用日", w: "w-24" }]}>
             {[["プレミアムプラン", "842", "¥8,251,600", "98.2%", "2026-02-13"], ["寄付金", "245", "¥1,230,000", "96.7%", "2026-02-12"], ["コース選択", "160", "¥960,000", "97.5%", "2026-02-11"]].map((r, i) => (
               <tr key={i} className="border-b">
-                <td className="px-4 py-2 whitespace-nowrap">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-20">{r[1]}</td><td className="px-4 py-2 whitespace-nowrap w-24 font-bold">{r[2]}</td><td className="px-4 py-2 whitespace-nowrap w-16 text-emerald-600">{r[3]}</td><td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{r[4]}</td>
+                <td className="px-4 py-2 whitespace-nowrap">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-20">{r[1]}</td><td className="px-4 py-2 whitespace-nowrap w-24 font-bold">{r[2]}</td><td className="px-4 py-2 whitespace-nowrap w-16 text-success-600">{r[3]}</td><td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{r[4]}</td>
               </tr>
             ))}
             </TableHeader>
@@ -10466,19 +10473,19 @@ const MerchantPaymentLinks = () => {
           <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowPreview(false)} />
           <div className="relative bg-white rounded-xl shadow-2xl w-[380px]">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
-              <h3 className="text-sm font-bold text-slate-800">👁 決済ページプレビュー</h3>
-              <button onClick={() => setShowPreview(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <h3 className="text-sm font-bold text-slate-800"><Eye className="w-4 h-4 inline mr-1" /> 決済ページプレビュー</h3>
+              <button onClick={() => setShowPreview(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-4">
               <div className="bg-white border-2 border-dashed rounded-lg p-4 text-center space-y-3">
-                <div className="w-12 h-12 bg-emerald-100 rounded-full mx-auto flex items-center justify-center text-2xl">💳</div>
+                <div className="w-12 h-12 bg-success-100 rounded-full mx-auto flex items-center justify-center text-2xl"><CreditCard className="w-4 h-4 inline" /></div>
                 <p className="text-sm font-bold text-slate-800">サンプルショップ</p>
                 <p className="text-xs text-slate-500">商品A × 1点</p>
                 <p className="text-lg font-bold text-slate-800">¥3,980</p>
                 <div className="space-y-2">
                   <input className="w-full text-xs border rounded px-3 py-2" placeholder="カード番号" disabled />
                   <div className="flex gap-2"><input className="flex-1 text-xs border rounded px-3 py-2" placeholder="有効期限" disabled /><input className="flex-1 text-xs border rounded px-3 py-2" placeholder="CVC" disabled /></div>
-                  <button className="w-full py-2 bg-emerald-600 text-white rounded text-xs font-bold" disabled>お支払い</button>
+                  <button className="w-full py-2 bg-success-600 text-white rounded text-xs font-bold" disabled>お支払い</button>
                 </div>
                 <p className="text-xs text-slate-300">Powered by AQUAGATES</p>
               </div>
@@ -10494,8 +10501,8 @@ const MerchantPaymentLinks = () => {
           <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedLink(null)} />
           <div className="w-[440px] bg-white shadow-xl border-l overflow-y-auto">
             <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
-              <h3 className="text-sm font-bold text-slate-800">🔗 リンク詳細</h3>
-              <button onClick={() => setSelectedLink(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <h3 className="text-sm font-bold text-slate-800"><Link2 className="w-4 h-4 inline mr-1" /> リンク詳細</h3>
+              <button onClick={() => setSelectedLink(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               {/* Link Info */}
@@ -10513,11 +10520,11 @@ const MerchantPaymentLinks = () => {
                 <p className="text-xs font-bold text-slate-700 mb-1">決済リンクURL</p>
                 <div className="flex items-center gap-2">
                   <input className="flex-1 text-xs border rounded px-2 py-1 bg-white" value={selectedLink.url} readOnly />
-                  <button onClick={() => toast("決済リンクをコピーしました", "success")} className="px-2 py-1 bg-emerald-600 text-white rounded text-xs">📋</button>
+                  <button onClick={() => toast("決済リンクをコピーしました", "success")} className="px-2 py-1 bg-success-600 text-white rounded text-xs"><ClipboardList className="w-4 h-4 inline" /></button>
                 </div>
                 <div className="mt-3 text-center">
                   <div className="w-24 h-24 bg-white border-2 border-slate-300 rounded mx-auto flex items-center justify-center">
-                    <span className="text-3xl">📱</span>
+                    <Smartphone className="w-4 h-4 inline" />
                   </div>
                   <p className="text-xs text-slate-400 mt-1">QRコード</p>
                 </div>
@@ -10542,7 +10549,7 @@ const MerchantPaymentLinks = () => {
 
               {/* Recent Transactions */}
               <div>
-                <p className="text-xs font-bold text-slate-700 mb-2">💳 直近の取引</p>
+                <p className="text-xs font-bold text-slate-700 mb-2"><CreditCard className="w-4 h-4 inline mr-1" /> 直近の取引</p>
                 <div className="space-y-1">
                   {selectedLink.recentTx.map((tx, i) => (
                     <div key={i} className="flex items-center justify-between text-xs p-2 bg-slate-50 rounded border">
@@ -10556,9 +10563,9 @@ const MerchantPaymentLinks = () => {
 
               {/* Actions */}
               <div className="flex gap-2 pt-2 border-t">
-                <button onClick={() => toast(`${selectedLink.name}を編集中`, "info")} className="flex-1 px-3 py-2 bg-slate-100 text-slate-600 rounded text-xs border hover:bg-slate-200">✏️ 編集</button>
-                <button onClick={() => toast(`${selectedLink.name}を一時停止しました`, "warning")} className="flex-1 px-3 py-2 bg-amber-50 text-amber-700 rounded text-xs border border-amber-200 hover:bg-amber-100">⏸ 一時停止</button>
-                <button onClick={() => { toast(`${selectedLink.name}を削除しました`, "error"); setSelectedLink(null); }} className="px-3 py-2 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200 hover:bg-rose-100">🗑</button>
+                <button onClick={() => toast(`${selectedLink.name}を編集中`, "info")} className="flex-1 px-3 py-2 bg-slate-100 text-slate-600 rounded text-xs border hover:bg-slate-200"><Pencil className="w-4 h-4 inline mr-1" /> 編集</button>
+                <button onClick={() => toast(`${selectedLink.name}を一時停止しました`, "warning")} className="flex-1 px-3 py-2 bg-warning-50 text-warning-700 rounded text-xs border border-warning-200 hover:bg-warning-100"><Pause className="w-3.5 h-3.5 inline mr-1" /> 一時停止</button>
+                <button onClick={() => { toast(`${selectedLink.name}を削除しました`, "error"); setSelectedLink(null); }} className="px-3 py-2 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200 hover:bg-danger-100"><Trash2 className="w-4 h-4 inline" /></button>
               </div>
             </div>
           </div>
@@ -10570,15 +10577,15 @@ const MerchantPaymentLinks = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowGenerated(false)} />
           <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
-            <div className="p-4 border-b bg-emerald-50 rounded-t-xl flex justify-between items-center">
-              <h3 className="text-sm font-bold text-emerald-700">✅ 決済リンクを生成しました</h3>
-              <button onClick={() => setShowGenerated(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <div className="p-4 border-b bg-success-50 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-sm font-bold text-success-700"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 決済リンクを生成しました</h3>
+              <button onClick={() => setShowGenerated(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
-              <div className="bg-slate-50 rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-400 mb-1">決済リンクURL</p><p className="text-xs font-mono text-blue-600 break-all">https://pay.aquagates.com/link/PL-20260216-001</p></div>
+              <div className="bg-slate-50 rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-400 mb-1">決済リンクURL</p><p className="text-xs font-mono text-brand-600 break-all">https://pay.aquagates.com/link/PL-20260216-001</p></div>
               <div className="flex gap-2">
-                <button onClick={() => toast("決済リンクをコピーしました", "success")} className="flex-1 py-2 bg-emerald-600 text-white rounded text-xs font-bold">📋 コピー</button>
-                <button onClick={() => toast("メールで決済リンクを送信しました", "success")} className="flex-1 py-2 bg-slate-100 text-slate-600 rounded text-xs border">📧 メール送信</button>
+                <button onClick={() => toast("決済リンクをコピーしました", "success")} className="flex-1 py-2 bg-success-600 text-white rounded text-xs font-bold"><ClipboardList className="w-4 h-4 inline mr-1" /> コピー</button>
+                <button onClick={() => toast("メールで決済リンクを送信しました", "success")} className="flex-1 py-2 bg-slate-100 text-slate-600 rounded text-xs border"><Mail className="w-4 h-4 inline mr-1" /> メール送信</button>
                 <button onClick={() => toast("QRコードを生成しました", "info")} className="flex-1 py-2 bg-slate-100 text-slate-600 rounded text-xs border">QRコード</button>
               </div>
               <div className="text-xs text-slate-400 text-center">有効期限: 2026-03-16 23:59</div>
@@ -10608,29 +10615,29 @@ const MerchantSubscriptions = () => {
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-bold text-slate-800">決済管理</h2>
           <div className="flex items-center gap-1 text-xs text-slate-400">
-            <span className="bg-slate-100 px-1.5 py-0.5 rounded">🏢 加盟店</span>
+            <span className="bg-slate-100 px-1.5 py-0.5 rounded"><Building2 className="w-4 h-4 inline mr-1" /> 加盟店</span>
             <span>→</span>
-            <select className="border rounded px-2 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50">
-              <option>🌐 ECサイトA</option>
-              <option>🌐 サブスクサイトB</option>
-              <option>🌐 教育プラットフォームC</option>
+            <select className="border rounded px-2 py-1 text-xs font-semibold text-success-700 bg-success-50">
+              <option><Globe className="w-4 h-4 inline mr-1" /> ECサイトA</option>
+              <option><Globe className="w-4 h-4 inline mr-1" /> サブスクサイトB</option>
+              <option><Globe className="w-4 h-4 inline mr-1" /> 教育プラットフォームC</option>
             </select>
             <span>→</span>
-            <span className="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-semibold">📦 プラン（複数）</span>
+            <span className="bg-success-100 text-success-700 px-1.5 py-0.5 rounded font-semibold"><Package className="w-4 h-4 inline mr-1" /> プラン（複数）</span>
           </div>
         </div>
       </div>
-      <div className="bg-blue-50 border border-blue-200 rounded p-2 text-xs text-blue-700 flex items-center gap-2">
-        <span>💡</span>
+      <div className="bg-brand-50 border border-brand-200 rounded p-2 text-xs text-brand-700 flex items-center gap-2">
+        <span><Lightbulb className="w-4 h-4 inline" /></span>
         <span>決済管理はサイト単位で管理されます。各サイトに複数のプラン（月額・年額・分割等）を設定できます。サイトを切り替えてプランを管理してください。</span>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
-        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-emerald-500 text-emerald-700 bg-emerald-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-success-500 text-success-700 bg-success-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}</div>
       {tab === "plans" && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <button onClick={() => setShowCreatePlan(!showCreatePlan)} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-bold">+ プラン作成</button>
+            <button onClick={() => setShowCreatePlan(!showCreatePlan)} className="px-3 py-1.5 bg-success-600 text-white rounded text-xs font-bold">+ プラン作成</button>
             <span className="text-xs text-slate-400">このサイトのプラン: 4件（有効3 / アーカイブ1）</span>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
@@ -10640,14 +10647,14 @@ const MerchantSubscriptions = () => {
               { name: "3回分割払い", type: "分割", amt: "¥15,000(3回)", cycle: "毎月15日", users: "56", st: "active", created: "2025-09-15", mrr: "¥280,000", churn: "—", trial: "なし" },
               { name: "旧プラン", type: "継続", amt: "¥1,980/月", cycle: "毎月1日", users: "12", st: "archived", created: "2024-01-01", mrr: "¥23,760", churn: "8.3%", trial: "なし" }
             ].map((r, i) => (
-              <tr key={i} className="border-b hover:bg-blue-50 cursor-pointer" onClick={() => setSelectedSubPlan(r)}>
+              <tr key={i} className="border-b hover:bg-brand-50 cursor-pointer" onClick={() => setSelectedSubPlan(r)}>
                 <td className="px-4 py-2 whitespace-nowrap font-bold">{r.name}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} /></td>
                 <td className="px-4 py-2 whitespace-nowrap w-24">{r.amt}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-20 text-slate-500">{r.cycle}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r.users}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st === "active" ? "有効" : "アーカイブ"} color={r.st === "active" ? "green" : "gray"} /></td>
-                <td className="px-4 py-2 whitespace-nowrap w-16" onClick={e => e.stopPropagation()}><button onClick={() => setSelectedSubPlan(r)} className="text-blue-600 text-xs hover:underline">編集</button></td>
+                <td className="px-4 py-2 whitespace-nowrap w-16" onClick={e => e.stopPropagation()}><button onClick={() => setSelectedSubPlan(r)} className="text-brand-600 text-xs hover:underline">編集</button></td>
               </tr>
             ))}
             </TableHeader>
@@ -10658,7 +10665,7 @@ const MerchantSubscriptions = () => {
         <div className="space-y-3">
           <div className="flex gap-2">
             <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="ユーザーID / メールで検索" />
-            <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>🟢 課金中</option><option>🔴 自動停止</option><option>🔵 完了</option></select>
+            <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option><Circle className="w-3 h-3 fill-success-500 text-success-500 inline" /> 課金中</option><option><Circle className="w-3 h-3 fill-danger-500 text-danger-500 inline" /> 自動停止</option><option><Circle className="w-3 h-3 fill-brand-500 text-brand-500 inline" /> 完了</option></select>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "ユーザーID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "プラン", w: "w-28" }, { label: "カード", w: "w-16" }, { label: "次回決済", w: "w-20" }, { label: "失敗", w: "w-10" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-28" }]}>
@@ -10667,20 +10674,20 @@ const MerchantSubscriptions = () => {
               { uid: "USR-003", email: "user3@example.com", plan: "月額スタンダード", card: "*5678", next: "02/23", fails: "2", st: "リトライ中", stc: "yellow", joined: "2025-10-01", total: "¥11,920", payments: [{ date: "02/01", amount: "¥2,980", status: "失敗" }, { date: "02/11", amount: "¥2,980", status: "失敗" }, { date: "01/01", amount: "¥2,980", status: "成功" }] },
               { uid: "USR-004", email: "user4@example.com", plan: "月額スタンダード", card: "*9999", next: "—", fails: "3", st: "自動停止", stc: "red", joined: "2025-11-15", total: "¥5,960", payments: [{ date: "02/01", amount: "¥2,980", status: "失敗" }, { date: "01/01", amount: "¥2,980", status: "成功" }, { date: "12/01", amount: "¥2,980", status: "成功" }] }
             ].map((r, i) => (
-              <tr key={i} className="border-b hover:bg-blue-50 cursor-pointer" onClick={() => setSelectedSubUser(r)}>
-                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{r.uid}</td>
+              <tr key={i} className="border-b hover:bg-brand-50 cursor-pointer" onClick={() => setSelectedSubUser(r)}>
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-brand-600">{r.uid}</td>
                 <td className="px-4 py-2 whitespace-nowrap">{r.email}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-28">{r.plan}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16 font-mono">{r.card}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-20">{r.next}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-10 text-center">{r.fails !== "0" && <span className="text-rose-600 font-bold">{r.fails}</span>}{r.fails === "0" && "—"}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-10 text-center">{r.fails !== "0" && <span className="text-danger-600 font-bold">{r.fails}</span>}{r.fails === "0" && "—"}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st} color={r.stc} /></td>
-                <td className="px-4 py-2 whitespace-nowrap w-28" onClick={e => e.stopPropagation()}><div className="flex gap-1">{r.st === "課金中" && <><button onClick={() => toast(`${r.uid}を一時停止しました`, "warning")} className="px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-xs border border-amber-200">一時停止</button><button onClick={() => toast("カード変更URLを発行しました", "success")} className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200">カード変更URL</button></>}{r.st === "一時停止" && <button onClick={() => toast(`${r.uid}の課金を再開しました`, "success")} className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded text-xs border border-emerald-200">再開</button>}{r.st === "リトライ中" && <button onClick={() => toast(`${r.uid}を永久停止しました`, "error")} className="px-1.5 py-0.5 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200">永久停止</button>}</div></td>
+                <td className="px-4 py-2 whitespace-nowrap w-28" onClick={e => e.stopPropagation()}><div className="flex gap-1">{r.st === "課金中" && <><button onClick={() => toast(`${r.uid}を一時停止しました`, "warning")} className="px-1.5 py-0.5 bg-warning-50 text-warning-700 rounded text-xs border border-warning-200">一時停止</button><button onClick={() => toast("カード変更URLを発行しました", "success")} className="px-1.5 py-0.5 bg-brand-50 text-brand-600 rounded text-xs border border-brand-200">カード変更URL</button></>}{r.st === "一時停止" && <button onClick={() => toast(`${r.uid}の課金を再開しました`, "success")} className="px-1.5 py-0.5 bg-success-50 text-success-600 rounded text-xs border border-success-200">再開</button>}{r.st === "リトライ中" && <button onClick={() => toast(`${r.uid}を永久停止しました`, "error")} className="px-1.5 py-0.5 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200">永久停止</button>}</div></td>
               </tr>
             ))}
             </TableHeader>
           </div>
-          <div className="bg-amber-50 border border-amber-200 rounded p-2 text-xs text-amber-700">⚠️ リトライロジック: 失敗→10日後再トライ→3回連続失敗で自動停止（再開不可）</div>
+          <div className="bg-warning-50 border border-warning-200 rounded p-2 text-xs text-warning-700"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> リトライロジック: 失敗→10日後再トライ→3回連続失敗で自動停止（再開不可）</div>
         </div>
       )}
       {tab === "history" && (
@@ -10694,8 +10701,8 @@ const MerchantSubscriptions = () => {
             <TableHeader cols={[{ label: "実行日", w: "w-24" }, { label: "ユーザーID", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "金額", w: "w-20" }, { label: "結果", w: "w-14" }, { label: "リトライ", w: "w-14" }, { label: "エラー", w: "w-20" }]}>
             {[["02/13 02:00", "USR-001", "月額スタンダード", "¥2,980", "成功", "—", "—"], ["02/13 02:00", "USR-003", "月額スタンダード", "¥2,980", "失敗", "2回目", "E-Card01"], ["02/13 02:00", "USR-004", "月額スタンダード", "¥2,980", "失敗", "3回目", "E-Card01"]].map((r, i) => (
               <tr key={i} className="border-b">
-                <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{r[1]}</td><td className="px-4 py-2 whitespace-nowrap">{r[2]}</td><td className="px-4 py-2 whitespace-nowrap w-20">{r[3]}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={r[4]} color={r[4] === "成功" ? "green" : "red"} /></td><td className="px-4 py-2 whitespace-nowrap w-14 text-slate-500">{r[5]}</td><td className="px-4 py-2 whitespace-nowrap w-20 text-rose-500 font-mono">{r[6]}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-brand-600">{r[1]}</td><td className="px-4 py-2 whitespace-nowrap">{r[2]}</td><td className="px-4 py-2 whitespace-nowrap w-20">{r[3]}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={r[4]} color={r[4] === "成功" ? "green" : "red"} /></td><td className="px-4 py-2 whitespace-nowrap w-14 text-slate-500">{r[5]}</td><td className="px-4 py-2 whitespace-nowrap w-20 text-danger-500 font-mono">{r[6]}</td>
               </tr>
             ))}
             </TableHeader>
@@ -10708,16 +10715,16 @@ const MerchantSubscriptions = () => {
         <div className="space-y-3">
           <div className="flex gap-1 border-b">
             {[{ id: "upload", label: "CSVアップロード" }, { id: "batches", label: "決済バッチ一覧" }, { id: "format", label: "フォーマット説明" }].map(t => (
-              <button key={t.id} onClick={() => setCsvTab(t.id)} className={`px-3 py-1.5 text-xs border-b-2 ${csvTab === t.id ? "border-emerald-500 text-emerald-700 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+              <button key={t.id} onClick={() => setCsvTab(t.id)} className={`px-3 py-1.5 text-xs border-b-2 ${csvTab === t.id ? "border-success-500 text-success-700 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
             ))}
           </div>
 
           {csvTab === "upload" && (
             <div className="space-y-3">
-              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs text-emerald-700">
-                <p className="font-bold mb-1">📋 CSV決済の流れ</p>
+              <div className="bg-success-50 border border-success-200 rounded-lg p-3 text-xs text-success-700">
+                <p className="font-bold mb-1"><ClipboardList className="w-4 h-4 inline mr-1" /> CSV決済の流れ</p>
                 <div className="flex gap-4 items-center text-slate-600">
-                  <div className="flex items-center gap-1"><span className="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span><span>CSV作成・UP</span></div>
+                  <div className="flex items-center gap-1"><span className="w-5 h-5 bg-success-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span><span>CSV作成・UP</span></div>
                   <span className="text-slate-300">→</span>
                   <div className="flex items-center gap-1"><span className="w-5 h-5 bg-slate-300 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span><span>運営側承認</span></div>
                   <span className="text-slate-300">→</span>
@@ -10725,16 +10732,16 @@ const MerchantSubscriptions = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg border-2 border-dashed border-slate-300 p-6 text-center hover:border-emerald-400 transition-colors cursor-pointer">
-                <div className="text-3xl mb-2">📁</div>
+              <div className="bg-white rounded-lg border-2 border-dashed border-slate-300 p-6 text-center hover:border-success-400 transition-colors cursor-pointer">
+                <div className="text-3xl mb-2"><FolderOpen className="w-4 h-4 inline" /></div>
                 <p className="text-xs font-bold text-slate-700">CSVファイルをドラッグ＆ドロップ</p>
-                <p className="text-xs text-slate-400 mt-1">または<button className="text-emerald-600 font-semibold underline ml-1">ファイルを選択</button></p>
+                <p className="text-xs text-slate-400 mt-1">または<button className="text-success-600 font-semibold underline ml-1">ファイルを選択</button></p>
                 <p className="text-xs text-slate-300 mt-2">対応形式: CSV (UTF-8) / 最大: 10MB / 最大行数: 10,000件</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600">決済予定日 <span className="text-rose-500">*</span></label>
+                  <label className="text-xs font-semibold text-slate-600">決済予定日 <span className="text-danger-500">*</span></label>
                   <input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="2026-02-20" />
                 </div>
                 <div>
@@ -10747,7 +10754,7 @@ const MerchantSubscriptions = () => {
               <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
                 <div className="p-3 border-b flex justify-between items-center bg-slate-50">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-700">📄 プレビュー: 202602_monthly.csv</span>
+                    <span className="text-xs font-bold text-slate-700"><FileText className="w-4 h-4 inline mr-1" /> プレビュー: 202602_monthly.csv</span>
                     <Badge text="5件" color="blue" />
                   </div>
                   <div className="flex gap-2">
@@ -10776,9 +10783,9 @@ const MerchantSubscriptions = () => {
                         { no: 4, pid: "", price: "9800", email: "yamada@example.com", tel: "090-3333-4444", product: "月額会費2月分", oid: "ORD-2026-0204", free1: "山田明", ok: true, warn: "新規: paymentidなし→新規決済として処理" },
                         { no: 5, pid: "PAY-20260115-005", price: "12000", email: "ito@example.com", tel: "080-5555-6666", product: "月額会費2月分（上級）", oid: "ORD-2026-0205", free1: "伊藤涼", ok: true },
                       ].map((r, i) => (
-                        <tr key={i} className={`border-b ${r.warn ? "bg-amber-50" : i % 2 ? "bg-slate-50" : ""}`}>
+                        <tr key={i} className={`border-b ${r.warn ? "bg-warning-50" : i % 2 ? "bg-slate-50" : ""}`}>
                           <td className="px-3 py-1.5 text-slate-400">{r.no}</td>
-                          <td className="px-3 py-1.5 font-mono text-blue-600">{r.pid || <span className="text-amber-500 italic">—（新規）</span>}</td>
+                          <td className="px-3 py-1.5 font-mono text-brand-600">{r.pid || <span className="text-warning-500 italic">—（新規）</span>}</td>
                           <td className="px-3 py-1.5 font-semibold">¥{Number(r.price).toLocaleString()}</td>
                           <td className="px-3 py-1.5 text-slate-500">{r.email}</td>
                           <td className="px-3 py-1.5 text-slate-500">{r.tel}</td>
@@ -10792,8 +10799,8 @@ const MerchantSubscriptions = () => {
                   </table>
                 </div>
                 {/* Warning detail */}
-                <div className="px-3 py-2 bg-amber-50 border-t border-amber-200 text-xs text-amber-700 flex items-center gap-1">
-                  <span>⚠️</span> 行4: paymentidが空のため、新規決済として処理されます。過去の決済IDがある場合は入力してください。
+                <div className="px-3 py-2 bg-warning-50 border-t border-warning-200 text-xs text-warning-700 flex items-center gap-1">
+                  <AlertTriangle className="w-4 h-4 text-warning-500 inline" /> 行4: paymentidが空のため、新規決済として処理されます。過去の決済IDがある場合は入力してください。
                 </div>
               </div>
 
@@ -10801,7 +10808,7 @@ const MerchantSubscriptions = () => {
                 <p className="text-xs text-slate-400">合計金額: <span className="font-bold text-slate-700">¥46,400</span>（5件）</p>
                 <div className="flex gap-2">
                   <button onClick={() => toast("テンプレートCSVをダウンロードしました", "success")} className="px-3 py-1.5 text-xs text-slate-500 border rounded hover:bg-slate-50">テンプレートCSVをDL</button>
-                  <button onClick={() => setShowCsvPreview(true)} className="px-4 py-1.5 text-xs bg-emerald-600 text-white rounded font-bold hover:bg-emerald-700">アップロードして承認依頼</button>
+                  <button onClick={() => setShowCsvPreview(true)} className="px-4 py-1.5 text-xs bg-success-600 text-white rounded font-bold hover:bg-success-700">アップロードして承認依頼</button>
                 </div>
               </div>
             </div>
@@ -10824,8 +10831,8 @@ const MerchantSubscriptions = () => {
                   { id: "CSV-0042", name: "1月追加分", count: "5", total: "¥49,000", schedule: "2026-01-15", uploaded: "2026-01-10 11:20", st: "完了", stc: "green", results: { success: 5, fail: 0, total: "¥49,000" } },
                   { id: "CSV-0041", name: "12月月謝決済", count: "35", total: "¥343,000", schedule: "2025-12-20", uploaded: "2025-12-14 10:00", st: "完了", stc: "green", results: { success: 34, fail: 1, total: "¥333,200" } },
                 ].map((r, i) => (
-                  <tr key={i} className="border-b hover:bg-blue-50 cursor-pointer" onClick={() => setSelectedCsvBatch(r)}>
-                    <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{r.id}</td>
+                  <tr key={i} className="border-b hover:bg-brand-50 cursor-pointer" onClick={() => setSelectedCsvBatch(r)}>
+                    <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-brand-600">{r.id}</td>
                     <td className="px-4 py-2 whitespace-nowrap font-semibold">{r.name}</td>
                     <td className="px-4 py-2 whitespace-nowrap w-14 text-center">{r.count}</td>
                     <td className="px-4 py-2 whitespace-nowrap w-24 font-semibold">{r.total}</td>
@@ -10842,8 +10849,8 @@ const MerchantSubscriptions = () => {
           {csvTab === "format" && (
             <div className="space-y-3">
               <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 space-y-3">
-                <p className="text-xs font-bold text-slate-800">📋 CSVフォーマット仕様</p>
-                <div className="bg-slate-800 rounded-lg p-3 font-mono text-xs text-emerald-400 overflow-x-auto">
+                <p className="text-xs font-bold text-slate-800"><ClipboardList className="w-4 h-4 inline mr-1" /> CSVフォーマット仕様</p>
+                <div className="bg-slate-800 rounded-lg p-3 font-mono text-xs text-success-400 overflow-x-auto">
                   paymentid,price,email,tel,productName,orderid,free1,free2,free3
                 </div>
                 <div className="overflow-x-auto">
@@ -10867,7 +10874,7 @@ const MerchantSubscriptions = () => {
                         { col: "free3", req: "任意", type: "文字列", desc: "自由項目3（例: 備考）" },
                       ].map((r, i) => (
                         <tr key={i} className="border-b">
-                          <td className="px-3 py-1.5 font-mono font-bold text-blue-700">{r.col}</td>
+                          <td className="px-3 py-1.5 font-mono font-bold text-brand-700">{r.col}</td>
                           <td className="px-3 py-1.5"><Badge text={r.req} color={r.req === "必須" ? "red" : r.req === "条件付" ? "yellow" : "gray"} /></td>
                           <td className="px-3 py-1.5 text-slate-500">{r.type}</td>
                           <td className="px-3 py-1.5 text-slate-600">{r.desc}</td>
@@ -10877,9 +10884,9 @@ const MerchantSubscriptions = () => {
                   </table>
                 </div>
               </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs space-y-2">
-                <p className="font-bold text-blue-700">💡 CSV決済の仕組み</p>
-                <ul className="space-y-1 text-blue-600">
+              <div className="bg-brand-50 border border-brand-200 rounded-lg p-3 text-xs space-y-2">
+                <p className="font-bold text-brand-700"><Lightbulb className="w-4 h-4 inline mr-1" /> CSV決済の仕組み</p>
+                <ul className="space-y-1 text-brand-600">
                   <li>• <span className="font-semibold">paymentid</span>に過去の決済IDを入力すると、そのカード情報を利用して継続決済を行います</li>
                   <li>• CSV決済で新しい決済が成功すると、<span className="font-semibold">新しい決済ID</span>が振られます</li>
                   <li>• CSVに含めなければ決済されないため、<span className="font-semibold">休会対応</span>が簡単にできます</li>
@@ -10888,8 +10895,8 @@ const MerchantSubscriptions = () => {
                 </ul>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => toast("テンプレートCSVをダウンロードしました", "success")} className="px-3 py-1.5 text-xs bg-slate-100 text-slate-600 rounded border hover:bg-slate-200">📥 テンプレートCSVをダウンロード</button>
-                <button onClick={() => toast("サンプルCSVをダウンロードしました", "success")} className="px-3 py-1.5 text-xs bg-slate-100 text-slate-600 rounded border hover:bg-slate-200">📥 サンプルCSV（記入例）をダウンロード</button>
+                <button onClick={() => toast("テンプレートCSVをダウンロードしました", "success")} className="px-3 py-1.5 text-xs bg-slate-100 text-slate-600 rounded border hover:bg-slate-200"><Download className="w-4 h-4 inline mr-1" /> テンプレートCSVをダウンロード</button>
+                <button onClick={() => toast("サンプルCSVをダウンロードしました", "success")} className="px-3 py-1.5 text-xs bg-slate-100 text-slate-600 rounded border hover:bg-slate-200"><Download className="w-4 h-4 inline mr-1" /> サンプルCSV（記入例）をダウンロード</button>
               </div>
             </div>
           )}
@@ -10901,23 +10908,23 @@ const MerchantSubscriptions = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowCsvPreview(false)} />
           <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
-            <div className="p-4 border-b bg-emerald-50 rounded-t-xl">
-              <h3 className="text-sm font-bold text-slate-800">📤 CSV決済 承認依頼の確認</h3>
+            <div className="p-4 border-b bg-success-50 rounded-t-xl">
+              <h3 className="text-sm font-bold text-slate-800"><Upload className="w-4 h-4 inline mr-1" /> CSV決済 承認依頼の確認</h3>
             </div>
             <div className="p-5 space-y-4">
               <div className="bg-slate-50 rounded-lg border p-3 space-y-1.5 text-xs">
                 <div className="flex justify-between"><span className="text-slate-400">ファイル名</span><span className="font-mono">202602_monthly.csv</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">決済件数</span><span className="font-bold">5件</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">合計金額</span><span className="font-bold text-emerald-600">¥46,400</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">合計金額</span><span className="font-bold text-success-600">¥46,400</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">決済予定日</span><span>2026-02-20</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">バッチ名</span><span>2月月謝決済</span></div>
               </div>
-              <div className="bg-amber-50 border border-amber-200 rounded p-2 text-xs text-amber-700">
-                <p className="font-bold">⚠️ アップロード後の流れ</p>
+              <div className="bg-warning-50 border border-warning-200 rounded p-2 text-xs text-warning-700">
+                <p className="font-bold"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> アップロード後の流れ</p>
                 <p className="mt-1">CSVアップロード後、運営側の<span className="font-bold">例外キュー</span>に「CSV決済承認待ち」として登録されます。運営側で内容を確認・承認した後、決済予定日にバッチ処理で自動決済されます。</p>
               </div>
-              <div className="bg-blue-50 border border-blue-200 rounded p-2 text-xs text-blue-700">
-                <p className="font-bold">📋 例外キューに登録される情報</p>
+              <div className="bg-brand-50 border border-brand-200 rounded p-2 text-xs text-brand-700">
+                <p className="font-bold"><ClipboardList className="w-4 h-4 inline mr-1" /> 例外キューに登録される情報</p>
                 <div className="grid grid-cols-2 gap-1 mt-1 text-slate-600">
                   <div>• キュータイプ: <span className="font-semibold">CSV決済承認</span></div>
                   <div>• 加盟店名・サイト名</div>
@@ -10932,7 +10939,7 @@ const MerchantSubscriptions = () => {
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowCsvPreview(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { setShowCsvPreview(false); setCsvTab("batches"); toast("CSV決済の承認依頼を送信しました", "success"); }} className="px-4 py-2 text-xs bg-emerald-600 text-white rounded font-semibold hover:bg-emerald-700">承認依頼を送信</button>
+              <button onClick={() => { setShowCsvPreview(false); setCsvTab("batches"); toast("CSV決済の承認依頼を送信しました", "success"); }} className="px-4 py-2 text-xs bg-success-600 text-white rounded font-semibold hover:bg-success-700">承認依頼を送信</button>
             </div>
           </div>
         </div>
@@ -10944,8 +10951,8 @@ const MerchantSubscriptions = () => {
           <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedCsvBatch(null)} />
           <div className="w-[440px] bg-white shadow-xl border-l overflow-y-auto">
             <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
-              <h3 className="text-sm font-bold text-slate-800">📦 CSVバッチ詳細</h3>
-              <button onClick={() => setSelectedCsvBatch(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <h3 className="text-sm font-bold text-slate-800"><Package className="w-4 h-4 inline mr-1" /> CSVバッチ詳細</h3>
+              <button onClick={() => setSelectedCsvBatch(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               <div className="flex items-center gap-2 justify-center">
@@ -10968,23 +10975,23 @@ const MerchantSubscriptions = () => {
                 ))}
               </div>
               {selectedCsvBatch.results && (
-                <div className="bg-emerald-50 rounded border border-emerald-200 p-3">
-                  <p className="text-xs font-bold text-emerald-700 mb-2">📊 実行結果</p>
+                <div className="bg-success-50 rounded border border-success-200 p-3">
+                  <p className="text-xs font-bold text-success-700 mb-2"><BarChart3 className="w-4 h-4 inline mr-1" /> 実行結果</p>
                   <div className="grid grid-cols-3 gap-2 text-xs">
-                    <div className="text-center"><p className="text-slate-400">成功</p><p className="text-lg font-bold text-emerald-600">{selectedCsvBatch.results.success}</p></div>
-                    <div className="text-center"><p className="text-slate-400">失敗</p><p className="text-lg font-bold text-rose-600">{selectedCsvBatch.results.fail}</p></div>
+                    <div className="text-center"><p className="text-slate-400">成功</p><p className="text-lg font-bold text-success-600">{selectedCsvBatch.results.success}</p></div>
+                    <div className="text-center"><p className="text-slate-400">失敗</p><p className="text-lg font-bold text-danger-600">{selectedCsvBatch.results.fail}</p></div>
                     <div className="text-center"><p className="text-slate-400">決済額</p><p className="text-lg font-bold text-slate-700">{selectedCsvBatch.results.total}</p></div>
                   </div>
                 </div>
               )}
               {/* Timeline */}
               <div>
-                <p className="text-xs font-bold text-slate-700 mb-2">📋 処理タイムライン</p>
+                <p className="text-xs font-bold text-slate-700 mb-2"><ClipboardList className="w-4 h-4 inline mr-1" /> 処理タイムライン</p>
                 <div className="space-y-2">
                   {[
-                    { date: selectedCsvBatch.uploaded, event: "CSVアップロード", icon: "📤" },
-                    ...(selectedCsvBatch.st !== "承認待ち" ? [{ date: selectedCsvBatch.uploaded.split(" ")[0] + " 15:00", event: "運営側承認", icon: "✅" }] : []),
-                    ...(selectedCsvBatch.st === "完了" ? [{ date: selectedCsvBatch.schedule + " 02:00", event: "バッチ決済実行・完了", icon: "💳" }] : []),
+                    { date: selectedCsvBatch.uploaded, event: "CSVアップロード", icon: <Upload className="w-4 h-4 inline text-slate-500" /> },
+                    ...(selectedCsvBatch.st !== "承認待ち" ? [{ date: selectedCsvBatch.uploaded.split(" ")[0] + " 15:00", event: "運営側承認", icon: <CheckCircle2 className="w-4 h-4 text-success-600 inline" /> }] : []),
+                    ...(selectedCsvBatch.st === "完了" ? [{ date: selectedCsvBatch.schedule + " 02:00", event: "バッチ決済実行・完了", icon: <CreditCard className="w-4 h-4 inline text-slate-500" /> }] : []),
                   ].map((e, i) => (
                     <div key={i} className="flex items-center gap-2 text-xs">
                       <span>{e.icon}</span>
@@ -10993,16 +11000,16 @@ const MerchantSubscriptions = () => {
                     </div>
                   ))}
                   {selectedCsvBatch.st === "承認待ち" && (
-                    <div className="flex items-center gap-2 text-xs text-amber-600">
-                      <span>⏳</span><span className="w-28">—</span><span>承認待ち中...</span>
+                    <div className="flex items-center gap-2 text-xs text-warning-600">
+                      <span><Clock className="w-4 h-4 inline" /></span><span className="w-28">—</span><span>承認待ち中...</span>
                     </div>
                   )}
                 </div>
               </div>
               <div className="flex gap-2 pt-2 border-t">
-                <button onClick={() => toast(`${selectedCsvBatch.id}のCSVをダウンロードしました`, "success")} className="flex-1 px-3 py-2 bg-slate-50 text-slate-600 rounded text-xs border hover:bg-slate-100">📥 CSVダウンロード</button>
-                {selectedCsvBatch.results && <button onClick={() => toast(`${selectedCsvBatch.id}の結果CSVをダウンロードしました`, "success")} className="flex-1 px-3 py-2 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200 hover:bg-blue-100">📊 結果CSVダウンロード</button>}
-                {selectedCsvBatch.st === "承認待ち" && <button onClick={() => { toast(`${selectedCsvBatch.id}の承認依頼を取り消しました`, "warning"); setSelectedCsvBatch(null); }} className="flex-1 px-3 py-2 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200 hover:bg-rose-100">取り消し</button>}
+                <button onClick={() => toast(`${selectedCsvBatch.id}のCSVをダウンロードしました`, "success")} className="flex-1 px-3 py-2 bg-slate-50 text-slate-600 rounded text-xs border hover:bg-slate-100"><Download className="w-4 h-4 inline mr-1" /> CSVダウンロード</button>
+                {selectedCsvBatch.results && <button onClick={() => toast(`${selectedCsvBatch.id}の結果CSVをダウンロードしました`, "success")} className="flex-1 px-3 py-2 bg-brand-50 text-brand-600 rounded text-xs border border-brand-200 hover:bg-brand-100"><BarChart3 className="w-4 h-4 inline mr-1" /> 結果CSVダウンロード</button>}
+                {selectedCsvBatch.st === "承認待ち" && <button onClick={() => { toast(`${selectedCsvBatch.id}の承認依頼を取り消しました`, "warning"); setSelectedCsvBatch(null); }} className="flex-1 px-3 py-2 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200 hover:bg-danger-100">取り消し</button>}
               </div>
             </div>
           </div>
@@ -11015,8 +11022,8 @@ const MerchantSubscriptions = () => {
           <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedSubUser(null)} />
           <div className="w-[420px] bg-white shadow-xl border-l overflow-y-auto">
             <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
-              <h3 className="text-sm font-bold text-slate-800">👤 ユーザー詳細</h3>
-              <button onClick={() => setSelectedSubUser(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <h3 className="text-sm font-bold text-slate-800"><User className="w-4 h-4 inline mr-1" /> ユーザー詳細</h3>
+              <button onClick={() => setSelectedSubUser(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               <div className="text-center">
@@ -11046,12 +11053,12 @@ const MerchantSubscriptions = () => {
 
               {/* Lifecycle Timeline */}
               <div>
-                <p className="text-xs font-bold text-slate-700 mb-2">📋 ライフサイクル</p>
+                <p className="text-xs font-bold text-slate-700 mb-2"><ClipboardList className="w-4 h-4 inline mr-1" /> ライフサイクル</p>
                 <div className="space-y-2">
                   {[
-                    { date: selectedSubUser.joined, event: "プラン登録", icon: "🟢" },
+                    { date: selectedSubUser.joined, event: "プラン登録", icon: <Circle className="w-3 h-3 fill-success-500 text-success-500 inline" /> },
                     ...selectedSubUser.payments.map(p => ({
-                      date: p.date, event: `決済 ${p.amount} ${p.status}`, icon: p.status === "成功" ? "✅" : "❌"
+                      date: p.date, event: `決済 ${p.amount} ${p.status}`, icon: p.status === "成功" ? "有効" : ""
                     })),
                   ].map((e, i) => (
                     <div key={i} className="flex items-center gap-2 text-xs">
@@ -11064,10 +11071,10 @@ const MerchantSubscriptions = () => {
               </div>
 
               <div className="flex gap-2 pt-2 border-t">
-                {selectedSubUser.st === "課金中" && <button onClick={() => toast(`${selectedSubUser.uid}を一時停止しました`, "warning")} className="flex-1 px-3 py-2 bg-amber-50 text-amber-700 rounded text-xs border border-amber-200 font-semibold hover:bg-amber-100">⏸ 一時停止</button>}
-                {selectedSubUser.st === "リトライ中" && <button onClick={() => { toast(`${selectedSubUser.uid}の手動リトライを実行中...`, "info"); setTimeout(() => toast("リトライが完了しました", "success"), 1500); }} className="flex-1 px-3 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">🔄 手動リトライ</button>}
-                {selectedSubUser.st === "自動停止" && <button onClick={() => toast(`${selectedSubUser.uid}の課金を再開しました`, "success")} className="flex-1 px-3 py-2 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700">♻️ 再開</button>}
-                <button onClick={() => toast("カード変更URLを発行しました", "success")} className="px-3 py-2 bg-blue-50 text-blue-600 rounded text-xs border border-blue-200 hover:bg-blue-100">💳 カード変更URL発行</button>
+                {selectedSubUser.st === "課金中" && <button onClick={() => toast(`${selectedSubUser.uid}を一時停止しました`, "warning")} className="flex-1 px-3 py-2 bg-warning-50 text-warning-700 rounded text-xs border border-warning-200 font-semibold hover:bg-warning-100"><Pause className="w-3.5 h-3.5 inline mr-1" /> 一時停止</button>}
+                {selectedSubUser.st === "リトライ中" && <button onClick={() => { toast(`${selectedSubUser.uid}の手動リトライを実行中...`, "info"); setTimeout(() => toast("リトライが完了しました", "success"), 1500); }} className="flex-1 px-3 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600"><RefreshCw className="w-4 h-4 inline mr-1" /> 手動リトライ</button>}
+                {selectedSubUser.st === "自動停止" && <button onClick={() => toast(`${selectedSubUser.uid}の課金を再開しました`, "success")} className="flex-1 px-3 py-2 bg-success-600 text-white rounded text-xs font-semibold hover:bg-success-700"><RotateCcw className="w-4 h-4 inline" /> 再開</button>}
+                <button onClick={() => toast("カード変更URLを発行しました", "success")} className="px-3 py-2 bg-brand-50 text-brand-600 rounded text-xs border border-brand-200 hover:bg-brand-100"><CreditCard className="w-4 h-4 inline mr-1" /> カード変更URL発行</button>
               </div>
             </div>
           </div>
@@ -11080,8 +11087,8 @@ const MerchantSubscriptions = () => {
           <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedSubPlan(null)} />
           <div className="w-[420px] bg-white shadow-xl border-l overflow-y-auto">
             <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
-              <h3 className="text-sm font-bold text-slate-800">📦 プラン詳細</h3>
-              <button onClick={() => setSelectedSubPlan(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <h3 className="text-sm font-bold text-slate-800"><Package className="w-4 h-4 inline mr-1" /> プラン詳細</h3>
+              <button onClick={() => setSelectedSubPlan(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               <div className="text-center">
@@ -11090,7 +11097,7 @@ const MerchantSubscriptions = () => {
                   <Badge text={selectedSubPlan.type} color={selectedSubPlan.type === "継続" ? "blue" : "purple"} />
                   <Badge text={selectedSubPlan.st === "active" ? "有効" : "アーカイブ"} color={selectedSubPlan.st === "active" ? "green" : "gray"} />
                 </div>
-                <p className="text-xl font-bold text-emerald-600 mt-2">{selectedSubPlan.amt}</p>
+                <p className="text-xl font-bold text-success-600 mt-2">{selectedSubPlan.amt}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -11111,18 +11118,18 @@ const MerchantSubscriptions = () => {
 
               {/* User Count Chart */}
               <div>
-                <p className="text-xs font-bold text-slate-700 mb-2">📈 ユーザー数推移</p>
+                <p className="text-xs font-bold text-slate-700 mb-2"><TrendingUp className="w-4 h-4 inline" /> ユーザー数推移</p>
                 <div className="flex items-end gap-1 h-16 bg-slate-50 rounded p-2">
                   {[280, 295, 305, 310, 318, 325, 330, 335, 338, 340, 342, 342].map((v, i) => (
-                    <div key={i} className="flex-1 bg-emerald-400 rounded-t" style={{ height: `${((v - 270) / 72) * 100}%` }} />
+                    <div key={i} className="flex-1 bg-success-400 rounded-t" style={{ height: `${((v - 270) / 72) * 100}%` }} />
                   ))}
                 </div>
                 <p className="text-xs text-slate-400 text-center mt-1">直近12ヶ月</p>
               </div>
 
               {/* Revenue */}
-              <div className="bg-emerald-50 rounded border border-emerald-200 p-3">
-                <p className="text-xs font-bold text-emerald-700 mb-1">💰 収益サマリー</p>
+              <div className="bg-success-50 rounded border border-success-200 p-3">
+                <p className="text-xs font-bold text-success-700 mb-1"><Coins className="w-4 h-4 inline mr-1" /> 収益サマリー</p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div><span className="text-slate-500">月間収益: </span><span className="font-bold text-slate-700">{selectedSubPlan.mrr}</span></div>
                   <div><span className="text-slate-500">年間見込: </span><span className="font-bold text-slate-700">¥{(parseInt(selectedSubPlan.mrr.replace(/[^0-9]/g, '')) * 12 / 1000).toFixed(0)}K</span></div>
@@ -11130,8 +11137,8 @@ const MerchantSubscriptions = () => {
               </div>
 
               <div className="flex gap-2 pt-2 border-t">
-                <button onClick={() => toast(`${selectedSubPlan.name}を編集中`, "info")} className="flex-1 px-3 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700">✏️ プラン編集</button>
-                {selectedSubPlan.st === "active" && <button onClick={() => toast(`${selectedSubPlan.name}をアーカイブしました`, "warning")} className="px-3 py-2 bg-amber-50 text-amber-700 rounded text-xs border border-amber-200 hover:bg-amber-100">📦 アーカイブ</button>}
+                <button onClick={() => toast(`${selectedSubPlan.name}を編集中`, "info")} className="flex-1 px-3 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600"><Pencil className="w-4 h-4 inline mr-1" /> プラン編集</button>
+                {selectedSubPlan.st === "active" && <button onClick={() => toast(`${selectedSubPlan.name}をアーカイブしました`, "warning")} className="px-3 py-2 bg-warning-50 text-warning-700 rounded text-xs border border-warning-200 hover:bg-warning-100"><Package className="w-4 h-4 inline mr-1" /> アーカイブ</button>}
               </div>
             </div>
           </div>
@@ -11145,13 +11152,13 @@ const MerchantSubscriptions = () => {
           <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">+ サブスクリプションプラン作成</h3>
-              <button onClick={() => setShowCreatePlan(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <button onClick={() => setShowCreatePlan(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
-              <div><label className="text-xs font-semibold text-slate-600">プラン名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: スタンダードプラン" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">プラン名 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: スタンダードプラン" /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-xs font-semibold text-slate-600">金額 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="¥2,980" /></div>
-                <div><label className="text-xs font-semibold text-slate-600">課金サイクル <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>月額</option><option>年額</option><option>週額</option></select></div>
+                <div><label className="text-xs font-semibold text-slate-600">金額 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="¥2,980" /></div>
+                <div><label className="text-xs font-semibold text-slate-600">課金サイクル <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>月額</option><option>年額</option><option>週額</option></select></div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="text-xs font-semibold text-slate-600">トライアル期間</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>なし</option><option>7日間</option><option>14日間</option><option>30日間</option></select></div>
@@ -11161,7 +11168,7 @@ const MerchantSubscriptions = () => {
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowCreatePlan(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { setShowCreatePlan(false); toast("新しいプランを作成しました", "success"); }} className="px-4 py-2 text-xs bg-emerald-600 text-white rounded font-semibold hover:bg-emerald-700">プランを作成</button>
+              <button onClick={() => { setShowCreatePlan(false); toast("新しいプランを作成しました", "success"); }} className="px-4 py-2 text-xs bg-success-600 text-white rounded font-semibold hover:bg-success-700">プランを作成</button>
             </div>
           </div>
         </div>
@@ -11206,7 +11213,7 @@ const MasterRecurring = () => {
         <h2 className="text-sm font-bold text-slate-800">リカーリング管理</h2>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
-        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-blue-500 text-blue-700 bg-blue-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-brand-500 text-brand-700 bg-brand-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}</div>
       {tab === "overview" && (
         <div className="space-y-3">
@@ -11216,9 +11223,9 @@ const MasterRecurring = () => {
             <KPICard label="本日の処理予定" value="423件" color="blue" />
             <KPICard label="リトライ中" value="18件" sub="要注意" color="red" />
           </div>
-          <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 flex items-center gap-2">
-            <span className="text-lg">🔴</span>
-            <div className="text-xs"><span className="font-bold text-rose-700">自動停止急増アラート：</span><span className="text-rose-600">直近24hの自動停止が前日比250%（5件 → 12件）。接続先の障害の可能性があります</span></div>
+          <div className="bg-danger-50 border border-danger-200 rounded-lg p-3 flex items-center gap-2">
+            <span className="text-lg"><Circle className="w-3 h-3 fill-danger-500 text-danger-500 inline" /></span>
+            <div className="text-xs"><span className="font-bold text-danger-700">自動停止急増アラート：</span><span className="text-danger-600">直近24hの自動停止が前日比250%（5件 → 12件）。接続先の障害の可能性があります</span></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 overflow-x-auto">
@@ -11236,7 +11243,7 @@ const MasterRecurring = () => {
               <TableHeader cols={[{ label: "実行日時", w: "w-28" }, { label: "処理", w: "w-12" }, { label: "成功", w: "w-12" }, { label: "失敗", w: "w-12" }, { label: "状態", w: "w-14" }]}>
               {[["2026-02-13 02:00", "423", "411", "12", "完了"], ["2026-02-12 02:00", "398", "391", "7", "完了"], ["2026-02-11 02:00", "412", "406", "6", "完了"]].map((r, i) => (
                 <tr key={i} className="border-b">
-                  <td className="px-4 py-1.5 whitespace-nowrap w-28 text-slate-400">{r[0]}</td><td className="px-4 py-1.5 whitespace-nowrap w-12">{r[1]}</td><td className="px-4 py-1.5 whitespace-nowrap w-12 text-emerald-600">{r[2]}</td><td className="px-4 py-1.5 whitespace-nowrap w-12 text-rose-600">{r[3]}</td><td className="px-4 py-1.5 whitespace-nowrap w-14"><Badge text={r[4]} color="green" /></td>
+                  <td className="px-4 py-1.5 whitespace-nowrap w-28 text-slate-400">{r[0]}</td><td className="px-4 py-1.5 whitespace-nowrap w-12">{r[1]}</td><td className="px-4 py-1.5 whitespace-nowrap w-12 text-success-600">{r[2]}</td><td className="px-4 py-1.5 whitespace-nowrap w-12 text-danger-600">{r[3]}</td><td className="px-4 py-1.5 whitespace-nowrap w-14"><Badge text={r[4]} color="green" /></td>
                 </tr>
               ))}
               </TableHeader>
@@ -11250,19 +11257,19 @@ const MasterRecurring = () => {
             <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="加盟店名 / プラン名で検索" />
             <select className="border rounded px-2 py-1 text-xs"><option>全タイプ</option><option>継続</option><option>分割</option></select>
             <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>有効</option><option>アーカイブ</option></select>
-            <button onClick={() => toast("リカーリングプランを検索しました", "info")} className="px-3 py-1 bg-blue-600 text-white rounded text-xs">検索</button>
+            <button onClick={() => toast("リカーリングプランを検索しました", "info")} className="px-3 py-1 bg-brand-500 text-white rounded text-xs">検索</button>
           </div>
           <TableHeader cols={[{ label: "プランID", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "サイト", w: "w-20" }, { label: "プラン名", w: "flex-1" }, { label: "タイプ", w: "w-14" }, { label: "金額", w: "w-24" }, { label: "ユーザー", w: "w-16" }, { label: "状態", w: "w-14" }]}>
           {planDetails.map((r, i) => (
             <React.Fragment key={i}>
-            <tr onClick={() => setExpandedPlanId(expandedPlanId === r.id ? null : r.id)} className={`border-b cursor-pointer transition-colors ${expandedPlanId === r.id ? "bg-blue-100 border-l-2 border-l-blue-500" : "hover:bg-blue-50"}`}>
-              <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{r.id}</td><td className="px-4 py-2 whitespace-nowrap w-24">{r.m}</td><td className="px-4 py-2 whitespace-nowrap w-20 text-slate-500">{r.s}</td><td className="px-4 py-2 whitespace-nowrap font-bold">{r.name}</td><td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} /></td><td className="px-4 py-2 whitespace-nowrap w-24 text-xs">{r.amt}</td><td className="px-4 py-2 whitespace-nowrap w-16">{r.users}</td><td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={r.st} color="green" /></td>
+            <tr onClick={() => setExpandedPlanId(expandedPlanId === r.id ? null : r.id)} className={`border-b cursor-pointer transition-colors ${expandedPlanId === r.id ? "bg-brand-100 border-l-2 border-l-brand-500" : "hover:bg-brand-50"}`}>
+              <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-brand-600">{r.id}</td><td className="px-4 py-2 whitespace-nowrap w-24">{r.m}</td><td className="px-4 py-2 whitespace-nowrap w-20 text-slate-500">{r.s}</td><td className="px-4 py-2 whitespace-nowrap font-bold">{r.name}</td><td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} /></td><td className="px-4 py-2 whitespace-nowrap w-24 text-xs">{r.amt}</td><td className="px-4 py-2 whitespace-nowrap w-16">{r.users}</td><td className="px-4 py-2 whitespace-nowrap w-14"><Badge text={r.st} color="green" /></td>
             </tr>
             {expandedPlanId === r.id && (
               <tr><td colSpan={8} className="p-0">
-                <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                <div className="px-4 py-3 bg-brand-50 border-b border-l-2 border-l-brand-500">
                   <div className="flex items-center gap-2 mb-2">
-                    <p className="text-xs font-bold text-slate-700">📋 プラン詳細 — {r.name}</p>
+                    <p className="text-xs font-bold text-slate-700"><ClipboardList className="w-4 h-4 inline mr-1" /> プラン詳細 — {r.name}</p>
                     <Badge text={r.type} color={r.type === "継続" ? "blue" : "purple"} />
                     <Badge text={r.st} color="green" />
                     <span className="text-xs text-slate-400 ml-auto">{r.id}</span>
@@ -11282,15 +11289,15 @@ const MasterRecurring = () => {
                     <div className="bg-white rounded-lg border border-slate-200 p-2.5">
                       <p className="font-semibold text-slate-600 mb-1">パフォーマンス</p>
                       <div className="space-y-1">
-                        <div className="bg-blue-50 rounded p-1.5 text-center border border-blue-200">
+                        <div className="bg-brand-50 rounded p-1.5 text-center border border-brand-200">
                           <p className="text-xs text-slate-400">ユーザー数</p>
-                          <p className="text-sm font-bold text-blue-600">{r.users}</p>
+                          <p className="text-sm font-bold text-brand-600">{r.users}</p>
                         </div>
-                        <div className="bg-emerald-50 rounded p-1.5 text-center border border-emerald-200">
+                        <div className="bg-success-50 rounded p-1.5 text-center border border-success-200">
                           <p className="text-xs text-slate-400">収益</p>
-                          <p className="text-sm font-bold text-emerald-600">{r.revenue}</p>
+                          <p className="text-sm font-bold text-success-600">{r.revenue}</p>
                         </div>
-                        {r.churn !== "-" && <div className="text-xs"><span className="text-slate-400">解約率:</span> <span className="font-bold text-amber-600">{r.churn}</span></div>}
+                        {r.churn !== "-" && <div className="text-xs"><span className="text-slate-400">解約率:</span> <span className="font-bold text-warning-600">{r.churn}</span></div>}
                       </div>
                     </div>
                     <div className="bg-white rounded-lg border border-slate-200 p-2.5 col-span-2">
@@ -11298,7 +11305,7 @@ const MasterRecurring = () => {
                       <div className="flex items-end gap-2 h-16 px-2">
                         {r.chart.map((v, ci) => {
                           const max = Math.max(...r.chart);
-                          return (<div key={ci} className="flex-1 flex flex-col items-center"><div className={`w-full rounded-t ${ci === 5 ? "bg-blue-500" : "bg-blue-200"}`} style={{ height: `${(v / max) * 100}%` }} /><p className="text-xs text-slate-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][ci]}</p></div>);
+                          return (<div key={ci} className="flex-1 flex flex-col items-center"><div className={`w-full rounded-t ${ci === 5 ? "bg-brand-500" : "bg-brand-200"}`} style={{ height: `${(v / max) * 100}%` }} /><p className="text-xs text-slate-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][ci]}</p></div>);
                         })}
                       </div>
                     </div>
@@ -11316,20 +11323,20 @@ const MasterRecurring = () => {
           <div className="p-3 border-b flex gap-2">
             <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="メール / ユーザーIDで検索" />
             <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>課金中</option><option>一時停止</option><option>自動停止</option></select>
-            <button onClick={() => toast("ユーザーを検索しました", "info")} className="px-3 py-1 bg-blue-600 text-white rounded text-xs">検索</button>
+            <button onClick={() => toast("ユーザーを検索しました", "info")} className="px-3 py-1 bg-brand-500 text-white rounded text-xs">検索</button>
           </div>
           <TableHeader cols={[{ label: "ユーザーID", w: "w-20" }, { label: "メール", w: "w-32" }, { label: "加盟店", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "状態", w: "w-16" }, { label: "次回決済", w: "w-20" }, { label: "失敗", w: "w-10" }, { label: "操作", w: "w-20" }]}>
           {userData.map((r, i) => (
             <React.Fragment key={i}>
-            <tr onClick={() => setExpandedUserId(expandedUserId === r.id ? null : r.id)} className={`border-b cursor-pointer transition-colors ${expandedUserId === r.id ? "bg-blue-100 border-l-2 border-l-blue-500" : "hover:bg-blue-50"}`}>
-              <td className="px-4 py-2 whitespace-nowrap w-20 font-mono text-blue-600">{r.id}</td><td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{r.email}</td><td className="px-4 py-2 whitespace-nowrap w-24">{r.m}</td><td className="px-4 py-2 whitespace-nowrap">{r.plan}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st} color={r.stc} /></td><td className="px-4 py-2 whitespace-nowrap w-20 text-slate-400">{r.next}</td><td className="px-4 py-2 whitespace-nowrap w-10 text-center">{r.fail !== "0" ? <span className="text-rose-600 font-bold">{r.fail}</span> : "0"}</td>
-              <td className="px-4 py-2 whitespace-nowrap w-20" onClick={e => e.stopPropagation()}><div className="flex gap-1">{r.st !== "自動停止" && <button onClick={() => setShowForceStop(r)} className="text-rose-500 text-xs">強制停止</button>}</div></td>
+            <tr onClick={() => setExpandedUserId(expandedUserId === r.id ? null : r.id)} className={`border-b cursor-pointer transition-colors ${expandedUserId === r.id ? "bg-brand-100 border-l-2 border-l-brand-500" : "hover:bg-brand-50"}`}>
+              <td className="px-4 py-2 whitespace-nowrap w-20 font-mono text-brand-600">{r.id}</td><td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{r.email}</td><td className="px-4 py-2 whitespace-nowrap w-24">{r.m}</td><td className="px-4 py-2 whitespace-nowrap">{r.plan}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st} color={r.stc} /></td><td className="px-4 py-2 whitespace-nowrap w-20 text-slate-400">{r.next}</td><td className="px-4 py-2 whitespace-nowrap w-10 text-center">{r.fail !== "0" ? <span className="text-danger-600 font-bold">{r.fail}</span> : "0"}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-20" onClick={e => e.stopPropagation()}><div className="flex gap-1">{r.st !== "自動停止" && <button onClick={() => setShowForceStop(r)} className="text-danger-500 text-xs">強制停止</button>}</div></td>
             </tr>
             {expandedUserId === r.id && (
               <tr><td colSpan={8} className="p-0">
-                <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                <div className="px-4 py-3 bg-brand-50 border-b border-l-2 border-l-brand-500">
                   <div className="flex items-center gap-2 mb-2">
-                    <p className="text-xs font-bold text-slate-700">👤 ユーザー詳細 — {r.id}</p>
+                    <p className="text-xs font-bold text-slate-700"><User className="w-4 h-4 inline mr-1" /> ユーザー詳細 — {r.id}</p>
                     <Badge text={r.st} color={r.stc} />
                   </div>
                   <div className="grid grid-cols-3 gap-3 text-xs">
@@ -11346,7 +11353,7 @@ const MasterRecurring = () => {
                       <div className="space-y-1">
                         {r.history.map((h, hi) => (
                           <div key={hi} className="flex items-center gap-2 py-1 border-b last:border-0">
-                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${h.st === "成功" ? "bg-emerald-500" : "bg-rose-500"}`} />
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${h.st === "成功" ? "bg-success-500" : "bg-danger-500"}`} />
                             <span className="text-slate-400 w-20">{h.date}</span>
                             <span className="font-semibold">{h.amt}</span>
                             <Badge text={h.st} color={h.st === "成功" ? "green" : "red"} />
@@ -11357,9 +11364,9 @@ const MasterRecurring = () => {
                     <div className="bg-white rounded-lg border border-slate-200 p-2.5">
                       <p className="font-semibold text-slate-600 mb-1">操作</p>
                       <div className="space-y-2">
-                        {r.st === "リトライ中" && <button className="w-full py-1.5 bg-blue-50 text-blue-600 rounded text-xs font-bold border border-blue-200 hover:bg-blue-100">🔄 手動リトライ</button>}
-                        {r.st === "課金中" && <button className="w-full py-1.5 bg-amber-50 text-amber-600 rounded text-xs font-bold border border-amber-200 hover:bg-amber-100">⏸ 一時停止</button>}
-                        {r.st !== "自動停止" && <button onClick={(e) => { e.stopPropagation(); setShowForceStop(r); }} className="w-full py-1.5 bg-red-50 text-red-600 rounded text-xs font-bold border border-red-200 hover:bg-red-100">⛔ 強制停止</button>}
+                        {r.st === "リトライ中" && <button className="w-full py-1.5 bg-brand-50 text-brand-600 rounded text-xs font-bold border border-brand-200 hover:bg-brand-100"><RefreshCw className="w-4 h-4 inline mr-1" /> 手動リトライ</button>}
+                        {r.st === "課金中" && <button className="w-full py-1.5 bg-warning-50 text-warning-600 rounded text-xs font-bold border border-warning-200 hover:bg-warning-100"><Pause className="w-3.5 h-3.5 inline mr-1" /> 一時停止</button>}
+                        {r.st !== "自動停止" && <button onClick={(e) => { e.stopPropagation(); setShowForceStop(r); }} className="w-full py-1.5 bg-danger-50 text-danger-600 rounded text-xs font-bold border border-danger-200 hover:bg-danger-100"><ShieldAlert className="w-4 h-4 inline mr-1" /> 強制停止</button>}
                         {r.st === "自動停止" && <div className="text-xs text-slate-400 text-center py-2">このユーザーは自動停止済みです</div>}
                       </div>
                     </div>
@@ -11377,8 +11384,8 @@ const MasterRecurring = () => {
         <div className="space-y-3">
           <div className="flex gap-1 border-b">
             {[{ id: "pending", label: "承認待ち", count: 2 }, { id: "approved", label: "承認済（実行待ち）", count: 1 }, { id: "completed", label: "実行完了", count: null }, { id: "all", label: "全て", count: null }].map(t => (
-              <button key={t.id} onClick={() => setCsvApprovalTab(t.id)} className={`px-3 py-1.5 text-xs border-b-2 ${csvApprovalTab === t.id ? "border-blue-500 text-blue-700 font-bold" : "border-transparent text-slate-400"}`}>
-                {t.label}{t.count !== null && <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${csvApprovalTab === t.id ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-400"}`}>{t.count}</span>}
+              <button key={t.id} onClick={() => setCsvApprovalTab(t.id)} className={`px-3 py-1.5 text-xs border-b-2 ${csvApprovalTab === t.id ? "border-brand-500 text-brand-700 font-bold" : "border-transparent text-slate-400"}`}>
+                {t.label}{t.count !== null && <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${csvApprovalTab === t.id ? "bg-brand-100 text-brand-600" : "bg-slate-100 text-slate-400"}`}>{t.count}</span>}
               </button>
             ))}
           </div>
@@ -11399,7 +11406,7 @@ const MasterRecurring = () => {
               <input type="date" className="border rounded px-2 py-1 text-xs" defaultValue="2026-02-01" />
               <span className="text-xs text-slate-400 self-center">〜</span>
               <input type="date" className="border rounded px-2 py-1 text-xs" defaultValue="2026-02-28" />
-              <button onClick={() => toast("CSVバッチを検索しました", "info")} className="px-3 py-1 bg-blue-600 text-white rounded text-xs">検索</button>
+              <button onClick={() => toast("CSVバッチを検索しました", "info")} className="px-3 py-1 bg-brand-500 text-white rounded text-xs">検索</button>
             </div>
             <TableHeader cols={[{ label: "バッチID", w: "w-24" }, { label: "加盟店", w: "w-28" }, { label: "バッチ名", w: "flex-1" }, { label: "件数", w: "w-14" }, { label: "合計金額", w: "w-24" }, { label: "決済予定日", w: "w-24" }, { label: "アップロード日", w: "w-28" }, { label: "ステータス", w: "w-20" }, { label: "操作", w: "w-28" }]}>
             {[
@@ -11410,8 +11417,8 @@ const MasterRecurring = () => {
               { id: "CSV-0042", merchant: "合同会社XYZショップ", name: "1月会費一括", count: "5", total: "¥49,000", schedule: "2026-01-15", uploaded: "2026-01-10 11:20", st: "完了", stc: "green" },
             ].filter(r => csvApprovalTab === "all" || (csvApprovalTab === "pending" && r.st === "承認待ち") || (csvApprovalTab === "approved" && r.st === "承認済") || (csvApprovalTab === "completed" && r.st === "完了")).map((r, i) => (
               <React.Fragment key={i}>
-              <tr className={`border-b cursor-pointer transition-colors ${expandedCsvId === r.id ? "bg-blue-100 border-l-2 border-l-blue-500" : r.st === "承認待ち" ? "bg-amber-50 hover:bg-amber-100" : "hover:bg-blue-50"}`} onClick={() => setExpandedCsvId(expandedCsvId === r.id ? null : r.id)}>
-                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{r.id}</td>
+              <tr className={`border-b cursor-pointer transition-colors ${expandedCsvId === r.id ? "bg-brand-100 border-l-2 border-l-brand-500" : r.st === "承認待ち" ? "bg-warning-50 hover:bg-warning-100" : "hover:bg-brand-50"}`} onClick={() => setExpandedCsvId(expandedCsvId === r.id ? null : r.id)}>
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-brand-600">{r.id}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-28">{r.merchant}</td>
                 <td className="px-4 py-2 whitespace-nowrap font-semibold">{r.name}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-14 text-center">{r.count}</td>
@@ -11422,19 +11429,19 @@ const MasterRecurring = () => {
                 <td className="px-4 py-2 whitespace-nowrap w-28" onClick={e => e.stopPropagation()}>
                   {r.st === "承認待ち" && (
                     <div className="flex gap-1">
-                      <button onClick={() => setShowApprovalConfirm({ ...r, action: "approve" })} className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs border border-emerald-200 hover:bg-emerald-200">承認</button>
-                      <button onClick={() => setShowApprovalConfirm({ ...r, action: "reject" })} className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs border border-rose-200 hover:bg-rose-200">却下</button>
+                      <button onClick={() => setShowApprovalConfirm({ ...r, action: "approve" })} className="px-2 py-1 bg-success-100 text-success-700 rounded text-xs border border-success-200 hover:bg-success-200">承認</button>
+                      <button onClick={() => setShowApprovalConfirm({ ...r, action: "reject" })} className="px-2 py-1 bg-danger-100 text-danger-700 rounded text-xs border border-danger-200 hover:bg-danger-200">却下</button>
                     </div>
                   )}
-                  {r.st === "承認済" && <span className="text-xs text-blue-500">実行待ち</span>}
-                  {r.st === "完了" && <button onClick={() => toast(`${r.name}の実行結果を表示`, "info")} className="text-xs text-blue-600 hover:underline">結果</button>}
+                  {r.st === "承認済" && <span className="text-xs text-brand-500">実行待ち</span>}
+                  {r.st === "完了" && <button onClick={() => toast(`${r.name}の実行結果を表示`, "info")} className="text-xs text-brand-600 hover:underline">結果</button>}
                 </td>
               </tr>
               {expandedCsvId === r.id && (
                 <tr><td colSpan={9} className="p-0">
-                  <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                  <div className="px-4 py-3 bg-brand-50 border-b border-l-2 border-l-brand-500">
                     <div className="flex items-center gap-2 mb-2">
-                      <p className="text-xs font-bold text-slate-700">📦 CSV決済バッチ詳細 — {r.id}</p>
+                      <p className="text-xs font-bold text-slate-700"><Package className="w-4 h-4 inline mr-1" /> CSV決済バッチ詳細 — {r.id}</p>
                       <Badge text={r.st} color={r.stc} />
                     </div>
                     <div className="grid grid-cols-3 gap-3 text-xs">
@@ -11447,7 +11454,7 @@ const MasterRecurring = () => {
                         </div>
                       </div>
                       <div className="bg-white rounded-lg border border-slate-200 p-2.5 col-span-2">
-                        <p className="font-semibold text-slate-600 mb-1">📄 CSVプレビュー（先頭5件）</p>
+                        <p className="font-semibold text-slate-600 mb-1"><FileText className="w-4 h-4 inline mr-1" /> CSVプレビュー（先頭5件）</p>
                         <div className="overflow-x-auto border rounded">
                           <table className="w-full text-xs">
                             <thead><tr className="bg-slate-50 border-b">
@@ -11459,8 +11466,8 @@ const MasterRecurring = () => {
                             </tr></thead>
                             <tbody>
                               {[["PAY-001", "9,800", "tanaka@ex...", "月額会費", "田中太郎"], ["PAY-002", "9,800", "sato@ex...", "月額会費", "佐藤花子"], ["PAY-003", "5,000", "suzuki@ex...", "月額会費(割引)", "鈴木一郎"], ["", "9,800", "yamada@ex...", "月額会費", "山田明"], ["PAY-005", "12,000", "ito@ex...", "月額会費(上級)", "伊藤涼"]].map((csvr, ci) => (
-                                <tr key={ci} className={`border-b ${!csvr[0] ? "bg-amber-50" : ""}`}>
-                                  <td className="px-2 py-1 font-mono text-blue-600">{csvr[0] || <span className="text-amber-500">新規</span>}</td>
+                                <tr key={ci} className={`border-b ${!csvr[0] ? "bg-warning-50" : ""}`}>
+                                  <td className="px-2 py-1 font-mono text-brand-600">{csvr[0] || <span className="text-warning-500">新規</span>}</td>
                                   <td className="px-2 py-1">¥{csvr[1]}</td>
                                   <td className="px-2 py-1 text-slate-500">{csvr[2]}</td>
                                   <td className="px-2 py-1">{csvr[3]}</td>
@@ -11475,10 +11482,10 @@ const MasterRecurring = () => {
                     </div>
                     <div className="flex gap-2 mt-2">
                       {r.st === "承認待ち" && (<>
-                        <button onClick={(e) => { e.stopPropagation(); setShowApprovalConfirm({ ...r, action: "approve" }); }} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700">✅ 承認する</button>
-                        <button onClick={(e) => { e.stopPropagation(); setShowApprovalConfirm({ ...r, action: "reject" }); }} className="px-3 py-1.5 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200 hover:bg-rose-100">❌ 却下する</button>
+                        <button onClick={(e) => { e.stopPropagation(); setShowApprovalConfirm({ ...r, action: "approve" }); }} className="px-3 py-1.5 bg-success-600 text-white rounded text-xs font-semibold hover:bg-success-700"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 承認する</button>
+                        <button onClick={(e) => { e.stopPropagation(); setShowApprovalConfirm({ ...r, action: "reject" }); }} className="px-3 py-1.5 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200 hover:bg-danger-100"><XCircle className="w-4 h-4 text-danger-500 inline mr-1" /> 却下する</button>
                       </>)}
-                      <button className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded text-xs border hover:bg-slate-100 ml-auto">📥 元CSVダウンロード</button>
+                      <button className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded text-xs border hover:bg-slate-100 ml-auto"><Download className="w-4 h-4 inline mr-1" /> 元CSVダウンロード</button>
                     </div>
                   </div>
                 </td></tr>
@@ -11487,8 +11494,8 @@ const MasterRecurring = () => {
             ))}
             </TableHeader>
           </div>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 text-xs text-blue-700 flex items-center gap-2">
-            <span>💡</span>
+          <div className="bg-brand-50 border border-brand-200 rounded-lg p-2.5 text-xs text-brand-700 flex items-center gap-2">
+            <span><Lightbulb className="w-4 h-4 inline" /></span>
             <span>CSV決済の流れ: 加盟店がCSVアップロード → <span className="font-bold">マスター側で承認</span> → 決済予定日にバッチで自動決済処理</span>
           </div>
         </div>
@@ -11499,8 +11506,8 @@ const MasterRecurring = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowApprovalConfirm(null)} />
           <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
-            <div className={`p-4 border-b rounded-t-xl ${showApprovalConfirm.action === "approve" ? "bg-emerald-50" : "bg-rose-50"}`}>
-              <h3 className="text-sm font-bold text-slate-800">{showApprovalConfirm.action === "approve" ? "✅ CSV決済バッチの承認" : "❌ CSV決済バッチの却下"}</h3>
+            <div className={`p-4 border-b rounded-t-xl ${showApprovalConfirm.action === "approve" ? "bg-success-50" : "bg-danger-50"}`}>
+              <h3 className="text-sm font-bold text-slate-800">{showApprovalConfirm.action === "approve" ? "CSV決済バッチの承認" : "CSV決済バッチの却下"}</h3>
             </div>
             <div className="p-5 space-y-4">
               <div className="bg-slate-50 rounded-lg border p-3 space-y-1.5 text-xs">
@@ -11508,17 +11515,17 @@ const MasterRecurring = () => {
                 <div className="flex justify-between"><span className="text-slate-400">加盟店</span><span className="font-semibold">{showApprovalConfirm.merchant}</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">バッチ名</span><span>{showApprovalConfirm.name}</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">決済件数</span><span className="font-bold">{showApprovalConfirm.count}件</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">合計金額</span><span className="font-bold text-emerald-600">{showApprovalConfirm.total}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">合計金額</span><span className="font-bold text-success-600">{showApprovalConfirm.total}</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">決済予定日</span><span>{showApprovalConfirm.schedule}</span></div>
               </div>
               {showApprovalConfirm.action === "approve" ? (
-                <div className="bg-emerald-50 border border-emerald-200 rounded p-2 text-xs text-emerald-700">
+                <div className="bg-success-50 border border-success-200 rounded p-2 text-xs text-success-700">
                   <p className="font-bold">承認すると:</p>
                   <p className="mt-1">決済予定日（{showApprovalConfirm.schedule}）にバッチ処理で自動的に{showApprovalConfirm.count}件の決済が実行されます。</p>
                 </div>
               ) : (
                 <div>
-                  <label className="text-xs font-semibold text-slate-600">却下理由 <span className="text-rose-500">*</span></label>
+                  <label className="text-xs font-semibold text-slate-600">却下理由 <span className="text-danger-500">*</span></label>
                   <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
                     <option>CSVフォーマットエラー</option>
                     <option>金額に不整合あり</option>
@@ -11532,7 +11539,7 @@ const MasterRecurring = () => {
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowApprovalConfirm(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setShowApprovalConfirm(null)} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showApprovalConfirm.action === "approve" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"}`}>
+              <button onClick={() => setShowApprovalConfirm(null)} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showApprovalConfirm.action === "approve" ? "bg-success-600 hover:bg-success-700" : "bg-danger-600 hover:bg-danger-700"}`}>
                 {showApprovalConfirm.action === "approve" ? "承認する" : "却下する"}
               </button>
             </div>
@@ -11552,7 +11559,7 @@ const MasterRecurring = () => {
             ["2026-02-10 02:00:02", "B-4518", "リカーリング", "389", "385", "4", "3", "3.5s", "完了"]
           ].map((r, i) => (
             <tr key={i} className="border-b hover:bg-slate-50">
-              <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-20 font-mono">{r[1]}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r[2]} color={r[2] === "CSV決済" ? "purple" : "blue"} /></td><td className="px-4 py-2 whitespace-nowrap w-16">{r[3]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-emerald-600">{r[4]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-rose-600">{r[5]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-amber-600">{r[6]}</td><td className="px-4 py-2 whitespace-nowrap w-14">{r[7]}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r[8]} color="green" /></td><td className="px-4 py-2 whitespace-nowrap w-10"><button onClick={() => toast(`バッチ${r[1]}の詳細を表示`, "info")} className="text-blue-600 text-xs">詳細</button></td>
+              <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-400">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-20 font-mono">{r[1]}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r[2]} color={r[2] === "CSV決済" ? "purple" : "blue"} /></td><td className="px-4 py-2 whitespace-nowrap w-16">{r[3]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-success-600">{r[4]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-danger-600">{r[5]}</td><td className="px-4 py-2 whitespace-nowrap w-14 text-warning-600">{r[6]}</td><td className="px-4 py-2 whitespace-nowrap w-14">{r[7]}</td><td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r[8]} color="green" /></td><td className="px-4 py-2 whitespace-nowrap w-10"><button onClick={() => toast(`バッチ${r[1]}の詳細を表示`, "info")} className="text-brand-600 text-xs">詳細</button></td>
             </tr>
           ))}
           </TableHeader>
@@ -11566,9 +11573,9 @@ const MasterRecurring = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowForceStop(null)} />
           <div className="relative bg-white rounded-xl shadow-2xl w-[400px]">
-            <div className="p-4 border-b"><p className="text-sm font-bold text-red-600">⚠️ サブスクリプション強制停止</p></div>
+            <div className="p-4 border-b"><p className="text-sm font-bold text-danger-600"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> サブスクリプション強制停止</p></div>
             <div className="p-4 space-y-3">
-              <div className="bg-red-50 border border-red-200 rounded p-3 text-xs text-red-700">
+              <div className="bg-danger-50 border border-danger-200 rounded p-3 text-xs text-danger-700">
                 <p className="font-bold">この操作は取り消せません</p>
                 <p className="mt-1">ユーザー {showForceStop.id} のサブスクリプションを即座に停止します。次回以降の課金は行われません。</p>
               </div>
@@ -11580,7 +11587,7 @@ const MasterRecurring = () => {
               <div><label className="text-xs text-slate-500">停止理由</label><select className="w-full border rounded px-2 py-1.5 text-xs mt-0.5"><option>顧客の要望</option><option>支払い不能</option><option>不正利用の疑い</option><option>その他</option></select></div>
               <div className="flex gap-2">
                 <button onClick={() => setShowForceStop(null)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
-                <button onClick={() => setShowForceStop(null)} className="flex-1 py-2 bg-red-500 text-white rounded text-xs font-bold">停止する</button>
+                <button onClick={() => setShowForceStop(null)} className="flex-1 py-2 bg-danger-500 text-white rounded text-xs font-bold">停止する</button>
               </div>
             </div>
           </div>
@@ -11609,7 +11616,7 @@ const MasterAgents = () => {
         <h2 className="text-sm font-bold text-slate-800">代理店管理</h2>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
-        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-blue-500 text-blue-700 bg-blue-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-brand-500 text-brand-700 bg-brand-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}</div>
       {tab === "list" && (
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
@@ -11619,20 +11626,20 @@ const MasterAgents = () => {
             const agentSites = merchantData.flatMap(m => m.sites.filter(s => s.agentId === r.code).map(s => ({ ...s, merchantName: m.name, merchantId: m.id })));
             return (
             <React.Fragment key={i}>
-            <tr onClick={() => setExpandedAgentCode(expandedAgentCode === r.code ? null : r.code)} className={`border-b cursor-pointer transition-colors ${expandedAgentCode === r.code ? "bg-blue-100 border-l-2 border-l-blue-500" : "hover:bg-blue-50"}`}>
+            <tr onClick={() => setExpandedAgentCode(expandedAgentCode === r.code ? null : r.code)} className={`border-b cursor-pointer transition-colors ${expandedAgentCode === r.code ? "bg-brand-100 border-l-2 border-l-brand-500" : "hover:bg-brand-50"}`}>
               <td className="px-4 py-2 whitespace-nowrap w-20 font-mono">{r.code}</td>
               <td className="px-4 py-2 whitespace-nowrap font-bold">{r.name}</td>
               <td className="px-4 py-2 whitespace-nowrap w-20">{r.rep}</td>
               <td className="px-4 py-2 whitespace-nowrap w-20 text-center">{r.merchants}社</td>
               <td className="px-4 py-2 whitespace-nowrap w-16">{r.rate}</td>
-              <td className="px-4 py-2 whitespace-nowrap w-24 font-semibold text-emerald-700">{r.monthlyRevenue}</td>
+              <td className="px-4 py-2 whitespace-nowrap w-24 font-semibold text-success-700">{r.monthlyRevenue}</td>
               <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text="有効" color="green" /></td>
             </tr>
             {expandedAgentCode === r.code && (
               <tr><td colSpan={7} className="p-0">
-                <div className="px-4 py-3 bg-blue-50 border-b border-l-2 border-l-blue-500">
+                <div className="px-4 py-3 bg-brand-50 border-b border-l-2 border-l-brand-500">
                   <div className="flex items-center gap-2 mb-2">
-                    <p className="text-xs font-bold text-slate-700">🤝 代理店詳細 — {r.name}</p>
+                    <p className="text-xs font-bold text-slate-700"><Handshake className="w-4 h-4 inline mr-1" /> 代理店詳細 — {r.name}</p>
                     <Badge text="有効" color="green" />
                     <span className="text-xs text-slate-400">{r.code}</span>
                   </div>
@@ -11652,9 +11659,9 @@ const MasterAgents = () => {
                           <p className="text-xs text-slate-400">紹介加盟店</p>
                           <p className="text-sm font-bold text-orange-600">{r.merchants}社</p>
                         </div>
-                        <div className="bg-emerald-50 rounded p-1.5 text-center border border-emerald-200">
+                        <div className="bg-success-50 rounded p-1.5 text-center border border-success-200">
                           <p className="text-xs text-slate-400">今月の報酬</p>
-                          <p className="text-sm font-bold text-emerald-600">{r.monthlyRevenue}</p>
+                          <p className="text-sm font-bold text-success-600">{r.monthlyRevenue}</p>
                         </div>
                         <div className="text-xs"><span className="text-slate-400">累計:</span> <span className="font-bold">{r.totalRevenue}</span></div>
                       </div>
@@ -11673,7 +11680,7 @@ const MasterAgents = () => {
                   {/* サイトごとの紐づけ一覧 */}
                   <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
                     <div className="px-3 py-2 bg-slate-50 border-b flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-600">🌐 紹介サイト一覧</span>
+                      <span className="text-xs font-bold text-slate-600"><Globe className="w-4 h-4 inline mr-1" /> 紹介サイト一覧</span>
                       <span className="text-xs text-slate-400">（{agentSites.length}サイト）</span>
                     </div>
                     {agentSites.length > 0 ? agentSites.map((site, si) => (
@@ -11683,16 +11690,16 @@ const MasterAgents = () => {
                           <span className="text-xs font-bold text-slate-700">{site.siteName}</span>
                           <span className="text-xs text-slate-400">—</span>
                           <span className="text-xs text-slate-500">{site.merchantName}</span>
-                          <span className="text-xs text-blue-500 truncate max-w-[180px] ml-auto">{site.url}</span>
+                          <span className="text-xs text-brand-500 truncate max-w-[180px] ml-auto">{site.url}</span>
                         </div>
                         <div className="flex gap-1 flex-wrap">
                           {site.processors.map((proc, pi) => {
                             const st = PROC_STATUS[proc.status] || { label: proc.status, color: "gray" };
                             return (
-                              <div key={pi} className={`text-xs px-2 py-0.5 rounded border ${proc.status === "approved" ? "bg-emerald-50 border-emerald-200" : proc.status === "reviewing" ? "bg-blue-50 border-blue-200" : "bg-slate-50 border-slate-200"}`}>
+                              <div key={pi} className={`text-xs px-2 py-0.5 rounded border ${proc.status === "approved" ? "bg-success-50 border-success-200" : proc.status === "reviewing" ? "bg-brand-50 border-brand-200" : "bg-slate-50 border-slate-200"}`}>
                                 <span className="font-semibold">{proc.name}</span>
                                 <span className="text-slate-400 ml-1">{proc.brands}</span>
-                                <span className="ml-1">{proc.status === "approved" ? "✅" : proc.status === "reviewing" ? "🔄" : "⏳"}</span>
+                                <span className="ml-1">{proc.status === "approved" ? <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" /> : proc.status === "reviewing" ? <RefreshCw className="w-3.5 h-3.5 text-brand-500 inline" /> : <Clock className="w-3.5 h-3.5 text-slate-400 inline" />}</span>
                               </div>
                             );
                           })}
@@ -11718,23 +11725,23 @@ const MasterAgents = () => {
             <div key={f}><label className="text-xs text-slate-500">{f}</label><input className="w-full border rounded px-2 py-1.5 text-xs mt-0.5" placeholder={f.replace(" *", "")} /></div>
           ))}
           <div><label className="text-xs text-slate-500">契約条件メモ</label><textarea className="w-full border rounded px-2 py-1.5 text-xs mt-0.5 h-16" /></div>
-          <button onClick={() => setShowAddAgent(true)} className="w-full py-2 bg-blue-600 text-white rounded text-xs font-bold">代理店を登録する</button>
+          <button onClick={() => setShowAddAgent(true)} className="w-full py-2 bg-brand-500 text-white rounded text-xs font-bold">代理店を登録する</button>
         </div>
       )}
       {tab === "commissions" && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <select className="border rounded px-2 py-1 text-xs"><option>2026年2月</option><option>2026年1月</option></select>
-            <button onClick={() => toast("今月の報酬を計算しています...", "info")} className="px-3 py-1 bg-blue-600 text-white rounded text-xs">今月の報酬を計算</button>
-            <button onClick={() => toast("報酬一覧をCSV出力しました", "success")} className="px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs border">📥 CSV出力</button>
+            <button onClick={() => toast("今月の報酬を計算しています...", "info")} className="px-3 py-1 bg-brand-500 text-white rounded text-xs">今月の報酬を計算</button>
+            <button onClick={() => toast("報酬一覧をCSV出力しました", "success")} className="px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs border"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "代理店", w: "flex-1" }, { label: "対象加盟店", w: "w-16" }, { label: "取引総額", w: "w-24" }, { label: "料率", w: "w-14" }, { label: "報酬額", w: "w-24" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]}>
             {[["デジタルパートナーズ", "23", "¥45,200,000", "5.0%", "¥2,260,000", "pending"], ["ウェブコンサル合同会社", "12", "¥18,500,000", "4.5%", "¥832,500", "confirmed"], ["ITソリューションズ", "8", "¥8,300,000", "5.0%", "¥415,000", "paid"]].map((r, i) => (
               <tr key={i} className="border-b">
-                <td className="px-4 py-2 whitespace-nowrap font-bold">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r[1]}社</td><td className="px-4 py-2 whitespace-nowrap w-24">{r[2]}</td><td className="px-4 py-2 whitespace-nowrap w-14">{r[3]}</td><td className="px-4 py-2 whitespace-nowrap w-24 font-bold text-emerald-700">{r[4]}</td>
+                <td className="px-4 py-2 whitespace-nowrap font-bold">{r[0]}</td><td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r[1]}社</td><td className="px-4 py-2 whitespace-nowrap w-24">{r[2]}</td><td className="px-4 py-2 whitespace-nowrap w-14">{r[3]}</td><td className="px-4 py-2 whitespace-nowrap w-24 font-bold text-success-700">{r[4]}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r[5] === "pending" ? "未確認" : r[5] === "confirmed" ? "確認済" : "支払済"} color={r[5] === "pending" ? "yellow" : r[5] === "confirmed" ? "blue" : "green"} /></td>
-                <td className="px-4 py-2 whitespace-nowrap w-16">{r[5] === "pending" && <button onClick={() => toast(`${r[0]}の報酬を承認しました`, "success")} className="text-blue-600 text-xs">承認</button>}{r[5] === "confirmed" && <button onClick={() => toast(`${r[0]}への支払いを実行しました`, "success")} className="text-emerald-600 text-xs">支払</button>}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-16">{r[5] === "pending" && <button onClick={() => toast(`${r[0]}の報酬を承認しました`, "success")} className="text-brand-600 text-xs">承認</button>}{r[5] === "confirmed" && <button onClick={() => toast(`${r[0]}への支払いを実行しました`, "success")} className="text-success-600 text-xs">支払</button>}</td>
               </tr>
             ))}
             </TableHeader>
@@ -11757,13 +11764,13 @@ const MasterAgents = () => {
         };
         return (
         <div className="space-y-3">
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 flex items-start gap-2">
-            <span className="text-xs">💡</span>
-            <p className="text-xs text-amber-700">代理店フィーは<span className="font-bold">サイトごと × ブランドごと</span>に設定します。各サイトの接続先・ブランドに応じた決済手数料から代理店フィーが差し引かれます。</p>
+          <div className="bg-warning-50 border border-warning-200 rounded-lg p-2 flex items-start gap-2">
+            <span className="text-xs"><Lightbulb className="w-4 h-4 inline" /></span>
+            <p className="text-xs text-warning-700">代理店フィーは<span className="font-bold">サイトごと × ブランドごと</span>に設定します。各サイトの接続先・ブランドに応じた決済手数料から代理店フィーが差し引かれます。</p>
           </div>
           <div className="flex items-center gap-2 mb-1">
             <select className="border rounded px-2 py-1 text-xs"><option>AG-001 デジタルパートナーズ</option><option>AG-002 ウェブコンサル合同会社</option><option>AG-003 ITソリューションズ</option></select>
-            <button onClick={() => toast("フィー設定を一括保存しました", "success")} className="px-3 py-1 bg-blue-600 text-white rounded text-xs">一括保存</button>
+            <button onClick={() => toast("フィー設定を一括保存しました", "success")} className="px-3 py-1 bg-brand-500 text-white rounded text-xs">一括保存</button>
           </div>
 
           {/* サイトごとのフィー設定 */}
@@ -11791,15 +11798,15 @@ const MasterAgents = () => {
             });
             return (
             <div key={si} className="bg-white rounded-lg border shadow-sm overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-50 to-slate-50 px-4 py-2 border-b flex items-center justify-between">
+              <div className="bg-gradient-to-r from-brand-50 to-slate-50 px-4 py-2 border-b flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">{site.siteId}</span>
+                  <span className="text-xs font-mono bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded">{site.siteId}</span>
                   <span className="text-xs font-bold text-slate-700">{site.siteName}</span>
                   <span className="text-xs text-slate-400">({site.merchantName})</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-slate-400">{approvedProcs.length}接続先</span>
-                  <button className="px-2 py-0.5 bg-blue-600 text-white rounded text-xs">保存</button>
+                  <button className="px-2 py-0.5 bg-brand-500 text-white rounded text-xs">保存</button>
                 </div>
               </div>
               {brandRows.length === 0 ? (
@@ -11807,15 +11814,15 @@ const MasterAgents = () => {
               ) : (
                 <TableHeader cols={[{ label: "接続先", w: "w-32" }, { label: "ブランド", w: "w-24" }, { label: "決済手数料", w: "w-24" }, { label: "代理店フィー", w: "w-28" }, { label: "運営取り分", w: "w-24" }, { label: "操作", w: "w-14" }]}>
                 {brandRows.map((row, ri) => (
-                  <tr key={ri} className="border-b hover:bg-blue-50/30">
+                  <tr key={ri} className="border-b hover:bg-brand-50/30">
                     <td className="px-3 py-1.5 whitespace-nowrap w-32 text-xs">{row.processor}</td>
                     <td className="px-3 py-1.5 whitespace-nowrap w-24 text-xs font-semibold">{row.brand}</td>
-                    <td className={`px-3 py-1.5 whitespace-nowrap w-24 text-xs ${row.isOverride ? "text-amber-700 font-semibold" : "text-slate-600"}`}>{row.displayFee}{row.isOverride && <span className="ml-1 text-amber-500">★</span>}</td>
+                    <td className={`px-3 py-1.5 whitespace-nowrap w-24 text-xs ${row.isOverride ? "text-warning-700 font-semibold" : "text-slate-600"}`}>{row.displayFee}{row.isOverride && <span className="ml-1 text-warning-500"><Zap className="w-3 h-3 inline" /></span>}</td>
                     <td className="px-3 py-1.5 whitespace-nowrap w-28">
                       <input type="text" defaultValue={row.agentFee !== "—" ? row.agentFee : ""} placeholder="0.00%" className="border rounded px-2 py-0.5 text-xs w-16 text-orange-600 font-bold text-center" />
                     </td>
                     <td className="px-3 py-1.5 whitespace-nowrap w-24 text-xs text-slate-500">{row.net}</td>
-                    <td className="px-3 py-1.5 whitespace-nowrap w-14"><button onClick={() => toast(`${row.brand}のフィーを編集中`, "info")} className="text-blue-600 text-xs">編集</button></td>
+                    <td className="px-3 py-1.5 whitespace-nowrap w-14"><button onClick={() => toast(`${row.brand}のフィーを編集中`, "info")} className="text-brand-600 text-xs">編集</button></td>
                   </tr>
                 ))}
                 </TableHeader>
@@ -11827,12 +11834,12 @@ const MasterAgents = () => {
           {/* サマリー */}
           <div className="bg-white rounded-lg border p-4">
             <div className="flex justify-between items-center mb-2">
-              <p className="text-xs font-bold text-slate-700">📊 フィー設定サマリー</p>
+              <p className="text-xs font-bold text-slate-700"><BarChart3 className="w-4 h-4 inline mr-1" /> フィー設定サマリー</p>
             </div>
             <div className="grid grid-cols-4 gap-2">
-              <div className="bg-blue-50 rounded p-2 text-center"><p className="text-xs text-slate-400">紐づけサイト数</p><p className="text-sm font-bold text-blue-700">{agSites.length}</p></div>
+              <div className="bg-brand-50 rounded p-2 text-center"><p className="text-xs text-slate-400">紐づけサイト数</p><p className="text-sm font-bold text-brand-700">{agSites.length}</p></div>
               <div className="bg-orange-50 rounded p-2 text-center"><p className="text-xs text-slate-400">フィー設定済み</p><p className="text-sm font-bold text-orange-700">{Object.keys(siteFeeData).filter(k => agSites.some(s => s.siteId === k)).length}</p></div>
-              <div className="bg-emerald-50 rounded p-2 text-center"><p className="text-xs text-slate-400">平均フィー率</p><p className="text-sm font-bold text-emerald-700">0.31%</p></div>
+              <div className="bg-success-50 rounded p-2 text-center"><p className="text-xs text-slate-400">平均フィー率</p><p className="text-sm font-bold text-success-700">0.31%</p></div>
               <div className="bg-slate-50 rounded p-2 text-center"><p className="text-xs text-slate-400">今月報酬見込</p><p className="text-sm font-bold text-slate-700">{ag.monthlyRevenue}</p></div>
             </div>
           </div>
@@ -11847,26 +11854,26 @@ const MasterAgents = () => {
           <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">代理店を登録</h3>
-              <button onClick={() => setShowAddAgent(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <button onClick={() => setShowAddAgent(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
-              <div><label className="text-xs font-semibold text-slate-600">法人名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="株式会社〇〇" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">法人名 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="株式会社〇〇" /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-xs font-semibold text-slate-600">代理店コード <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="AG-XXX" /></div>
-                <div><label className="text-xs font-semibold text-slate-600">種別 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>紹介型</option><option>取次型</option></select></div>
+                <div><label className="text-xs font-semibold text-slate-600">代理店コード <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="AG-XXX" /></div>
+                <div><label className="text-xs font-semibold text-slate-600">種別 <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>紹介型</option><option>取次型</option></select></div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-xs font-semibold text-slate-600">担当者名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="山田 太郎" /></div>
-                <div><label className="text-xs font-semibold text-slate-600">メール <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="agent@example.com" /></div>
+                <div><label className="text-xs font-semibold text-slate-600">担当者名 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="山田 太郎" /></div>
+                <div><label className="text-xs font-semibold text-slate-600">メール <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="agent@example.com" /></div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-xs font-semibold text-slate-600">報酬率（%）<span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="0.1" /></div>
+                <div><label className="text-xs font-semibold text-slate-600">報酬率（%）<span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="0.1" /></div>
                 <div><label className="text-xs font-semibold text-slate-600">契約期間</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>1年</option><option>2年</option><option>無期限</option></select></div>
               </div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowAddAgent(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setShowAddAgent(false)} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">登録する</button>
+              <button onClick={() => setShowAddAgent(false)} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">登録する</button>
             </div>
           </div>
         </div>
@@ -11890,9 +11897,9 @@ const AgentDashboard = () => {
     "先月の報酬確定額": { value: "¥2,105,000", details: [{ label: "基本報酬", value: "¥1,950,000" }, { label: "ボーナス", value: "¥155,000" }], chart: [1700, 1850, 1900, 1980, 2050, 2105] },
   };
   const notifications = [
-    { type: "info", icon: "📋", text: "「太郎合同会社」の審査が完了し、承認されました", time: "2時間前" },
-    { type: "alert", icon: "⚠️", text: "「ECサイトA」のチャージバック率が閾値に近づいています", time: "5時間前" },
-    { type: "success", icon: "💰", text: "1月分の報酬が振り込まれました（¥2,105,000）", time: "1日前" },
+    { type: "info", icon: <ClipboardList className="w-4 h-4 inline text-slate-500" />, text: "「太郎合同会社」の審査が完了し、承認されました", time: "2時間前" },
+    { type: "alert", icon: <AlertTriangle className="w-4 h-4 inline text-warning-500" />, text: "「ECサイトA」のチャージバック率が閾値に近づいています", time: "5時間前" },
+    { type: "success", icon: <Coins className="w-4 h-4 inline text-slate-500" />, text: "1月分の報酬が振り込まれました（¥2,105,000）", time: "1日前" },
   ];
   return (
   <div className="p-5 space-y-4">
@@ -11911,24 +11918,24 @@ const AgentDashboard = () => {
     {/* お知らせ欄 */}
     {(() => {
       const aNotices = [
-        { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: "🔧" },
-        { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: "🚀" },
-        { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: "⚠️" },
-        { date: "02/10", title: "代理店向け報酬計算ロジック変更について", type: "重要", tColor: "red", icon: "🤝" },
+        { date: "02/17", title: "決済処理メンテナンスのお知らせ（2/20 AM2:00-4:00）", type: "メンテナンス", tColor: "yellow", icon: <Wrench className="w-4 h-4 inline text-slate-500" /> },
+        { date: "02/15", title: "新機能: Apple Pay / Google Pay 対応開始", type: "リリース", tColor: "blue", icon: <Rocket className="w-4 h-4 inline text-brand-500" /> },
+        { date: "02/14", title: "【復旧済】2/14 決済エラー増加について", type: "障害", tColor: "red", icon: <AlertTriangle className="w-4 h-4 inline text-warning-500" /> },
+        { date: "02/10", title: "代理店向け報酬計算ロジック変更について", type: "重要", tColor: "red", icon: <Handshake className="w-4 h-4 inline text-slate-500" /> },
       ];
       const renderANotice = (n, i) => (
-        <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-orange-50 ${i === 0 ? "border-amber-300 bg-amber-50" : i === 3 ? "border-rose-200 bg-rose-50/50" : "border-slate-200"}`}>
+        <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-orange-50 ${i === 0 ? "border-warning-300 bg-warning-50" : i === 3 ? "border-danger-200 bg-danger-50/50" : "border-slate-200"}`}>
           <span>{n.icon}</span>
           <span className="w-12 text-slate-400 shrink-0">{n.date}</span>
           <Badge text={n.type} color={n.tColor} />
-          <span className={`flex-1 ${i === 0 ? "text-amber-800 font-semibold" : i === 3 ? "text-rose-700 font-semibold" : "text-slate-700"}`}>{n.title}</span>
+          <span className={`flex-1 ${i === 0 ? "text-warning-800 font-semibold" : i === 3 ? "text-danger-700 font-semibold" : "text-slate-700"}`}>{n.title}</span>
         </div>
       );
       return (
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <span>📢</span>
+            <Megaphone className="w-4 h-4 inline" />
             <p className="text-xs font-bold text-slate-600">お知らせ</p>
             {aNotices.length > 3 && <span className="text-xs text-slate-300">({aNotices.length}件)</span>}
           </div>
@@ -11951,9 +11958,9 @@ const AgentDashboard = () => {
     })()}
 
     {/* AIインサイト */}
-    <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border border-orange-200 p-3">
+    <div className="bg-gradient-to-r from-orange-50 to-warning-50 rounded-lg border border-orange-200 p-3">
       <div className="flex items-center gap-2 mb-1">
-        <span>🤖</span><span className="text-xs font-bold text-orange-700">AI 分析</span><span className="text-xs text-slate-400">毎日更新</span>
+        <Bot className="w-4 h-4 inline" /><span className="text-xs font-bold text-orange-700">AI 分析</span><span className="text-xs text-slate-400">毎日更新</span>
       </div>
       <p className="text-xs text-slate-700">今月の紹介加盟店の取引総額は前月比+8.3%の¥45.2M。上位3加盟店で全体の62%を占めています。新規紹介の「太郎合同会社」が審査通過すれば、来月の報酬は+¥120,000の見込みです。</p>
     </div>
@@ -11970,8 +11977,8 @@ const AgentDashboard = () => {
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
         <p className="text-xs font-bold mb-2">加盟店ステータス</p>
         <div className="flex items-center gap-4 py-4 justify-center">
-          <div className="text-center"><div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold">23</div><p className="text-xs text-slate-500 mt-1">稼働中</p></div>
-          <div className="text-center"><div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold">3</div><p className="text-xs text-slate-500 mt-1">審査中</p></div>
+          <div className="text-center"><div className="w-12 h-12 rounded-full bg-success-100 flex items-center justify-center text-success-700 font-bold">23</div><p className="text-xs text-slate-500 mt-1">稼働中</p></div>
+          <div className="text-center"><div className="w-12 h-12 rounded-full bg-warning-100 flex items-center justify-center text-warning-700 font-bold">3</div><p className="text-xs text-slate-500 mt-1">審査中</p></div>
           <div className="text-center"><div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold">1</div><p className="text-xs text-slate-500 mt-1">停止中</p></div>
         </div>
       </div>
@@ -12001,9 +12008,9 @@ const AgentDashboard = () => {
         ))}
       </div>
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <p className="text-xs font-bold mb-2">🔔 通知</p>
+        <p className="text-xs font-bold mb-2"><Bell className="w-4 h-4 inline" /> 通知</p>
         {notifications.map((n, i) => (
-          <div key={i} className={`flex items-start gap-2 py-2 border-b text-xs last:border-0 ${n.type === "alert" ? "bg-amber-50 -mx-3 px-3" : ""}`}>
+          <div key={i} className={`flex items-start gap-2 py-2 border-b text-xs last:border-0 ${n.type === "alert" ? "bg-warning-50 -mx-3 px-3" : ""}`}>
             <span>{n.icon}</span>
             <div className="flex-1">
               <p className="text-slate-700">{n.text}</p>
@@ -12029,11 +12036,11 @@ const AgentDashboard = () => {
           { merchant: "ファッションEC", siteId: "S-015", siteName: "ファッションストア", url: "https://fashion-ec.com", service: "クレジット/WEBマネー", token: "aip_tk_wwww...wwww" },
           { merchant: "フード通販ABC", siteId: "S-020", siteName: "フード通販", url: "https://food-abc.jp", service: "クレジット", token: "aip_tk_vvvv...vvvv" },
         ].map((s, i) => (
-          <tr key={i} className="border-b hover:bg-blue-50">
+          <tr key={i} className="border-b hover:bg-brand-50">
             <td className="px-4 py-2 whitespace-nowrap w-28 font-semibold">{s.merchant}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-20 font-mono text-blue-600">{s.siteId}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-20 font-mono text-brand-600">{s.siteId}</td>
             <td className="px-4 py-2 whitespace-nowrap">{s.siteName}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-40 text-blue-500 text-xs">{s.url}</td>
+            <td className="px-4 py-2 whitespace-nowrap w-40 text-brand-500 text-xs">{s.url}</td>
             <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1 flex-wrap">{s.service.split("/").map((sv, j) => <Badge key={j} text={sv} color="blue" />)}</div></td>
             <td className="px-4 py-2 whitespace-nowrap w-36 font-mono text-slate-400 text-xs">{s.token}</td>
           </tr>
@@ -12043,9 +12050,9 @@ const AgentDashboard = () => {
     </div>
 
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold mb-2">⚡ クイックアクション</p>
+      <p className="text-xs font-bold mb-2"><Zap className="w-4 h-4 inline mr-1" /> クイックアクション</p>
       <div className="flex gap-2">
-        {[["📝 新規紹介", "orange"], ["💰 報酬明細", "blue"], ["👥 紹介先一覧", "emerald"], ["⚙️ アカウント設定", "slate"]].map(([label, color], i) => (
+        {[["新規紹介", "orange"], ["報酬明細", "blue"], ["紹介先一覧", "emerald"], ["アカウント設定", "slate"]].map(([label, color], i) => (
           <button key={i} onClick={() => toast(`${label}を開きます`, "info")} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100`}>{label}</button>
         ))}
       </div>
@@ -12058,7 +12065,7 @@ const AgentDashboard = () => {
         <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
           <div className="p-4 border-b flex items-center justify-between">
             <p className="text-sm font-bold">{showDetail}</p>
-            <button onClick={() => setShowDetail(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <button onClick={() => setShowDetail(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-4 space-y-4">
             <div className="text-center py-2">
@@ -12114,7 +12121,7 @@ const AgentMerchants = () => {
   <div className="p-5 space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-sm font-bold text-slate-800">紹介先一覧</h2>
-      <button onClick={() => toast("紹介先一覧をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200">📥 CSV出力</button>
+      <button onClick={() => toast("紹介先一覧をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
     </div>
     {/* タブ */}
     <div className="flex gap-1 border-b">
@@ -12133,8 +12140,8 @@ const AgentMerchants = () => {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
       <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "法人名", w: "w-28" }, { label: "ステータス", w: "w-16" }, { label: "月間取引額", w: "w-24" }, { label: "取引数", w: "w-16" }, { label: "紹介日", w: "w-20" }, { label: "適用料率", w: "w-16" }]}>
       {merchants.map((r, i) => (
-        <tr key={i} onClick={() => setSelectedMerchant(r)} className="border-b hover:bg-blue-50 cursor-pointer">
-          <td className="px-4 py-2 whitespace-nowrap font-bold text-blue-600">{r.name}</td>
+        <tr key={i} onClick={() => setSelectedMerchant(r)} className="border-b hover:bg-brand-50 cursor-pointer">
+          <td className="px-4 py-2 whitespace-nowrap font-bold text-brand-600">{r.name}</td>
           <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-500">{r.corp}</td>
           <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.status} color={r.sc} /></td>
           <td className="px-4 py-2 whitespace-nowrap w-24">{r.vol}</td>
@@ -12151,7 +12158,7 @@ const AgentMerchants = () => {
     {/* AQUAGATES準拠: クレジット決済検索 */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
       <div className="p-3 border-b bg-slate-50 flex items-center justify-between cursor-pointer" onClick={() => setShowD02Search(!showD02Search)}>
-        <p className="text-xs font-bold text-slate-700">🔍 検索条件</p>
+        <p className="text-xs font-bold text-slate-700"><Search className="w-4 h-4 inline mr-1" /> 検索条件</p>
         <span className="text-xs text-slate-400">{showD02Search ? "▲ 閉じる" : "▼ 開く"}</span>
       </div>
       {showD02Search && (
@@ -12183,14 +12190,14 @@ const AgentMerchants = () => {
     </div>
     <div className="flex items-center justify-between">
       <p className="text-xs text-slate-500">検索結果: <span className="font-bold text-slate-800">5件</span></p>
-      <button onClick={() => toast("決済履歴をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200">📥 CSV出力</button>
+      <button onClick={() => toast("決済履歴をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
     </div>
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
       <TableHeader cols={[{ label: "決済日時", w: "w-32" }, { label: "決済ID", w: "w-36" }, { label: "オーダーID", w: "w-28" }, { label: "加盟店", w: "w-24" }, { label: "サイト", w: "w-28" }, { label: "金額", w: "w-20" }, { label: "ステータス", w: "w-16" }, { label: "カード", w: "w-20" }, { label: "顧客名", w: "w-20" }]}>
       {d02TxResults.map((tx, i) => (
         <tr key={i} onClick={() => setSelectedD02Tx(tx)} className="border-b hover:bg-orange-50 cursor-pointer">
           <td className="px-3 py-2 whitespace-nowrap text-xs w-32 text-slate-500">{tx.date}</td>
-          <td className="px-3 py-2 whitespace-nowrap text-xs w-36 font-mono text-blue-600">{tx.txId}</td>
+          <td className="px-3 py-2 whitespace-nowrap text-xs w-36 font-mono text-brand-600">{tx.txId}</td>
           <td className="px-3 py-2 whitespace-nowrap text-xs w-28 text-slate-500">{tx.orderId}</td>
           <td className="px-3 py-2 whitespace-nowrap text-xs w-24">{tx.merchant}</td>
           <td className="px-3 py-2 whitespace-nowrap text-xs w-28 text-slate-500">{tx.site}</td>
@@ -12217,9 +12224,9 @@ const AgentMerchants = () => {
       <div className="fixed inset-0 z-50 flex">
         <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedMerchant(null)} />
         <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
-          <div className="p-4 border-b bg-blue-50 flex justify-between items-center">
+          <div className="p-4 border-b bg-brand-50 flex justify-between items-center">
             <h3 className="text-sm font-bold text-slate-800">{selectedMerchant.name}</h3>
-            <button onClick={() => setSelectedMerchant(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <button onClick={() => setSelectedMerchant(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
             <div>
@@ -12233,8 +12240,8 @@ const AgentMerchants = () => {
             <div className="border-t pt-3">
               <p className="text-xs text-slate-400 mb-1">月次パフォーマンス</p>
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-blue-50 rounded p-2 text-center"><p className="text-xs text-slate-400">取引額</p><p className="text-sm font-bold text-blue-700">{selectedMerchant.vol}</p></div>
-                <div className="bg-emerald-50 rounded p-2 text-center"><p className="text-xs text-slate-400">報酬</p><p className="text-sm font-bold text-emerald-700">{selectedMerchant.commission}</p></div>
+                <div className="bg-brand-50 rounded p-2 text-center"><p className="text-xs text-slate-400">取引額</p><p className="text-sm font-bold text-brand-700">{selectedMerchant.vol}</p></div>
+                <div className="bg-success-50 rounded p-2 text-center"><p className="text-xs text-slate-400">報酬</p><p className="text-sm font-bold text-success-700">{selectedMerchant.commission}</p></div>
                 <div className="bg-slate-50 rounded p-2 text-center"><p className="text-xs text-slate-400">取引数</p><p className="text-sm font-bold">{selectedMerchant.txn > 0 ? `${selectedMerchant.txn}件` : "—"}</p></div>
                 <div className="bg-slate-50 rounded p-2 text-center"><p className="text-xs text-slate-400">成功率</p><p className="text-sm font-bold">{selectedMerchant.success}</p></div>
               </div>
@@ -12244,7 +12251,7 @@ const AgentMerchants = () => {
               <div className="flex items-end gap-1 h-20 px-1">
                 {[65, 72, 68, 80, 75, 85].map((h, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center">
-                    <div className="w-full bg-blue-400 rounded-t" style={{ height: `${h}%` }} />
+                    <div className="w-full bg-brand-400 rounded-t" style={{ height: `${h}%` }} />
                     <p className="text-xs text-slate-400 mt-0.5">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
                   </div>
                 ))}
@@ -12278,7 +12285,7 @@ const AgentMerchants = () => {
         <div className="w-[480px] bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b bg-orange-50 flex justify-between items-center">
             <div><h3 className="text-sm font-bold text-slate-800">決済詳細</h3><p className="text-xs text-slate-400 font-mono">{selectedD02Tx.txId}</p></div>
-            <button onClick={() => setSelectedD02Tx(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <button onClick={() => setSelectedD02Tx(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
             <div className="flex items-center gap-2 mb-2"><Badge text={selectedD02Tx.status} color={selectedD02Tx.sc} /><span className="text-lg font-bold">{selectedD02Tx.amount}</span><span className="text-xs text-slate-400">({selectedD02Tx.currency})</span></div>
@@ -12334,7 +12341,7 @@ const AgentReports = () => {
   <div className="p-5 space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-sm font-bold text-slate-800">報酬明細</h2>
-      <button onClick={() => toast("報酬明細をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200">📥 CSV出力</button>
+      <button onClick={() => toast("報酬明細をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
     </div>
     <div className="grid grid-cols-3 gap-3">
       <KPICard label="年間報酬合計" value="¥24,580,000" sub="2025年度" color="blue" />
@@ -12343,7 +12350,7 @@ const AgentReports = () => {
     </div>
     {/* 検索フォーム */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-700 mb-2">🔍 明細検索</p>
+      <p className="text-xs font-bold text-slate-700 mb-2"><Search className="w-4 h-4 inline mr-1" /> 明細検索</p>
       <div className="grid grid-cols-4 gap-3">
         <div><label className="text-xs text-slate-500">報告書ID</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="RPT-" /></div>
         <div><label className="text-xs text-slate-500">レポートナンバー</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="AG001-" /></div>
@@ -12360,8 +12367,8 @@ const AgentReports = () => {
       <div className="flex items-end gap-1 h-24 px-1">
         {[{ m: "9月", v: 1750 }, { m: "10月", v: 1820 }, { m: "11月", v: 1900 }, { m: "12月", v: 1925 }, { m: "1月", v: 2105 }, { m: "2月", v: 2260 }].map((d, i) => (
           <div key={i} className="flex-1 flex flex-col items-center">
-            <p className="text-xs font-bold text-emerald-700 mb-0.5">¥{(d.v / 10).toFixed(0)}万</p>
-            <div className="w-full bg-emerald-400 rounded-t" style={{ height: `${(d.v / 2500) * 100}%` }} />
+            <p className="text-xs font-bold text-success-700 mb-0.5">¥{(d.v / 10).toFixed(0)}万</p>
+            <div className="w-full bg-success-400 rounded-t" style={{ height: `${(d.v / 2500) * 100}%` }} />
             <p className="text-xs text-slate-400 mt-1">{d.m}</p>
           </div>
         ))}
@@ -12372,14 +12379,14 @@ const AgentReports = () => {
       <TableHeader cols={[{ label: "報告書ID", w: "w-24" }, { label: "レポートNo.", w: "w-32" }, { label: "対象月", w: "w-20" }, { label: "発行日", w: "w-20" }, { label: "お支払金額", w: "w-24" }, { label: "お支払予定日", w: "w-24" }, { label: "ステータス", w: "w-16" }, { label: "内訳", w: "w-12" }]}>
       {reports.map((r, i) => (
         <tr key={i} className="border-b hover:bg-orange-50">
-          <td className="px-3 py-2 whitespace-nowrap text-xs w-24 font-mono text-blue-600">{r.reportId}</td>
+          <td className="px-3 py-2 whitespace-nowrap text-xs w-24 font-mono text-brand-600">{r.reportId}</td>
           <td className="px-3 py-2 whitespace-nowrap text-xs w-32 font-mono text-slate-500">{r.reportNo}</td>
           <td className="px-3 py-2 whitespace-nowrap text-xs w-20 font-bold">{r.month}</td>
           <td className="px-3 py-2 whitespace-nowrap text-xs w-20 text-slate-400">{r.issueDate}</td>
-          <td className="px-3 py-2 whitespace-nowrap text-xs w-24 font-bold text-emerald-700">{r.commission}</td>
+          <td className="px-3 py-2 whitespace-nowrap text-xs w-24 font-bold text-success-700">{r.commission}</td>
           <td className="px-3 py-2 whitespace-nowrap text-xs w-24 text-slate-500">{r.payDate}</td>
           <td className="px-3 py-2 whitespace-nowrap text-xs w-16"><Badge text={r.label} color={r.status === "paid" ? "green" : "yellow"} /></td>
-          <td className="px-3 py-2 whitespace-nowrap text-xs w-12"><button onClick={() => setSelectedReport(r)} className="text-blue-600 hover:underline font-bold">内訳</button></td>
+          <td className="px-3 py-2 whitespace-nowrap text-xs w-12"><button onClick={() => setSelectedReport(r)} className="text-brand-600 hover:underline font-bold">内訳</button></td>
         </tr>
       ))}
       </TableHeader>
@@ -12392,7 +12399,7 @@ const AgentReports = () => {
         <div className="w-[480px] bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b bg-orange-50 flex justify-between items-center">
             <div><h3 className="text-sm font-bold text-slate-800">報酬明細 内訳</h3><p className="text-xs text-slate-400 font-mono">{selectedReport.reportNo}</p></div>
-            <button onClick={() => setSelectedReport(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <button onClick={() => setSelectedReport(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
             <div>
@@ -12423,7 +12430,7 @@ const AgentReports = () => {
                         <td className="px-3 py-1.5 text-right">{b.vol}</td>
                         <td className="px-3 py-1.5 text-right text-slate-500">{b.fee}</td>
                         <td className="px-3 py-1.5 text-right text-slate-500">{b.txn}件</td>
-                        <td className="px-3 py-1.5 text-right font-bold text-emerald-700">{b.com}</td>
+                        <td className="px-3 py-1.5 text-right font-bold text-success-700">{b.com}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -12435,13 +12442,13 @@ const AgentReports = () => {
               <div className="bg-slate-50 rounded p-3 text-xs space-y-1">
                 <div className="flex justify-between"><span>取引総額</span><span className="font-bold">{selectedReport.volume}</span></div>
                 <div className="flex justify-between"><span>対象加盟店数</span><span className="font-bold">{selectedReport.merchants}</span></div>
-                <div className="flex justify-between border-t pt-1 mt-1"><span className="font-bold">お支払金額</span><span className="font-bold text-emerald-700">{selectedReport.commission}</span></div>
+                <div className="flex justify-between border-t pt-1 mt-1"><span className="font-bold">お支払金額</span><span className="font-bold text-success-700">{selectedReport.commission}</span></div>
                 <div className="flex justify-between"><span>お支払予定日</span><span className="font-bold">{selectedReport.payDate}</span></div>
               </div>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => toast("報酬明細PDFをダウンロードしました", "success")} className="flex-1 py-1.5 bg-slate-100 text-slate-600 rounded text-xs border font-bold">📄 PDF出力</button>
-              <button onClick={() => toast("報酬明細CSVをダウンロードしました", "success")} className="flex-1 py-1.5 bg-slate-100 text-slate-600 rounded text-xs border font-bold">📥 CSV出力</button>
+              <button onClick={() => toast("報酬明細PDFをダウンロードしました", "success")} className="flex-1 py-1.5 bg-slate-100 text-slate-600 rounded text-xs border font-bold"><FileText className="w-4 h-4 inline mr-1" /> PDF出力</button>
+              <button onClick={() => toast("報酬明細CSVをダウンロードしました", "success")} className="flex-1 py-1.5 bg-slate-100 text-slate-600 rounded text-xs border font-bold"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
             </div>
           </div>
         </div>
@@ -12488,7 +12495,7 @@ const AgentReferral = () => {
       <h2 className="text-sm font-bold text-slate-800">申込紹介</h2>
       <div className="flex items-center gap-2 text-xs text-slate-400">
         <span>紹介総数: <span className="font-bold text-slate-700">12件</span></span>
-        <span>承認率: <span className="font-bold text-emerald-600">75%</span></span>
+        <span>承認率: <span className="font-bold text-success-600">75%</span></span>
       </div>
     </div>
     <div className="grid grid-cols-3 gap-3">
@@ -12518,12 +12525,12 @@ const AgentReferral = () => {
             </div>
           ))}
         </div>
-        <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-700">
+        <div className="bg-brand-50 border border-brand-200 rounded p-3 text-xs text-brand-700">
           <p className="font-bold">紹介フロー</p>
           <p className="mt-1">① 紹介申請 → ② 運営確認 → ③ 加盟店にP01 URLを送信 → ④ 正式申込 → ⑤ 審査 → ⑥ 承認後自動紐付け</p>
         </div>
         <div className="bg-orange-50 border border-orange-200 rounded p-3 text-xs text-orange-700">
-          <p className="font-bold">📊 紹介のポイント</p>
+          <p className="font-bold"><BarChart3 className="w-4 h-4 inline mr-1" /> 紹介のポイント</p>
           <p className="mt-1">月間予定決済高が高い加盟店ほど審査が通りやすい傾向があります。サイトURLは正確に入力してください。</p>
         </div>
       </div>
@@ -12536,11 +12543,11 @@ const AgentReferral = () => {
         <div className="relative bg-white rounded-xl shadow-2xl w-[420px] max-h-[80vh] overflow-y-auto">
           <div className="p-4 border-b flex items-center justify-between">
             <p className="text-sm font-bold">紹介申請の確認</p>
-            <button onClick={() => setShowConfirm(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <button onClick={() => setShowConfirm(false)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-4 space-y-3">
-            <div className="bg-amber-50 border border-amber-200 rounded p-3 text-xs text-amber-700">
-              <p className="font-bold">⚠️ 送信前にご確認ください</p>
+            <div className="bg-warning-50 border border-warning-200 rounded p-3 text-xs text-warning-700">
+              <p className="font-bold"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 送信前にご確認ください</p>
               <p className="mt-1">紹介申請は送信後の取り消しはできません。入力内容を再度ご確認ください。</p>
             </div>
             <div className="space-y-2">
@@ -12565,7 +12572,7 @@ const AgentReferral = () => {
         <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
             <p className="text-sm font-bold">{selectedReferral.name}</p>
-            <button onClick={() => setSelectedReferral(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <button onClick={() => setSelectedReferral(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-4 space-y-4">
             {/* ステータス */}
@@ -12591,8 +12598,8 @@ const AgentReferral = () => {
                 {selectedReferral.steps.map((step, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <div className="flex flex-col items-center">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step.done ? (step.label === "否決" ? "bg-red-500 text-white" : "bg-emerald-500 text-white") : "bg-slate-200 text-slate-400"}`}>{step.done ? "✓" : i + 1}</div>
-                      {i < selectedReferral.steps.length - 1 && <div className={`w-0.5 h-6 ${step.done ? "bg-emerald-300" : "bg-slate-200"}`} />}
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step.done ? (step.label === "否決" ? "bg-danger-500 text-white" : "bg-success-500 text-white") : "bg-slate-200 text-slate-400"}`}>{step.done ? <Check className="w-3 h-3" /> : i + 1}</div>
+                      {i < selectedReferral.steps.length - 1 && <div className={`w-0.5 h-6 ${step.done ? "bg-success-300" : "bg-slate-200"}`} />}
                     </div>
                     <div className="pb-4">
                       <p className={`text-xs font-bold ${step.done ? "text-slate-700" : "text-slate-400"}`}>{step.label}</p>
@@ -12605,8 +12612,8 @@ const AgentReferral = () => {
 
             {/* アクション */}
             {selectedReferral.status === "審査中" && (
-              <div className="bg-amber-50 border border-amber-200 rounded p-3 text-xs text-amber-700">
-                <p className="font-bold">📋 現在審査中</p>
+              <div className="bg-warning-50 border border-warning-200 rounded p-3 text-xs text-warning-700">
+                <p className="font-bold"><ClipboardList className="w-4 h-4 inline mr-1" /> 現在審査中</p>
                 <p className="mt-1">運営による審査が進行中です。結果は通常1〜3営業日で通知されます。</p>
               </div>
             )}
@@ -12670,8 +12677,8 @@ const AgentAccountSettings = () => {
       </div>
       <div className="bg-white rounded-lg border p-4 space-y-2">
         <p className="text-xs font-bold">セキュリティ</p>
-        <button onClick={() => setShowPasswordModal(true)} className="w-full py-1.5 bg-slate-50 rounded text-xs border hover:bg-slate-100">🔑 パスワード変更</button>
-        <button onClick={() => setShowMfaModal(true)} className="w-full py-1.5 bg-slate-50 rounded text-xs border hover:bg-slate-100">📱 MFA設定</button>
+        <button onClick={() => setShowPasswordModal(true)} className="w-full py-1.5 bg-slate-50 rounded text-xs border hover:bg-slate-100"><Key className="w-4 h-4 inline mr-1" /> パスワード変更</button>
+        <button onClick={() => setShowMfaModal(true)} className="w-full py-1.5 bg-slate-50 rounded text-xs border hover:bg-slate-100"><Smartphone className="w-4 h-4 inline mr-1" /> MFA設定</button>
         <div className="mt-2"><p className="text-xs text-slate-400 mb-1">最近のログイン</p>
           {[["2026-02-13 09:15", "103.xx.xx.xx", "Chrome"], ["2026-02-12 14:30", "103.xx.xx.xx", "Chrome"], ["2026-02-11 10:00", "192.xx.xx.xx", "Safari"]].map(([d, ip, br], i) => (
             <div key={i} className="flex text-xs text-slate-500 py-0.5"><span className="flex-1">{d}</span><span className="w-14">{br}</span><span>{ip}</span></div>
@@ -12692,7 +12699,7 @@ const AgentAccountSettings = () => {
     {d05StaffTab === "search" && (<>
     {/* スタッフ検索フォーム（AQUAGATES D04準拠） */}
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-      <p className="text-xs font-bold text-slate-700 mb-2">🔍 検索条件</p>
+      <p className="text-xs font-bold text-slate-700 mb-2"><Search className="w-4 h-4 inline mr-1" /> 検索条件</p>
       <div className="grid grid-cols-5 gap-3">
         <div><label className="text-xs text-slate-500">ログインユーザー名</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="tanaka_t" /></div>
         <div><label className="text-xs text-slate-500">メールアドレス</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="@digital-partners.jp" /></div>
@@ -12709,7 +12716,7 @@ const AgentAccountSettings = () => {
     <div className="flex items-center justify-between">
       <p className="text-xs text-slate-500">検索結果: <span className="font-bold text-slate-800">{staffList.length}件</span></p>
       <div className="flex gap-1">
-        <button onClick={() => toast("スタッフ一覧をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200">📥 CSV出力</button>
+        <button onClick={() => toast("スタッフ一覧をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
         <button onClick={() => setShowInviteD05(true)} className="text-xs bg-orange-500 text-white px-3 py-1 rounded font-semibold hover:bg-orange-600">+ 新規登録</button>
       </div>
     </div>
@@ -12717,7 +12724,7 @@ const AgentAccountSettings = () => {
       <TableHeader cols={[{ label: "スタッフID", w: "w-20" }, { label: "ログインユーザー名", w: "w-28" }, { label: "氏名", w: "w-20" }, { label: "メール", w: "w-36" }, { label: "状態", w: "w-12" }, { label: "権限", w: "w-14" }, { label: "最終PW更新", w: "w-24" }, { label: "登録日時", w: "w-20" }, { label: "更新日時", w: "w-20" }]}>
       {staffList.map((s, i) => (
         <tr key={i} onClick={() => setSelectedStaff(s)} className="border-b hover:bg-orange-50 cursor-pointer">
-          <td className="px-3 py-2 whitespace-nowrap text-xs w-20 font-mono text-blue-600">{s.staffId}</td>
+          <td className="px-3 py-2 whitespace-nowrap text-xs w-20 font-mono text-brand-600">{s.staffId}</td>
           <td className="px-3 py-2 whitespace-nowrap text-xs w-28 font-mono">{s.loginUser}</td>
           <td className="px-3 py-2 whitespace-nowrap text-xs w-20 font-bold">{s.name}</td>
           <td className="px-3 py-2 whitespace-nowrap text-xs w-36 text-slate-500">{s.email}</td>
@@ -12738,11 +12745,11 @@ const AgentAccountSettings = () => {
       <div>
         <p className="text-xs font-bold text-slate-700 mb-3">基本設定</p>
         <div className="grid grid-cols-2 gap-4">
-          <div><label className="text-xs font-semibold text-slate-600">ログインユーザー名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: yamada_h" /></div>
-          <div><label className="text-xs font-semibold text-slate-600">メールアドレス <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="staff@digital-partners.jp" /></div>
-          <div><label className="text-xs font-semibold text-slate-600">氏名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="山田 花子" /></div>
-          <div><label className="text-xs font-semibold text-slate-600">パスワード <span className="text-rose-500">*</span></label><input type="password" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="8文字以上" /></div>
-          <div><label className="text-xs font-semibold text-slate-600">権限設定 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>閲覧のみ</option><option>管理者</option></select></div>
+          <div><label className="text-xs font-semibold text-slate-600">ログインユーザー名 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: yamada_h" /></div>
+          <div><label className="text-xs font-semibold text-slate-600">メールアドレス <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="staff@digital-partners.jp" /></div>
+          <div><label className="text-xs font-semibold text-slate-600">氏名 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="山田 花子" /></div>
+          <div><label className="text-xs font-semibold text-slate-600">パスワード <span className="text-danger-500">*</span></label><input type="password" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="8文字以上" /></div>
+          <div><label className="text-xs font-semibold text-slate-600">権限設定 <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>閲覧のみ</option><option>管理者</option></select></div>
           <div><label className="text-xs font-semibold text-slate-600">状態</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>有効</option><option>無効</option></select></div>
         </div>
       </div>
@@ -12755,8 +12762,8 @@ const AgentAccountSettings = () => {
               <p className="text-xs text-slate-400 mt-0.5">CSV出力・レポートダウンロード等のデータ出力機能</p>
             </div>
             <div className="flex gap-2">
-              <label className="flex items-center gap-1 text-xs"><input type="radio" name="dlPerm" defaultChecked className="accent-orange-500" /><span className="font-bold text-emerald-600">許可</span></label>
-              <label className="flex items-center gap-1 text-xs"><input type="radio" name="dlPerm" className="accent-orange-500" /><span className="font-bold text-red-500">不可</span></label>
+              <label className="flex items-center gap-1 text-xs"><input type="radio" name="dlPerm" defaultChecked className="accent-orange-500" /><span className="font-bold text-success-600">許可</span></label>
+              <label className="flex items-center gap-1 text-xs"><input type="radio" name="dlPerm" className="accent-orange-500" /><span className="font-bold text-danger-500">不可</span></label>
             </div>
           </div>
           <div className="flex items-center justify-between bg-slate-50 rounded p-3">
@@ -12765,8 +12772,8 @@ const AgentAccountSettings = () => {
               <p className="text-xs text-slate-400 mt-0.5">他スタッフの新規登録・情報編集・削除機能</p>
             </div>
             <div className="flex gap-2">
-              <label className="flex items-center gap-1 text-xs"><input type="radio" name="editPerm" className="accent-orange-500" /><span className="font-bold text-emerald-600">許可</span></label>
-              <label className="flex items-center gap-1 text-xs"><input type="radio" name="editPerm" defaultChecked className="accent-orange-500" /><span className="font-bold text-red-500">不可</span></label>
+              <label className="flex items-center gap-1 text-xs"><input type="radio" name="editPerm" className="accent-orange-500" /><span className="font-bold text-success-600">許可</span></label>
+              <label className="flex items-center gap-1 text-xs"><input type="radio" name="editPerm" defaultChecked className="accent-orange-500" /><span className="font-bold text-danger-500">不可</span></label>
             </div>
           </div>
         </div>
@@ -12789,11 +12796,11 @@ const AgentAccountSettings = () => {
               <h3 className="text-sm font-bold text-slate-800">{selectedStaff.name}</h3>
               <p className="text-xs text-slate-400 font-mono">{selectedStaff.staffId} / {selectedStaff.loginUser}</p>
             </div>
-            <button onClick={() => setSelectedStaff(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <button onClick={() => setSelectedStaff(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-xl">👤</div>
+              <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-xl"><User className="w-4 h-4 inline" /></div>
               <div>
                 <p className="text-sm font-bold">{selectedStaff.name}</p>
                 <p className="text-xs text-slate-400">{selectedStaff.email}</p>
@@ -12811,8 +12818,8 @@ const AgentAccountSettings = () => {
             <div className="border-t pt-3">
               <p className="text-xs text-slate-400 mb-2">個別権限</p>
               <div className="grid grid-cols-2 gap-2">
-                <div className={`rounded p-2 text-center ${selectedStaff.dlPerm ? "bg-emerald-50" : "bg-red-50"}`}><p className="text-xs text-slate-400">データDL</p><p className="text-xs font-bold">{selectedStaff.dlPerm ? "✅ 許可" : "❌ 不可"}</p></div>
-                <div className={`rounded p-2 text-center ${selectedStaff.editPerm ? "bg-emerald-50" : "bg-red-50"}`}><p className="text-xs text-slate-400">スタッフ編集</p><p className="text-xs font-bold">{selectedStaff.editPerm ? "✅ 許可" : "❌ 不可"}</p></div>
+                <div className={`rounded p-2 text-center ${selectedStaff.dlPerm ? "bg-success-50" : "bg-danger-50"}`}><p className="text-xs text-slate-400">データDL</p><p className="text-xs font-bold">{selectedStaff.dlPerm ? "許可" : "不可"}</p></div>
+                <div className={`rounded p-2 text-center ${selectedStaff.editPerm ? "bg-success-50" : "bg-danger-50"}`}><p className="text-xs text-slate-400">スタッフ編集</p><p className="text-xs font-bold">{selectedStaff.editPerm ? "許可" : "不可"}</p></div>
               </div>
             </div>
             <div className="border-t pt-3">
@@ -12822,9 +12829,9 @@ const AgentAccountSettings = () => {
               ))}
             </div>
             <div className="flex gap-2 mt-3">
-              <button onClick={() => toast(`${selectedStaff.name}を編集中`, "info")} className="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded border border-blue-200">編集</button>
-              <button onClick={() => toast(`${selectedStaff.name}を${selectedStaff.state === "有効" ? "無効化" : "有効化"}しました`, "warning")} className="text-xs px-3 py-1.5 bg-amber-50 text-amber-600 rounded border border-amber-200">{selectedStaff.state === "有効" ? "無効化" : "有効化"}</button>
-              {selectedStaff.role !== "admin" && <button onClick={() => { toast(`${selectedStaff.name}を削除しました`, "error"); setSelectedStaff(null); }} className="text-xs px-3 py-1.5 bg-red-50 text-red-600 rounded border border-red-200">削除</button>}
+              <button onClick={() => toast(`${selectedStaff.name}を編集中`, "info")} className="text-xs px-3 py-1.5 bg-brand-50 text-brand-600 rounded border border-brand-200">編集</button>
+              <button onClick={() => toast(`${selectedStaff.name}を${selectedStaff.state === "有効" ? "無効化" : "有効化"}しました`, "warning")} className="text-xs px-3 py-1.5 bg-warning-50 text-warning-600 rounded border border-warning-200">{selectedStaff.state === "有効" ? "無効化" : "有効化"}</button>
+              {selectedStaff.role !== "admin" && <button onClick={() => { toast(`${selectedStaff.name}を削除しました`, "error"); setSelectedStaff(null); }} className="text-xs px-3 py-1.5 bg-danger-50 text-danger-600 rounded border border-danger-200">削除</button>}
             </div>
           </div>
         </div>
@@ -12837,15 +12844,15 @@ const AgentAccountSettings = () => {
         <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowInviteD05(false)} />
         <div className="relative bg-white rounded-xl shadow-2xl w-[500px]">
           <div className="p-4 border-b bg-orange-50 rounded-t-xl flex justify-between items-center">
-            <h3 className="text-sm font-bold text-slate-800">📧 スタッフを招待</h3>
-            <button onClick={() => setShowInviteD05(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            <h3 className="text-sm font-bold text-slate-800"><Mail className="w-4 h-4 inline mr-1" /> スタッフを招待</h3>
+            <button onClick={() => setShowInviteD05(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-xs font-semibold text-slate-600">ログインユーザー名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="yamada_h" /></div>
-              <div><label className="text-xs font-semibold text-slate-600">メールアドレス <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="staff@agency.jp" /></div>
-              <div><label className="text-xs font-semibold text-slate-600">氏名 <span className="text-rose-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="山田 花子" /></div>
-              <div><label className="text-xs font-semibold text-slate-600">権限 <span className="text-rose-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>閲覧のみ</option><option>管理者</option></select></div>
+              <div><label className="text-xs font-semibold text-slate-600">ログインユーザー名 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="yamada_h" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">メールアドレス <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="staff@agency.jp" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">氏名 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="山田 花子" /></div>
+              <div><label className="text-xs font-semibold text-slate-600">権限 <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>閲覧のみ</option><option>管理者</option></select></div>
             </div>
             <div className="border-t pt-3">
               <p className="text-xs font-bold text-slate-700 mb-2">個別権限</p>
@@ -12875,15 +12882,15 @@ const AgentAccountSettings = () => {
         <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowPasswordModal(false)} />
         <div className="relative bg-white rounded-xl shadow-2xl w-[400px]">
           <div className="p-4 border-b flex items-center justify-between">
-            <p className="text-sm font-bold">🔑 パスワード変更</p>
-            <button onClick={() => setShowPasswordModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <p className="text-sm font-bold"><Key className="w-4 h-4 inline mr-1" /> パスワード変更</p>
+            <button onClick={() => setShowPasswordModal(false)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-4 space-y-3">
             <div><label className="text-xs text-slate-500">現在のパスワード</label><input type="password" className="w-full border rounded px-2 py-1.5 text-xs mt-0.5" /></div>
             <div><label className="text-xs text-slate-500">新しいパスワード</label><input type="password" onChange={e => setPwStrength(Math.min(4, Math.floor(e.target.value.length / 3)))} className="w-full border rounded px-2 py-1.5 text-xs mt-0.5" />
               <div className="flex gap-1 mt-1">
                 {[0,1,2,3].map(i => (
-                  <div key={i} className={`flex-1 h-1 rounded ${i < pwStrength ? (pwStrength <= 1 ? "bg-red-400" : pwStrength <= 2 ? "bg-amber-400" : pwStrength <= 3 ? "bg-blue-400" : "bg-emerald-400") : "bg-slate-200"}`} />
+                  <div key={i} className={`flex-1 h-1 rounded ${i < pwStrength ? (pwStrength <= 1 ? "bg-danger-400" : pwStrength <= 2 ? "bg-warning-400" : pwStrength <= 3 ? "bg-brand-400" : "bg-success-400") : "bg-slate-200"}`} />
                 ))}
               </div>
               <p className="text-xs text-slate-400 mt-0.5">{["", "弱い", "普通", "強い", "非常に強い"][pwStrength]}</p>
@@ -12910,13 +12917,13 @@ const AgentAccountSettings = () => {
         <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowMfaModal(false)} />
         <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
           <div className="p-4 border-b flex items-center justify-between">
-            <p className="text-sm font-bold">📱 二要素認証（MFA）設定</p>
-            <button onClick={() => setShowMfaModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <p className="text-sm font-bold"><Smartphone className="w-4 h-4 inline mr-1" /> 二要素認証（MFA）設定</p>
+            <button onClick={() => setShowMfaModal(false)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-4 space-y-4">
             <div className="text-center">
               <div className="w-40 h-40 mx-auto bg-slate-100 rounded-lg flex items-center justify-center text-slate-400 border-2 border-dashed">
-                <div className="text-center"><p className="text-3xl mb-1">📱</p><p className="text-xs">QRコード</p></div>
+                <div className="text-center"><p className="text-3xl mb-1"><Smartphone className="w-4 h-4 inline" /></p><p className="text-xs">QRコード</p></div>
               </div>
               <p className="text-xs text-slate-500 mt-2">Google AuthenticatorまたはAuthyでスキャンしてください</p>
             </div>
@@ -12924,14 +12931,14 @@ const AgentAccountSettings = () => {
               <label className="text-xs text-slate-500">手動入力キー:</label>
               <div className="flex items-center gap-1 mt-1">
                 <p className="text-xs font-mono bg-slate-50 rounded p-1.5 flex-1 tracking-wider">JBSWY3DPEHPK3PXP</p>
-                <button className="text-xs text-blue-600 px-2">📋</button>
+                <button className="text-xs text-brand-600 px-2"><ClipboardList className="w-4 h-4 inline" /></button>
               </div>
             </div>
             <div>
               <label className="text-xs text-slate-500">認証コードを入力して有効化:</label>
               <input className="w-full border rounded px-2 py-1.5 text-xs mt-0.5 text-center tracking-widest font-mono" placeholder="000000" maxLength={6} />
             </div>
-            <div className="bg-amber-50 border border-amber-200 rounded p-3 text-xs text-amber-700">
+            <div className="bg-warning-50 border border-warning-200 rounded p-3 text-xs text-warning-700">
               <p className="font-bold">バックアップコード</p>
               <p className="mt-1">MFA設定後、バックアップコードが発行されます。安全な場所に保管してください。デバイス紛失時に使用します。</p>
             </div>
@@ -12967,10 +12974,10 @@ const MasterCustomers = () => {
     <div className="p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-slate-800">顧客管理</h2>
-        <button onClick={() => setShowM16CsvExport(true)} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">📥 CSVエクスポート</button>
+        <button onClick={() => setShowM16CsvExport(true)} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSVエクスポート</button>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
-        <button key={t.id} onClick={() => { setTab(t.id); setSelectedCustomer(null); }} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-blue-500 text-blue-700 bg-blue-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        <button key={t.id} onClick={() => { setTab(t.id); setSelectedCustomer(null); }} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-brand-500 text-brand-700 bg-brand-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}</div>
 
       {tab === "search" && !selectedCustomer && (
@@ -12981,7 +12988,7 @@ const MasterCustomers = () => {
               <div><label className="text-xs text-slate-400">メール / 名前</label><input className="w-full border rounded px-2 py-1 text-xs mt-0.5" placeholder="検索..." /></div>
               <div><label className="text-xs text-slate-400">カード下4桁</label><input className="w-full border rounded px-2 py-1 text-xs mt-0.5" placeholder="4242" /></div>
               <div><label className="text-xs text-slate-400">加盟店</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全加盟店</option><option>ABC商事</option><option>XYZ物産</option></select></div>
-              <div><label className="text-xs text-slate-400">リスク</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全レベル</option><option>🟢 低</option><option>🟡 中</option><option>🔴 高</option></select></div>
+              <div><label className="text-xs text-slate-400">リスク</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全レベル</option><option><Circle className="w-3 h-3 fill-success-500 text-success-500 inline" /> 低</option><option><Circle className="w-3 h-3 fill-warning-500 text-warning-500 inline" /> 中</option><option><Circle className="w-3 h-3 fill-danger-500 text-danger-500 inline" /> 高</option></select></div>
             </div>
             <div className="grid grid-cols-4 gap-2 mt-2">
               <div><label className="text-xs text-slate-400">サブスク状態</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全て</option><option>課金中</option><option>停止</option><option>なし</option></select></div>
@@ -12993,14 +13000,14 @@ const MasterCustomers = () => {
               <div><label className="text-xs text-slate-400">最終利用日（From）</label><input type="date" className="w-full border rounded px-2 py-1 text-xs mt-0.5" /></div>
               <div><label className="text-xs text-slate-400">最終利用日（To）</label><input type="date" className="w-full border rounded px-2 py-1 text-xs mt-0.5" /></div>
               <div />
-              <div className="flex items-end"><button onClick={() => toast("顧客を検索しました", "success")} className="w-full py-1 bg-blue-600 text-white rounded text-xs font-bold">🔍 検索</button></div>
+              <div className="flex items-end"><button onClick={() => toast("顧客を検索しました", "success")} className="w-full py-1 bg-brand-500 text-white rounded text-xs font-bold"><Search className="w-4 h-4 inline mr-1" /> 検索</button></div>
             </div>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "最終取引", w: "w-24" }, { label: "PQ ID", w: "w-20" }, { label: "RC紐付", w: "w-12" }, { label: "サブスク", w: "w-14" }, { label: "セグメント", w: "w-16" }, { label: "リスク", w: "w-12" }]}>
             {customers.map((c, i) => (
-              <tr key={i} onClick={() => setSelectedCustomer(c)} className="border-b hover:bg-blue-50 cursor-pointer">
-                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600">{c.id}</td>
+              <tr key={i} onClick={() => setSelectedCustomer(c)} className="border-b hover:bg-brand-50 cursor-pointer">
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-brand-600">{c.id}</td>
                 <td className="px-4 py-2 whitespace-nowrap">{c.email}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-xs">{c.card}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-500">{c.merchant}</td>
@@ -13026,11 +13033,11 @@ const MasterCustomers = () => {
             <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-bold">プロファイル</p>
-                <button onClick={() => setSelectedCustomer(null)} className="text-xs text-blue-600">← 一覧に戻る</button>
+                <button onClick={() => setSelectedCustomer(null)} className="text-xs text-brand-600">← 一覧に戻る</button>
               </div>
               <div className="space-y-2">
                 {[["顧客ID", selectedCustomer.id], ["メール", selectedCustomer.email], ["カード", selectedCustomer.card], ["加盟店", selectedCustomer.merchant], ["初回取引", "2024-08-15"], ["最終取引", selectedCustomer.last]].map(([l, v], i) => (
-                  <div key={i} className="flex text-xs items-center"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span>{l === "メール" && <button onClick={() => toast("メールアドレスのマスクを解除しました", "info")} className="ml-2 px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded border border-blue-200 text-xs">🔓 マスク解除</button>}</div>
+                  <div key={i} className="flex text-xs items-center"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span>{l === "メール" && <button onClick={() => toast("メールアドレスのマスクを解除しました", "info")} className="ml-2 px-1.5 py-0.5 bg-brand-50 text-brand-600 rounded border border-brand-200 text-xs"><LockOpen className="w-4 h-4 inline" /> マスク解除</button>}</div>
                 ))}
               </div>
             </div>
@@ -13048,7 +13055,7 @@ const MasterCustomers = () => {
               <p className="text-xs font-bold mb-2">タグ</p>
               <div className="flex gap-1 flex-wrap">
                 {selectedCustomer.segment === "ロイヤル" && <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">VIP</span>}
-                <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">{selectedCustomer.segment}</span>
+                <span className="text-xs px-2 py-0.5 bg-brand-100 text-brand-700 rounded-full">{selectedCustomer.segment}</span>
                 <button onClick={() => toast("タグを追加しました", "success")} className="text-xs px-2 py-0.5 bg-slate-100 text-slate-400 rounded-full border border-dashed">+ タグ追加</button>
               </div>
             </div>
@@ -13057,12 +13064,12 @@ const MasterCustomers = () => {
               <div className="space-y-1.5">
                 <div className="bg-slate-50 rounded p-2 text-xs"><p className="text-slate-400">2026-02-10 — admin田中</p><p>問い合わせあり。返金対応完了。</p></div>
               </div>
-              <div className="flex gap-1 mt-2"><input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="メモを追加..." /><button onClick={() => toast("メモを追加しました", "success")} className="px-2 py-1 bg-blue-600 text-white rounded text-xs">追加</button></div>
+              <div className="flex gap-1 mt-2"><input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="メモを追加..." /><button onClick={() => toast("メモを追加しました", "success")} className="px-2 py-1 bg-brand-500 text-white rounded text-xs">追加</button></div>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => toast(`${selectedCustomer.id}をブロックリストに追加しました`, "warning")} className="flex-1 py-1.5 bg-rose-50 text-rose-600 rounded text-xs border border-rose-200">🚫 ブロック</button>
-              <button onClick={() => toast(`${selectedCustomer.id}をホワイトリストに追加しました`, "success")} className="flex-1 py-1.5 bg-emerald-50 text-emerald-600 rounded text-xs border border-emerald-200">✅ ホワイトリスト</button>
-              <button onClick={() => toast("この顧客の取引詳細画面を開きます", "info")} className="flex-1 py-1.5 bg-slate-50 text-slate-600 rounded text-xs border">🔍 取引詳細を開く</button>
+              <button onClick={() => toast(`${selectedCustomer.id}をブロックリストに追加しました`, "warning")} className="flex-1 py-1.5 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200"><Ban className="w-4 h-4 inline mr-1" /> ブロック</button>
+              <button onClick={() => toast(`${selectedCustomer.id}をホワイトリストに追加しました`, "success")} className="flex-1 py-1.5 bg-success-50 text-success-600 rounded text-xs border border-success-200"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> ホワイトリスト</button>
+              <button onClick={() => toast("この顧客の取引詳細画面を開きます", "info")} className="flex-1 py-1.5 bg-slate-50 text-slate-600 rounded text-xs border"><Search className="w-4 h-4 inline mr-1" /> 取引詳細を開く</button>
             </div>
           </div>
           <div className="col-span-3 space-y-3">
@@ -13071,15 +13078,15 @@ const MasterCustomers = () => {
                 <p className="text-xs font-bold">取引統計</p>
                 <div className="flex gap-2 text-xs">
                   <span>取引: <b>{selectedCustomer.txn}件</b></span>
-                  <span>成功率: <b className="text-emerald-600">97.8%</b></span>
+                  <span>成功率: <b className="text-success-600">97.8%</b></span>
                   <span>平均単価: <b>¥{Math.round(parseInt(selectedCustomer.ltv.replace(/[¥,]/g, "")) / selectedCustomer.txn).toLocaleString()}</b></span>
-                  <span>LTV: <b className="text-blue-700">{selectedCustomer.ltv}</b></span>
+                  <span>LTV: <b className="text-brand-700">{selectedCustomer.ltv}</b></span>
                 </div>
               </div>
               <div className="flex items-end gap-1 h-16 px-1">
                 {[35, 42, 38, 55, 48, 62].map((h, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center">
-                    <div className="w-full bg-blue-400 rounded-t" style={{ height: `${h}%` }} />
+                    <div className="w-full bg-brand-400 rounded-t" style={{ height: `${h}%` }} />
                     <p className="text-xs text-slate-400 mt-0.5">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
                   </div>
                 ))}
@@ -13110,13 +13117,13 @@ const MasterCustomers = () => {
                   <div className="flex-1 text-slate-400 truncate min-w-0">{t.note}</div>
                 </div>
               ))}
-              <div className="text-center mt-2"><button onClick={() => toast("取引タイムラインを全件表示します", "info")} className="text-xs text-blue-600">さらに表示 →</button></div>
+              <div className="text-center mt-2"><button onClick={() => toast("取引タイムラインを全件表示します", "info")} className="text-xs text-brand-600">さらに表示 →</button></div>
             </div>
             <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-2">カード情報</p>
               <div className="flex gap-3">
                 {[{ brand: "VISA", last4: "4242", exp: "12/27", lastUsed: "02/13", active: true }, { brand: "VISA", last4: "8888", exp: "03/25", lastUsed: "2024-12", active: false }].map((c, i) => (
-                  <div key={i} className={`border rounded p-2 text-xs flex-1 ${c.active ? "border-blue-200 bg-blue-50" : "border-slate-200 bg-slate-50"}`}>
+                  <div key={i} className={`border rounded p-2 text-xs flex-1 ${c.active ? "border-brand-200 bg-brand-50" : "border-slate-200 bg-slate-50"}`}>
                     <div className="flex items-center justify-between"><span className="font-bold">{c.brand} *{c.last4}</span>{c.active && <Badge text="メイン" color="blue" />}{!c.active && <Badge text="未使用" color="gray" />}</div>
                     <div className="text-slate-400 mt-1">有効期限: {c.exp} | 最終使用: {c.lastUsed}</div>
                   </div>
@@ -13140,7 +13147,7 @@ const MasterCustomers = () => {
             <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-3">セグメント分布</p>
               <div className="space-y-2">
-                {[{ seg: "ロイヤル（11回以上）", pct: 8, cnt: "1,028", color: "bg-purple-400" }, { seg: "リピーター（2-10回）", pct: 27, cnt: "3,469", color: "bg-blue-400" }, { seg: "初回（1回のみ）", pct: 45, cnt: "5,781", color: "bg-slate-300" }, { seg: "休眠（90日+）", pct: 15, cnt: "1,927", color: "bg-yellow-300" }, { seg: "離脱（180日+）", pct: 5, cnt: "642", color: "bg-rose-300" }].map((s, i) => (
+                {[{ seg: "ロイヤル（11回以上）", pct: 8, cnt: "1,028", color: "bg-purple-400" }, { seg: "リピーター（2-10回）", pct: 27, cnt: "3,469", color: "bg-brand-400" }, { seg: "初回（1回のみ）", pct: 45, cnt: "5,781", color: "bg-slate-300" }, { seg: "休眠（90日+）", pct: 15, cnt: "1,927", color: "bg-warning-300" }, { seg: "離脱（180日+）", pct: 5, cnt: "642", color: "bg-danger-300" }].map((s, i) => (
                   <div key={i} className="text-xs">
                     <div className="flex justify-between mb-0.5"><span>{s.seg}</span><span className="text-slate-400">{s.cnt}人 ({s.pct}%)</span></div>
                     <div className="w-full bg-slate-100 rounded-full h-2"><div className={`${s.color} h-2 rounded-full`} style={{ width: `${s.pct * 2}%` }} /></div>
@@ -13154,21 +13161,21 @@ const MasterCustomers = () => {
                 {[{ n: 580, r: 320 }, { n: 610, r: 340 }, { n: 550, r: 360 }, { n: 640, r: 380 }, { n: 670, r: 410 }, { n: 623, r: 395 }].map((d, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center">
                     <div className="w-full flex flex-col">
-                      <div className="w-full bg-blue-300 rounded-t" style={{ height: `${d.r / 10}px` }} />
+                      <div className="w-full bg-brand-300 rounded-t" style={{ height: `${d.r / 10}px` }} />
                       <div className="w-full bg-slate-300" style={{ height: `${d.n / 10}px` }} />
                     </div>
                     <p className="text-xs text-slate-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
                   </div>
                 ))}
               </div>
-              <div className="flex justify-center gap-4 mt-2 text-xs"><span className="flex items-center gap-1"><span className="w-3 h-2 bg-slate-300 rounded" />新規</span><span className="flex items-center gap-1"><span className="w-3 h-2 bg-blue-300 rounded" />リピーター</span></div>
+              <div className="flex justify-center gap-4 mt-2 text-xs"><span className="flex items-center gap-1"><span className="w-3 h-2 bg-slate-300 rounded" />新規</span><span className="flex items-center gap-1"><span className="w-3 h-2 bg-brand-300 rounded" />リピーター</span></div>
             </div>
             <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-3">LTV分布</p>
               <div className="flex items-end gap-1 h-32 px-1">
                 {[{ range: "〜¥1万", h: 85 }, { range: "¥1-5万", h: 60 }, { range: "¥5-10万", h: 35 }, { range: "¥10-50万", h: 20 }, { range: "¥50万〜", h: 8 }].map((d, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center">
-                    <div className="w-full bg-emerald-400 rounded-t" style={{ height: `${d.h}%` }} />
+                    <div className="w-full bg-success-400 rounded-t" style={{ height: `${d.h}%` }} />
                     <p className="text-xs text-slate-400 mt-1 leading-tight text-center">{d.range}</p>
                   </div>
                 ))}
@@ -13180,7 +13187,7 @@ const MasterCustomers = () => {
             {[["ABC商事", 3420, 34], ["XYZ物産", 2150, 22], ["DEFサービス", 1890, 19], ["GHIオンライン", 1240, 12], ["JKLマーケット", 980, 10]].map((r, i) => (
               <div key={i} className="flex items-center text-xs py-1">
                 <div className="w-32 font-bold">{r[0]}</div>
-                <div className="flex-1"><div className="w-full bg-slate-100 rounded-full h-3"><div className="bg-blue-500 h-3 rounded-full" style={{ width: `${r[2] * 3}%` }} /></div></div>
+                <div className="flex-1"><div className="w-full bg-slate-100 rounded-full h-3"><div className="bg-brand-500 h-3 rounded-full" style={{ width: `${r[2] * 3}%` }} /></div></div>
                 <div className="w-20 text-right text-slate-500">{r[1].toLocaleString()}人</div>
               </div>
             ))}
@@ -13191,7 +13198,7 @@ const MasterCustomers = () => {
       {tab === "cards" && (
         <div className="space-y-3">
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-            <p className="text-xs font-bold mb-2">🔍 トークン検索</p>
+            <p className="text-xs font-bold mb-2"><Search className="w-4 h-4 inline mr-1" /> トークン検索</p>
             <div className="grid grid-cols-4 gap-2">
               <div><label className="text-xs text-slate-400">トークンID</label><input className="w-full border rounded px-2 py-1 text-xs mt-0.5" placeholder="TKN-..." /></div>
               <div><label className="text-xs text-slate-400">ペイクイックID</label><input className="w-full border rounded px-2 py-1 text-xs mt-0.5" placeholder="PQ-..." /></div>
@@ -13202,7 +13209,7 @@ const MasterCustomers = () => {
               <div><label className="text-xs text-slate-400">ブランド</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全て</option><option>VISA</option><option>MC</option><option>JCB</option><option>AMEX</option></select></div>
               <div><label className="text-xs text-slate-400">ステータス</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全て</option><option>有効</option><option>期限切れ</option><option>無効化済</option></select></div>
               <div />
-              <div className="flex items-end"><button onClick={() => toast("トークンを検索しました", "success")} className="w-full py-1 bg-blue-600 text-white rounded text-xs font-bold">🔍 検索</button></div>
+              <div className="flex items-end"><button onClick={() => toast("トークンを検索しました", "success")} className="w-full py-1 bg-brand-500 text-white rounded text-xs font-bold"><Search className="w-4 h-4 inline mr-1" /> 検索</button></div>
             </div>
           </div>
           <div className="grid grid-cols-4 gap-3">
@@ -13222,12 +13229,12 @@ const MasterCustomers = () => {
               { tkn: "TKN-E01345", pq: "—", brand: "VISA", last4: "9999", exp: "01/25", cust: "CUS-00004", merchant: "DEFサービス", rc: 0, lastUsed: "02/08 11:00", st: "無効化済" },
             ].map((t, i) => (
               <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
-                <td className="px-4 py-2 whitespace-nowrap w-28 font-mono text-blue-600 text-xs">{t.tkn}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-28 font-mono text-brand-600 text-xs">{t.tkn}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-xs text-slate-500">{t.pq}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16 text-xs">{t.brand}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16 font-mono text-xs">*{t.last4}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-20 text-xs">{t.exp}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-blue-600 text-xs">{t.cust}</td>
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-brand-600 text-xs">{t.cust}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-500 text-xs">{t.merchant}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-14 text-center">{t.rc > 0 ? <Badge text={`${t.rc}件`} color="blue" /> : <span className="text-slate-300">—</span>}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400 text-xs">{t.lastUsed}</td>
@@ -13237,15 +13244,15 @@ const MasterCustomers = () => {
             </TableHeader>
           </div>
           <div className="text-xs text-slate-400 text-right">6件表示 / 全28,431件</div>
-          <div className="bg-blue-50 rounded-lg border border-blue-200 p-3">
-            <p className="text-xs font-bold text-blue-700 mb-1">🔐 トークン化サービス</p>
+          <div className="bg-brand-50 rounded-lg border border-brand-200 p-3">
+            <p className="text-xs font-bold text-brand-700 mb-1"><ShieldCheck className="w-4 h-4 inline mr-1" /> トークン化サービス</p>
             <div className="grid grid-cols-3 gap-3 text-xs">
-              <div><span className="text-slate-500">PCI DSS準拠:</span> <span className="font-bold text-emerald-600">Level 1 認定</span></div>
+              <div><span className="text-slate-500">PCI DSS準拠:</span> <span className="font-bold text-success-600">Level 1 認定</span></div>
               <div><span className="text-slate-500">暗号化方式:</span> <span className="font-bold">AES-256 + RSA-2048</span></div>
               <div><span className="text-slate-500">トークン有効期間:</span> <span className="font-bold">カード有効期限まで</span></div>
               <div><span className="text-slate-500">自動削除:</span> <span className="font-bold">期限切れ後180日</span></div>
               <div><span className="text-slate-500">最終監査:</span> <span className="font-bold">2026-01-15</span></div>
-              <div><span className="text-slate-500">次回監査:</span> <span className="font-bold text-amber-600">2026-07-15</span></div>
+              <div><span className="text-slate-500">次回監査:</span> <span className="font-bold text-warning-600">2026-07-15</span></div>
             </div>
           </div>
         </div>
@@ -13257,8 +13264,8 @@ const MasterCustomers = () => {
           <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowM16CsvExport(false)} />
           <div className="relative bg-white rounded-xl shadow-2xl w-[460px]">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
-              <h3 className="text-sm font-bold text-slate-800">📥 顧客データCSVエクスポート</h3>
-              <button onClick={() => setShowM16CsvExport(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <h3 className="text-sm font-bold text-slate-800"><Download className="w-4 h-4 inline mr-1" /> 顧客データCSVエクスポート</h3>
+              <button onClick={() => setShowM16CsvExport(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-3">
@@ -13277,13 +13284,13 @@ const MasterCustomers = () => {
                 <div><label className="text-xs font-semibold text-slate-600">最終取引日（開始）</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
                 <div><label className="text-xs font-semibold text-slate-600">最終取引日（終了）</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
               </div>
-              <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">
-                💡 推定出力件数: 約15,420件 / ファイルサイズ: 約1.2MB
+              <div className="bg-brand-50 rounded border border-brand-200 p-2 text-xs text-brand-700">
+                推定出力件数: 約15,420件 / ファイルサイズ: 約1.2MB
               </div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowM16CsvExport(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { setShowM16CsvExport(false); toast("顧客データCSVをダウンロードしました", "success"); }} className="px-4 py-2 text-xs bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">CSVダウンロード</button>
+              <button onClick={() => { setShowM16CsvExport(false); toast("顧客データCSVをダウンロードしました", "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">CSVダウンロード</button>
             </div>
           </div>
         </div>
@@ -13312,30 +13319,30 @@ const MerchantCustomers = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-slate-800">顧客管理</h2>
         <div className="flex items-center gap-2">
-          <select className="border rounded px-2 py-1 text-xs"><option>🏢 ECサイトA</option><option>全サイト合算</option></select>
-          <button onClick={() => setShowCsvExport(true)} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">📥 CSV</button>
+          <select className="border rounded px-2 py-1 text-xs"><option><Building2 className="w-4 h-4 inline mr-1" /> ECサイトA</option><option>全サイト合算</option></select>
+          <button onClick={() => setShowCsvExport(true)} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSV</button>
         </div>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
-        <button key={t.id} onClick={() => { setTab(t.id); setDetail(null); }} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-emerald-500 text-emerald-700 bg-emerald-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        <button key={t.id} onClick={() => { setTab(t.id); setDetail(null); }} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-success-500 text-success-700 bg-success-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}</div>
 
       {tab === "list" && !detail && (
         <div className="space-y-3">
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
             <div className="flex gap-2">
-              <input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="🔍 メール / 名前 / 顧客IDで検索" />
+              <input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="メール / 名前 / 顧客IDで検索" />
               <input className="w-24 border rounded px-2 py-1 text-xs" placeholder="カード下4桁" />
               <select className="border rounded px-2 py-1 text-xs"><option>全セグメント</option><option>ロイヤル</option><option>リピーター</option><option>初回</option></select>
               <select className="border rounded px-2 py-1 text-xs"><option>全サブスク</option><option>課金中</option><option>停止</option></select>
-              <button onClick={() => toast("顧客を検索しました", "success")} className="px-3 py-1 bg-emerald-600 text-white rounded text-xs">検索</button>
+              <button onClick={() => toast("顧客を検索しました", "success")} className="px-3 py-1 bg-success-600 text-white rounded text-xs">検索</button>
             </div>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
             <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "リピート", w: "w-16" }, { label: "サブスク", w: "w-14" }, { label: "最終取引", w: "w-24" }, { label: "タグ", w: "w-20" }]}>
             {customers.map((c, i) => (
-              <tr key={i} onClick={() => setDetail(c)} className="border-b hover:bg-emerald-50 cursor-pointer">
-                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-emerald-700">{c.id}</td>
+              <tr key={i} onClick={() => setDetail(c)} className="border-b hover:bg-success-50 cursor-pointer">
+                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-success-700">{c.id}</td>
                 <td className="px-4 py-2 whitespace-nowrap">{c.email}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-24 font-mono">{c.card}</td>
                 <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{c.txn}</td>
@@ -13357,7 +13364,7 @@ const MerchantCustomers = () => {
             <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-bold">顧客プロファイル</p>
-                <button onClick={() => setDetail(null)} className="text-xs text-emerald-600">← 一覧に戻る</button>
+                <button onClick={() => setDetail(null)} className="text-xs text-success-600">← 一覧に戻る</button>
               </div>
               {[["顧客ID", detail.id], ["メール", detail.email], ["カード", detail.card], ["初回取引", "2024-08-15"], ["最終取引", detail.last], ["取引回数", `${detail.txn}回`], ["LTV", detail.ltv]].map(([l, v], i) => (
                 <div key={i} className="flex text-xs py-0.5"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
@@ -13369,7 +13376,7 @@ const MerchantCustomers = () => {
                 <Badge text={detail.repeat} color={repeatColors[detail.repeat]} />
                 {detail.sub !== "なし" && <Badge text={`サブスク: ${detail.sub}`} color={detail.sub === "課金中" ? "green" : "red"} />}
               </div>
-              {detail.sub === "課金中" && <div className="mt-2 text-xs text-slate-500 bg-emerald-50 rounded p-1.5">月額スタンダード ¥2,980/月<br/>次回: 2026-03-01 → <button onClick={() => toast("S10 決済管理画面を開きます", "info")} className="text-emerald-600 underline">S10で開く</button></div>}
+              {detail.sub === "課金中" && <div className="mt-2 text-xs text-slate-500 bg-success-50 rounded p-1.5">月額スタンダード ¥2,980/月<br/>次回: 2026-03-01 → <button onClick={() => toast("S10 決済管理画面を開きます", "info")} className="text-success-600 underline">S10で開く</button></div>}
             </div>
             <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-1">タグ</p>
@@ -13381,11 +13388,11 @@ const MerchantCustomers = () => {
             <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-1">メモ</p>
               <div className="bg-slate-50 rounded p-2 text-xs"><p className="text-slate-400">2026-02-10 — admin山田</p><p>電話で問い合わせあり。サブスク解約方法をご案内。</p></div>
-              <div className="flex gap-1 mt-2"><input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="メモを追加..." /><button onClick={() => toast("メモを追加しました", "success")} className="px-2 py-1 bg-emerald-600 text-white rounded text-xs">追加</button></div>
+              <div className="flex gap-1 mt-2"><input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="メモを追加..." /><button onClick={() => toast("メモを追加しました", "success")} className="px-2 py-1 bg-success-600 text-white rounded text-xs">追加</button></div>
             </div>
             <div className="flex gap-2">
               <button onClick={() => toast("S02 注文一覧画面を開きます", "info")} className="flex-1 py-1.5 bg-slate-50 text-slate-600 rounded text-xs border">S02 注文一覧で開く</button>
-              <button onClick={() => toast("顧客の取引データCSVをダウンロードしました", "success")} className="flex-1 py-1.5 bg-slate-50 text-slate-600 rounded text-xs border">📥 CSV出力</button>
+              <button onClick={() => toast("顧客の取引データCSVをダウンロードしました", "success")} className="flex-1 py-1.5 bg-slate-50 text-slate-600 rounded text-xs border"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
             </div>
           </div>
           <div className="col-span-3 space-y-3">
@@ -13394,13 +13401,13 @@ const MerchantCustomers = () => {
               <div className="flex items-end gap-1 h-16 px-1">
                 {[35, 42, 38, 55, 48, 62].map((h, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center">
-                    <div className="w-full bg-emerald-400 rounded-t" style={{ height: `${h}%` }} />
+                    <div className="w-full bg-success-400 rounded-t" style={{ height: `${h}%` }} />
                     <p className="text-xs text-slate-400 mt-0.5">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
                   </div>
                 ))}
               </div>
               <div className="flex gap-4 mt-2 text-xs text-slate-500">
-                <span>成功率: <b className="text-emerald-600">97.8%</b></span>
+                <span>成功率: <b className="text-success-600">97.8%</b></span>
                 <span>平均単価: <b>¥18,990</b></span>
                 <span>CB: <b>0件</b></span>
               </div>
@@ -13425,7 +13432,7 @@ const MerchantCustomers = () => {
                   <div className="flex-1"><Badge text={t.st} color={t.stc} /></div>
                 </div>
               ))}
-              <div className="text-center mt-2"><button onClick={() => toast(`全${detail.txn}件の取引履歴を表示します`, "info")} className="text-xs text-emerald-600">全{detail.txn}件を表示 →</button></div>
+              <div className="text-center mt-2"><button onClick={() => toast(`全${detail.txn}件の取引履歴を表示します`, "info")} className="text-xs text-success-600">全{detail.txn}件を表示 →</button></div>
             </div>
           </div>
         </div>
@@ -13444,7 +13451,7 @@ const MerchantCustomers = () => {
             <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
               <p className="text-xs font-bold mb-3">セグメント分布</p>
               <div className="flex items-center justify-center gap-6 py-3">
-                {[{ seg: "ロイヤル", cnt: 274, pct: "8%", color: "bg-purple-500" }, { seg: "リピーター", cnt: 1044, pct: "30.5%", color: "bg-blue-500" }, { seg: "初回", cnt: 1540, pct: "45%", color: "bg-slate-400" }, { seg: "休眠", cnt: 432, pct: "12.6%", color: "bg-yellow-400" }, { seg: "離脱", cnt: 130, pct: "3.8%", color: "bg-rose-400" }].map((s, i) => (
+                {[{ seg: "ロイヤル", cnt: 274, pct: "8%", color: "bg-purple-500" }, { seg: "リピーター", cnt: 1044, pct: "30.5%", color: "bg-brand-500" }, { seg: "初回", cnt: 1540, pct: "45%", color: "bg-slate-400" }, { seg: "休眠", cnt: 432, pct: "12.6%", color: "bg-warning-400" }, { seg: "離脱", cnt: 130, pct: "3.8%", color: "bg-danger-400" }].map((s, i) => (
                   <div key={i} className="text-center">
                     <div className={`w-12 h-12 rounded-full ${s.color} flex items-center justify-center text-white text-xs font-bold`}>{s.pct}</div>
                     <p className="text-xs mt-1 font-bold">{s.seg}</p>
@@ -13458,7 +13465,7 @@ const MerchantCustomers = () => {
               <div className="flex items-end gap-0.5 h-24 px-1">
                 {[30, 31, 32, 33, 34, 33, 34, 35, 36, 37, 38, 38.5].map((v, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center">
-                    <div className="w-full bg-emerald-400 rounded-t" style={{ height: `${v * 2.5}%` }} />
+                    <div className="w-full bg-success-400 rounded-t" style={{ height: `${v * 2.5}%` }} />
                     <p className="text-xs text-slate-400 mt-0.5" style={{ fontSize: "9px" }}>{["3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "1", "2"][i]}月</p>
                   </div>
                 ))}
@@ -13470,7 +13477,7 @@ const MerchantCustomers = () => {
             <div className="grid grid-cols-4 gap-3">
               {[{ label: "1回のみ", cnt: 1540, pct: 45 }, { label: "2-5回", cnt: 820, pct: 24 }, { label: "6-10回", cnt: 524, pct: 15 }, { label: "11回以上", cnt: 536, pct: 16 }].map((d, i) => (
                 <div key={i} className="text-center">
-                  <div className="w-full bg-slate-100 rounded-full h-4 mb-1"><div className="bg-emerald-500 h-4 rounded-full" style={{ width: `${d.pct * 2}%` }} /></div>
+                  <div className="w-full bg-slate-100 rounded-full h-4 mb-1"><div className="bg-success-500 h-4 rounded-full" style={{ width: `${d.pct * 2}%` }} /></div>
                   <p className="text-xs font-bold">{d.label}</p>
                   <p className="text-xs text-slate-400">{d.cnt.toLocaleString()}人 ({d.pct}%)</p>
                 </div>
@@ -13480,7 +13487,7 @@ const MerchantCustomers = () => {
 
           {/* Cohort Analysis */}
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-            <p className="text-xs font-bold mb-2">📊 コホート分析（月次リテンション）</p>
+            <p className="text-xs font-bold mb-2"><BarChart3 className="w-4 h-4 inline mr-1" /> コホート分析（月次リテンション）</p>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead><tr className="bg-slate-50 border-b">
@@ -13503,7 +13510,7 @@ const MerchantCustomers = () => {
                       {c.rates.map((r, j) => (
                         <td key={j} className="px-2 py-1 text-center">
                           {r !== null ? (
-                            <span className={`px-1.5 py-0.5 rounded text-xs ${r >= 60 ? "bg-emerald-100 text-emerald-700" : r >= 40 ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>{r}%</span>
+                            <span className={`px-1.5 py-0.5 rounded text-xs ${r >= 60 ? "bg-success-100 text-success-700" : r >= 40 ? "bg-brand-100 text-brand-700" : "bg-warning-100 text-warning-700"}`}>{r}%</span>
                           ) : <span className="text-slate-200">—</span>}
                         </td>
                       ))}
@@ -13523,8 +13530,8 @@ const MerchantCustomers = () => {
           <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowCsvExport(false)} />
           <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
-              <h3 className="text-sm font-bold text-slate-800">📥 顧客データCSVエクスポート</h3>
-              <button onClick={() => setShowCsvExport(false)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <h3 className="text-sm font-bold text-slate-800"><Download className="w-4 h-4 inline mr-1" /> 顧客データCSVエクスポート</h3>
+              <button onClick={() => setShowCsvExport(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               <div><label className="text-xs font-semibold text-slate-600">セグメント</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>全顧客</option><option>ロイヤル</option><option>リピーター</option><option>初回</option><option>休眠</option></select></div>
@@ -13540,13 +13547,13 @@ const MerchantCustomers = () => {
                 <div><label className="text-xs font-semibold text-slate-600">最終取引日（開始）</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
                 <div><label className="text-xs font-semibold text-slate-600">最終取引日（終了）</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
               </div>
-              <div className="bg-blue-50 rounded border border-blue-200 p-2 text-xs text-blue-700">
-                💡 推定出力件数: 約3,420件 / ファイルサイズ: 約240KB
+              <div className="bg-brand-50 rounded border border-brand-200 p-2 text-xs text-brand-700">
+                推定出力件数: 約3,420件 / ファイルサイズ: 約240KB
               </div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
               <button onClick={() => setShowCsvExport(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { setShowCsvExport(false); toast("顧客データCSVをダウンロードしました", "success"); }} className="px-4 py-2 text-xs bg-emerald-600 text-white rounded font-semibold hover:bg-emerald-700">CSVダウンロード</button>
+              <button onClick={() => { setShowCsvExport(false); toast("顧客データCSVをダウンロードしました", "success"); }} className="px-4 py-2 text-xs bg-success-600 text-white rounded font-semibold hover:bg-success-700">CSVダウンロード</button>
             </div>
           </div>
         </div>
@@ -13559,11 +13566,11 @@ const MerchantCustomers = () => {
 // 決済処理ステップアニメーション
 const PaymentProcessingFlow = ({ onComplete, onError }) => {
   const steps = [
-    { id: 1, label: "トークン化", desc: "カード情報を暗号化", icon: "🔑", zone: "A" },
-    { id: 2, label: "ルーティング", desc: "最適な接続先を選択", icon: "🔀", zone: "A" },
-    { id: 3, label: "不正検知", desc: "リスクスコア判定", icon: "🛡️", zone: "A" },
-    { id: 4, label: "接続先通信", desc: "プロセッサーへ送信", icon: "📡", zone: "A" },
-    { id: 5, label: "結果同期", desc: "管理系DBに記録", icon: "💾", zone: "B" },
+    { id: 1, label: "トークン化", desc: "カード情報を暗号化", icon: <Key className="w-4 h-4 inline text-slate-500" />, zone: "A" },
+    { id: 2, label: "ルーティング", desc: "最適な接続先を選択", icon: <Shuffle className="w-4 h-4 inline text-slate-500" />, zone: "A" },
+    { id: 3, label: "不正検知", desc: "リスクスコア判定", icon: <Shield className="w-4 h-4 inline text-slate-500" />, zone: "A" },
+    { id: 4, label: "接続先通信", desc: "プロセッサーへ送信", icon: <Radio className="w-4 h-4 inline text-slate-500" />, zone: "A" },
+    { id: 5, label: "結果同期", desc: "管理系DBに記録", icon: <Save className="w-4 h-4 inline text-slate-500" />, zone: "B" },
   ];
   const [currentStep, setCurrentStep] = useState(0);
   const [status, setStatus] = useState("processing"); // processing | success | error
@@ -13582,12 +13589,12 @@ const PaymentProcessingFlow = ({ onComplete, onError }) => {
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
       <div className="bg-slate-900 text-white px-6 py-5">
-        <div className="flex items-center gap-2"><span className="text-lg">🔒</span><span className="text-sm font-bold">決済処理中</span></div>
+        <div className="flex items-center gap-2"><Lock className="w-4 h-4 inline" /><span className="text-sm font-bold">決済処理中</span></div>
       </div>
       <div className="px-6 py-5">
         {/* Progress bar */}
         <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden mb-6">
-          <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500 ease-out" style={{ width: `${(currentStep / steps.length) * 100}%` }} />
+          <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full transition-all duration-500 ease-out" style={{ width: `${(currentStep / steps.length) * 100}%` }} />
         </div>
 
         {/* Steps */}
@@ -13596,19 +13603,19 @@ const PaymentProcessingFlow = ({ onComplete, onError }) => {
             const isDone = idx < currentStep;
             const isActive = idx === currentStep && status === "processing";
             return (
-              <div key={step.id} className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${isActive ? "bg-blue-50 border border-blue-200 shadow-sm" : isDone ? "bg-emerald-50/50" : "opacity-40"}`}>
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0 ${isDone ? "bg-emerald-100" : isActive ? "bg-blue-100" : "bg-slate-100"}`}>
-                  {isDone ? "✅" : isActive ? <span className="animate-pulse">{step.icon}</span> : step.icon}
+              <div key={step.id} className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${isActive ? "bg-brand-50 border border-brand-200 shadow-sm" : isDone ? "bg-success-50/50" : "opacity-40"}`}>
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0 ${isDone ? "bg-success-100" : isActive ? "bg-brand-100" : "bg-slate-100"}`}>
+                  {isDone ? "有効" : isActive ? <span className="animate-pulse">{step.icon}</span> : step.icon}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className={`text-sm font-bold ${isDone ? "text-emerald-700" : isActive ? "text-blue-700" : "text-slate-400"}`}>{step.label}</span>
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${step.zone === "A" ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600"}`}>Zone {step.zone}</span>
+                    <span className={`text-sm font-bold ${isDone ? "text-success-700" : isActive ? "text-brand-700" : "text-slate-400"}`}>{step.label}</span>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${step.zone === "A" ? "bg-danger-100 text-danger-600" : "bg-brand-100 text-brand-600"}`}>Zone {step.zone}</span>
                   </div>
-                  <p className={`text-xs ${isDone ? "text-emerald-500" : isActive ? "text-blue-500" : "text-slate-300"}`}>{isDone ? "完了" : isActive ? "処理中..." : step.desc}</p>
+                  <p className={`text-xs ${isDone ? "text-success-500" : isActive ? "text-brand-500" : "text-slate-300"}`}>{isDone ? "完了" : isActive ? "処理中..." : step.desc}</p>
                 </div>
-                {isActive && <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin shrink-0" />}
-                {isDone && <span className="text-emerald-500 text-xs font-bold shrink-0">✓</span>}
+                {isActive && <div className="w-4 h-4 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin shrink-0" />}
+                {isDone && <Check className="w-4 h-4 text-success-500 shrink-0" />}
               </div>
             );
           })}
@@ -13616,16 +13623,16 @@ const PaymentProcessingFlow = ({ onComplete, onError }) => {
 
         {/* Zone Legend */}
         <div className="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-slate-100">
-          <span className="flex items-center gap-1 text-[10px]"><span className="w-2 h-2 rounded bg-red-400"></span><span className="text-slate-400">Zone A (CDE)</span></span>
-          <span className="flex items-center gap-1 text-[10px]"><span className="w-2 h-2 rounded bg-blue-400"></span><span className="text-slate-400">Zone B (管理系)</span></span>
+          <span className="flex items-center gap-1 text-[10px]"><span className="w-2 h-2 rounded bg-danger-400"></span><span className="text-slate-400">Zone A (CDE)</span></span>
+          <span className="flex items-center gap-1 text-[10px]"><span className="w-2 h-2 rounded bg-brand-400"></span><span className="text-slate-400">Zone B (管理系)</span></span>
         </div>
 
         <p className="text-xs text-slate-400 text-center mt-3">ブラウザを閉じないでください</p>
 
         {/* ワイヤーフレーム用: 手動遷移ボタン */}
         <div className="mt-4 flex gap-2 justify-center">
-          <button onClick={onComplete} className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded text-xs">→ 成功</button>
-          <button onClick={onError} className="px-3 py-1 bg-rose-100 text-rose-700 rounded text-xs">→ 失敗</button>
+          <button onClick={onComplete} className="px-3 py-1 bg-success-100 text-success-700 rounded text-xs">→ 成功</button>
+          <button onClick={onError} className="px-3 py-1 bg-danger-100 text-danger-700 rounded text-xs">→ 失敗</button>
         </div>
       </div>
     </div>
@@ -13641,7 +13648,7 @@ const PaymentPage = () => {
           <h2 className="text-sm font-bold text-slate-800">決済ページ</h2>
           <div className="flex gap-1">
             {[{ id: "input", label: "入力" }, { id: "3ds", label: "3DS認証" }, { id: "processing", label: "処理中" }, { id: "complete", label: "完了" }, { id: "error", label: "エラー" }, { id: "link_error", label: "リンク無効" }].map(s => (
-              <button key={s.id} onClick={() => setScreen(s.id)} className={`px-2 py-0.5 rounded text-xs ${screen === s.id ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"}`}>{s.label}</button>
+              <button key={s.id} onClick={() => setScreen(s.id)} className={`px-2 py-0.5 rounded text-xs ${screen === s.id ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-500"}`}>{s.label}</button>
             ))}
           </div>
         </div>
@@ -13649,28 +13656,28 @@ const PaymentPage = () => {
         {screen === "input" && (
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
             {/* PCI DSS v4.0 Req 6.4.3 / 11.6.1 スクリプト完全性管理 */}
-            <div className="bg-amber-50 border-b border-amber-200 px-4 py-1.5 text-xs text-amber-700">
-              <span className="font-bold">⚡ CDE iframe方式</span> — カード入力フォームはcde.aipayment.jp内のiframeで動作。管理系JSはカード番号に触れません。
-              <span className="ml-2 text-amber-500">CSP: script-src 'self' 'nonce-...' | SRI: 全スクリプトにintegrity属性 | 週次ハッシュ監視</span>
+            <div className="bg-warning-50 border-b border-warning-200 px-4 py-1.5 text-xs text-warning-700">
+              <span className="font-bold"><Zap className="w-4 h-4 inline mr-1" /> CDE iframe方式</span> — カード入力フォームはcde.aipayment.jp内のiframeで動作。管理系JSはカード番号に触れません。
+              <span className="ml-2 text-warning-500">CSP: script-src 'self' 'nonce-...' | SRI: 全スクリプトにintegrity属性 | 週次ハッシュ監視</span>
             </div>
             <div className="bg-slate-900 text-white px-6 py-5">
-              <div className="flex items-center gap-2"><span className="text-lg">🔒</span><span className="text-sm font-bold">安全なお支払い</span></div>
+              <div className="flex items-center gap-2"><Lock className="w-4 h-4 inline" /><span className="text-sm font-bold">安全なお支払い</span></div>
             </div>
-            <div className="px-6 py-5 bg-blue-50/70 border-b border-blue-100">
+            <div className="px-6 py-5 bg-brand-50/70 border-b border-brand-100">
               <p className="text-xs text-slate-500">お支払い先: 〇〇ショップ</p>
               <p className="text-sm font-bold mt-1">プレミアムプラン</p>
-              <p className="text-3xl font-bold text-blue-600 tracking-tight mt-1">¥9,800</p>
+              <p className="text-3xl font-bold text-brand-600 tracking-tight mt-1">¥9,800</p>
             </div>
             <div className="px-6 py-4 space-y-3">
-              <div><label className="text-xs text-slate-500">カード番号</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="1234 5678 9012 3456" /></div>
+              <div><label className="text-xs text-slate-500">カード番号</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="1234 5678 9012 3456" /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-xs text-slate-500">有効期限</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="MM/YY" /></div>
-                <div><label className="text-xs text-slate-500">セキュリティコード</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="CVC" /></div>
+                <div><label className="text-xs text-slate-500">有効期限</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="MM/YY" /></div>
+                <div><label className="text-xs text-slate-500">セキュリティコード</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="CVC" /></div>
               </div>
-              <div><label className="text-xs text-slate-500">カード名義</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="TARO YAMADA" /></div>
-              <button onClick={() => setScreen("3ds")} className="w-full py-3.5 bg-blue-600 text-white rounded-xl text-base font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:shadow-xl transition-all duration-200 mt-3">💳 ¥9,800 を支払う</button>
+              <div><label className="text-xs text-slate-500">カード名義</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="TARO YAMADA" /></div>
+              <button onClick={() => setScreen("3ds")} className="w-full py-3.5 bg-brand-500 text-white rounded-xl text-base font-bold shadow-lg shadow-brand-600/20 hover:bg-brand-600 hover:shadow-xl transition-all duration-200 mt-3"><CreditCard className="w-4 h-4 inline mr-1" /> ¥9,800 を支払う</button>
               <div className="flex items-center justify-center gap-3 text-xs text-slate-400 pt-2">
-                <span>🔒 TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
+                <span><Lock className="w-4 h-4 inline mr-1" /> TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
               </div>
               <div className="flex justify-center gap-2 pt-1">
                 {["VISA", "MC", "JCB", "AMEX"].map(b => (
@@ -13684,12 +13691,12 @@ const PaymentPage = () => {
         {screen === "3ds" && (
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
             <div className="bg-slate-900 text-white px-6 py-5">
-              <div className="flex items-center gap-2"><span className="text-lg">🔒</span><span className="text-sm font-bold">3Dセキュア認証</span></div>
+              <div className="flex items-center gap-2"><Lock className="w-4 h-4 inline" /><span className="text-sm font-bold">3Dセキュア認証</span></div>
             </div>
             <div className="px-6 py-6">
-              <div className="border-2 border-blue-200 rounded-lg p-5 bg-blue-50/50">
+              <div className="border-2 border-brand-200 rounded-lg p-5 bg-brand-50/50">
                 <div className="text-center mb-4">
-                  <div className="w-16 h-10 bg-blue-600 rounded mx-auto flex items-center justify-center text-white text-xs font-bold">VISA</div>
+                  <div className="w-16 h-10 bg-brand-500 rounded mx-auto flex items-center justify-center text-white text-xs font-bold">VISA</div>
                   <p className="text-sm font-bold text-slate-800 mt-3">本人認証サービス</p>
                   <p className="text-xs text-slate-500 mt-1">Verified by VISA</p>
                 </div>
@@ -13707,13 +13714,13 @@ const PaymentPage = () => {
                     <input className="w-full border rounded-lg px-3 py-2 text-sm mt-0.5 text-center tracking-widest" placeholder="● ● ● ● ● ●" maxLength={6} />
                     <p className="text-xs text-slate-400 mt-1">ご登録の携帯番号にSMSで送信しました</p>
                   </div>
-                  <button onClick={() => setScreen("processing")} className="w-full py-2.5 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700">認証する</button>
+                  <button onClick={() => setScreen("processing")} className="w-full py-2.5 bg-brand-500 text-white rounded-lg text-sm font-bold hover:bg-brand-600">認証する</button>
                   <button onClick={() => setScreen("input")} className="w-full py-2 bg-slate-100 text-slate-500 rounded-lg text-xs">キャンセル</button>
                 </div>
               </div>
               <div className="mt-4 flex gap-2 justify-center">
-                <button onClick={() => setScreen("processing")} className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded text-xs">→ 認証成功</button>
-                <button onClick={() => setScreen("error")} className="px-3 py-1 bg-rose-100 text-rose-700 rounded text-xs">→ 認証失敗</button>
+                <button onClick={() => setScreen("processing")} className="px-3 py-1 bg-success-100 text-success-700 rounded text-xs">→ 認証成功</button>
+                <button onClick={() => setScreen("error")} className="px-3 py-1 bg-danger-100 text-danger-700 rounded text-xs">→ 認証失敗</button>
               </div>
             </div>
           </div>
@@ -13725,8 +13732,8 @@ const PaymentPage = () => {
 
         {screen === "complete" && (
           <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
-            <div className="bg-emerald-600 text-white px-6 py-6 text-center">
-              <div className="text-4xl mb-2">✅</div>
+            <div className="bg-success-600 text-white px-6 py-6 text-center">
+              <div className="text-4xl mb-2"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></div>
               <p className="text-lg font-bold">お支払い完了</p>
             </div>
             <div className="px-6 py-4">
@@ -13742,29 +13749,29 @@ const PaymentPage = () => {
               <button className="w-full py-2 bg-slate-100 text-slate-600 rounded-lg text-sm mt-3 border">ページを閉じる</button>
             </div>
             <div className="flex items-center justify-center gap-3 text-xs text-slate-400 py-3 border-t">
-              <span>🔒 TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
+              <span><Lock className="w-4 h-4 inline mr-1" /> TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
             </div>
           </div>
         )}
 
         {screen === "error" && (
           <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
-            <div className="bg-rose-600 text-white px-6 py-6 text-center">
-              <div className="text-4xl mb-2">❌</div>
+            <div className="bg-danger-600 text-white px-6 py-6 text-center">
+              <div className="text-4xl mb-2"><XCircle className="w-4 h-4 text-danger-500 inline" /></div>
               <p className="text-lg font-bold">お支払いに失敗しました</p>
             </div>
             <div className="px-6 py-4 text-center">
-              <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 mt-2">
-                <p className="text-sm text-rose-700">カードの利用限度額を超えています</p>
-                <p className="text-xs text-rose-500 mt-1">別のカードでお試しいただくか、カード会社にお問い合わせください</p>
+              <div className="bg-danger-50 border border-danger-200 rounded-lg p-4 mt-2">
+                <p className="text-sm text-danger-700">カードの利用限度額を超えています</p>
+                <p className="text-xs text-danger-500 mt-1">別のカードでお試しいただくか、カード会社にお問い合わせください</p>
               </div>
               <div className="flex gap-2 mt-4">
-                <button onClick={() => setScreen("input")} className="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold">もう一度試す</button>
+                <button onClick={() => setScreen("input")} className="flex-1 py-2 bg-brand-500 text-white rounded-lg text-sm font-bold">もう一度試す</button>
                 <button className="flex-1 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm border">ページを閉じる</button>
               </div>
             </div>
             <div className="flex items-center justify-center gap-3 text-xs text-slate-400 py-3 border-t">
-              <span>🔒 TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
+              <span><Lock className="w-4 h-4 inline mr-1" /> TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
             </div>
           </div>
         )}
@@ -13772,10 +13779,10 @@ const PaymentPage = () => {
         {screen === "link_error" && (
           <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
             <div className="bg-gray-900 text-white px-6 py-4">
-              <div className="flex items-center gap-2"><span className="text-lg">🔒</span><span className="text-sm font-bold">安全なお支払い</span></div>
+              <div className="flex items-center gap-2"><Lock className="w-4 h-4 inline" /><span className="text-sm font-bold">安全なお支払い</span></div>
             </div>
             <div className="px-6 py-12 text-center">
-              <div className="text-4xl mb-3">⚠️</div>
+              <div className="text-4xl mb-3"><AlertTriangle className="w-4 h-4 text-warning-500 inline" /></div>
               <p className="text-sm font-bold text-slate-700">この決済リンクは無効です</p>
               <p className="text-xs text-slate-400 mt-2">リンクの有効期限が過ぎているか、利用可能回数に達しています</p>
               <div className="bg-slate-50 rounded-lg p-3 mt-4 text-xs text-slate-500">
@@ -13783,7 +13790,7 @@ const PaymentPage = () => {
               </div>
             </div>
             <div className="flex items-center justify-center gap-3 text-xs text-slate-400 py-3 border-t">
-              <span>🔒 TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
+              <span><Lock className="w-4 h-4 inline mr-1" /> TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
             </div>
           </div>
         )}
@@ -13941,7 +13948,7 @@ export default function Wireframes() {
         <button onClick={() => setView("master")} className={`text-[13px] px-3 py-1.5 rounded-md font-medium transition-colors duration-150 ${view === "master" ? "bg-brand-50 text-brand-700" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
           マスター管理
         </button>
-        <button onClick={() => setView("merchant")} className={`text-[13px] px-3 py-1.5 rounded-md font-medium transition-colors duration-150 ${view === "merchant" ? "bg-emerald-50 text-emerald-700" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
+        <button onClick={() => setView("merchant")} className={`text-[13px] px-3 py-1.5 rounded-md font-medium transition-colors duration-150 ${view === "merchant" ? "bg-success-50 text-success-700" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
           加盟店管理
         </button>
         <button onClick={() => setView("agent")} className={`text-[13px] px-3 py-1.5 rounded-md font-medium transition-colors duration-150 ${view === "agent" ? "bg-orange-50 text-orange-700" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
