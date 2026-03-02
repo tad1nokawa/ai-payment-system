@@ -197,7 +197,7 @@ const colorMap = {
 };
 
 const KPICard = ({ label, value, sub, trend, color = "blue" }) => (
-  <div className="bg-white rounded-lg border border-slate-200 p-5 flex-1 min-w-0 hover:shadow-md transition-shadow duration-200">
+  <div className="bg-white rounded-lg border border-slate-200 shadow-card p-5 flex-1 min-w-0 hover:shadow-md transition-shadow duration-150">
     <p className="text-xs font-medium text-slate-500 tracking-wide">{label}</p>
     <p className={`text-2xl font-semibold ${colorMap[color] || "text-brand-600"} mt-1.5 tracking-tight`}>{value}</p>
     <div className="flex items-center gap-2 mt-2">
@@ -313,79 +313,85 @@ const MasterDashboard = () => {
   };
 
   return (
-  <div className="p-5 flex gap-4">
+  <div className="p-6 flex gap-6">
     {/* ===== 左カラム: AIチャット（アコーディオン） ===== */}
     <div className={`${chatOpen ? "w-80" : "w-10"} shrink-0 transition-all duration-300`}>
       {chatOpen ? (
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden flex flex-col" style={{ height: "calc(100vh - 80px)" }}>
-        <div className="p-3 border-b bg-gradient-to-r from-brand-50 to-purple-50 flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 inline" />
-          <p className="text-xs font-bold text-brand-700">AIチャットサポート</p>
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card overflow-hidden flex flex-col" style={{ height: "calc(100vh - 80px)" }}>
+        <div className="px-4 py-3 border-b bg-gradient-to-r from-brand-50 to-purple-50 flex items-center gap-2.5">
+          <div className="w-6 h-6 rounded-full bg-brand-100 flex items-center justify-center shrink-0">
+            <Bot size={14} className="text-brand-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-brand-700">AIアシスタント</p>
+          </div>
           <Badge text="Claude 4 Opus" color="purple" />
-          <button onClick={() => setChatOpen(false)} className="ml-auto text-slate-400 hover:text-slate-600 text-sm" title="チャットを閉じる">◀</button>
+          <button onClick={() => setChatOpen(false)} className="ml-1 p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors duration-150" title="チャットを閉じる"><ChevronLeft size={14} /></button>
         </div>
         {/* クイックアクション */}
-        <div className="p-2 border-b bg-slate-50">
-          <div className="flex flex-wrap gap-1">
+        <div className="p-2.5 border-b bg-slate-50/80">
+          <div className="flex flex-wrap gap-1.5">
             {["不正検知の状況", "今日の決済件数", "例外キューの確認", "精算状況", "エラーコード検索"].map(q => (
-              <button key={q} onClick={() => sendChat(q)} className="text-xs bg-white border rounded px-2 py-1 text-slate-500 hover:bg-brand-50 hover:text-brand-600">{q}</button>
+              <button key={q} onClick={() => sendChat(q)} className="text-xs bg-white border border-slate-200 rounded-md px-2.5 py-1 text-slate-500 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200 transition-colors duration-150">{q}</button>
             ))}
           </div>
         </div>
         {/* 会話エリア */}
-        <div className="flex-1 p-3 space-y-2 overflow-y-auto bg-slate-50">
+        <div className="flex-1 p-3 space-y-3 overflow-y-auto bg-slate-50/50">
           {chatMessages.map((msg, i) => msg.role === "user" ? (
             <div key={i} className="flex gap-2 justify-end">
-              <div className="bg-brand-500 rounded-lg p-2 max-w-[220px]"><p className="text-xs text-white whitespace-pre-wrap">{msg.text}</p></div>
+              <div className="bg-white rounded-lg px-3 py-2 max-w-[220px] border border-slate-200 shadow-sm"><p className="text-xs text-slate-700 whitespace-pre-wrap">{msg.text}</p></div>
             </div>
           ) : (
             <div key={i} className="flex gap-2">
-              <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs shrink-0"><Bot className="w-4 h-4 inline" /></div>
-              <div className="bg-white rounded-lg p-2 border border-slate-200">
-                <p className="text-xs text-slate-700 whitespace-pre-wrap">{msg.text}</p>
-                <div className="flex gap-1 mt-1.5 border-t pt-1">
-                  <button onClick={() => toast("フィードバックを送信しました", "success")} className="text-xs text-slate-400 hover:text-success-600"><ThumbsUp className="w-3.5 h-3.5 inline" /></button>
-                  <button onClick={() => toast("フィードバックを送信しました", "info")} className="text-xs text-slate-400 hover:text-danger-600"><ThumbsDown className="w-3.5 h-3.5 inline" /></button>
-                  <button onClick={() => { navigator.clipboard?.writeText(msg.text); toast("クリップボードにコピーしました", "info"); }} className="text-xs text-slate-400 hover:text-brand-600 ml-auto"><ClipboardList className="w-4 h-4 inline" /></button>
+              <div className="w-6 h-6 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center shrink-0"><Bot size={12} className="text-brand-500" /></div>
+              <div className="bg-brand-50/60 rounded-lg px-3 py-2 border border-brand-100/50 max-w-[240px]">
+                <p className="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                <div className="flex gap-1.5 mt-2 pt-1.5 border-t border-brand-100/40">
+                  <button onClick={() => toast("フィードバックを送信しました", "success")} className="p-0.5 rounded text-slate-400 hover:text-success-600 transition-colors duration-150"><ThumbsUp size={12} /></button>
+                  <button onClick={() => toast("フィードバックを送信しました", "info")} className="p-0.5 rounded text-slate-400 hover:text-danger-600 transition-colors duration-150"><ThumbsDown size={12} /></button>
+                  <button onClick={() => { navigator.clipboard?.writeText(msg.text); toast("クリップボードにコピーしました", "info"); }} className="p-0.5 rounded text-slate-400 hover:text-brand-600 transition-colors duration-150 ml-auto"><Copy size={12} /></button>
                 </div>
               </div>
             </div>
           ))}
         </div>
         {/* 入力エリア */}
-        <div className="p-2 border-t bg-white flex gap-2">
-          <input value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === "Enter" && sendChat(chatInput)} className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="AIアシスタントに質問..." />
-          <button onClick={() => sendChat(chatInput)} className="px-3 py-2 bg-brand-500 text-white rounded-lg text-xs font-bold hover:bg-brand-600">送信</button>
+        <div className="p-3 border-t bg-white flex gap-2">
+          <input value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === "Enter" && sendChat(chatInput)} className="flex-1 text-xs border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="AIアシスタントに質問..." />
+          <button onClick={() => sendChat(chatInput)} className="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150 flex items-center gap-1.5"><Send size={13} /></button>
         </div>
       </div>
       ) : (
-      <button onClick={() => setChatOpen(true)} className="bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col items-center justify-center gap-2 hover:bg-brand-50 transition-colors cursor-pointer" style={{ height: "calc(100vh - 80px)" }}>
-        <MessageSquare className="w-4 h-4 inline" />
-        <span className="text-[10px] text-slate-400 font-bold" style={{ writingMode: "vertical-rl" }}>AIチャット</span>
+      <button onClick={() => setChatOpen(true)} className="bg-white rounded-lg border border-slate-200 shadow-card flex flex-col items-center justify-center gap-2 hover:bg-brand-50 hover:shadow-md transition-all duration-200 cursor-pointer" style={{ height: "calc(100vh - 80px)" }}>
+        <MessageSquare size={16} className="text-brand-500" />
+        <span className="text-[10px] text-slate-400 font-medium" style={{ writingMode: "vertical-rl" }}>AIチャット</span>
       </button>
       )}
     </div>
 
     {/* ===== 右カラム: ダッシュボード本体 ===== */}
-    <div className="flex-1 space-y-4 min-w-0">
-    <div className="flex justify-between items-center">
-      <h2 className="text-sm font-bold text-slate-800">ダッシュボード</h2>
-      <div className="flex gap-2">
-        <span className="text-xs bg-success-100 text-success-700 px-2 py-1 rounded">全システム正常</span>
+    <div className="flex-1 space-y-6 min-w-0">
+    <div className="flex items-center justify-between">
+      <h2 className="text-xl font-semibold text-slate-800">ダッシュボード</h2>
+      <div className="flex items-center gap-3">
+        <span className="inline-flex items-center gap-1.5 text-xs bg-success-50 text-success-700 border border-success-200/60 px-2.5 py-1 rounded-md font-medium"><CheckCircle2 size={12} />全システム正常</span>
         <span className="text-xs text-slate-400">最終更新: 14:32</span>
       </div>
     </div>
 
     {/* AI Summary — ※ reviewer ロールには非表示 / Redisキャッシュ30分 */}
-    <div className="bg-gradient-to-r from-brand-50 to-purple-50 rounded-lg border border-brand-200 p-3">
-      <div className="flex items-center justify-between mb-1">
+    <div className="bg-gradient-to-r from-brand-50 to-purple-50 rounded-lg border border-brand-200 p-4">
+      <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <Bot className="w-4 h-4 inline" />
-          <span className="text-xs font-bold text-brand-700">AI サマリー</span>
+          <Sparkles size={14} className="text-brand-500" />
+          <span className="text-sm font-medium text-brand-700">AI サマリー</span>
         </div>
-        <button onClick={handleRegenerate} className="text-xs text-brand-500 hover:text-brand-700">{aiSummaryLoading ? "生成中..." : "再生成"}</button>
+        <button onClick={handleRegenerate} className="inline-flex items-center gap-1.5 text-xs text-brand-500 hover:text-brand-700 font-medium transition-colors duration-150">
+          {aiSummaryLoading ? <><Loader2 size={12} className="animate-spin" />生成中...</> : <><RefreshCw size={12} />再生成</>}
+        </button>
       </div>
-      <p className={`text-xs text-slate-700 transition-opacity duration-300 ${aiSummaryLoading ? "opacity-30" : "opacity-100"}`}>{aiSummaryLoading ? "AIサマリーを生成しています..." : "本日の取引は順調です。取引量は前日比+8%、決済成功率99.2%。不正検知で2件を自動ブロック済み。例外キューに審査保留3件あり（うち1件は2時間超過）。対応をお願いします。"}</p>
+      <p className={`text-[13px] text-slate-700 leading-relaxed transition-opacity duration-300 ${aiSummaryLoading ? "opacity-30" : "opacity-100"}`}>{aiSummaryLoading ? "AIサマリーを生成しています..." : "本日の取引は順調です。取引量は前日比+8%、決済成功率99.2%。不正検知で2件を自動ブロック済み。例外キューに審査保留3件あり（うち1件は2時間超過）。対応をお願いします。"}</p>
     </div>
 
     {/* お知らせ欄 */}
@@ -399,7 +405,7 @@ const MasterDashboard = () => {
         { date: "02/10", title: "代理店向け報酬計算ロジック変更について", type: "重要", tColor: "red", icon: <Handshake className="w-4 h-4 inline text-slate-500" />, target: "管理者" },
       ];
       const renderNotice = (n, i) => (
-        <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-brand-50 ${i === 0 ? "border-warning-300 bg-warning-50" : i === 1 ? "border-danger-200 bg-danger-50/50" : "border-slate-200"}`}>
+        <div key={i} className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg border text-xs cursor-pointer hover:bg-brand-50 transition-colors duration-150 ${i === 0 ? "border-warning-300 bg-warning-50" : i === 1 ? "border-danger-200 bg-danger-50/50" : "border-slate-200"}`}>
           <span>{n.icon}</span>
           <span className="w-12 text-slate-400 shrink-0">{n.date}</span>
           <Badge text={n.type} color={n.tColor} />
@@ -408,24 +414,24 @@ const MasterDashboard = () => {
         </div>
       );
       return (
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <div className="flex items-center justify-between mb-2">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card p-5 hover:shadow-md transition-shadow duration-150">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Megaphone className="w-4 h-4 inline" />
-            <p className="text-xs font-bold text-slate-600">お知らせ</p>
+            <Megaphone size={15} className="text-slate-500" />
+            <p className="text-sm font-medium text-slate-700">お知らせ</p>
             <Badge text="管理者向け" color="purple" />
-            {allNotices.length > 3 && <span className="text-xs text-slate-300">({allNotices.length}件)</span>}
+            {allNotices.length > 3 && <span className="text-xs text-slate-400">({allNotices.length}件)</span>}
           </div>
           {allNotices.length > 3 && (
-            <button className="text-xs text-brand-600 cursor-pointer hover:underline" onClick={() => setShowAllNotices(!showAllNotices)}>
-              {showAllNotices ? "閉じる ▲" : `すべて見る (${allNotices.length - 3}件) ▼`}
+            <button className="text-xs text-brand-600 cursor-pointer hover:underline font-medium transition-colors duration-150" onClick={() => setShowAllNotices(!showAllNotices)}>
+              {showAllNotices ? "閉じる" : `すべて見る (${allNotices.length - 3}件)`}
             </button>
           )}
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {allNotices.slice(0, 3).map(renderNotice)}
           {showAllNotices && (
-            <div className="space-y-1.5 pt-1 border-t border-dashed border-slate-200 mt-1">
+            <div className="space-y-2 pt-2 border-t border-dashed border-slate-200 mt-2">
               {allNotices.slice(3).map((n, i) => renderNotice(n, i + 3))}
             </div>
           )}
@@ -435,28 +441,32 @@ const MasterDashboard = () => {
     })()}
 
     {/* クイックアクション（最上部） */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-600 mb-2"><Zap className="w-4 h-4 inline mr-1" /> クイックアクション</p>
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <Zap size={15} className="text-slate-500" />
+        <p className="text-sm font-medium text-slate-700">クイックアクション</p>
+      </div>
       <div className="flex gap-2">
         {[{ icon: ClipboardList, label: "例外キュー", color: "rose" }, { icon: Search, label: "取引検索", color: "blue" }, { icon: BarChart3, label: "レポート生成", color: "emerald" }, { icon: Users, label: "加盟店一覧", color: "slate" }, { icon: Bot, label: "AI監視", color: "purple" }].map(({ icon: Icon, label, color }, i) => (
-          <button key={i} onClick={() => nav.setMasterPage(navMap[label])} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100 flex items-center justify-center gap-1`}><Icon className="w-3.5 h-3.5" /> {label}</button>
+          <button key={i} onClick={() => nav.setMasterPage(navMap[label])} className={`flex-1 py-2.5 rounded-lg border text-xs font-medium bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100 flex items-center justify-center gap-1.5 transition-colors duration-150`}><Icon size={14} /> {label}</button>
         ))}
       </div>
     </div>
 
     {/* KPIs + Period Toggle */}
-    <div className="space-y-2">
-      <div className="flex justify-end">
-        <div className="flex bg-slate-100 rounded-lg p-1">
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium text-slate-700">主要指標</p>
+        <div className="flex bg-slate-100 rounded-lg p-0.5">
           {[{k:"today",l:"本日"},{k:"week",l:"今週"},{k:"month",l:"今月"}].map(p => (
-            <button key={p.k} className={`text-sm px-3 py-1.5 rounded ${kpiPeriod === p.k ? "bg-white shadow-sm text-brand-600 font-semibold" : "text-slate-500"}`}
+            <button key={p.k} className={`text-xs px-3 py-1.5 rounded-md transition-colors duration-150 ${kpiPeriod === p.k ? "bg-white shadow-sm text-brand-600 font-semibold" : "text-slate-500 hover:text-slate-700"}`}
               onClick={() => setKpiPeriod(p.k)}>{p.l}</button>
           ))}
         </div>
       </div>
-      <div className="flex gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {[{ label: "取引量", value: "1,247件", sub: "前日比", trend: 8 }, { label: "決済高", value: "¥18.3M", sub: "前日比", trend: 12 }, { label: "決済成功率", value: "99.2%", sub: "目標: 99.0%", color: "green" }, { label: "チャージバック率", value: "0.03%", sub: "基準: 1.0%以下", color: "green" }, { label: "自動化率", value: "94.2%", sub: "目標: 95%", color: "purple" }].map((k, i) => (
-          <div key={i} onClick={() => kpiDrillData[k.label] && setShowKpiDrill(k.label)} className={`flex-1 ${kpiDrillData[k.label] ? "cursor-pointer hover:ring-2 hover:ring-brand-200 rounded-lg transition-all" : ""}`}>
+          <div key={i} onClick={() => kpiDrillData[k.label] && setShowKpiDrill(k.label)} className={`${kpiDrillData[k.label] ? "cursor-pointer hover:ring-2 hover:ring-brand-200 rounded-lg transition-all duration-150" : ""}`}>
             <KPICard label={k.label} value={k.value} sub={k.sub} trend={k.trend} color={k.color} />
           </div>
         ))}
@@ -464,74 +474,77 @@ const MasterDashboard = () => {
     </div>
 
     {/* Charts + Exception Queue Preview */}
-    <div className="flex gap-3">
-      <div className="flex-1 bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center gap-2">
-            <p className="text-xs font-bold text-slate-600">取引推移</p>
-            <div className="flex bg-slate-100 rounded-lg p-1">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 shadow-card p-5 hover:shadow-md transition-shadow duration-150">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-3">
+            <p className="text-sm font-medium text-slate-700">取引推移</p>
+            <div className="flex bg-slate-100 rounded-lg p-0.5">
               {[{k:"count",l:"件数"},{k:"amount",l:"金額"}].map(t => (
-                <button key={t.k} className={`text-sm px-3 py-1.5 rounded ${chartType === t.k ? "bg-white shadow-sm text-brand-600 font-semibold" : "text-slate-400"}`}
+                <button key={t.k} className={`text-xs px-3 py-1.5 rounded-md transition-colors duration-150 ${chartType === t.k ? "bg-white shadow-sm text-brand-600 font-semibold" : "text-slate-400 hover:text-slate-600"}`}
                   onClick={() => setChartType(t.k)}>{t.l}</button>
               ))}
             </div>
           </div>
-          <div className="flex bg-slate-100 rounded-lg p-1">
+          <div className="flex bg-slate-100 rounded-lg p-0.5">
             {[{k:"7d",l:"7日"},{k:"30d",l:"30日"},{k:"90d",l:"90日"}].map(p => (
-              <button key={p.k} className={`text-sm px-3 py-1.5 rounded ${chartPeriod === p.k ? "bg-white shadow-sm text-brand-600 font-semibold" : "text-slate-400"}`}
+              <button key={p.k} className={`text-xs px-3 py-1.5 rounded-md transition-colors duration-150 ${chartPeriod === p.k ? "bg-white shadow-sm text-brand-600 font-semibold" : "text-slate-400 hover:text-slate-600"}`}
                 onClick={() => setChartPeriod(p.k)}>{p.l}</button>
             ))}
           </div>
         </div>
         {chartType === "count" ? (
-          <div className="h-24 flex items-end gap-1">
+          <div className="h-28 flex items-end gap-1.5 px-1">
             {[820, 950, 1100, 980, 1150, 1200, 1247].map((v, i) => (
               <div key={i} className="flex-1 flex flex-col items-center">
-                <div className="w-full bg-brand-400 rounded-t" style={{ height: `${(v / 1300) * 80}px` }} />
-                <span className="text-xs text-slate-400 mt-1">{["月","火","水","木","金","土","日"][i]}</span>
+                <div className="w-full bg-brand-400 rounded-t hover:bg-brand-500 transition-colors duration-150" style={{ height: `${(v / 1300) * 90}px` }} />
+                <span className="text-xs text-slate-400 mt-1.5">{["月","火","水","木","金","土","日"][i]}</span>
               </div>
             ))}
           </div>
         ) : (
-          <div className="h-24 flex items-end gap-1">
+          <div className="h-28 flex items-end gap-1.5 px-1">
             {[12.5, 14.2, 16.8, 15.1, 17.3, 18.0, 18.3].map((v, i) => (
               <div key={i} className="flex-1 flex flex-col items-center">
-                <div className="w-full bg-success-400 rounded-t" style={{ height: `${(v / 20) * 80}px` }} />
-                <span className="text-xs text-slate-400 mt-1">{["月","火","水","木","金","土","日"][i]}</span>
+                <div className="w-full bg-success-400 rounded-t hover:bg-success-500 transition-colors duration-150" style={{ height: `${(v / 20) * 90}px` }} />
+                <span className="text-xs text-slate-400 mt-1.5">{["月","火","水","木","金","土","日"][i]}</span>
               </div>
             ))}
           </div>
         )}
       </div>
-      <div className="w-72 bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <div className="flex justify-between items-center mb-2">
-          <p className="text-xs font-bold text-slate-600">例外キュー</p>
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card p-5 hover:shadow-md transition-shadow duration-150">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-medium text-slate-700">例外キュー</p>
           <div className="flex items-center gap-2">
-            <span className="bg-danger-500 text-white text-xs rounded-full px-1.5 py-0.5">3件</span>
-            <button onClick={() => nav.setMasterPage("queue")} className="text-xs text-brand-500 hover:underline">全て見る →</button>
+            <span className="bg-danger-500 text-white text-[11px] font-medium rounded-full px-2 py-0.5">3件</span>
+            <button onClick={() => nav.setMasterPage("queue")} className="text-xs text-brand-500 hover:text-brand-700 font-medium transition-colors duration-150">全て見る</button>
           </div>
         </div>
-        <div className="space-y-2">
-          <div className="bg-warning-50 rounded p-2 border border-warning-200">
-            <div className="flex justify-between"><span className="text-xs font-semibold text-slate-700">審査保留 #1024</span><Badge text="2h超過" color="red" /></div>
-            <p className="text-xs text-slate-500 mt-1">中リスク加盟店 / AI推薦: 承認</p>
+        <div className="space-y-2.5">
+          <div className="bg-warning-50 rounded-lg p-3 border border-warning-200">
+            <div className="flex justify-between items-center"><span className="text-xs font-semibold text-slate-700">審査保留 #1024</span><Badge text="2h超過" color="red" /></div>
+            <p className="text-xs text-slate-500 mt-1.5">中リスク加盟店 / AI推薦: 承認</p>
           </div>
-          <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
-            <div className="flex justify-between"><span className="text-xs font-semibold text-slate-700">不正検知保留 #5521</span><Badge text="30分前" color="yellow" /></div>
-            <p className="text-xs text-slate-500 mt-1">¥89,000 / リスクスコア: 72</p>
+          <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+            <div className="flex justify-between items-center"><span className="text-xs font-semibold text-slate-700">不正検知保留 #5521</span><Badge text="30分前" color="yellow" /></div>
+            <p className="text-xs text-slate-500 mt-1.5">¥89,000 / リスクスコア: 72</p>
           </div>
-          <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
-            <div className="flex justify-between"><span className="text-xs font-semibold text-slate-700">審査保留 #1025</span><Badge text="15分前" color="gray" /></div>
-            <p className="text-xs text-slate-500 mt-1">中リスク / AI推薦: 承認</p>
+          <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+            <div className="flex justify-between items-center"><span className="text-xs font-semibold text-slate-700">審査保留 #1025</span><Badge text="15分前" color="gray" /></div>
+            <p className="text-xs text-slate-500 mt-1.5">中リスク / AI推薦: 承認</p>
           </div>
         </div>
       </div>
     </div>
 
     {/* Processor Health — green=正常 yellow=注意 red=異常 blue=メンテナンス orange=緊急 */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-600 mb-2">接続先ヘルス</p>
-      <div className="flex gap-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card p-5 hover:shadow-md transition-shadow duration-150">
+      <div className="flex items-center gap-2 mb-3">
+        <Network size={15} className="text-slate-500" />
+        <p className="text-sm font-medium text-slate-700">接続先ヘルス</p>
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
         {[
           { name: "Univa Pay cast", status: "healthy", rate: "99.5%", ms: "120ms", tag: null },
           { name: "楽天銀行", status: "healthy", rate: "99.1%", ms: "95ms", tag: null },
@@ -540,20 +553,20 @@ const MasterDashboard = () => {
           { name: "ビットキャッシュ", status: "healthy", rate: "99.8%", ms: "80ms", tag: null },
           { name: "ペイディ", status: "healthy", rate: "99.9%", ms: "75ms", tag: null },
         ].map((p, i) => (
-          <div key={i} className="flex-1 bg-slate-50 rounded p-2 flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${
+          <div key={i} className="bg-slate-50 rounded-lg p-3 flex items-center gap-2.5 border border-slate-100 hover:border-slate-200 transition-colors duration-150">
+            <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${
               p.status === "healthy" ? "bg-success-500" :
               p.status === "warning" ? "bg-warning-500" :
               p.status === "error" ? "bg-danger-500" :
               p.status === "maintenance" ? "bg-brand-500" :
               "bg-orange-500"
             }`} />
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-1">
-                <p className="text-xs font-semibold text-slate-700">{p.name}</p>
-                {p.tag && <span className={`text-xs px-1 py-0.5 rounded ${p.status === "maintenance" ? "bg-brand-100 text-brand-600" : "bg-orange-100 text-orange-600"}`}>{p.tag}</span>}
+                <p className="text-xs font-semibold text-slate-700 truncate">{p.name}</p>
+                {p.tag && <span className={`text-[10px] px-1.5 py-0.5 rounded-md shrink-0 ${p.status === "maintenance" ? "bg-brand-100 text-brand-600" : "bg-orange-100 text-orange-600"}`}>{p.tag}</span>}
               </div>
-              <p className="text-xs text-slate-400">{p.tag ? "計画停止中" : `成功率 ${p.rate} / ${p.ms}`}</p>
+              <p className="text-xs text-slate-400 mt-0.5">{p.tag ? "計画停止中" : `成功率 ${p.rate} / ${p.ms}`}</p>
             </div>
           </div>
         ))}
@@ -564,18 +577,18 @@ const MasterDashboard = () => {
 
     {/* KPIドリルダウンモーダル */}
     {showKpiDrill && kpiDrillData[showKpiDrill] && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowKpiDrill(null)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
+      <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowKpiDrill(null)} />
+        <div className="relative bg-white rounded-xl shadow-overlay w-[420px] animate-scale-in">
           <div className="p-4 border-b flex items-center justify-between">
-            <p className="text-sm font-bold">{showKpiDrill} - 内訳</p>
-            <button onClick={() => setShowKpiDrill(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
+            <p className="text-sm font-semibold text-slate-800">{showKpiDrill} - 内訳</p>
+            <button onClick={() => setShowKpiDrill(null)} className="p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors duration-150"><X size={16} /></button>
           </div>
-          <div className="p-4 space-y-4">
-            <div className="text-center py-2"><p className="text-2xl font-bold text-slate-800">{kpiDrillData[showKpiDrill].value}</p></div>
+          <div className="p-5 space-y-4">
+            <div className="text-center py-3"><p className="text-2xl font-bold text-slate-800">{kpiDrillData[showKpiDrill].value}</p></div>
             <div className="space-y-2">
               {kpiDrillData[showKpiDrill].details.map((d, i) => (
-                <div key={i} className="flex items-center text-xs border-b pb-1.5"><span className="flex-1 text-slate-600">{d.label}</span><span className="font-bold text-slate-800">{d.value}</span></div>
+                <div key={i} className="flex items-center text-[13px] px-3 py-2 rounded-lg bg-slate-50"><span className="flex-1 text-slate-600">{d.label}</span><span className="font-semibold text-slate-800">{d.value}</span></div>
               ))}
             </div>
           </div>
@@ -2411,27 +2424,27 @@ const MerchantDashboard = () => {
     { id: "pay_4b9z0a", time: "13:41", amount: "¥1,980", status: "成功", sc: "green", method: "QR" },
   ];
   return (
-  <div className="p-5 space-y-4">
-    <div className="flex justify-between items-center">
-      <h2 className="text-sm font-bold text-slate-800">ダッシュボード</h2>
-      <div className="flex items-center gap-2">
-        <div className="flex bg-slate-100 rounded-lg p-1">
+  <div className="p-6 space-y-6">
+    <div className="flex items-center justify-between">
+      <h2 className="text-xl font-semibold text-slate-800">ダッシュボード</h2>
+      <div className="flex items-center gap-3">
+        <div className="flex bg-slate-100 rounded-lg p-0.5">
           {["今日", "今週", "今月"].map(p => (
-            <button key={p} onClick={() => setPeriod(p)} className={`text-sm px-3 py-1.5 rounded ${period === p ? "bg-white shadow-sm text-brand-600 font-semibold" : "text-slate-500"}`}>{p}</button>
+            <button key={p} onClick={() => setPeriod(p)} className={`text-xs px-3 py-1.5 rounded-md transition-colors duration-150 ${period === p ? "bg-white shadow-sm text-brand-600 font-semibold" : "text-slate-500 hover:text-slate-700"}`}>{p}</button>
           ))}
         </div>
-        <span className="text-xs text-slate-400">株式会社ABCマート</span>
+        <span className="text-xs text-slate-400 font-medium">株式会社ABCマート</span>
       </div>
     </div>
 
     {/* Under Review State (shown when merchant is under review) */}
     {false && (
-      <div className="bg-warning-50 rounded-lg border border-warning-300 p-6 text-center space-y-3">
-        <div className="text-3xl"><ClipboardList className="w-4 h-4 inline" /></div>
-        <p className="text-sm font-bold text-warning-800">現在審査中です</p>
-        <p className="text-xs text-warning-700">審査完了後にダッシュボードのデータが表示されます。</p>
+      <div className="bg-warning-50 rounded-lg border border-warning-300 p-8 text-center space-y-3">
+        <div className="w-12 h-12 rounded-full bg-warning-100 flex items-center justify-center mx-auto"><ClipboardList size={24} className="text-warning-500" /></div>
+        <p className="text-base font-semibold text-warning-800">現在審査中です</p>
+        <p className="text-sm text-warning-700">審査完了後にダッシュボードのデータが表示されます。</p>
         <div className="flex items-center justify-center gap-2">
-          <div className="h-2 w-48 bg-slate-200 rounded-full"><div className="h-2 bg-warning-500 rounded-full" style={{width:"60%"}} /></div>
+          <div className="h-2 w-48 bg-slate-200 rounded-full"><div className="h-2 bg-warning-500 rounded-full transition-all duration-500" style={{width:"60%"}} /></div>
           <span className="text-xs text-warning-600 font-semibold">60%</span>
         </div>
         <p className="text-xs text-slate-500">通常1〜3時間で完了します。結果はメールでお知らせします。</p>
@@ -2447,7 +2460,7 @@ const MerchantDashboard = () => {
         { date: "02/12", title: "3Dセキュア2.0 完全移行のお知らせ", type: "お知らせ", tColor: "default", icon: <Pin className="w-4 h-4 inline text-slate-500" /> },
       ];
       const renderMNotice = (n, i) => (
-        <div key={i} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-brand-50 ${i === 0 ? "border-warning-300 bg-warning-50" : "border-slate-200"}`}>
+        <div key={i} className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg border text-xs cursor-pointer hover:bg-brand-50 transition-colors duration-150 ${i === 0 ? "border-warning-300 bg-warning-50" : "border-slate-200"}`}>
           <span>{n.icon}</span>
           <span className="w-12 text-slate-400 shrink-0">{n.date}</span>
           <Badge text={n.type} color={n.tColor} />
@@ -2455,23 +2468,23 @@ const MerchantDashboard = () => {
         </div>
       );
       return (
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <div className="flex items-center justify-between mb-2">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card p-5 hover:shadow-md transition-shadow duration-150">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Megaphone className="w-4 h-4 inline" />
-            <p className="text-xs font-bold text-slate-600">お知らせ</p>
-            {mNotices.length > 3 && <span className="text-xs text-slate-300">({mNotices.length}件)</span>}
+            <Megaphone size={15} className="text-slate-500" />
+            <p className="text-sm font-medium text-slate-700">お知らせ</p>
+            {mNotices.length > 3 && <span className="text-xs text-slate-400">({mNotices.length}件)</span>}
           </div>
           {mNotices.length > 3 && (
-            <button className="text-xs text-brand-600 cursor-pointer hover:underline" onClick={() => setShowAllNotices(!showAllNotices)}>
-              {showAllNotices ? "閉じる ▲" : `すべて見る (${mNotices.length - 3}件) ▼`}
+            <button className="text-xs text-brand-600 cursor-pointer hover:underline font-medium transition-colors duration-150" onClick={() => setShowAllNotices(!showAllNotices)}>
+              {showAllNotices ? "閉じる" : `すべて見る (${mNotices.length - 3}件)`}
             </button>
           )}
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {mNotices.slice(0, 3).map(renderMNotice)}
           {showAllNotices && (
-            <div className="space-y-1.5 pt-1 border-t border-dashed border-slate-200 mt-1">
+            <div className="space-y-2 pt-2 border-t border-dashed border-slate-200 mt-2">
               {mNotices.slice(3).map((n, i) => renderMNotice(n, i + 3))}
             </div>
           )}
@@ -2480,112 +2493,122 @@ const MerchantDashboard = () => {
       );
     })()}
 
-    <div className="bg-gradient-to-r from-success-50 to-brand-50 rounded-lg border border-success-200 p-3">
-      <div className="flex items-center gap-2 mb-1">
-        <Bot className="w-4 h-4 inline" /><span className="text-xs font-bold text-success-700">AI インサイト</span><span className="text-xs text-slate-400">毎日更新</span>
+    <div className="bg-gradient-to-r from-success-50 to-brand-50 rounded-lg border border-success-200 p-4">
+      <div className="flex items-center gap-2 mb-2">
+        <Sparkles size={14} className="text-success-500" />
+        <span className="text-sm font-medium text-success-700">AI インサイト</span>
+        <span className="text-xs text-slate-400">毎日更新</span>
       </div>
-      <p className="text-xs text-slate-700">昨日の売上は¥412,000で前週比+15%。カード決済が78%を占めています。決済成功率は99.5%と安定。特異なパターンはありません。WEBマネーの導入で、カート離脱率を約8%改善できる可能性があります。</p>
+      <p className="text-[13px] text-slate-700 leading-relaxed">昨日の売上は¥412,000で前週比+15%。カード決済が78%を占めています。決済成功率は99.5%と安定。特異なパターンはありません。WEBマネーの導入で、カート離脱率を約8%改善できる可能性があります。</p>
     </div>
 
-    <div className="flex gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {Object.entries(kpiData).map(([label, d]) => (
-        <div key={label} onClick={() => setShowKpiDetail(label)} className="flex-1 cursor-pointer hover:ring-2 hover:ring-brand-200 rounded-lg transition-all">
+        <div key={label} onClick={() => setShowKpiDetail(label)} className="cursor-pointer hover:ring-2 hover:ring-brand-200 rounded-lg transition-all duration-150">
           <KPICard label={label} value={d.value} sub={label === "決済成功率" ? "" : "前月比"} trend={d.trend} color={label === "決済成功率" ? "green" : undefined} />
         </div>
       ))}
     </div>
 
-    <div className="flex gap-3">
-      <div className="flex-1 bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <p className="text-xs font-bold text-slate-600 mb-2">決済高推移（直近30日）</p>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 shadow-card p-5 hover:shadow-md transition-shadow duration-150">
+        <p className="text-sm font-medium text-slate-700 mb-3">決済高推移（直近30日）</p>
         <div className="flex items-center justify-center h-20">
           <MiniChart data={[280,310,295,340,380,350,420,390,410,380,420,450,412,440,470,430,460,480,450,490,510,480,520,540,510,550,530,560,580,550]} w={400} h={70} />
         </div>
       </div>
-      <div className="w-56 bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <p className="text-xs font-bold text-slate-600 mb-2">決済手段分布</p>
-        <div className="space-y-2">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card p-5 hover:shadow-md transition-shadow duration-150">
+        <p className="text-sm font-medium text-slate-700 mb-3">決済手段分布</p>
+        <div className="space-y-3">
           {[{ name: "クレジットカード", pct: 89, color: "bg-brand-500" }, { name: "WEBマネー", pct: 11, color: "bg-purple-500" }].map((m, i) => (
             <div key={i}>
-              <div className="flex justify-between text-xs"><span className="text-slate-600">{m.name}</span><span className="font-semibold">{m.pct}%</span></div>
-              <div className="w-full h-1.5 bg-slate-100 rounded-full mt-0.5"><div className={`h-full ${m.color} rounded-full`} style={{ width: `${m.pct}%` }} /></div>
+              <div className="flex justify-between text-xs"><span className="text-slate-600">{m.name}</span><span className="font-semibold text-slate-800">{m.pct}%</span></div>
+              <div className="w-full h-2 bg-slate-100 rounded-full mt-1"><div className={`h-full ${m.color} rounded-full transition-all duration-500`} style={{ width: `${m.pct}%` }} /></div>
             </div>
           ))}
         </div>
       </div>
     </div>
 
-    <div className="grid grid-cols-2 gap-3">
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <p className="text-xs font-bold text-slate-600 mb-2"><Lightbulb className="w-4 h-4 inline mr-1" /> AIからの改善提案</p>
-        <div className="space-y-2">
-          <div className="bg-brand-50 rounded p-2 text-xs text-brand-700"><BarChart3 className="w-4 h-4 inline mr-1" /> 19-21時台の売上が全体の35%を占めています。この時間帯のサーバー応答速度を最適化すると成功率が向上する可能性があります。</div>
-          <div className="bg-success-50 rounded p-2 text-xs text-success-700"><CreditCard className="w-4 h-4 inline mr-1" /> 3Dセキュアのフリクションレス率が92%です。チャレンジ率をさらに下げるために、デバイス情報の送信を強化しましょう。</div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card p-5 hover:shadow-md transition-shadow duration-150">
+        <div className="flex items-center gap-2 mb-3">
+          <Lightbulb size={15} className="text-slate-500" />
+          <p className="text-sm font-medium text-slate-700">AIからの改善提案</p>
+        </div>
+        <div className="space-y-2.5">
+          <div className="bg-brand-50 rounded-lg p-3 text-[13px] text-brand-700 leading-relaxed flex gap-2"><BarChart3 size={16} className="shrink-0 mt-0.5" /> <span>19-21時台の売上が全体の35%を占めています。この時間帯のサーバー応答速度を最適化すると成功率が向上する可能性があります。</span></div>
+          <div className="bg-success-50 rounded-lg p-3 text-[13px] text-success-700 leading-relaxed flex gap-2"><CreditCard size={16} className="shrink-0 mt-0.5" /> <span>3Dセキュアのフリクションレス率が92%です。チャレンジ率をさらに下げるために、デバイス情報の送信を強化しましょう。</span></div>
         </div>
       </div>
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-bold text-slate-600">直近の取引</p>
-          <span className="text-xs text-brand-600 cursor-pointer">すべて見る →</span>
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card p-5 hover:shadow-md transition-shadow duration-150">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-medium text-slate-700">直近の取引</p>
+          <button className="text-xs text-brand-600 font-medium hover:text-brand-700 transition-colors duration-150">すべて見る</button>
         </div>
-        {recentTx.map((tx, i) => (
-          <div key={i} className="flex items-center py-1.5 text-xs border-b last:border-0">
-            <span className="w-16 font-mono text-slate-400">{tx.time}</span>
-            <span className="flex-1 font-bold">{tx.amount}</span>
-            <span className="w-10 text-slate-400">{tx.method}</span>
-            <Badge text={tx.status} color={tx.sc} />
-          </div>
-        ))}
+        <div className="divide-y divide-slate-100">
+          {recentTx.map((tx, i) => (
+            <div key={i} className="flex items-center px-1 py-2.5 text-[13px] hover:bg-slate-50 transition-colors duration-150 rounded">
+              <span className="w-16 font-mono text-slate-400">{tx.time}</span>
+              <span className="flex-1 font-semibold text-slate-800">{tx.amount}</span>
+              <span className="w-12 text-slate-400 text-xs">{tx.method}</span>
+              <Badge text={tx.status} color={tx.sc} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
 
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-      <p className="text-xs font-bold text-slate-600 mb-2"><Zap className="w-4 h-4 inline mr-1" /> クイックアクション</p>
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <Zap size={15} className="text-slate-500" />
+        <p className="text-sm font-medium text-slate-700">クイックアクション</p>
+      </div>
       <div className="flex gap-2">
         {[["注文一覧", "blue"], ["決済高レポート", "emerald"], ["API設定", "slate"], ["AIに相談", "purple"]].map(([label, color], i) => (
-          <button key={i} onClick={() => toast(`${label}を開きます`, "info")} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100`}>{label}</button>
+          <button key={i} onClick={() => toast(`${label}を開きます`, "info")} className={`flex-1 py-2.5 rounded-lg border text-xs font-medium bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100 transition-colors duration-150`}>{label}</button>
         ))}
       </div>
     </div>
 
     {/* KPIドリルダウンモーダル */}
     {showKpiDetail && kpiData[showKpiDetail] && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowKpiDetail(null)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[480px] max-h-[80vh] overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowKpiDetail(null)} />
+        <div className="relative bg-white rounded-xl shadow-overlay w-[480px] max-h-[80vh] overflow-y-auto animate-scale-in">
           <div className="p-4 border-b flex items-center justify-between">
-            <p className="text-sm font-bold">{showKpiDetail} - 詳細</p>
-            <button onClick={() => setShowKpiDetail(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
+            <p className="text-sm font-semibold text-slate-800">{showKpiDetail} - 詳細</p>
+            <button onClick={() => setShowKpiDetail(null)} className="p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors duration-150"><X size={16} /></button>
           </div>
-          <div className="p-4 space-y-4">
+          <div className="p-5 space-y-5">
             <div className="text-center py-3">
               <p className="text-2xl font-bold text-slate-800">{kpiData[showKpiDetail].value}</p>
-              <p className="text-xs text-success-600 mt-1">前月比 +{kpiData[showKpiDetail].trend}%</p>
+              <p className="text-xs text-success-600 font-medium mt-1.5">前月比 +{kpiData[showKpiDetail].trend}%</p>
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-700 mb-2">月次推移（直近6ヶ月）</p>
-              <div className="flex items-end gap-2 h-20 px-2">
+              <p className="text-sm font-medium text-slate-700 mb-3">月次推移（直近6ヶ月）</p>
+              <div className="flex items-end gap-2 h-24 px-2">
                 {kpiData[showKpiDetail].chart.map((v, i) => {
                   const max = Math.max(...kpiData[showKpiDetail].chart);
                   const h = max > 0 ? (v / max) * 100 : 0;
                   return (
                     <div key={i} className="flex-1 flex flex-col items-center">
                       <p className="text-xs text-slate-500 mb-1">{typeof v === "number" && v > 1000 ? `${(v/1000).toFixed(0)}K` : v}</p>
-                      <div className={`w-full rounded-t ${i === 5 ? "bg-brand-500" : "bg-brand-200"}`} style={{ height: `${h}%` }} />
-                      <p className="text-xs text-slate-400 mt-1">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
+                      <div className={`w-full rounded-t transition-colors duration-150 ${i === 5 ? "bg-brand-500" : "bg-brand-200 hover:bg-brand-300"}`} style={{ height: `${h}%` }} />
+                      <p className="text-xs text-slate-400 mt-1.5">{["9月", "10月", "11月", "12月", "1月", "2月"][i]}</p>
                     </div>
                   );
                 })}
               </div>
             </div>
-            <div>
-              <p className="text-xs font-bold text-slate-700 mb-2">内訳</p>
-              <div className="space-y-2">
+            <div className="border-t border-slate-100 pt-5">
+              <p className="text-sm font-medium text-slate-700 mb-3">内訳</p>
+              <div className="space-y-1">
                 {kpiData[showKpiDetail].details.map((d, i) => (
-                  <div key={i} className="flex items-center text-xs border-b pb-1.5">
+                  <div key={i} className="flex items-center text-[13px] px-3 py-2.5 rounded-lg bg-slate-50">
                     <span className="flex-1 text-slate-600">{d.label}</span>
-                    <span className="font-bold text-slate-800 w-20 text-right">{d.value}</span>
-                    {d.pct && <span className="w-12 text-right text-slate-400">{d.pct}</span>}
+                    <span className="font-semibold text-slate-800 w-20 text-right">{d.value}</span>
+                    {d.pct && <span className="w-12 text-right text-slate-400 text-xs">{d.pct}</span>}
                   </div>
                 ))}
               </div>
@@ -13566,11 +13589,11 @@ const MerchantCustomers = () => {
 // 決済処理ステップアニメーション
 const PaymentProcessingFlow = ({ onComplete, onError }) => {
   const steps = [
-    { id: 1, label: "トークン化", desc: "カード情報を暗号化", icon: <Key className="w-4 h-4 inline text-slate-500" />, zone: "A" },
-    { id: 2, label: "ルーティング", desc: "最適な接続先を選択", icon: <Shuffle className="w-4 h-4 inline text-slate-500" />, zone: "A" },
-    { id: 3, label: "不正検知", desc: "リスクスコア判定", icon: <Shield className="w-4 h-4 inline text-slate-500" />, zone: "A" },
-    { id: 4, label: "接続先通信", desc: "プロセッサーへ送信", icon: <Radio className="w-4 h-4 inline text-slate-500" />, zone: "A" },
-    { id: 5, label: "結果同期", desc: "管理系DBに記録", icon: <Save className="w-4 h-4 inline text-slate-500" />, zone: "B" },
+    { id: 1, label: "トークン化", desc: "カード情報を暗号化", icon: <Key className="w-4 h-4 inline" />, zone: "A" },
+    { id: 2, label: "ルーティング", desc: "最適な接続先を選択", icon: <Shuffle className="w-4 h-4 inline" />, zone: "A" },
+    { id: 3, label: "不正検知", desc: "リスクスコア判定", icon: <Shield className="w-4 h-4 inline" />, zone: "A" },
+    { id: 4, label: "接続先通信", desc: "プロセッサーへ送信", icon: <Radio className="w-4 h-4 inline" />, zone: "A" },
+    { id: 5, label: "結果同期", desc: "管理系DBに記録", icon: <Save className="w-4 h-4 inline" />, zone: "B" },
   ];
   const [currentStep, setCurrentStep] = useState(0);
   const [status, setStatus] = useState("processing"); // processing | success | error
@@ -13586,212 +13609,370 @@ const PaymentProcessingFlow = ({ onComplete, onError }) => {
     return () => clearTimeout(timer);
   }, [currentStep, status]);
 
+  const pct = Math.round((currentStep / steps.length) * 100);
+
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
-      <div className="bg-slate-900 text-white px-6 py-5">
-        <div className="flex items-center gap-2"><Lock className="w-4 h-4 inline" /><span className="text-sm font-bold">決済処理中</span></div>
-      </div>
-      <div className="px-6 py-5">
-        {/* Progress bar */}
-        <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden mb-6">
-          <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full transition-all duration-500 ease-out" style={{ width: `${(currentStep / steps.length) * 100}%` }} />
+    <div className="bg-white rounded-xl shadow-lg border border-slate-200/60 overflow-hidden">
+      {/* Centered spinner header */}
+      <div className="px-6 sm:px-8 pt-8 pb-2 text-center">
+        <div className="w-14 h-14 rounded-full bg-brand-50 border-2 border-brand-100 flex items-center justify-center mx-auto mb-4">
+          <div className="w-6 h-6 border-[2.5px] border-brand-200 border-t-brand-500 rounded-full animate-spin" />
         </div>
+        <h3 className="text-lg font-semibold text-slate-800">お支払いを処理しています</h3>
+        <p className="text-sm text-slate-400 mt-1">ブラウザを閉じないでください</p>
+      </div>
+
+      <div className="px-6 sm:px-8 py-6">
+        {/* Progress bar */}
+        <div className="relative h-1.5 bg-slate-100 rounded-full overflow-hidden mb-1">
+          <div className="absolute inset-y-0 left-0 bg-brand-500 rounded-full transition-all duration-500 ease-out" style={{ width: `${pct}%` }} />
+        </div>
+        <p className="text-right text-xs text-slate-400 mb-5">{pct}%</p>
 
         {/* Steps */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {steps.map((step, idx) => {
             const isDone = idx < currentStep;
             const isActive = idx === currentStep && status === "processing";
             return (
-              <div key={step.id} className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${isActive ? "bg-brand-50 border border-brand-200 shadow-sm" : isDone ? "bg-success-50/50" : "opacity-40"}`}>
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0 ${isDone ? "bg-success-100" : isActive ? "bg-brand-100" : "bg-slate-100"}`}>
-                  {isDone ? "有効" : isActive ? <span className="animate-pulse">{step.icon}</span> : step.icon}
+              <div key={step.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-300 ${isActive ? "bg-brand-50/80" : isDone ? "bg-slate-50/60" : ""}`}>
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-colors duration-300 ${isDone ? "bg-success-100 text-success-600" : isActive ? "bg-brand-100 text-brand-600" : "bg-slate-100 text-slate-300"}`}>
+                  {isDone ? <Check className="w-3.5 h-3.5" /> : isActive ? <span className="animate-pulse">{step.icon}</span> : step.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm font-bold ${isDone ? "text-success-700" : isActive ? "text-brand-700" : "text-slate-400"}`}>{step.label}</span>
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${step.zone === "A" ? "bg-danger-100 text-danger-600" : "bg-brand-100 text-brand-600"}`}>Zone {step.zone}</span>
-                  </div>
-                  <p className={`text-xs ${isDone ? "text-success-500" : isActive ? "text-brand-500" : "text-slate-300"}`}>{isDone ? "完了" : isActive ? "処理中..." : step.desc}</p>
+                  <span className={`text-sm font-medium ${isDone ? "text-slate-700" : isActive ? "text-slate-800" : "text-slate-400"}`}>{step.label}</span>
+                  <span className={`text-xs ml-2 ${isDone ? "text-success-500" : isActive ? "text-brand-500" : "text-slate-300"}`}>
+                    {isDone ? "完了" : isActive ? "処理中..." : step.desc}
+                  </span>
                 </div>
-                {isActive && <div className="w-4 h-4 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin shrink-0" />}
-                {isDone && <Check className="w-4 h-4 text-success-500 shrink-0" />}
+                <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${step.zone === "A" ? "bg-slate-100 text-slate-400" : "bg-brand-50 text-brand-400"}`}>Zone {step.zone}</span>
+                {isActive && <div className="w-3.5 h-3.5 border-2 border-brand-200 border-t-brand-500 rounded-full animate-spin shrink-0" />}
               </div>
             );
           })}
         </div>
 
         {/* Zone Legend */}
-        <div className="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-slate-100">
-          <span className="flex items-center gap-1 text-[10px]"><span className="w-2 h-2 rounded bg-danger-400"></span><span className="text-slate-400">Zone A (CDE)</span></span>
-          <span className="flex items-center gap-1 text-[10px]"><span className="w-2 h-2 rounded bg-brand-400"></span><span className="text-slate-400">Zone B (管理系)</span></span>
+        <div className="flex items-center justify-center gap-4 mt-5 pt-3 border-t border-slate-100">
+          <span className="flex items-center gap-1.5 text-[10px]"><span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span><span className="text-slate-400">Zone A (CDE)</span></span>
+          <span className="flex items-center gap-1.5 text-[10px]"><span className="w-1.5 h-1.5 rounded-full bg-brand-400"></span><span className="text-slate-400">Zone B (管理系)</span></span>
         </div>
 
-        <p className="text-xs text-slate-400 text-center mt-3">ブラウザを閉じないでください</p>
-
-        {/* ワイヤーフレーム用: 手動遷移ボタン */}
+        {/* Wireframe: manual transition buttons */}
         <div className="mt-4 flex gap-2 justify-center">
-          <button onClick={onComplete} className="px-3 py-1 bg-success-100 text-success-700 rounded text-xs">→ 成功</button>
-          <button onClick={onError} className="px-3 py-1 bg-danger-100 text-danger-700 rounded text-xs">→ 失敗</button>
+          <button onClick={onComplete} className="px-3 py-1 bg-success-50 text-success-600 rounded-md text-xs font-medium hover:bg-success-100 transition-colors">成功へ</button>
+          <button onClick={onError} className="px-3 py-1 bg-danger-50 text-danger-600 rounded-md text-xs font-medium hover:bg-danger-100 transition-colors">失敗へ</button>
         </div>
       </div>
     </div>
   );
 };
 
+// 決済ページ共通フッター
+const PaymentFooter = () => (
+  <div className="flex flex-col items-center gap-2 pt-5 pb-2">
+    <div className="flex items-center gap-1.5 text-xs text-slate-400">
+      <Lock className="w-3 h-3" />
+      <span>安全な決済</span>
+      <span className="text-slate-300">|</span>
+      <span>TLS 1.2+暗号化</span>
+      <span className="text-slate-300">|</span>
+      <span>PCI DSS v4.0準拠</span>
+    </div>
+    <div className="flex items-center gap-2">
+      {["VISA", "Mastercard", "JCB", "AMEX"].map(b => (
+        <span key={b} className="text-[10px] font-medium text-slate-400 tracking-wide">{b}</span>
+      ))}
+    </div>
+  </div>
+);
+
 const PaymentPage = () => {
   const [screen, setScreen] = useState("input");
+  const [payMethod, setPayMethod] = useState("card"); // card | cvs | bank
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-bold text-slate-800">決済ページ</h2>
-          <div className="flex gap-1">
-            {[{ id: "input", label: "入力" }, { id: "3ds", label: "3DS認証" }, { id: "processing", label: "処理中" }, { id: "complete", label: "完了" }, { id: "error", label: "エラー" }, { id: "link_error", label: "リンク無効" }].map(s => (
-              <button key={s.id} onClick={() => setScreen(s.id)} className={`px-2 py-0.5 rounded text-xs ${screen === s.id ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-500"}`}>{s.label}</button>
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 sm:px-6 py-8">
+      <div className="w-full max-w-lg">
+        {/* Wireframe screen switcher */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xs font-semibold text-slate-400 tracking-wide uppercase">Payment Page</h2>
+          <div className="flex gap-1 flex-wrap justify-end">
+            {[{ id: "input", label: "入力" }, { id: "3ds", label: "3DS" }, { id: "processing", label: "処理中" }, { id: "complete", label: "完了" }, { id: "error", label: "エラー" }, { id: "link_error", label: "リンク無効" }].map(s => (
+              <button key={s.id} onClick={() => setScreen(s.id)} className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${screen === s.id ? "bg-brand-500 text-white" : "bg-white text-slate-400 hover:text-slate-600 border border-slate-200"}`}>{s.label}</button>
             ))}
           </div>
         </div>
 
+        {/* ─── INPUT SCREEN ─── */}
         {screen === "input" && (
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
-            {/* PCI DSS v4.0 Req 6.4.3 / 11.6.1 スクリプト完全性管理 */}
-            <div className="bg-warning-50 border-b border-warning-200 px-4 py-1.5 text-xs text-warning-700">
-              <span className="font-bold"><Zap className="w-4 h-4 inline mr-1" /> CDE iframe方式</span> — カード入力フォームはcde.aipayment.jp内のiframeで動作。管理系JSはカード番号に触れません。
-              <span className="ml-2 text-warning-500">CSP: script-src 'self' 'nonce-...' | SRI: 全スクリプトにintegrity属性 | 週次ハッシュ監視</span>
+          <div className="space-y-4">
+            {/* PCI DSS wireframe note */}
+            <div className="bg-warning-50/80 border border-warning-200/60 rounded-lg px-4 py-2 text-xs text-warning-700">
+              <span className="font-semibold"><Zap className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />CDE iframe方式</span> — カード入力フォームはcde.aipayment.jp内のiframeで動作。管理系JSはカード番号に触れません。
+              <span className="block mt-0.5 text-warning-500/80">CSP: script-src 'self' 'nonce-...' | SRI: integrity属性 | 週次ハッシュ監視</span>
             </div>
-            <div className="bg-slate-900 text-white px-6 py-5">
-              <div className="flex items-center gap-2"><Lock className="w-4 h-4 inline" /><span className="text-sm font-bold">安全なお支払い</span></div>
-            </div>
-            <div className="px-6 py-5 bg-brand-50/70 border-b border-brand-100">
-              <p className="text-xs text-slate-500">お支払い先: 〇〇ショップ</p>
-              <p className="text-sm font-bold mt-1">プレミアムプラン</p>
-              <p className="text-3xl font-bold text-brand-600 tracking-tight mt-1">¥9,800</p>
-            </div>
-            <div className="px-6 py-4 space-y-3">
-              <div><label className="text-xs text-slate-500">カード番号</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="1234 5678 9012 3456" /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-xs text-slate-500">有効期限</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="MM/YY" /></div>
-                <div><label className="text-xs text-slate-500">セキュリティコード</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="CVC" /></div>
-              </div>
-              <div><label className="text-xs text-slate-500">カード名義</label><input className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 outline-none px-3 py-2 text-sm mt-0.5" placeholder="TARO YAMADA" /></div>
-              <button onClick={() => setScreen("3ds")} className="w-full py-3.5 bg-brand-500 text-white rounded-xl text-base font-bold shadow-lg shadow-brand-600/20 hover:bg-brand-600 hover:shadow-xl transition-all duration-200 mt-3"><CreditCard className="w-4 h-4 inline mr-1" /> ¥9,800 を支払う</button>
-              <div className="flex items-center justify-center gap-3 text-xs text-slate-400 pt-2">
-                <span><Lock className="w-4 h-4 inline mr-1" /> TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
-              </div>
-              <div className="flex justify-center gap-2 pt-1">
-                {["VISA", "MC", "JCB", "AMEX"].map(b => (
-                  <span key={b} className="text-xs px-1.5 py-0.5 bg-slate-100 rounded border border-slate-200">{b}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
-        {screen === "3ds" && (
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
-            <div className="bg-slate-900 text-white px-6 py-5">
-              <div className="flex items-center gap-2"><Lock className="w-4 h-4 inline" /><span className="text-sm font-bold">3Dセキュア認証</span></div>
-            </div>
-            <div className="px-6 py-6">
-              <div className="border-2 border-brand-200 rounded-lg p-5 bg-brand-50/50">
-                <div className="text-center mb-4">
-                  <div className="w-16 h-10 bg-brand-500 rounded mx-auto flex items-center justify-center text-white text-xs font-bold">VISA</div>
-                  <p className="text-sm font-bold text-slate-800 mt-3">本人認証サービス</p>
-                  <p className="text-xs text-slate-500 mt-1">Verified by VISA</p>
-                </div>
-                <div className="bg-white rounded border p-3 space-y-3">
-                  <div className="text-xs">
-                    <p className="text-slate-400">加盟店名</p>
-                    <p className="font-semibold text-slate-700">〇〇ショップ</p>
-                  </div>
-                  <div className="text-xs">
-                    <p className="text-slate-400">お支払い金額</p>
-                    <p className="font-bold text-slate-800">¥9,800</p>
-                  </div>
+            {/* Main card */}
+            <div className="bg-white rounded-xl shadow-lg border border-slate-200/60 overflow-hidden">
+              {/* Header: merchant info + amount */}
+              <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-5 border-b border-slate-100">
+                {/* Logo placeholder */}
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold text-sm shrink-0">AI</div>
                   <div>
-                    <label className="text-xs text-slate-500">ワンタイムパスワード</label>
-                    <input className="w-full border rounded-lg px-3 py-2 text-sm mt-0.5 text-center tracking-widest" placeholder="● ● ● ● ● ●" maxLength={6} />
-                    <p className="text-xs text-slate-400 mt-1">ご登録の携帯番号にSMSで送信しました</p>
+                    <p className="text-sm font-semibold text-slate-800">AIpayment Shop</p>
+                    <p className="text-xs text-slate-400">aipayment.jp</p>
                   </div>
-                  <button onClick={() => setScreen("processing")} className="w-full py-2.5 bg-brand-500 text-white rounded-lg text-sm font-bold hover:bg-brand-600">認証する</button>
-                  <button onClick={() => setScreen("input")} className="w-full py-2 bg-slate-100 text-slate-500 rounded-lg text-xs">キャンセル</button>
+                </div>
+                {/* Order summary */}
+                <div className="flex items-end justify-between">
+                  <div>
+                    <p className="text-xs text-slate-500 mb-0.5">プレミアムプラン</p>
+                    <p className="text-[32px] font-bold text-slate-900 tracking-tight leading-none">¥9,800</p>
+                  </div>
+                  <span className="text-xs text-slate-400 bg-slate-50 px-2 py-1 rounded-md">税込</span>
                 </div>
               </div>
-              <div className="mt-4 flex gap-2 justify-center">
-                <button onClick={() => setScreen("processing")} className="px-3 py-1 bg-success-100 text-success-700 rounded text-xs">→ 認証成功</button>
-                <button onClick={() => setScreen("error")} className="px-3 py-1 bg-danger-100 text-danger-700 rounded text-xs">→ 認証失敗</button>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {screen === "processing" && (
-          <PaymentProcessingFlow onComplete={() => setScreen("complete")} onError={() => setScreen("error")} />
-        )}
+              {/* Payment method tabs */}
+              <div className="px-6 sm:px-8 pt-5">
+                <div className="flex border-b border-slate-200 mb-5">
+                  {[
+                    { id: "card", label: "カード", icon: <CreditCard className="w-3.5 h-3.5" /> },
+                    { id: "cvs", label: "コンビニ", icon: <Receipt className="w-3.5 h-3.5" /> },
+                    { id: "bank", label: "銀行振込", icon: <Landmark className="w-3.5 h-3.5" /> },
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setPayMethod(tab.id)}
+                      className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors relative ${payMethod === tab.id ? "text-brand-600" : "text-slate-400 hover:text-slate-600"}`}
+                    >
+                      {tab.icon}
+                      {tab.label}
+                      {payMethod === tab.id && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-500 rounded-full" />}
+                    </button>
+                  ))}
+                </div>
 
-        {screen === "complete" && (
-          <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
-            <div className="bg-success-600 text-white px-6 py-6 text-center">
-              <div className="text-4xl mb-2"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></div>
-              <p className="text-lg font-bold">お支払い完了</p>
-            </div>
-            <div className="px-6 py-4">
-              <div className="bg-slate-50 rounded-lg p-4 space-y-2">
-                {[["商品名", "プレミアムプラン"], ["お支払い金額", "¥9,800"], ["注文番号", "ORD-20260213-0042"], ["日時", "2026/02/13 14:30"], ["カード", "VISA **** 4242"]].map(([k, v], i) => (
-                  <div key={i} className="flex justify-between text-xs">
-                    <span className="text-slate-500">{k}</span>
-                    <span className="font-bold">{v}</span>
+                {/* Card form */}
+                {payMethod === "card" && (
+                  <div className="space-y-4 pb-6 sm:pb-8">
+                    {/* Email */}
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1.5">メールアドレス</label>
+                      <input className="w-full border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-300 transition-shadow" placeholder="your@email.com" />
+                    </div>
+
+                    {/* Stripe-style grouped card fields */}
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1.5">カード情報</label>
+                      <div className="border border-slate-200 rounded-lg divide-y divide-slate-200 focus-within:ring-2 focus-within:ring-brand-500/20 focus-within:border-brand-500 transition-shadow overflow-hidden">
+                        {/* Card number row */}
+                        <div className="flex items-center">
+                          <input className="flex-1 border-0 outline-none px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-300 bg-transparent" placeholder="1234 5678 9012 3456" />
+                          <div className="flex items-center gap-1 pr-3">
+                            {["VISA", "MC", "JCB", "AMEX"].map(b => (
+                              <span key={b} className="text-[9px] font-bold text-slate-300 bg-slate-50 px-1 py-0.5 rounded">{b}</span>
+                            ))}
+                          </div>
+                        </div>
+                        {/* Expiry + CVC row */}
+                        <div className="flex divide-x divide-slate-200">
+                          <input className="flex-1 border-0 outline-none px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-300 bg-transparent" placeholder="MM / YY" />
+                          <input className="flex-1 border-0 outline-none px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-300 bg-transparent" placeholder="CVC" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Cardholder name */}
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1.5">カード名義</label>
+                      <input className="w-full border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-300 transition-shadow uppercase" placeholder="TARO YAMADA" />
+                    </div>
+
+                    {/* Pay button */}
+                    <button onClick={() => setScreen("3ds")} className="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-3 rounded-lg transition-colors duration-150 text-base shadow-sm mt-2">
+                      ¥9,800 を支払う
+                    </button>
+
+                    {/* Security indicators */}
+                    <div className="flex items-center justify-center gap-1.5 pt-1">
+                      <Lock className="w-3 h-3 text-slate-300" />
+                      <span className="text-xs text-slate-400">安全な決済 — 情報は暗号化されます</span>
+                    </div>
                   </div>
-                ))}
+                )}
+
+                {/* Convenience store placeholder */}
+                {payMethod === "cvs" && (
+                  <div className="pb-6 sm:pb-8 text-center py-8">
+                    <Receipt className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                    <p className="text-sm font-medium text-slate-600">コンビニ決済</p>
+                    <p className="text-xs text-slate-400 mt-1">セブン-イレブン / ファミリーマート / ローソン</p>
+                    <div className="mt-4 space-y-3 text-left max-w-xs mx-auto">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-600 mb-1.5">お名前</label>
+                        <input className="w-full border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none px-3.5 py-2.5 text-sm placeholder:text-slate-300 transition-shadow" placeholder="山田 太郎" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-600 mb-1.5">メールアドレス</label>
+                        <input className="w-full border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none px-3.5 py-2.5 text-sm placeholder:text-slate-300 transition-shadow" placeholder="your@email.com" />
+                      </div>
+                      <button className="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-3 rounded-lg transition-colors duration-150 text-sm">お支払い番号を発行する</button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bank transfer placeholder */}
+                {payMethod === "bank" && (
+                  <div className="pb-6 sm:pb-8 text-center py-8">
+                    <Landmark className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                    <p className="text-sm font-medium text-slate-600">銀行振込</p>
+                    <p className="text-xs text-slate-400 mt-1">振込先口座をメールでお知らせします</p>
+                    <div className="mt-4 space-y-3 text-left max-w-xs mx-auto">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-600 mb-1.5">メールアドレス</label>
+                        <input className="w-full border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none px-3.5 py-2.5 text-sm placeholder:text-slate-300 transition-shadow" placeholder="your@email.com" />
+                      </div>
+                      <button className="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-3 rounded-lg transition-colors duration-150 text-sm">振込先を送信する</button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <p className="text-xs text-slate-400 text-center mt-3">※ 決済完了メールを送信しました</p>
-              <button className="w-full py-2 bg-slate-100 text-slate-600 rounded-lg text-sm mt-3 border">ページを閉じる</button>
             </div>
-            <div className="flex items-center justify-center gap-3 text-xs text-slate-400 py-3 border-t">
-              <span><Lock className="w-4 h-4 inline mr-1" /> TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
-            </div>
+
+            {/* Footer */}
+            <PaymentFooter />
           </div>
         )}
 
+        {/* ─── 3DS SCREEN ─── */}
+        {screen === "3ds" && (
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl shadow-lg border border-slate-200/60 overflow-hidden">
+              <div className="px-6 sm:px-8 pt-6 pb-4 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-brand-500" />
+                  <span className="text-sm font-semibold text-slate-800">3Dセキュア認証</span>
+                </div>
+                <p className="text-xs text-slate-400 mt-1">カード会社による本人確認を行います</p>
+              </div>
+              <div className="px-6 sm:px-8 py-6">
+                <div className="border border-brand-200 rounded-xl p-5 bg-brand-50/30">
+                  <div className="text-center mb-5">
+                    <div className="w-14 h-9 bg-brand-500 rounded-md mx-auto flex items-center justify-center text-white text-xs font-bold tracking-wider">VISA</div>
+                    <p className="text-sm font-semibold text-slate-800 mt-3">本人認証サービス</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Verified by VISA</p>
+                  </div>
+                  <div className="bg-white rounded-lg border border-slate-200 p-4 space-y-3">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">加盟店名</span>
+                      <span className="font-semibold text-slate-700">AIpayment Shop</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">お支払い金額</span>
+                      <span className="font-bold text-slate-800">¥9,800</span>
+                    </div>
+                    <div className="border-t border-slate-100 pt-3">
+                      <label className="block text-xs font-medium text-slate-600 mb-1.5">ワンタイムパスワード</label>
+                      <input className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-center tracking-[0.3em] focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-shadow placeholder:text-slate-300" placeholder="------" maxLength={6} />
+                      <p className="text-[11px] text-slate-400 mt-1.5">ご登録の携帯番号にSMSで送信しました</p>
+                    </div>
+                    <button onClick={() => setScreen("processing")} className="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors">認証する</button>
+                    <button onClick={() => setScreen("input")} className="w-full py-2 text-slate-400 hover:text-slate-600 rounded-lg text-xs transition-colors">キャンセルして戻る</button>
+                  </div>
+                </div>
+                {/* Wireframe: manual transition */}
+                <div className="mt-4 flex gap-2 justify-center">
+                  <button onClick={() => setScreen("processing")} className="px-3 py-1 bg-success-50 text-success-600 rounded-md text-xs font-medium hover:bg-success-100 transition-colors">認証成功</button>
+                  <button onClick={() => setScreen("error")} className="px-3 py-1 bg-danger-50 text-danger-600 rounded-md text-xs font-medium hover:bg-danger-100 transition-colors">認証失敗</button>
+                </div>
+              </div>
+            </div>
+            <PaymentFooter />
+          </div>
+        )}
+
+        {/* ─── PROCESSING SCREEN ─── */}
+        {screen === "processing" && (
+          <div className="space-y-4">
+            <PaymentProcessingFlow onComplete={() => setScreen("complete")} onError={() => setScreen("error")} />
+            <PaymentFooter />
+          </div>
+        )}
+
+        {/* ─── COMPLETE SCREEN ─── */}
+        {screen === "complete" && (
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl shadow-lg border border-slate-200/60 overflow-hidden">
+              <div className="px-6 sm:px-8 pt-8 pb-5 text-center">
+                <div className="w-14 h-14 rounded-full bg-success-50 flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 className="w-7 h-7 text-success-500" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800">お支払い完了</h3>
+                <p className="text-sm text-slate-400 mt-1">決済が正常に処理されました</p>
+              </div>
+              <div className="px-6 sm:px-8 pb-6">
+                <div className="bg-slate-50 rounded-lg p-4 space-y-2.5 border border-slate-100">
+                  {[["商品名", "プレミアムプラン"], ["お支払い金額", "¥9,800"], ["注文番号", "ORD-20260213-0042"], ["日時", "2026/02/13 14:30"], ["カード", "VISA **** 4242"]].map(([k, v], i) => (
+                    <div key={i} className="flex justify-between text-sm">
+                      <span className="text-slate-400">{k}</span>
+                      <span className="font-medium text-slate-700">{v}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-400 text-center mt-4">確認メールを送信しました</p>
+                <button className="w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg text-sm font-medium mt-3 border border-slate-200 transition-colors">ページを閉じる</button>
+              </div>
+            </div>
+            <PaymentFooter />
+          </div>
+        )}
+
+        {/* ─── ERROR SCREEN ─── */}
         {screen === "error" && (
-          <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
-            <div className="bg-danger-600 text-white px-6 py-6 text-center">
-              <div className="text-4xl mb-2"><XCircle className="w-4 h-4 text-danger-500 inline" /></div>
-              <p className="text-lg font-bold">お支払いに失敗しました</p>
-            </div>
-            <div className="px-6 py-4 text-center">
-              <div className="bg-danger-50 border border-danger-200 rounded-lg p-4 mt-2">
-                <p className="text-sm text-danger-700">カードの利用限度額を超えています</p>
-                <p className="text-xs text-danger-500 mt-1">別のカードでお試しいただくか、カード会社にお問い合わせください</p>
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl shadow-lg border border-slate-200/60 overflow-hidden">
+              <div className="px-6 sm:px-8 pt-8 pb-5 text-center">
+                <div className="w-14 h-14 rounded-full bg-danger-50 flex items-center justify-center mx-auto mb-4">
+                  <XCircle className="w-7 h-7 text-danger-500" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800">お支払いに失敗しました</h3>
+                <p className="text-sm text-slate-400 mt-1">別の方法をお試しください</p>
               </div>
-              <div className="flex gap-2 mt-4">
-                <button onClick={() => setScreen("input")} className="flex-1 py-2 bg-brand-500 text-white rounded-lg text-sm font-bold">もう一度試す</button>
-                <button className="flex-1 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm border">ページを閉じる</button>
+              <div className="px-6 sm:px-8 pb-6">
+                <div className="bg-danger-50/50 border border-danger-100 rounded-lg p-4">
+                  <p className="text-sm text-danger-700 font-medium">カードの利用限度額を超えています</p>
+                  <p className="text-xs text-danger-500/80 mt-1">別のカードでお試しいただくか、カード会社にお問い合わせください</p>
+                </div>
+                <div className="flex gap-3 mt-5">
+                  <button onClick={() => setScreen("input")} className="flex-1 bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors">もう一度試す</button>
+                  <button className="flex-1 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg text-sm font-medium border border-slate-200 transition-colors">閉じる</button>
+                </div>
               </div>
             </div>
-            <div className="flex items-center justify-center gap-3 text-xs text-slate-400 py-3 border-t">
-              <span><Lock className="w-4 h-4 inline mr-1" /> TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
-            </div>
+            <PaymentFooter />
           </div>
         )}
 
+        {/* ─── LINK ERROR SCREEN ─── */}
         {screen === "link_error" && (
-          <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
-            <div className="bg-gray-900 text-white px-6 py-4">
-              <div className="flex items-center gap-2"><Lock className="w-4 h-4 inline" /><span className="text-sm font-bold">安全なお支払い</span></div>
-            </div>
-            <div className="px-6 py-12 text-center">
-              <div className="text-4xl mb-3"><AlertTriangle className="w-4 h-4 text-warning-500 inline" /></div>
-              <p className="text-sm font-bold text-slate-700">この決済リンクは無効です</p>
-              <p className="text-xs text-slate-400 mt-2">リンクの有効期限が過ぎているか、利用可能回数に達しています</p>
-              <div className="bg-slate-50 rounded-lg p-3 mt-4 text-xs text-slate-500">
-                お支払い先にお問い合わせください
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl shadow-lg border border-slate-200/60 overflow-hidden">
+              <div className="px-6 sm:px-8 pt-8 pb-5 text-center">
+                <div className="w-14 h-14 rounded-full bg-warning-50 flex items-center justify-center mx-auto mb-4">
+                  <AlertTriangle className="w-7 h-7 text-warning-500" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800">この決済リンクは無効です</h3>
+                <p className="text-sm text-slate-400 mt-1">リンクの有効期限が過ぎているか、利用可能回数に達しています</p>
+              </div>
+              <div className="px-6 sm:px-8 pb-6">
+                <div className="bg-slate-50 border border-slate-100 rounded-lg p-4 text-center">
+                  <p className="text-sm text-slate-500">お支払い先にお問い合わせください</p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center justify-center gap-3 text-xs text-slate-400 py-3 border-t">
-              <span><Lock className="w-4 h-4 inline mr-1" /> TLS 1.2+暗号化通信</span><span>|</span><span>PCI DSS v4.0準拠</span>
-            </div>
+            <PaymentFooter />
           </div>
         )}
       </div>
