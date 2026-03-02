@@ -1,15 +1,66 @@
 @import "tailwindcss";
 
 @theme {
+  /* Typography */
   --font-sans: 'Inter', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+
+  /* Brand Colors - Stripe-inspired */
+  --color-brand-50: #F0F0FF;
+  --color-brand-100: #E0E0FF;
+  --color-brand-200: #C7C4FF;
+  --color-brand-300: #A5A0FF;
+  --color-brand-400: #8A82FF;
+  --color-brand-500: #635BFF;
+  --color-brand-600: #5851DB;
+  --color-brand-700: #4B45B2;
+  --color-brand-800: #3E3A8F;
+  --color-brand-900: #312E6C;
+
+  /* Semantic Status Colors */
+  --color-success-50: #ECFDF5;
+  --color-success-100: #D1FAE5;
+  --color-success-500: #10B981;
+  --color-success-600: #059669;
+  --color-success-700: #047857;
+
+  --color-warning-50: #FFFBEB;
+  --color-warning-100: #FEF3C7;
+  --color-warning-500: #F59E0B;
+  --color-warning-600: #D97706;
+  --color-warning-700: #B45309;
+
+  --color-danger-50: #FEF2F2;
+  --color-danger-100: #FEE2E2;
+  --color-danger-500: #EF4444;
+  --color-danger-600: #DC2626;
+  --color-danger-700: #B91C1C;
+
+  --color-info-50: #EFF6FF;
+  --color-info-100: #DBEAFE;
+  --color-info-500: #3B82F6;
+  --color-info-600: #2563EB;
+
+  /* Shadows - Stripe uses very subtle shadows */
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  --shadow-overlay: 0 25px 50px -12px rgb(0 0 0 / 0.15);
 }
 
 @layer base {
   body {
     @apply antialiased text-slate-700;
     font-feature-settings: 'palt';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Focus visible ring - accessibility */
+  *:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--color-brand-500);
+    border-radius: 4px;
+  }
+
+  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -24,18 +75,44 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
   }
+
+  /* Selection color */
+  ::selection {
+    background: var(--color-brand-100);
+    color: var(--color-brand-900);
+  }
 }
 
 @layer components {
-  /* テーブルコンテナ: 横スクロール対応 */
   .table-container {
     @apply overflow-x-auto;
   }
 }
 
-/* トースト通知アニメーション */
+/* Toast animation */
 @keyframes slide-in {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
 .animate-slide-in { animation: slide-in 0.3s ease-out; }
+
+/* Modal fade-in */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in { animation: fade-in 0.15s ease-out; }
+
+/* Modal scale-in */
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in { animation: scale-in 0.2s ease-out; }
+
+/* Slide panel animation */
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.animate-slide-in-right { animation: slide-in-right 0.25s ease-out; }

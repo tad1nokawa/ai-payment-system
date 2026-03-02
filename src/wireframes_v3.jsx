@@ -1,4 +1,5 @@
 import React, { useState, useContext, useCallback, useRef, useEffect, createContext } from "react";
+import { LayoutDashboard, Zap, Search, CreditCard, Bot, ClipboardList, Shield, Users, Settings, Building2, FileText, TrendingUp, Wallet, BarChart3, Network, AlertTriangle, Eye, Link2, RefreshCw, UserCircle, Wrench, MessageSquare, ChevronDown, ChevronRight, ChevronLeft, ChevronUp, X, Check, Plus, Download, Upload, Filter, MoreHorizontal, Lock, ArrowUpRight, ArrowDownRight, Bell, LogOut, Copy, ThumbsUp, ThumbsDown, Send, Loader2, Info, AlertCircle, CheckCircle2, XCircle, CircleDot, ExternalLink, Pencil, Trash2, Archive, Play, Pause, RotateCcw, Calendar, Clock, Globe, Mail, Phone, Receipt, ArrowRight, ArrowLeft, Handshake, Monitor, Radio, ShoppingCart, Repeat, UserPlus, FileSpreadsheet, Landmark } from "lucide-react";
 
 // ─── トースト通知システム ───
 const ToastContext = createContext(() => {});
@@ -10,21 +11,25 @@ const ToastProvider = ({ children }) => {
     setToasts(prev => [...prev, { id, message, type }]);
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), duration);
   }, []);
+  const iconMap = { success: CheckCircle2, error: XCircle, warning: AlertTriangle, info: Info };
   return (
     <ToastContext.Provider value={addToast}>
       {children}
       <div className="fixed top-4 right-4 z-[100] space-y-2 pointer-events-none" style={{minWidth:"320px"}}>
-        {toasts.map(t => (
-          <div key={t.id} className={`pointer-events-auto px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold flex items-center gap-2 animate-slide-in ${
-            t.type === "success" ? "bg-emerald-50 text-emerald-800 border-emerald-200" :
-            t.type === "error" ? "bg-rose-50 text-rose-800 border-rose-200" :
-            t.type === "warning" ? "bg-amber-50 text-amber-800 border-amber-200" :
-            "bg-blue-50 text-blue-800 border-blue-200"
-          }`}>
-            <span>{t.type === "success" ? "✅" : t.type === "error" ? "❌" : t.type === "warning" ? "⚠️" : "ℹ️"}</span>
-            <span>{t.message}</span>
-          </div>
-        ))}
+        {toasts.map(t => {
+          const Icon = iconMap[t.type] || Info;
+          return (
+            <div key={t.id} className={`pointer-events-auto px-4 py-3 rounded-lg shadow-lg border text-[13px] font-medium flex items-center gap-2.5 animate-slide-in ${
+              t.type === "success" ? "bg-emerald-50 text-emerald-800 border-emerald-200" :
+              t.type === "error" ? "bg-rose-50 text-rose-800 border-rose-200" :
+              t.type === "warning" ? "bg-amber-50 text-amber-800 border-amber-200" :
+              "bg-blue-50 text-blue-800 border-blue-200"
+            }`}>
+              <Icon size={16} className="shrink-0" />
+              <span>{t.message}</span>
+            </div>
+          );
+        })}
       </div>
     </ToastContext.Provider>
   );
@@ -40,44 +45,45 @@ const ConfirmDialog = ({ config, onClose }) => {
   const [inputVal, setInputVal] = useState("");
   if (!config) return null;
   const colors = {
-    approve: { bg: "bg-emerald-50 border-emerald-200", btn: "bg-emerald-600 hover:bg-emerald-700" },
-    reject: { bg: "bg-rose-50 border-rose-200", btn: "bg-rose-600 hover:bg-rose-700" },
-    danger: { bg: "bg-rose-50 border-rose-200", btn: "bg-rose-600 hover:bg-rose-700" },
-    warning: { bg: "bg-amber-50 border-amber-200", btn: "bg-amber-600 hover:bg-amber-700" },
-    info: { bg: "bg-blue-50 border-blue-200", btn: "bg-blue-600 hover:bg-blue-700" },
+    approve: { bg: "bg-emerald-50 border-emerald-200", btn: "bg-emerald-600 hover:bg-emerald-700", icon: CheckCircle2 },
+    reject: { bg: "bg-rose-50 border-rose-200", btn: "bg-rose-600 hover:bg-rose-700", icon: XCircle },
+    danger: { bg: "bg-rose-50 border-rose-200", btn: "bg-rose-600 hover:bg-rose-700", icon: AlertTriangle },
+    warning: { bg: "bg-amber-50 border-amber-200", btn: "bg-amber-600 hover:bg-amber-700", icon: AlertTriangle },
+    info: { bg: "bg-brand-50 border-brand-200", btn: "bg-brand-500 hover:bg-brand-600", icon: Info },
   };
   const c = colors[config.type] || colors.info;
+  const Icon = c.icon;
   const canConfirm = config.inputConfirm ? inputVal === config.inputConfirm : true;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in">
+      <div className="absolute inset-0 bg-slate-900/20" onClick={onClose} />
+      <div className="relative bg-white rounded-xl shadow-2xl w-[440px] animate-scale-in">
         <div className={`p-4 border-b rounded-t-xl ${c.bg}`}>
-          <h3 className="text-sm font-bold text-slate-800">{config.icon || "⚡"} {config.title}</h3>
+          <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2"><Icon size={16} /> {config.title}</h3>
         </div>
         <div className="p-5 space-y-3">
-          <p className="text-xs text-slate-600">{config.description}</p>
+          <p className="text-[13px] text-slate-600">{config.description}</p>
           {config.details && (
-            <div className="bg-slate-50 rounded border p-2 space-y-1">
+            <div className="bg-slate-50 rounded-lg border border-slate-200 p-3 space-y-1.5">
               {config.details.map(([l,v], i) => (
-                <div key={i} className="flex text-xs"><span className="w-28 text-slate-400">{l}:</span><span className="font-semibold text-slate-700">{v}</span></div>
+                <div key={i} className="flex text-[13px]"><span className="w-28 text-slate-400">{l}:</span><span className="font-medium text-slate-700">{v}</span></div>
               ))}
             </div>
           )}
           {config.warning && (
-            <div className="bg-yellow-50 rounded border border-yellow-200 p-2 text-xs text-yellow-700">⚠️ {config.warning}</div>
+            <div className="bg-amber-50 rounded-lg border border-amber-200 p-3 text-[13px] text-amber-700 flex items-center gap-2"><AlertTriangle size={14} /> {config.warning}</div>
           )}
           {config.inputConfirm && (
             <div>
-              <label className="text-xs text-slate-500">確認のため「{config.inputConfirm}」と入力してください</label>
-              <input value={inputVal} onChange={e => setInputVal(e.target.value)} className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 focus:ring-2 focus:ring-blue-300" />
+              <label className="text-[13px] text-slate-500">確認のため「{config.inputConfirm}」と入力してください</label>
+              <input value={inputVal} onChange={e => setInputVal(e.target.value)} className="w-full text-[13px] border border-slate-200 rounded-md px-3 py-2 mt-1 shadow-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400" />
             </div>
           )}
         </div>
         <div className="p-4 border-t flex gap-2 justify-end">
-          <button onClick={onClose} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+          <button onClick={onClose} className="px-4 py-2 text-[13px] text-slate-600 border border-slate-200 rounded-md hover:bg-slate-50 transition-colors duration-150">キャンセル</button>
           <button disabled={!canConfirm} onClick={() => { config.onConfirm?.(); onClose(); }}
-            className={`px-4 py-2 text-xs text-white rounded font-semibold ${canConfirm ? c.btn : "bg-slate-300 cursor-not-allowed"}`}>
+            className={`px-4 py-2 text-[13px] text-white rounded-md font-medium transition-colors duration-150 ${canConfirm ? c.btn : "bg-slate-300 cursor-not-allowed"}`}>
             {config.confirmLabel || "実行する"}
           </button>
         </div>
@@ -91,7 +97,6 @@ const Sidebar = ({ items, active, onSelect, title, color, user, switchableUsers,
   const [showSwitcher, setShowSwitcher] = useState(false);
   const switcherRef = useRef(null);
 
-  // 外部クリックで閉じる
   useEffect(() => {
     if (!showSwitcher) return;
     const handler = (e) => { if (switcherRef.current && !switcherRef.current.contains(e.target)) setShowSwitcher(false); };
@@ -99,11 +104,9 @@ const Sidebar = ({ items, active, onSelect, title, color, user, switchableUsers,
     return () => document.removeEventListener("mousedown", handler);
   }, [showSwitcher]);
 
-  // 権限に応じたメニューフィルタリング
   const currentUser = switchableUsers?.find(u => u.id === currentUserId);
   const filteredItems = currentUser ? items.map(item => {
     if (item.separator) return item;
-    // サイドバーIDからメニューIDを逆引き
     const menuEntry = Object.entries(MENU_TO_SIDEBAR).find(([, sid]) => sid === item.id);
     if (!menuEntry) return item;
     const perm = currentUser.permissions[menuEntry[0]];
@@ -113,52 +116,54 @@ const Sidebar = ({ items, active, onSelect, title, color, user, switchableUsers,
   }) : items;
 
   return (
-  <div className="w-56 bg-slate-900 text-white flex flex-col shrink-0">
-    <div className="px-5 py-4 border-b border-slate-700/50">
-      <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{title}</p>
-      <p className="text-base font-bold" style={{ color }}>{active}</p>
+  <div className="w-56 bg-white border-r border-slate-200 text-slate-700 flex flex-col shrink-0">
+    <div className="px-5 py-4 border-b border-slate-100">
+      <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">{title}</p>
+      <p className="text-sm font-semibold text-slate-900 mt-0.5">{active}</p>
     </div>
-    <nav className="flex-1 py-2 overflow-y-auto">
+    <nav className="flex-1 py-1 overflow-y-auto">
       {filteredItems.map((item, idx) =>
         item.separator ? (
-          <div key={`sep-${idx}`} className="px-4 pt-4 pb-1.5">
-            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">{item.label}</p>
+          <div key={`sep-${idx}`} className="px-4 pt-5 pb-1">
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{item.label}</p>
           </div>
         ) : item.hidden ? null : (
         <button
           key={item.id}
           onClick={() => onSelect(item.id)}
-          className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2.5 transition-all duration-200 ${
-            active === item.id ? "bg-slate-700/70 text-white border-l-3 border-l-white rounded-r-lg" : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
+          className={`w-full text-left px-3 py-2 mx-1.5 text-[13px] flex items-center gap-2.5 rounded-md transition-colors duration-150 ${
+            active === item.id ? "bg-brand-50 text-brand-700 font-medium" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
           } ${item.readOnly ? "opacity-60" : ""}`}
+          style={{maxWidth: "calc(100% - 12px)"}}
         >
-          <span>{item.icon}</span>
-          <span>{item.label}</span>
-          {item.readOnly && <span className="ml-auto text-[9px] text-amber-400/70 font-medium">閲覧</span>}
+          <span className="w-5 h-5 flex items-center justify-center shrink-0">
+            {typeof item.icon === 'function' ? React.createElement(item.icon, { size: 16, className: active === item.id ? "text-brand-500" : "text-slate-400" }) : <span className="text-sm">{item.icon}</span>}
+          </span>
+          <span className="truncate">{item.label}</span>
+          {item.readOnly && <span className="ml-auto text-[9px] text-amber-500 font-medium bg-amber-50 px-1.5 py-0.5 rounded">閲覧</span>}
           {!item.readOnly && item.badge && <span className="ml-auto bg-rose-500 text-white text-[10px] rounded-full min-w-5 h-5 flex items-center justify-center font-semibold">{item.badge}</span>}
         </button>
         )
       )}
     </nav>
-    <div className="px-5 py-3 border-t border-slate-700/50 shrink-0 relative" ref={switcherRef}>
-      {/* ユーザー切替ポップアップ */}
+    <div className="px-4 py-3 border-t border-slate-100 shrink-0 relative" ref={switcherRef}>
       {showSwitcher && switchableUsers && (
-        <div className="absolute bottom-full left-0 w-full bg-slate-800 border border-slate-600/50 rounded-t-lg shadow-xl overflow-hidden z-50">
-          <div className="px-3 py-2 bg-slate-700/50 border-b border-slate-600/30">
-            <p className="text-[10px] font-semibold text-amber-400 uppercase tracking-wider">🔄 ユーザー切替 (デモ用)</p>
+        <div className="absolute bottom-full left-0 w-full bg-white border border-slate-200 rounded-t-lg shadow-xl overflow-hidden z-50">
+          <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
+            <p className="text-[10px] font-semibold text-brand-600 uppercase tracking-wider flex items-center gap-1"><RefreshCw size={10} /> ユーザー切替 (デモ用)</p>
           </div>
           <div className="max-h-64 overflow-y-auto">
             {switchableUsers.map(u => (
               <button key={u.id} onClick={() => { onSwitchUser(u.id); setShowSwitcher(false); }}
-                className={`w-full text-left px-3 py-2.5 flex items-center gap-2.5 transition-colors text-xs ${
-                  currentUserId === u.id ? "bg-blue-600/20 border-l-2 border-l-blue-400" : "hover:bg-slate-700/50 border-l-2 border-l-transparent"
+                className={`w-full text-left px-3 py-2.5 flex items-center gap-2.5 transition-colors text-[13px] ${
+                  currentUserId === u.id ? "bg-brand-50 border-l-2 border-l-brand-500" : "hover:bg-slate-50 border-l-2 border-l-transparent"
                 }`}>
                 <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: u.rColor }}>{u.initials}</div>
                 <div className="flex-1 min-w-0">
-                  <p className={`font-medium truncate ${currentUserId === u.id ? "text-blue-300" : "text-slate-200"}`}>{u.name}</p>
-                  <p className="text-[9px] text-slate-500 truncate">{u.roleLabel}</p>
+                  <p className={`font-medium truncate ${currentUserId === u.id ? "text-brand-700" : "text-slate-700"}`}>{u.name}</p>
+                  <p className="text-[10px] text-slate-400 truncate">{u.roleLabel}</p>
                 </div>
-                {currentUserId === u.id && <span className="text-blue-400 text-[10px]">●</span>}
+                {currentUserId === u.id && <span className="text-brand-500 text-[10px]"><Check size={14} /></span>}
               </button>
             ))}
           </div>
@@ -166,23 +171,23 @@ const Sidebar = ({ items, active, onSelect, title, color, user, switchableUsers,
       )}
       {user && (
         <button onClick={() => switchableUsers && setShowSwitcher(!showSwitcher)}
-          className={`flex items-center gap-2 mb-2 w-full text-left rounded-lg p-1 -m-1 transition-colors ${switchableUsers ? "hover:bg-slate-800 cursor-pointer" : ""}`}>
+          className={`flex items-center gap-2 mb-2 w-full text-left rounded-lg p-1.5 -m-1 transition-colors ${switchableUsers ? "hover:bg-slate-50 cursor-pointer" : ""}`}>
           <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ color: "#fff", backgroundColor: currentUser?.rColor || "#475569" }}>{user.initials}</div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-slate-200 truncate">{user.name}</p>
-            <p className="text-[10px] text-slate-500 truncate">{user.role}</p>
+            <p className="text-[13px] font-medium text-slate-700 truncate">{user.name}</p>
+            <p className="text-[10px] text-slate-400 truncate">{user.role}</p>
           </div>
-          {switchableUsers && <span className="text-slate-500 text-[10px]">{showSwitcher ? "▼" : "▲"}</span>}
+          {switchableUsers && <ChevronDown size={14} className="text-slate-400" />}
         </button>
       )}
-      <div className="text-xs text-slate-500 flex items-center gap-2">v1.0 / AI Payment</div>
+      <div className="text-[11px] text-slate-400 flex items-center gap-1.5">AI Payment v3.0</div>
     </div>
   </div>
   );
 };
 
 const colorMap = {
-  blue: "text-blue-600",
+  blue: "text-brand-600",
   green: "text-emerald-600",
   red: "text-rose-600",
   purple: "text-violet-600",
@@ -192,40 +197,48 @@ const colorMap = {
 };
 
 const KPICard = ({ label, value, sub, trend, color = "blue" }) => (
-  <div className="bg-white rounded-xl border border-slate-200/60 p-4 lg:p-5 flex-1 min-w-0 shadow-sm hover:shadow-md transition-all duration-200">
-    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</p>
-    <p className={`text-2xl font-bold ${colorMap[color] || "text-blue-600"} mt-1`}>{value}</p>
-    <div className="flex items-center gap-1.5 mt-1.5">
-      {trend && <span className={`text-sm font-semibold ${trend > 0 ? "text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md" : "text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-md"}`}>{trend > 0 ? "↑" : "↓"}{Math.abs(trend)}%</span>}
-      {sub && <span className="text-xs text-slate-400 mt-0.5">{sub}</span>}
+  <div className="bg-white rounded-lg border border-slate-200 p-5 flex-1 min-w-0 hover:shadow-md transition-shadow duration-200">
+    <p className="text-xs font-medium text-slate-500 tracking-wide">{label}</p>
+    <p className={`text-2xl font-semibold ${colorMap[color] || "text-brand-600"} mt-1.5 tracking-tight`}>{value}</p>
+    <div className="flex items-center gap-2 mt-2">
+      {trend && (
+        <span className={`text-xs font-medium inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md ${
+          trend > 0 ? "text-emerald-700 bg-emerald-50" : "text-rose-700 bg-rose-50"
+        }`}>
+          {trend > 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+          {Math.abs(trend)}%
+        </span>
+      )}
+      {sub && <span className="text-xs text-slate-400">{sub}</span>}
     </div>
   </div>
 );
 
 const TableHeader = ({ cols, children }) => (
-  <table className="w-full text-left text-xs">
+  <table className="w-full text-left text-[13px]">
     <thead>
-      <tr className="bg-slate-50/80 border-b border-slate-200 font-semibold text-slate-500 uppercase tracking-wider">
-        {cols.map((c, i) => <th key={i} className={`px-4 py-3 whitespace-nowrap font-semibold ${c.w === "flex-1" ? "" : c.w}`}>{c.label}</th>)}
+      <tr className="border-b border-slate-200 text-xs font-medium text-slate-500 uppercase tracking-wider">
+        {cols.map((c, i) => <th key={i} className={`px-4 py-3 whitespace-nowrap font-medium ${c.w === "flex-1" ? "" : c.w}`}>{c.label}</th>)}
       </tr>
     </thead>
-    <tbody>{children}</tbody>
+    <tbody className="divide-y divide-slate-100">{children}</tbody>
   </table>
 );
 
 const Badge = ({ text, color }) => {
   const colors = {
-    green: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    red: "bg-rose-50 text-rose-700 border-rose-200",
-    yellow: "bg-amber-50 text-amber-700 border-amber-200",
-    blue: "bg-sky-50 text-sky-700 border-sky-200",
-    gray: "bg-slate-100 text-slate-600 border-slate-200",
-    purple: "bg-violet-50 text-violet-700 border-violet-200"
+    green: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
+    red: "bg-rose-50 text-rose-700 border-rose-200/60",
+    yellow: "bg-amber-50 text-amber-700 border-amber-200/60",
+    blue: "bg-blue-50 text-blue-700 border-blue-200/60",
+    gray: "bg-slate-50 text-slate-600 border-slate-200",
+    purple: "bg-violet-50 text-violet-700 border-violet-200/60",
+    brand: "bg-brand-50 text-brand-700 border-brand-200",
   };
-  return <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${colors[color] || colors.gray}`}>{text}</span>;
+  return <span className={`text-xs font-medium px-2 py-0.5 rounded-md border ${colors[color] || colors.gray}`}>{text}</span>;
 };
 
-const MiniChart = ({ data, color = "#3B82F6", h = 30, w = 100 }) => {
+const MiniChart = ({ data, color = "#635BFF", h = 30, w = 100 }) => {
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
@@ -235,12 +248,12 @@ const MiniChart = ({ data, color = "#3B82F6", h = 30, w = 100 }) => {
     <svg width={w} height={h}>
       <defs>
         <linearGradient id={`chartGrad-${color.replace('#','')}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.2"/>
+          <stop offset="0%" stopColor={color} stopOpacity="0.15"/>
           <stop offset="100%" stopColor={color} stopOpacity="0"/>
         </linearGradient>
       </defs>
       <polygon points={fillPoints} fill={`url(#chartGrad-${color.replace('#','')})`} />
-      <polyline points={points} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 };
@@ -13781,63 +13794,63 @@ const PaymentPage = () => {
 
 const masterMenuItems = [
   { separator: true, label: "概況" },
-  { id: "dashboard", icon: "📊", label: "ダッシュボード" },
-  { id: "queue", icon: "⚡", label: "例外キュー", badge: 3 },
+  { id: "dashboard", icon: LayoutDashboard, label: "ダッシュボード" },
+  { id: "queue", icon: Zap, label: "例外キュー", badge: 3 },
   { separator: true, label: "モニタリング" },
-  { id: "txn", icon: "📡", label: "リアルタイム監視" },
+  { id: "txn", icon: Radio, label: "リアルタイム監視" },
   { separator: true, label: "取引" },
-  { id: "orderSearch", icon: "🔍", label: "注文検索" },
-  { id: "customers", icon: "👤", label: "顧客管理" },
-  { id: "recurring", icon: "🔄", label: "継続課金管理" },
+  { id: "orderSearch", icon: Search, label: "注文検索" },
+  { id: "customers", icon: UserCircle, label: "顧客管理" },
+  { id: "recurring", icon: Repeat, label: "継続課金管理" },
   { separator: true, label: "加盟店" },
-  { id: "merchants", icon: "🏢", label: "加盟店管理" },
-  { id: "applications", icon: "📝", label: "審査・申込", badge: 2 },
-  { id: "processors", icon: "🔌", label: "接続先審査", badge: 2 },
-  { id: "agents", icon: "🤝", label: "代理店管理" },
+  { id: "merchants", icon: Building2, label: "加盟店管理" },
+  { id: "applications", icon: FileText, label: "審査・申込", badge: 2 },
+  { id: "processors", icon: Link2, label: "接続先審査", badge: 2 },
+  { id: "agents", icon: Handshake, label: "代理店管理" },
   { separator: true, label: "精算" },
-  { id: "settlement", icon: "💰", label: "精算・入金管理" },
-  { id: "report", icon: "📈", label: "レポート" },
+  { id: "settlement", icon: Wallet, label: "精算・入金管理" },
+  { id: "report", icon: BarChart3, label: "レポート" },
   { separator: true, label: "決済インフラ" },
-  { id: "routing", icon: "🔀", label: "ルーティング" },
-  { id: "fraud", icon: "🛡️", label: "不正検知" },
+  { id: "routing", icon: Network, label: "ルーティング" },
+  { id: "fraud", icon: Shield, label: "不正検知" },
   { separator: true, label: "運用" },
-  { id: "ai", icon: "🤖", label: "AI監視" },
-  { id: "users", icon: "👥", label: "スタッフ管理" },
-  { id: "settings", icon: "⚙️", label: "システム設定" },
+  { id: "ai", icon: Bot, label: "AI監視" },
+  { id: "users", icon: Users, label: "スタッフ管理" },
+  { id: "settings", icon: Settings, label: "システム設定" },
 ];
 
 const merchantMenuItems = [
   { separator: true, label: "ホーム" },
-  { id: "m_dashboard", icon: "📊", label: "ダッシュボード" },
+  { id: "m_dashboard", icon: LayoutDashboard, label: "ダッシュボード" },
   { separator: true, label: "注文" },
-  { id: "m_transactions", icon: "💳", label: "注文一覧" },
-  { id: "m_customers", icon: "👤", label: "顧客管理" },
+  { id: "m_transactions", icon: CreditCard, label: "注文一覧" },
+  { id: "m_customers", icon: UserCircle, label: "顧客管理" },
   { separator: true, label: "集金ツール" },
-  { id: "m_links", icon: "🔗", label: "決済リンク" },
-  { id: "m_subscriptions", icon: "🔄", label: "決済管理" },
+  { id: "m_links", icon: Link2, label: "決済リンク" },
+  { id: "m_subscriptions", icon: Repeat, label: "決済管理" },
   { separator: true, label: "決済高" },
-  { id: "m_report", icon: "📈", label: "決済高レポート" },
-  { id: "m_payout", icon: "💰", label: "入金確認" },
+  { id: "m_report", icon: BarChart3, label: "決済高レポート" },
+  { id: "m_payout", icon: Wallet, label: "入金確認" },
   { separator: true, label: "サイト管理" },
-  { id: "m_site_apply", icon: "📝", label: "新規サイト申請" },
+  { id: "m_site_apply", icon: FileText, label: "新規サイト申請" },
   { separator: true, label: "設定" },
-  { id: "m_api", icon: "🔧", label: "API・Webhook" },
-  { id: "m_users", icon: "👥", label: "スタッフ管理" },
-  { id: "m_account", icon: "⚙️", label: "アカウント設定" },
+  { id: "m_api", icon: Wrench, label: "API・Webhook" },
+  { id: "m_users", icon: Users, label: "スタッフ管理" },
+  { id: "m_account", icon: Settings, label: "アカウント設定" },
   { separator: true, label: "サポート" },
-  { id: "m_chat", icon: "🤖", label: "AIチャット" },
+  { id: "m_chat", icon: Bot, label: "AIチャット" },
 ];
 
 const agentMenuItems = [
   { separator: true, label: "ホーム" },
-  { id: "d_dashboard", icon: "📊", label: "ダッシュボード" },
+  { id: "d_dashboard", icon: LayoutDashboard, label: "ダッシュボード" },
   { separator: true, label: "営業活動" },
-  { id: "d_merchants", icon: "🏢", label: "紹介先一覧" },
-  { id: "d_referral", icon: "📝", label: "新規紹介" },
+  { id: "d_merchants", icon: Building2, label: "紹介先一覧" },
+  { id: "d_referral", icon: UserPlus, label: "新規紹介" },
   { separator: true, label: "報酬" },
-  { id: "d_reports", icon: "💰", label: "報酬明細" },
+  { id: "d_reports", icon: Wallet, label: "報酬明細" },
   { separator: true, label: "設定" },
-  { id: "d_account", icon: "⚙️", label: "アカウント設定" },
+  { id: "d_account", icon: Settings, label: "アカウント設定" },
 ];
 
 export default function Wireframes() {
@@ -13923,27 +13936,27 @@ export default function Wireframes() {
     <NavigationContext.Provider value={navCtx}>
     <div className="h-screen flex flex-col bg-slate-50 font-sans overflow-hidden">
       {/* Top toggle */}
-      <div className="bg-slate-900 px-5 py-3 flex items-center gap-4 shrink-0 border-b border-slate-700/50">
-        <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">画面切替:</span>
-        <button onClick={() => setView("master")} className={`text-sm px-4 py-1.5 rounded-lg font-medium transition-colors duration-200 ${view === "master" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}>
-          マスター管理画面
+      <div className="bg-white px-5 py-2.5 flex items-center gap-3 shrink-0 border-b border-slate-200">
+        <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">View:</span>
+        <button onClick={() => setView("master")} className={`text-[13px] px-3 py-1.5 rounded-md font-medium transition-colors duration-150 ${view === "master" ? "bg-brand-50 text-brand-700" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
+          マスター管理
         </button>
-        <button onClick={() => setView("merchant")} className={`text-sm px-4 py-1.5 rounded-lg font-medium transition-colors duration-200 ${view === "merchant" ? "bg-emerald-600 text-white" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}>
-          加盟店管理画面
+        <button onClick={() => setView("merchant")} className={`text-[13px] px-3 py-1.5 rounded-md font-medium transition-colors duration-150 ${view === "merchant" ? "bg-emerald-50 text-emerald-700" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
+          加盟店管理
         </button>
-        <button onClick={() => setView("agent")} className={`text-sm px-4 py-1.5 rounded-lg font-medium transition-colors duration-200 ${view === "agent" ? "bg-orange-600 text-white" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}>
-          代理店管理画面
+        <button onClick={() => setView("agent")} className={`text-[13px] px-3 py-1.5 rounded-md font-medium transition-colors duration-150 ${view === "agent" ? "bg-orange-50 text-orange-700" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
+          代理店管理
         </button>
-        <button onClick={() => setView("apply")} className={`text-sm px-4 py-1.5 rounded-lg font-medium transition-colors duration-200 ${view === "apply" ? "bg-violet-600 text-white" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}>
-          加盟店 新規申込
+        <button onClick={() => setView("apply")} className={`text-[13px] px-3 py-1.5 rounded-md font-medium transition-colors duration-150 ${view === "apply" ? "bg-violet-50 text-violet-700" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
+          加盟店申込
         </button>
-        <button onClick={() => setView("agentApply")} className={`text-sm px-4 py-1.5 rounded-lg font-medium transition-colors duration-200 ${view === "agentApply" ? "bg-orange-600 text-white" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}>
-          代理店 新規申込
+        <button onClick={() => setView("agentApply")} className={`text-[13px] px-3 py-1.5 rounded-md font-medium transition-colors duration-150 ${view === "agentApply" ? "bg-orange-50 text-orange-700" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
+          代理店申込
         </button>
-        <button onClick={() => setView("payment")} className={`text-sm px-4 py-1.5 rounded-lg font-medium transition-colors duration-200 ${view === "payment" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}>
+        <button onClick={() => setView("payment")} className={`text-[13px] px-3 py-1.5 rounded-md font-medium transition-colors duration-150 ${view === "payment" ? "bg-brand-50 text-brand-700" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
           決済ページ
         </button>
-        <span className="text-xs text-slate-600/40 ml-auto">WIREFRAME v3 / 全36画面実装</span>
+        <span className="text-[11px] text-slate-300 ml-auto font-mono">v3.0</span>
       </div>
 
       {/* Main content */}
