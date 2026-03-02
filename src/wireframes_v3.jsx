@@ -137,7 +137,7 @@ const Sidebar = ({ items, active, onSelect, title, color, user, switchableUsers,
           style={{maxWidth: "calc(100% - 12px)"}}
         >
           <span className="w-5 h-5 flex items-center justify-center shrink-0">
-            {typeof item.icon === 'function' ? React.createElement(item.icon, { size: 16, className: active === item.id ? "text-brand-500" : "text-slate-400" }) : <span className="text-sm">{item.icon}</span>}
+            {typeof item.icon === 'function' || (typeof item.icon === 'object' && item.icon !== null && item.icon.$$typeof) ? React.createElement(item.icon, { size: 16, className: active === item.id ? "text-brand-500" : "text-slate-400" }) : <span className="text-sm">{item.icon}</span>}
           </span>
           <span className="truncate">{item.label}</span>
           {item.readOnly && <span className="ml-auto text-[9px] text-amber-500 font-medium bg-amber-50 px-1.5 py-0.5 rounded">閲覧</span>}
