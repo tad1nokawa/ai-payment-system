@@ -662,75 +662,75 @@ const MasterExceptionQueue = () => {
   const d = selectedItem.detail;
 
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-6 space-y-6">
     <div className="flex justify-between items-center">
-      <h2 className="text-sm font-bold text-slate-800">例外キュー</h2>
+      <h2 className="text-xl font-semibold text-slate-800">例外キュー</h2>
       <div className="flex gap-2">
         {[{ k: "all", label: "全て" }, { k: "review", label: "審査保留" }, { k: "fraud", label: "不正検知" }, { k: "url", label: "URL巡回" }, { k: "settlement", label: "精算" }, { k: "chargeback", label: "チャージバック" }, { k: "done", label: "処理済み" }].map(f => (
-          <button key={f.k} onClick={() => setQueueFilter(f.k)} className={`text-xs px-2 py-1 rounded border ${queueFilter === f.k ? "bg-brand-50 text-brand-600 border-brand-200" : "bg-white text-slate-500"} ${f.k === "done" ? "border-dashed" : ""}`}>{f.label}</button>
+          <button key={f.k} onClick={() => setQueueFilter(f.k)} className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors duration-150 ${queueFilter === f.k ? "bg-brand-50 text-brand-600 border-brand-200" : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"} ${f.k === "done" ? "border-dashed" : ""}`}>{f.label}</button>
         ))}
       </div>
     </div>
 
     {/* Statistics Bar */}
-    <div className="flex gap-4 text-xs">
+    <div className="flex gap-4 text-[13px]">
       <div className="flex items-center gap-1.5">
         <span className="text-slate-400">今日の処理:</span>
-        <span className="font-bold text-slate-700">12件</span>
+        <span className="font-semibold text-slate-700">12件</span>
       </div>
       <div className="flex items-center gap-1.5">
         <span className="text-slate-400">AI一致率:</span>
-        <span className="font-bold text-success-600">87%</span>
+        <span className="font-semibold text-success-600">87%</span>
       </div>
       {checkedItems.length > 0 && (
-        <div className="flex items-center gap-2 ml-auto bg-brand-50 rounded px-3 py-1 border border-brand-200">
-          <span className="font-bold text-brand-700">{checkedItems.length}件選択中</span>
-          <button onClick={() => setShowBatchConfirm("approve")} className="px-2 py-0.5 bg-success-600 text-white rounded text-xs font-semibold hover:bg-success-700">一括承認</button>
-          <button onClick={() => setShowBatchConfirm("reject")} className="px-2 py-0.5 bg-danger-600 text-white rounded text-xs font-semibold hover:bg-danger-700">一括拒否</button>
-          <button onClick={() => setCheckedItems([])} className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1"><X className="w-3.5 h-3.5" /> 解除</button>
+        <div className="flex items-center gap-2 ml-auto bg-brand-50 rounded-lg px-3 py-1.5 border border-brand-200">
+          <span className="font-medium text-brand-700">{checkedItems.length}件選択中</span>
+          <button onClick={() => setShowBatchConfirm("approve")} className="px-2.5 py-1 bg-success-600 text-white rounded-lg text-xs font-medium hover:bg-success-700 transition-colors duration-150">一括承認</button>
+          <button onClick={() => setShowBatchConfirm("reject")} className="px-2.5 py-1 bg-danger-600 text-white rounded-lg text-xs font-medium hover:bg-danger-700 transition-colors duration-150">一括拒否</button>
+          <button onClick={() => setCheckedItems([])} className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1 transition-colors duration-150"><X className="w-3.5 h-3.5" /> 解除</button>
         </div>
       )}
     </div>
 
     {/* Detail card — 選択中のキューアイテム詳細 */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
-      <div className={`p-3 border-b ${d.badge === "不正検知" ? "bg-danger-50" : d.badge === "精算" ? "bg-brand-50" : d.badge === "URL巡回" ? "bg-purple-50" : "bg-warning-50"}`}>
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card hover:shadow-md transition-shadow duration-150">
+      <div className={`p-4 border-b ${d.badge === "不正検知" ? "bg-danger-50" : d.badge === "精算" ? "bg-brand-50" : d.badge === "URL巡回" ? "bg-purple-50" : "bg-warning-50"}`}>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Badge text={d.badge} color={d.badge === "不正検知" ? "red" : d.badge === "精算" ? "blue" : d.badge === "URL巡回" ? "purple" : "yellow"} />
-            <span className="text-sm font-bold text-slate-800">{selectedItem.id} - {d.company}</span>
+            <span className="text-sm font-semibold text-slate-800">{selectedItem.id} - {d.company}</span>
             {parseInt(d.staleTime) >= 60 || d.staleTime.includes("時間") ? <Badge text={`滞留 ${d.staleTime}`} color="red" /> : <Badge text={`滞留 ${d.staleTime}`} color="gray" />}
           </div>
-          <span className="text-xs text-slate-400">受付: {d.receivedAt}</span>
+          <span className="text-[13px] text-slate-400">受付: {d.receivedAt}</span>
         </div>
       </div>
 
-      <div className="p-3">
-        <div className="grid grid-cols-3 gap-4 mb-3">
+      <div className="p-5">
+        <div className="grid grid-cols-3 gap-4 mb-4">
           <div>
-            <p className="text-xs text-slate-400 mb-1">AI推薦判定</p>
+            <p className="text-sm font-medium text-slate-700 mb-1">AI推薦判定</p>
             <div className="flex items-center gap-2">
               <span className="text-lg">{d.aiIcon}</span>
               <div>
-                <p className={`text-sm font-bold ${d.aiColor}`}>{d.aiLabel}</p>
-                <p className="text-xs text-slate-500">信頼度: {d.aiConf}</p>
+                <p className={`text-sm font-semibold ${d.aiColor}`}>{d.aiLabel}</p>
+                <p className="text-[13px] text-slate-500">信頼度: {d.aiConf}</p>
               </div>
             </div>
           </div>
           <div>
-            <p className="text-xs text-slate-400 mb-1">リスクレベル</p>
-            <p className={`text-sm font-bold ${d.riskColor}`}>{d.risk}</p>
-            <p className="text-xs text-slate-500">{d.riskSub}</p>
+            <p className="text-sm font-medium text-slate-700 mb-1">リスクレベル</p>
+            <p className={`text-sm font-semibold ${d.riskColor}`}>{d.risk}</p>
+            <p className="text-[13px] text-slate-500">{d.riskSub}</p>
           </div>
           <div>
-            <p className="text-xs text-slate-400 mb-1">AI分析サマリー</p>
-            <p className="text-xs text-slate-600">{d.aiSummary}</p>
+            <p className="text-sm font-medium text-slate-700 mb-1">AI分析サマリー</p>
+            <p className="text-[13px] text-slate-600">{d.aiSummary}</p>
           </div>
         </div>
 
-        <div className="bg-slate-50 rounded p-2 mb-3">
-          <p className="text-xs font-bold text-slate-600 mb-1">AIが収集した主要データ</p>
-          <div className="grid grid-cols-4 gap-2 text-xs">
+        <div className="bg-slate-50 rounded-lg p-3 mb-4 border border-slate-100">
+          <p className="text-sm font-medium text-slate-700 mb-2">AIが収集した主要データ</p>
+          <div className="grid grid-cols-4 gap-2 text-[13px]">
             {d.data.map(([label, value], di) => (
               <div key={di}><span className="text-slate-400">{label}:</span> {value}</div>
             ))}
@@ -739,53 +739,53 @@ const MasterExceptionQueue = () => {
 
         <div className="flex gap-2 justify-end">
           {processedItems[selectedItem.id] ? (
-            <span className="text-xs text-slate-400 italic"><Check className="w-4 h-4 inline" /> 処理済み（{processedItems[selectedItem.id]}）</span>
+            <span className="text-[13px] text-slate-400 italic"><Check className="w-4 h-4 inline" /> 処理済み（{processedItems[selectedItem.id]}）</span>
           ) : d.badge === "不正検知" ? (<>
-            <button onClick={() => setActionConfirm({ title: "正常と判定", description: `${selectedItem.id} を正常な取引として処理します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "正常判定"); toast(`${selectedItem.id} を正常と判定しました`, "success"); } })} className="px-4 py-2 bg-success-100 text-success-700 rounded text-xs font-semibold hover:bg-success-200"><Check className="w-4 h-4 inline mr-1" /> 正常と判定</button>
-            <button onClick={() => setActionConfirm({ title: "ブロック確定", description: `${selectedItem.id} の取引をブロックします。`, warning: "ブロックされた取引は加盟店に通知されます。", type: "danger", onConfirm: () => { markProcessed(selectedItem.id, "ブロック"); toast(`${selectedItem.id} をブロックしました`, "warning"); } })} className="px-4 py-2 bg-danger-600 text-white rounded text-xs font-semibold hover:bg-danger-700"><Ban className="w-4 h-4 inline mr-1" /> ブロック確定</button>
+            <button onClick={() => setActionConfirm({ title: "正常と判定", description: `${selectedItem.id} を正常な取引として処理します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "正常判定"); toast(`${selectedItem.id} を正常と判定しました`, "success"); } })} className="px-4 py-2 bg-success-100 text-success-700 rounded-lg text-sm font-medium hover:bg-success-200 transition-colors duration-150"><Check className="w-4 h-4 inline mr-1" /> 正常と判定</button>
+            <button onClick={() => setActionConfirm({ title: "ブロック確定", description: `${selectedItem.id} の取引をブロックします。`, warning: "ブロックされた取引は加盟店に通知されます。", type: "danger", onConfirm: () => { markProcessed(selectedItem.id, "ブロック"); toast(`${selectedItem.id} をブロックしました`, "warning"); } })} className="px-4 py-2 bg-danger-600 text-white rounded-lg text-sm font-medium hover:bg-danger-700 transition-colors duration-150"><Ban className="w-4 h-4 inline mr-1" /> ブロック確定</button>
           </>) : d.badge === "精算" ? (<>
-            <button onClick={() => { markProcessed(selectedItem.id, "スキップ"); toast(`${selectedItem.id} をスキップしました`, "info"); }} className="px-4 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">スキップ</button>
-            <button onClick={() => setActionConfirm({ title: "精算再実行", description: `${selectedItem.id} の精算バッチを再実行します。`, type: "info", onConfirm: () => { markProcessed(selectedItem.id, "再実行"); toast(`${selectedItem.id} の再実行を開始しました`, "success"); } })} className="px-4 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600"><RefreshCw className="w-4 h-4 inline mr-1" /> 再実行</button>
+            <button onClick={() => { markProcessed(selectedItem.id, "スキップ"); toast(`${selectedItem.id} をスキップしました`, "info"); }} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors duration-150">スキップ</button>
+            <button onClick={() => setActionConfirm({ title: "精算再実行", description: `${selectedItem.id} の精算バッチを再実行します。`, type: "info", onConfirm: () => { markProcessed(selectedItem.id, "再実行"); toast(`${selectedItem.id} の再実行を開始しました`, "success"); } })} className="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-colors duration-150"><RefreshCw className="w-4 h-4 inline mr-1" /> 再実行</button>
           </>) : d.badge === "URL巡回" ? (<>
-            <button onClick={() => setActionConfirm({ title: "問題なしと判定", description: `${selectedItem.id} のURL変更を問題なしと判定します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "問題なし"); toast(`${selectedItem.id} を問題なしと判定しました`, "success"); } })} className="px-4 py-2 bg-success-100 text-success-700 rounded text-xs font-semibold hover:bg-success-200">問題なし</button>
-            <button onClick={() => setActionConfirm({ title: "加盟店に確認", description: `${selectedItem.id} について加盟店に確認メールを送信します。`, type: "warning", onConfirm: () => { markProcessed(selectedItem.id, "加盟店確認中"); toast(`${selectedItem.id} の確認メールを送信しました`, "info"); } })} className="px-4 py-2 bg-warning-100 text-warning-700 rounded text-xs font-semibold hover:bg-warning-200">加盟店に確認</button>
-            <button onClick={() => setActionConfirm({ title: "サイト停止", description: `${selectedItem.id} のサイトを停止します。`, warning: "停止すると該当サイトの決済処理が停止されます。", type: "danger", onConfirm: () => { markProcessed(selectedItem.id, "停止"); toast(`${selectedItem.id} のサイトを停止しました`, "warning"); } })} className="px-4 py-2 bg-danger-600 text-white rounded text-xs font-semibold hover:bg-danger-700">停止</button>
+            <button onClick={() => setActionConfirm({ title: "問題なしと判定", description: `${selectedItem.id} のURL変更を問題なしと判定します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "問題なし"); toast(`${selectedItem.id} を問題なしと判定しました`, "success"); } })} className="px-4 py-2 bg-success-100 text-success-700 rounded-lg text-sm font-medium hover:bg-success-200 transition-colors duration-150">問題なし</button>
+            <button onClick={() => setActionConfirm({ title: "加盟店に確認", description: `${selectedItem.id} について加盟店に確認メールを送信します。`, type: "warning", onConfirm: () => { markProcessed(selectedItem.id, "加盟店確認中"); toast(`${selectedItem.id} の確認メールを送信しました`, "info"); } })} className="px-4 py-2 bg-warning-100 text-warning-700 rounded-lg text-sm font-medium hover:bg-warning-200 transition-colors duration-150">加盟店に確認</button>
+            <button onClick={() => setActionConfirm({ title: "サイト停止", description: `${selectedItem.id} のサイトを停止します。`, warning: "停止すると該当サイトの決済処理が停止されます。", type: "danger", onConfirm: () => { markProcessed(selectedItem.id, "停止"); toast(`${selectedItem.id} のサイトを停止しました`, "warning"); } })} className="px-4 py-2 bg-danger-600 text-white rounded-lg text-sm font-medium hover:bg-danger-700 transition-colors duration-150">停止</button>
           </>) : (<>
-            <button onClick={() => setActionConfirm({ title: "審査拒否", description: `${selectedItem.id} の審査申請を拒否します。`, warning: "拒否理由が加盟店に通知されます。", type: "reject", onConfirm: () => { markProcessed(selectedItem.id, "拒否"); toast(`${selectedItem.id} を拒否しました`, "warning"); } })} className="px-4 py-2 bg-danger-100 text-danger-700 rounded text-xs font-semibold hover:bg-danger-200">拒否</button>
-            <button onClick={() => setActionConfirm({ title: "差戻し", description: `${selectedItem.id} を差戻します。追加書類の提出を依頼します。`, type: "warning", onConfirm: () => { markProcessed(selectedItem.id, "差戻し"); toast(`${selectedItem.id} を差戻しました`, "info"); } })} className="px-4 py-2 bg-warning-100 text-warning-700 rounded text-xs font-semibold hover:bg-warning-200">差戻し</button>
-            <button onClick={() => setActionConfirm({ title: "審査承認", description: `${selectedItem.id} の審査を承認します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "承認"); toast(`${selectedItem.id} を承認しました`, "success"); } })} className="px-4 py-2 bg-success-600 text-white rounded text-xs font-semibold hover:bg-success-700"><Check className="w-4 h-4 inline mr-1" /> 承認</button>
+            <button onClick={() => setActionConfirm({ title: "審査拒否", description: `${selectedItem.id} の審査申請を拒否します。`, warning: "拒否理由が加盟店に通知されます。", type: "reject", onConfirm: () => { markProcessed(selectedItem.id, "拒否"); toast(`${selectedItem.id} を拒否しました`, "warning"); } })} className="px-4 py-2 bg-danger-100 text-danger-700 rounded-lg text-sm font-medium hover:bg-danger-200 transition-colors duration-150">拒否</button>
+            <button onClick={() => setActionConfirm({ title: "差戻し", description: `${selectedItem.id} を差戻します。追加書類の提出を依頼します。`, type: "warning", onConfirm: () => { markProcessed(selectedItem.id, "差戻し"); toast(`${selectedItem.id} を差戻しました`, "info"); } })} className="px-4 py-2 bg-warning-100 text-warning-700 rounded-lg text-sm font-medium hover:bg-warning-200 transition-colors duration-150">差戻し</button>
+            <button onClick={() => setActionConfirm({ title: "審査承認", description: `${selectedItem.id} の審査を承認します。`, type: "approve", onConfirm: () => { markProcessed(selectedItem.id, "承認"); toast(`${selectedItem.id} を承認しました`, "success"); } })} className="px-4 py-2 bg-success-600 text-white rounded-lg text-sm font-medium hover:bg-success-700 transition-colors duration-150"><Check className="w-4 h-4 inline mr-1" /> 承認</button>
           </>)}
         </div>
       </div>
     </div>
 
     {/* Queue list */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card overflow-x-auto">
       <TableHeader cols={[{ label: "", w: "w-8" }, { label: "ID", w: "w-16" }, { label: "種別", w: "w-20" }, { label: "対象", w: "flex-1" }, { label: "AI推薦", w: "w-24" }, { label: "滞留時間", w: "w-24" }, { label: "操作", w: "w-32" }]}>
       <tr className="border-b bg-slate-50">
-        <td className="px-4 py-1 w-8"><input type="checkbox" className="w-3.5 h-3.5" checked={checkedItems.length === queueItems.length} onChange={() => toggleAll(queueItems.map(q => q.id))} /></td>
-        <td colSpan="6" className="px-4 py-1 text-xs text-slate-400">{checkedItems.length > 0 ? `${checkedItems.length}件選択中` : "全選択"}</td>
+        <td className="px-4 py-1.5 w-8"><input type="checkbox" className="w-3.5 h-3.5" checked={checkedItems.length === queueItems.length} onChange={() => toggleAll(queueItems.map(q => q.id))} /></td>
+        <td colSpan="6" className="px-4 py-1.5 text-[13px] text-slate-400">{checkedItems.length > 0 ? `${checkedItems.length}件選択中` : "全選択"}</td>
       </tr>
       {queueItems.map((item, i) => (
-        <tr key={i} onClick={() => setSelectedQueueId(item.id)} className={`border-b cursor-pointer transition-colors ${processedItems[item.id] ? "bg-slate-100 opacity-60" : selectedQueueId === item.id ? "bg-brand-100 border-l-2 border-l-brand-500" : item.locked ? "bg-orange-50 hover:bg-orange-100" : checkedItems.includes(item.id) ? "bg-brand-50 hover:bg-brand-100" : "hover:bg-slate-100"}`}>
-          <td className="px-4 py-2 whitespace-nowrap w-8" onClick={(e) => e.stopPropagation()}><input type="checkbox" className="w-3.5 h-3.5" checked={checkedItems.includes(item.id)} onChange={() => toggleCheck(item.id)} disabled={!!processedItems[item.id]} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-16 font-mono text-slate-600"><div className="flex items-center gap-1">{item.locked && <Lock className="w-4 h-4 inline" />}{selectedQueueId === item.id ? <span className="font-bold text-brand-700">{item.id}</span> : item.id}</div></td>
-          <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={item.type} color={item.type === "不正検知" ? "red" : item.type === "精算" ? "blue" : item.type === "URL巡回" ? "purple" : "yellow"} /></td>
-          <td className="px-4 py-2 whitespace-nowrap text-slate-700">{item.target}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-24">{processedItems[item.id] ? <Badge text={`${processedItems[item.id]}`} color="gray" /> : <Badge text={item.ai} color={item.aiColor} />}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={item.time} color={item.timeColor} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-32"><div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+        <tr key={i} onClick={() => setSelectedQueueId(item.id)} className={`border-b border-slate-100 cursor-pointer transition-colors duration-150 ${processedItems[item.id] ? "bg-slate-100 opacity-60" : selectedQueueId === item.id ? "bg-brand-100 border-l-2 border-l-brand-500" : item.locked ? "bg-orange-50 hover:bg-orange-100" : checkedItems.includes(item.id) ? "bg-brand-50 hover:bg-brand-100" : "hover:bg-slate-50"}`}>
+          <td className="px-4 py-2.5 whitespace-nowrap w-8" onClick={(e) => e.stopPropagation()}><input type="checkbox" className="w-3.5 h-3.5" checked={checkedItems.includes(item.id)} onChange={() => toggleCheck(item.id)} disabled={!!processedItems[item.id]} /></td>
+          <td className="px-4 py-2.5 whitespace-nowrap w-16 font-mono text-slate-600"><div className="flex items-center gap-1">{item.locked && <Lock className="w-4 h-4 inline" />}{selectedQueueId === item.id ? <span className="font-semibold text-brand-700">{item.id}</span> : item.id}</div></td>
+          <td className="px-4 py-2.5 whitespace-nowrap w-20"><Badge text={item.type} color={item.type === "不正検知" ? "red" : item.type === "精算" ? "blue" : item.type === "URL巡回" ? "purple" : "yellow"} /></td>
+          <td className="px-4 py-2.5 whitespace-nowrap text-[13px] text-slate-700">{item.target}</td>
+          <td className="px-4 py-2.5 whitespace-nowrap w-24">{processedItems[item.id] ? <Badge text={`${processedItems[item.id]}`} color="gray" /> : <Badge text={item.ai} color={item.aiColor} />}</td>
+          <td className="px-4 py-2.5 whitespace-nowrap w-24"><Badge text={item.time} color={item.timeColor} /></td>
+          <td className="px-4 py-2.5 whitespace-nowrap w-32"><div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
             {processedItems[item.id] ? (
-              <span className="text-xs text-slate-400 italic">処理済み</span>
+              <span className="text-[13px] text-slate-400 italic">処理済み</span>
             ) : item.type === "不正検知" ? (<>
-              <button onClick={() => setActionConfirm({ title: "正常と判定", description: `${item.id} を正常な取引として処理します。`, type: "approve", onConfirm: () => { markProcessed(item.id, "正常判定"); toast(`${item.id} を正常と判定しました`, "success"); } })} className="px-2 py-1 bg-success-100 text-success-700 rounded text-xs hover:bg-success-200">正常</button>
-              <button onClick={() => setActionConfirm({ title: "ブロック確定", description: `${item.id} の取引をブロックします。`, type: "danger", onConfirm: () => { markProcessed(item.id, "ブロック"); toast(`${item.id} をブロックしました`, "warning"); } })} className="px-2 py-1 bg-danger-100 text-danger-700 rounded text-xs hover:bg-danger-200">ブロック</button>
+              <button onClick={() => setActionConfirm({ title: "正常と判定", description: `${item.id} を正常な取引として処理します。`, type: "approve", onConfirm: () => { markProcessed(item.id, "正常判定"); toast(`${item.id} を正常と判定しました`, "success"); } })} className="px-2 py-1 bg-success-100 text-success-700 rounded-lg text-xs font-medium hover:bg-success-200 transition-colors duration-150">正常</button>
+              <button onClick={() => setActionConfirm({ title: "ブロック確定", description: `${item.id} の取引をブロックします。`, type: "danger", onConfirm: () => { markProcessed(item.id, "ブロック"); toast(`${item.id} をブロックしました`, "warning"); } })} className="px-2 py-1 bg-danger-100 text-danger-700 rounded-lg text-xs font-medium hover:bg-danger-200 transition-colors duration-150">ブロック</button>
             </>) : item.type === "精算" ? (<>
-              <button onClick={() => setActionConfirm({ title: "精算再実行", description: `${item.id} の精算バッチを再実行します。`, type: "info", onConfirm: () => { markProcessed(item.id, "再実行"); toast(`${item.id} の再実行を開始しました`, "success"); } })} className="px-2 py-1 bg-brand-100 text-brand-700 rounded text-xs hover:bg-brand-200">再実行</button>
-              <button onClick={() => { markProcessed(item.id, "スキップ"); toast(`${item.id} をスキップしました`, "info"); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">スキップ</button>
+              <button onClick={() => setActionConfirm({ title: "精算再実行", description: `${item.id} の精算バッチを再実行します。`, type: "info", onConfirm: () => { markProcessed(item.id, "再実行"); toast(`${item.id} の再実行を開始しました`, "success"); } })} className="px-2 py-1 bg-brand-100 text-brand-700 rounded-lg text-xs font-medium hover:bg-brand-200 transition-colors duration-150">再実行</button>
+              <button onClick={() => { markProcessed(item.id, "スキップ"); toast(`${item.id} をスキップしました`, "info"); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-200 transition-colors duration-150">スキップ</button>
             </>) : (<>
-              <button onClick={() => setActionConfirm({ title: item.type === "URL巡回" ? "問題なしと判定" : "審査承認", description: `${item.id} を${item.type === "URL巡回" ? "問題なしと判定" : "承認"}します。`, type: "approve", onConfirm: () => { markProcessed(item.id, item.type === "URL巡回" ? "問題なし" : "承認"); toast(`${item.id} を${item.type === "URL巡回" ? "問題なしと判定" : "承認"}しました`, "success"); } })} className="px-2 py-1 bg-success-100 text-success-700 rounded text-xs hover:bg-success-200">{item.type === "URL巡回" ? "問題なし" : "承認"}</button>
-              <button onClick={() => setActionConfirm({ title: item.type === "URL巡回" ? "サイト停止" : "審査拒否", description: `${item.id} を${item.type === "URL巡回" ? "停止" : "拒否"}します。`, type: item.type === "URL巡回" ? "danger" : "reject", onConfirm: () => { markProcessed(item.id, item.type === "URL巡回" ? "停止" : "拒否"); toast(`${item.id} を${item.type === "URL巡回" ? "停止" : "拒否"}しました`, "warning"); } })} className="px-2 py-1 bg-danger-100 text-danger-700 rounded text-xs hover:bg-danger-200">{item.type === "URL巡回" ? "停止" : "拒否"}</button>
+              <button onClick={() => setActionConfirm({ title: item.type === "URL巡回" ? "問題なしと判定" : "審査承認", description: `${item.id} を${item.type === "URL巡回" ? "問題なしと判定" : "承認"}します。`, type: "approve", onConfirm: () => { markProcessed(item.id, item.type === "URL巡回" ? "問題なし" : "承認"); toast(`${item.id} を${item.type === "URL巡回" ? "問題なしと判定" : "承認"}しました`, "success"); } })} className="px-2 py-1 bg-success-100 text-success-700 rounded-lg text-xs font-medium hover:bg-success-200 transition-colors duration-150">{item.type === "URL巡回" ? "問題なし" : "承認"}</button>
+              <button onClick={() => setActionConfirm({ title: item.type === "URL巡回" ? "サイト停止" : "審査拒否", description: `${item.id} を${item.type === "URL巡回" ? "停止" : "拒否"}します。`, type: item.type === "URL巡回" ? "danger" : "reject", onConfirm: () => { markProcessed(item.id, item.type === "URL巡回" ? "停止" : "拒否"); toast(`${item.id} を${item.type === "URL巡回" ? "停止" : "拒否"}しました`, "warning"); } })} className="px-2 py-1 bg-danger-100 text-danger-700 rounded-lg text-xs font-medium hover:bg-danger-200 transition-colors duration-150">{item.type === "URL巡回" ? "停止" : "拒否"}</button>
             </>)}
           </div></td>
         </tr>
@@ -797,21 +797,21 @@ const MasterExceptionQueue = () => {
 
     {/* ── Modal: バッチ操作確認 ── */}
     {showBatchConfirm && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowBatchConfirm(null)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+      <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowBatchConfirm(null)} />
+        <div className="relative bg-white rounded-xl shadow-overlay w-[440px] animate-scale-in">
           <div className={`p-4 border-b rounded-t-xl flex justify-between items-center ${showBatchConfirm === "approve" ? "bg-success-50" : "bg-danger-50"}`}>
-            <h3 className="text-sm font-bold text-slate-800">{showBatchConfirm === "approve" ? "一括承認の確認" : "一括拒否の確認"}</h3>
-            <button onClick={() => setShowBatchConfirm(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
+            <h3 className="text-sm font-semibold text-slate-800">{showBatchConfirm === "approve" ? "一括承認の確認" : "一括拒否の確認"}</h3>
+            <button onClick={() => setShowBatchConfirm(null)} className="text-slate-400 hover:text-slate-600 transition-colors duration-150"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
             <div className={`rounded-lg border p-3 ${showBatchConfirm === "approve" ? "bg-success-50 border-success-200" : "bg-danger-50 border-danger-200"}`}>
-              <p className="text-xs font-bold text-slate-700 mb-2">対象: {checkedItems.length}件</p>
+              <p className="text-[13px] font-medium text-slate-700 mb-2">対象: {checkedItems.length}件</p>
               <div className="space-y-1">
                 {checkedItems.map((id, i) => {
                   const item = queueItems.find(q => q.id === id);
                   return item ? (
-                    <div key={i} className="flex items-center gap-2 text-xs">
+                    <div key={i} className="flex items-center gap-2 text-[13px]">
                       <span className="font-mono text-slate-500">{item.id}</span>
                       <Badge text={item.type} color="yellow" />
                       <span className="text-slate-600 truncate">{item.target}</span>
@@ -822,17 +822,17 @@ const MasterExceptionQueue = () => {
             </div>
             {showBatchConfirm === "reject" && (
               <div>
-                <label className="text-xs font-semibold text-slate-600">拒否理由 <span className="text-danger-500">*</span></label>
-                <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>ポリシー違反</option><option>不正利用の疑い</option><option>書類不備</option><option>その他</option></select>
+                <label className="text-[13px] font-medium text-slate-600">拒否理由 <span className="text-danger-500">*</span></label>
+                <select className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2 mt-1 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150"><option>ポリシー違反</option><option>不正利用の疑い</option><option>書類不備</option><option>その他</option></select>
               </div>
             )}
-            <div className="bg-warning-50 rounded border border-warning-200 p-2 text-xs text-warning-700">
+            <div className="bg-warning-50 rounded-lg border border-warning-200 p-3 text-[13px] text-warning-700">
               この操作は元に戻せません。{showBatchConfirm === "approve" ? "承認" : "拒否"}後、関連する通知が自動送信されます。
             </div>
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
-            <button onClick={() => setShowBatchConfirm(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => { const action = showBatchConfirm === "approve" ? "承認" : "拒否"; const count = checkedItems.length; checkedItems.forEach(id => markProcessed(id, action)); setShowBatchConfirm(null); setCheckedItems([]); toast(`${count}件を一括${action}しました`, showBatchConfirm === "approve" ? "success" : "warning"); }} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showBatchConfirm === "approve" ? "bg-success-600 hover:bg-success-700" : "bg-danger-600 hover:bg-danger-700"}`}>{checkedItems.length}件を{showBatchConfirm === "approve" ? "承認" : "拒否"}する</button>
+            <button onClick={() => setShowBatchConfirm(null)} className="px-4 py-2 text-[13px] text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 font-medium transition-colors duration-150">キャンセル</button>
+            <button onClick={() => { const action = showBatchConfirm === "approve" ? "承認" : "拒否"; const count = checkedItems.length; checkedItems.forEach(id => markProcessed(id, action)); setShowBatchConfirm(null); setCheckedItems([]); toast(`${count}件を一括${action}しました`, showBatchConfirm === "approve" ? "success" : "warning"); }} className={`px-4 py-2 text-[13px] text-white rounded-lg font-medium transition-colors duration-150 ${showBatchConfirm === "approve" ? "bg-success-600 hover:bg-success-700" : "bg-danger-600 hover:bg-danger-700"}`}>{checkedItems.length}件を{showBatchConfirm === "approve" ? "承認" : "拒否"}する</button>
           </div>
         </div>
       </div>
@@ -1048,17 +1048,17 @@ const MasterMerchants = () => {
     });
 
   return (
-    <div className="p-5 space-y-4">
+    <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <h2 className="text-sm font-bold text-slate-800">加盟店管理 <span className="text-slate-400 font-normal">({filtered.length}件)</span></h2>
-          <button onClick={() => setShowAddModal(true)} className="text-xs bg-brand-500 text-white px-2.5 py-1 rounded hover:bg-brand-600">+ 手動登録</button>
-          <button onClick={() => toast("加盟店一覧をCSV出力しました", "success")} className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50"><Download className="w-4 h-4 inline mr-1" /> CSV</button>
-          <button onClick={() => toast("加盟店一覧をExcel出力しました", "success")} className="text-xs bg-white text-slate-600 px-2 py-1 rounded border hover:bg-slate-50"><Download className="w-4 h-4 inline mr-1" /> Excel</button>
+          <h2 className="text-xl font-semibold text-slate-800">加盟店管理 <span className="text-sm text-slate-400 font-normal">({filtered.length}件)</span></h2>
+          <button onClick={() => setShowAddModal(true)} className="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">+ 手動登録</button>
+          <button onClick={() => toast("加盟店一覧をCSV出力しました", "success")} className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150"><Download className="w-4 h-4 inline mr-1" /> CSV</button>
+          <button onClick={() => toast("加盟店一覧をExcel出力しました", "success")} className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150"><Download className="w-4 h-4 inline mr-1" /> Excel</button>
         </div>
         <div className="flex gap-2">
-          <input className="text-xs border rounded px-2 py-1 w-48" placeholder="加盟店名 / IDで検索..." value={searchText} onChange={e => setSearchText(e.target.value)} />
-          <select className="text-xs border rounded px-2 py-1" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+          <input className="text-[13px] border border-slate-200 rounded-lg px-3 py-2 w-48 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="加盟店名 / IDで検索..." value={searchText} onChange={e => setSearchText(e.target.value)} />
+          <select className="text-[13px] border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
             <option value="all">全ステータス</option>
             <option value="有効">有効</option>
             <option value="審査中">審査中</option>
@@ -1068,9 +1068,9 @@ const MasterMerchants = () => {
       </div>
 
       {/* Tabs: 加盟店一覧 / サイト管理 */}
-      <div className="flex gap-1 border-b">
+      <div className="flex gap-1 border-b border-slate-200">
         {[{ id: "merchants", label: "加盟店一覧" }, { id: "sites", label: "サイト管理" }].map(t => (
-          <button key={t.id} onClick={() => setM03Tab(t.id)} className={`text-xs px-3 py-2 border-b-2 ${m03Tab === t.id ? "border-brand-500 text-brand-600 font-semibold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+          <button key={t.id} onClick={() => setM03Tab(t.id)} className={`text-sm px-4 py-2.5 border-b-2 font-medium transition-colors duration-150 ${m03Tab === t.id ? "border-brand-500 text-brand-600" : "border-transparent text-slate-400 hover:text-slate-600"}`}>{t.label}</button>
         ))}
       </div>
 
@@ -1527,19 +1527,19 @@ const MasterMerchants = () => {
       {/* ===== 加盟店一覧タブ ===== */}
       {m03Tab === "merchants" && (<>
       {/* Sort indicator */}
-      <div className="flex items-center gap-2 text-xs text-slate-400">
+      <div className="flex items-center gap-2 text-[13px] text-slate-400">
         <span>並び替え:</span>
-        <span className="bg-brand-50 text-brand-600 px-2 py-0.5 rounded border border-brand-200">
+        <span className="bg-brand-50 text-brand-600 px-2.5 py-1 rounded-lg border border-brand-200 font-medium">
           {{ id:"加盟店ID", name:"加盟店名", salesNum:"月間決済高", cbNum:"CB率", successNum:"成功率", feeNum:"手数料", riskOrder:"リスク" }[sortKey] || sortKey}
           {sortDir === "asc" ? " ↑昇順" : " ↓降順"}
         </span>
         {sortKey !== "id" && (
-          <button className="text-slate-400 hover:text-slate-600 flex items-center gap-1" onClick={() => { setSortKey("id"); setSortDir("asc"); }}><X className="w-3.5 h-3.5" /> リセット</button>
+          <button className="text-slate-400 hover:text-slate-600 flex items-center gap-1 transition-colors duration-150" onClick={() => { setSortKey("id"); setSortDir("asc"); }}><X className="w-3.5 h-3.5" /> リセット</button>
         )}
         <span className="ml-auto text-slate-300"><Lightbulb className="w-4 h-4 inline mr-1" /> 行クリックで接続先審査状況を表示</span>
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card overflow-x-auto">
         <SortableHeader
           sortKey={sortKey} sortDir={sortDir} onSort={handleSort}
           cols={[
@@ -1563,24 +1563,24 @@ const MasterMerchants = () => {
           return (
             <React.Fragment key={m.id}>
               <tr
-                className={`border-b cursor-pointer transition-colors ${isExpanded ? "bg-brand-50 border-l-2 border-l-brand-500" : i % 2 ? "bg-slate-50 hover:bg-brand-50" : "hover:bg-brand-50"}`}
+                className={`border-b border-slate-100 cursor-pointer transition-colors duration-150 ${isExpanded ? "bg-brand-50 border-l-2 border-l-brand-500" : "hover:bg-slate-50"}`}
                 onClick={() => setExpandedId(isExpanded ? null : m.id)}
               >
-                <td className="px-4 py-2 whitespace-nowrap w-24 font-mono text-slate-500">{m.id}</td>
-                <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{m.name}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={m.status} color={m.sColor} /></td>
-                <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={m.risk} color={m.rColor} /></td>
-                <td className="px-4 py-2 whitespace-nowrap w-12 text-center"><span className="text-xs font-semibold text-slate-600">{m.sites.length}</span></td>
-                <td className="px-4 py-2 whitespace-nowrap w-16">
-                  <span className={`text-xs font-semibold ${approvedCount === 0 ? "text-slate-400" : approvedCount >= 3 ? "text-success-600" : "text-brand-600"}`}>
+                <td className="px-4 py-2.5 whitespace-nowrap w-24 font-mono text-slate-500">{m.id}</td>
+                <td className="px-4 py-2.5 whitespace-nowrap font-semibold text-slate-700">{m.name}</td>
+                <td className="px-4 py-2.5 whitespace-nowrap w-20"><Badge text={m.status} color={m.sColor} /></td>
+                <td className="px-4 py-2.5 whitespace-nowrap w-16"><Badge text={m.risk} color={m.rColor} /></td>
+                <td className="px-4 py-2.5 whitespace-nowrap w-12 text-center"><span className="text-[13px] font-semibold text-slate-600">{m.sites.length}</span></td>
+                <td className="px-4 py-2.5 whitespace-nowrap w-16">
+                  <span className={`text-[13px] font-semibold ${approvedCount === 0 ? "text-slate-400" : approvedCount >= 3 ? "text-success-600" : "text-brand-600"}`}>
                     {approvedCount}/{totalCount}
                   </span>
                 </td>
-                <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-slate-600">{m.sales}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-16 text-right text-slate-600">{m.cb}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-16 text-right text-slate-600">{m.success}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-16 text-right text-slate-600">{m.fee}</td>
-                <td className="px-4 py-2 whitespace-nowrap w-14"><button onClick={(e) => { e.stopPropagation(); setSlidePanel(m); }} className="px-2 py-0.5 bg-brand-100 text-brand-700 rounded text-xs hover:bg-brand-200">詳細</button></td>
+                <td className="px-4 py-2.5 whitespace-nowrap w-24 text-right text-[13px] text-slate-600">{m.sales}</td>
+                <td className="px-4 py-2.5 whitespace-nowrap w-16 text-right text-[13px] text-slate-600">{m.cb}</td>
+                <td className="px-4 py-2.5 whitespace-nowrap w-16 text-right text-[13px] text-slate-600">{m.success}</td>
+                <td className="px-4 py-2.5 whitespace-nowrap w-16 text-right text-[13px] text-slate-600">{m.fee}</td>
+                <td className="px-4 py-2.5 whitespace-nowrap w-14"><button onClick={(e) => { e.stopPropagation(); setSlidePanel(m); }} className="px-2.5 py-1 bg-brand-100 text-brand-700 rounded-lg text-xs font-medium hover:bg-brand-200 transition-colors duration-150">詳細</button></td>
               </tr>
 
               {/* ── Expanded: サイト→接続先→各条件 階層パネル ── */}
@@ -1765,17 +1765,17 @@ const MasterMerchants = () => {
 
       {/* ── Slide Panel: 加盟店詳細 ── */}
       {slidePanel && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSlidePanel(null)} />
-          <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex animate-fade-in">
+          <div className="flex-1 bg-slate-900/20" onClick={() => setSlidePanel(null)} />
+          <div className="w-96 bg-white shadow-overlay border-l overflow-y-auto animate-slide-in-right">
             <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
-              <h3 className="text-sm font-bold text-slate-800">加盟店詳細</h3>
-              <button onClick={() => setSlidePanel(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
+              <h3 className="text-sm font-semibold text-slate-800">加盟店詳細</h3>
+              <button onClick={() => setSlidePanel(null)} className="text-slate-400 hover:text-slate-600 transition-colors duration-150"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               {/* 企業情報 */}
               <div>
-                <p className="text-xs font-bold text-slate-600 mb-2">企業情報</p>
+                <p className="text-sm font-medium text-slate-700 mb-2">企業情報</p>
                 <div className="space-y-1.5 text-xs">
                   <div className="flex justify-between"><span className="text-slate-400">法人名</span><span className="font-semibold">{slidePanel.name}</span></div>
                   <div className="flex justify-between"><span className="text-slate-400">ID</span><span className="font-mono">{slidePanel.id}</span></div>
@@ -1785,33 +1785,33 @@ const MasterMerchants = () => {
               </div>
               {/* リスク情報 */}
               <div className="border-t pt-3">
-                <p className="text-xs font-bold text-slate-600 mb-2">リスク情報</p>
+                <p className="text-sm font-medium text-slate-700 mb-2">リスク情報</p>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs text-slate-400">現在:</span>
+                  <span className="text-[13px] text-slate-400">現在:</span>
                   <Badge text={slidePanel.risk} color={slidePanel.rColor} />
-                  <span className="text-xs text-slate-400 ml-2">AI判定スコア: 58/100</span>
+                  <span className="text-[13px] text-slate-400 ml-2">AI判定スコア: 58/100</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400">変更:</span>
-                  <select className="text-xs border rounded px-2 py-1">
+                  <span className="text-[13px] text-slate-400">変更:</span>
+                  <select className="text-[13px] border border-slate-200 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150">
                     <option>低</option><option>中</option><option>高</option>
                   </select>
-                  <input className="text-xs border rounded px-2 py-1 flex-1" placeholder="変更理由（必須）" />
+                  <input className="text-[13px] border border-slate-200 rounded-lg px-2.5 py-1.5 flex-1 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="変更理由（必須）" />
                 </div>
               </div>
               {/* 取引統計 */}
               <div className="border-t pt-3">
-                <p className="text-xs font-bold text-slate-600 mb-2">取引統計</p>
+                <p className="text-sm font-medium text-slate-700 mb-2">取引統計</p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200"><span className="text-slate-400">月間決済高</span><p className="font-bold">{slidePanel.sales}</p></div>
-                  <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200"><span className="text-slate-400">成功率</span><p className="font-bold">{slidePanel.success}</p></div>
-                  <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200"><span className="text-slate-400">CB率</span><p className="font-bold">{slidePanel.cb}</p></div>
-                  <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200"><span className="text-slate-400">手数料</span><p className="font-bold">{slidePanel.fee}</p></div>
+                  <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200"><span className="text-[13px] text-slate-400">月間決済高</span><p className="font-semibold">{slidePanel.sales}</p></div>
+                  <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200"><span className="text-[13px] text-slate-400">成功率</span><p className="font-semibold">{slidePanel.success}</p></div>
+                  <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200"><span className="text-[13px] text-slate-400">CB率</span><p className="font-semibold">{slidePanel.cb}</p></div>
+                  <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200"><span className="text-[13px] text-slate-400">手数料</span><p className="font-semibold">{slidePanel.fee}</p></div>
                 </div>
               </div>
               {/* サイト別接続先状況 */}
               <div className="border-t pt-3">
-                <p className="text-xs font-bold text-slate-600 mb-2"><Globe className="w-4 h-4 inline mr-1" /> サイト別 接続先・手数料一覧</p>
+                <p className="text-sm font-medium text-slate-700 mb-2"><Globe className="w-4 h-4 inline mr-1" /> サイト別 接続先・手数料一覧</p>
                 {(slidePanel.sites || []).map((site, si) => (
                   <div key={si} className="mb-3 bg-slate-50 rounded-lg border border-slate-200 p-2">
                     <div className="flex items-center gap-2 mb-2">
@@ -1890,15 +1890,15 @@ const MasterMerchants = () => {
               </div>
               {/* メモ */}
               <div className="border-t pt-3">
-                <p className="text-xs font-bold text-slate-600 mb-2">運営メモ</p>
-                <textarea className="w-full text-xs border rounded p-2 h-16" placeholder="メモを入力..." />
+                <p className="text-sm font-medium text-slate-700 mb-2">運営メモ</p>
+                <textarea className="w-full text-[13px] border border-slate-200 rounded-lg p-3 h-16 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="メモを入力..." />
               </div>
               {/* 操作ボタン */}
               <div className="border-t pt-3 space-y-2">
-                <button className="w-full py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">保存</button>
+                <button className="w-full py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-colors duration-150">保存</button>
                 <div className="flex gap-2">
-                  <button onClick={() => setShowConfirm("suspend")} className="flex-1 py-2 bg-warning-100 text-warning-700 rounded text-xs font-semibold hover:bg-warning-200"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> サスペンド</button>
-                  <button onClick={() => setShowConfirm("terminate")} className="flex-1 py-2 bg-danger-100 text-danger-700 rounded text-xs font-semibold hover:bg-danger-200"><AlertOctagon className="w-4 h-4 text-danger-500 inline mr-1" /> 解約</button>
+                  <button onClick={() => setShowConfirm("suspend")} className="flex-1 py-2 bg-warning-100 text-warning-700 rounded-lg text-sm font-medium hover:bg-warning-200 transition-colors duration-150"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> サスペンド</button>
+                  <button onClick={() => setShowConfirm("terminate")} className="flex-1 py-2 bg-danger-100 text-danger-700 rounded-lg text-sm font-medium hover:bg-danger-200 transition-colors duration-150"><AlertOctagon className="w-4 h-4 text-danger-500 inline mr-1" /> 解約</button>
                 </div>
               </div>
             </div>
@@ -1908,15 +1908,15 @@ const MasterMerchants = () => {
 
       {/* ── Slide Panel: 手動登録 ── */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setShowAddModal(false)} />
-          <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex animate-fade-in">
+          <div className="flex-1 bg-slate-900/20" onClick={() => setShowAddModal(false)} />
+          <div className="w-96 bg-white shadow-overlay border-l overflow-y-auto animate-slide-in-right">
             <div className="p-4 border-b bg-brand-50 flex justify-between items-center">
-              <h3 className="text-sm font-bold text-slate-800">加盟店 手動登録</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
+              <h3 className="text-sm font-semibold text-slate-800">加盟店 手動登録</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors duration-150"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
-              <div className="bg-warning-50 rounded border border-warning-200 p-2 text-xs text-warning-700"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 手動登録はAI審査をスキップします。audit_logsに記録されます。</div>
+              <div className="bg-warning-50 rounded-lg border border-warning-200 p-3 text-[13px] text-warning-700"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 手動登録はAI審査をスキップします。audit_logsに記録されます。</div>
               {[
                 { label: "法人名", placeholder: "株式会社〇〇", required: true },
                 { label: "法人番号", placeholder: "1234567890123（13桁）", required: true },
@@ -1927,36 +1927,36 @@ const MasterMerchants = () => {
                 { label: "URL", placeholder: "https://example.com", required: true },
               ].map((f, i) => (
                 <div key={i}>
-                  <label className="text-xs font-semibold text-slate-600">{f.label} {f.required && <span className="text-danger-500">*</span>}</label>
-                  <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder={f.placeholder} />
+                  <label className="text-[13px] font-medium text-slate-600">{f.label} {f.required && <span className="text-danger-500">*</span>}</label>
+                  <input className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2 mt-1 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder={f.placeholder} />
                 </div>
               ))}
               <div>
-                <label className="text-xs font-semibold text-slate-600">業種 <span className="text-danger-500">*</span></label>
-                <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                <label className="text-[13px] font-medium text-slate-600">業種 <span className="text-danger-500">*</span></label>
+                <select className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2 mt-1 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150">
                   <option>選択してください</option>
                   <option>EC（物販）</option><option>EC（デジタル）</option><option>旅行</option>
                   <option>飲食</option><option>サービス</option><option>教育</option><option>医療</option><option>その他</option>
                 </select>
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600">月間予定決済高 <span className="text-danger-500">*</span></label>
-                <input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="¥1,000,000" />
+                <label className="text-[13px] font-medium text-slate-600">月間予定決済高 <span className="text-danger-500">*</span></label>
+                <input className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2 mt-1 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="¥1,000,000" />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600">初期リスクレベル <span className="text-danger-500">*</span></label>
-                <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5">
+                <label className="text-[13px] font-medium text-slate-600">初期リスクレベル <span className="text-danger-500">*</span></label>
+                <select className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2 mt-1 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150">
                   <option>低</option><option>中</option><option>高</option>
                 </select>
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600">登録理由 <span className="text-danger-500">*</span></label>
-                <textarea className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 h-16" placeholder="手動登録の理由を入力..." />
+                <label className="text-[13px] font-medium text-slate-600">登録理由 <span className="text-danger-500">*</span></label>
+                <textarea className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2 mt-1 h-16 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="手動登録の理由を入力..." />
               </div>
             </div>
             <div className="p-4 border-t space-y-2">
-              <button onClick={() => { setShowAddModal(false); toast("加盟店を手動登録しました", "success"); }} className="w-full py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">登録する</button>
-              <button onClick={() => setShowAddModal(false)} className="w-full py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => { setShowAddModal(false); toast("加盟店を手動登録しました", "success"); }} className="w-full py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-colors duration-150">登録する</button>
+              <button onClick={() => setShowAddModal(false)} className="w-full py-2 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 font-medium transition-colors duration-150">キャンセル</button>
             </div>
           </div>
         </div>
@@ -1964,9 +1964,9 @@ const MasterMerchants = () => {
 
       {/* ── Confirm Dialog: サスペンド/解約 ── */}
       {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowConfirm(null)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[420px] p-6">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowConfirm(null)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[420px] p-6 animate-scale-in">
             <h3 className={`text-sm font-bold mb-3 ${showConfirm === "suspend" ? "text-warning-700" : "text-danger-700"}`}>
               {showConfirm === "suspend" ? "加盟店をサスペンドしますか？" : "加盟店を解約しますか？"}
             </h3>
@@ -1974,12 +1974,12 @@ const MasterMerchants = () => {
               {showConfirm === "suspend" ? "サスペンド中は全サイトの決済処理が停止されます。復帰は管理者が手動で行います。" : "解約後は全データが保持されますが、決済処理は完全に停止されます。未精算分は精算完了後に入金されます。"}
             </p>
             <div className="mb-3">
-              <label className="text-xs font-semibold text-slate-600">理由（必須） <span className="text-danger-500">*</span></label>
-              <textarea className="w-full text-xs border rounded p-2 h-16 mt-0.5" placeholder="理由を入力..." />
+              <label className="text-[13px] font-medium text-slate-600">理由（必須） <span className="text-danger-500">*</span></label>
+              <textarea className="w-full text-[13px] border border-slate-200 rounded-lg p-3 h-16 mt-1 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="理由を入力..." />
             </div>
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowConfirm(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { const action = showConfirm === "suspend" ? "サスペンド" : "解約"; setShowConfirm(null); toast(`加盟店を${action}しました`, showConfirm === "suspend" ? "warning" : "error"); }} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showConfirm === "suspend" ? "bg-warning-600 hover:bg-warning-700" : "bg-danger-600 hover:bg-danger-700"}`}>
+              <button onClick={() => setShowConfirm(null)} className="px-4 py-2 text-[13px] text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 font-medium transition-colors duration-150">キャンセル</button>
+              <button onClick={() => { const action = showConfirm === "suspend" ? "サスペンド" : "解約"; setShowConfirm(null); toast(`加盟店を${action}しました`, showConfirm === "suspend" ? "warning" : "error"); }} className={`px-4 py-2 text-[13px] text-white rounded-lg font-medium transition-colors duration-150 ${showConfirm === "suspend" ? "bg-warning-600 hover:bg-warning-700" : "bg-danger-600 hover:bg-danger-700"}`}>
                 {showConfirm === "suspend" ? "サスペンドする" : "解約する"}
               </button>
             </div>
@@ -1989,27 +1989,27 @@ const MasterMerchants = () => {
 
       {/* ── Modal: 接続先審査を追加申請 ── */}
       {showProcApply && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowProcApply(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowProcApply(false)} />
+          <div className="relative bg-white rounded-xl shadow-overlay w-[480px] animate-scale-in">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
-              <h3 className="text-sm font-bold text-slate-800">接続先審査を追加申請</h3>
-              <button onClick={() => setShowProcApply(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
+              <h3 className="text-sm font-semibold text-slate-800">接続先審査を追加申請</h3>
+              <button onClick={() => setShowProcApply(false)} className="text-slate-400 hover:text-slate-600 transition-colors duration-150"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-600">接続先 <span className="text-danger-500">*</span></label>
-                <select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>選択してください</option><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option><option>ONTHELINE</option><option>Asiabill</option><option>ビットキャッシュ</option><option>スマートピット</option><option>ネットライドキャッシュ</option><option>セキュリティマネー</option><option>Gマネー</option><option>ペイディ</option><option>ニーハオペイ</option></select>
+                <label className="text-[13px] font-medium text-slate-600">接続先 <span className="text-danger-500">*</span></label>
+                <select className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2 mt-1 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150"><option>選択してください</option><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option><option>ONTHELINE</option><option>Asiabill</option><option>ビットキャッシュ</option><option>スマートピット</option><option>ネットライドキャッシュ</option><option>セキュリティマネー</option><option>Gマネー</option><option>ペイディ</option><option>ニーハオペイ</option></select>
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600">申請理由</label>
-                <textarea className="w-full text-xs border rounded p-2 h-16 mt-0.5" placeholder="追加申請の理由を入力..." />
+                <label className="text-[13px] font-medium text-slate-600">申請理由</label>
+                <textarea className="w-full text-[13px] border border-slate-200 rounded-lg p-3 h-16 mt-1 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="追加申請の理由を入力..." />
               </div>
-              <div className="bg-brand-50 rounded border border-brand-200 p-2 text-xs text-brand-700"><Lightbulb className="w-4 h-4 inline mr-1" /> 申請後、審査完了まで1〜5営業日かかります</div>
+              <div className="bg-brand-50 rounded-lg border border-brand-200 p-3 text-[13px] text-brand-700"><Lightbulb className="w-4 h-4 inline mr-1" /> 申請後、審査完了まで1〜5営業日かかります</div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
-              <button onClick={() => setShowProcApply(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { setShowProcApply(false); toast("接続先審査を申請しました", "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">申請する</button>
+              <button onClick={() => setShowProcApply(false)} className="px-4 py-2 text-[13px] text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 font-medium transition-colors duration-150">キャンセル</button>
+              <button onClick={() => { setShowProcApply(false); toast("接続先審査を申請しました", "success"); }} className="px-4 py-2 text-[13px] bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 transition-colors duration-150">申請する</button>
             </div>
           </div>
         </div>
@@ -2018,12 +2018,12 @@ const MasterMerchants = () => {
 
       {/* ── Modal: サイト追加 ── */}
       {showSiteAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowSiteAddModal(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[600px] max-h-[85vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowSiteAddModal(false)} />
+          <div className="relative bg-white rounded-xl shadow-overlay w-[600px] max-h-[85vh] overflow-y-auto animate-scale-in">
             <div className="p-4 border-b bg-brand-50 rounded-t-xl flex justify-between items-center sticky top-0 z-10">
-              <h3 className="text-sm font-bold text-slate-800"><Globe className="w-4 h-4 inline mr-1" /> 新規サイト追加</h3>
-              <button onClick={() => setShowSiteAddModal(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
+              <h3 className="text-sm font-semibold text-slate-800"><Globe className="w-4 h-4 inline mr-1" /> 新規サイト追加</h3>
+              <button onClick={() => setShowSiteAddModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors duration-150"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               <div className="bg-brand-50 border border-brand-200 rounded p-3 text-xs text-brand-700">
@@ -2159,8 +2159,8 @@ const MasterAIMonitor = () => {
   ];
 
   return (
-  <div className="p-5 space-y-4">
-    <h2 className="text-sm font-bold text-slate-800">AI監視ダッシュボード</h2>
+  <div className="p-6 space-y-6">
+    <h2 className="text-xl font-semibold text-slate-800">AI監視ダッシュボード</h2>
     <div className="flex gap-3">
       <KPICard label="全体自動化率" value="94.2%" sub="目標: 95%" color="purple" />
       <KPICard label="不正検知精度" value="97.8%" sub="FP率: 0.3%" color="green" />
@@ -2171,7 +2171,7 @@ const MasterAIMonitor = () => {
     {/* AI Modules with version info, toggle, trend */}
     <div className="grid grid-cols-2 gap-3">
       {aiModules.map((ai, i) => (
-        <div key={i} className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 cursor-pointer hover:ring-2 hover:ring-brand-200 transition-all" onClick={() => setSelectedModule(ai)}>
+        <div key={i} className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3 cursor-pointer hover:ring-2 hover:ring-brand-200 transition-all" onClick={() => setSelectedModule(ai)}>
           <div className="flex justify-between items-center mb-2">
             <p className="text-xs font-bold text-slate-700"><Bot className="w-4 h-4 inline mr-1" /> {ai.name}</p>
             <div className="flex items-center gap-2">
@@ -2187,7 +2187,7 @@ const MasterAIMonitor = () => {
             <span>学習データ: {ai.trainData}</span>
           </div>
           {ai.metrics.map((m, j) => (
-            <div key={j} className="flex justify-between text-xs py-1 border-b border-slate-100 last:border-0">
+            <div key={j} className="flex justify-between text-xs py-1 border-b hover:bg-slate-50 border-slate-100 last:border-0">
               <span className="text-slate-500">{m.l}</span>
               <span className="font-semibold text-slate-700">{m.v}</span>
             </div>
@@ -2206,7 +2206,7 @@ const MasterAIMonitor = () => {
     </div>
 
     {/* AI vs Human Consistency Analysis */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-slate-700"><BarChart3 className="w-4 h-4 inline mr-1" /> AI判定 vs 人間判定 一致率分析</p>
         <div className="flex bg-slate-100 rounded-lg p-1">
@@ -2239,7 +2239,7 @@ const MasterAIMonitor = () => {
     </div>
 
     {/* Claude API Usage & Cost */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-700 mb-2"><Coins className="w-4 h-4 inline mr-1" /> Claude API 使用量・コスト（今月）</p>
       <div className="flex gap-3 mb-2">
         <div className="flex-1 bg-slate-50 rounded p-2 text-center">
@@ -2274,7 +2274,7 @@ const MasterAIMonitor = () => {
     </div>
 
     {/* アラート閾値設定 */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-700 mb-2"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> アラート閾値設定</p>
       <div className="grid grid-cols-4 gap-3">
         {[{ label: "FP率アラート", value: "0.5%", desc: "偽陽性率がこの値を超えたら通知" },
@@ -2293,16 +2293,16 @@ const MasterAIMonitor = () => {
 
     {/* AIモジュール詳細ドリルダウンモーダル */}
     {selectedModule && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setSelectedModule(null)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[600px] max-h-[85vh] overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setSelectedModule(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[600px] max-h-[85vh] overflow-y-auto animate-scale-in">
           <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
             <div className="flex items-center gap-2">
               <p className="text-sm font-bold"><Bot className="w-4 h-4 inline mr-1" /> {selectedModule.name}</p>
               <Badge text={selectedModule.version} color="blue" />
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={e => { e.stopPropagation(); setShowTrainModal(selectedModule); setSelectedModule(null); }} className="text-xs px-3 py-1 bg-purple-50 text-purple-600 rounded border border-purple-200 hover:bg-purple-100"><RefreshCw className="w-4 h-4 inline mr-1" /> 再学習</button>
+              <button onClick={e => { e.stopPropagation(); setShowTrainModal(selectedModule); setSelectedModule(null); }} className="text-xs px-3 py-1 bg-purple-50 text-purple-600 rounded border border-purple-200 transition-colors duration-150 hover:bg-purple-100"><RefreshCw className="w-4 h-4 inline mr-1" /> 再学習</button>
               <button onClick={() => setSelectedModule(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
             </div>
           </div>
@@ -2335,7 +2335,7 @@ const MasterAIMonitor = () => {
             <div>
               <p className="text-xs font-bold text-slate-700 mb-2">最新判定サンプル</p>
               {selectedModule.samples.map((s, i) => (
-                <div key={i} className="flex items-center gap-3 py-2 border-b text-xs last:border-0">
+                <div key={i} className="flex items-center gap-3 py-2 border-b hover:bg-slate-50 text-xs last:border-0">
                   <span className="font-mono text-slate-400 w-16">{s.id}</span>
                   <Badge text={s.result} color={s.result === "ブロック" || s.result === "エスカレ" ? "red" : s.result === "要確認" ? "yellow" : "green"} />
                   {s.confidence !== "-" && <span className="text-slate-500">信頼度: {s.confidence}</span>}
@@ -2351,9 +2351,9 @@ const MasterAIMonitor = () => {
 
     {/* 再学習スケジュールモーダル */}
     {showTrainModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowTrainModal(null)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowTrainModal(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[420px] animate-scale-in">
           <div className="p-4 border-b flex items-center justify-between">
             <p className="text-sm font-bold"><RefreshCw className="w-4 h-4 inline mr-1" /> 再学習スケジュール</p>
             <button onClick={() => setShowTrainModal(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
@@ -2378,7 +2378,7 @@ const MasterAIMonitor = () => {
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowTrainModal(null)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
-              <button onClick={() => { toast(`${showTrainModal.name} の再学習をスケジュールしました`, "success"); setShowTrainModal(null); }} className="flex-1 py-2 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700">再学習をスケジュール</button>
+              <button onClick={() => { toast(`${showTrainModal.name} の再学習をスケジュールしました`, "success"); setShowTrainModal(null); }} className="flex-1 py-2 bg-purple-600 text-white rounded text-xs font-medium transition-colors duration-150 hover:bg-purple-700">再学習をスケジュール</button>
             </div>
           </div>
         </div>
@@ -2634,77 +2634,77 @@ const MerchantTransactions = () => {
     { id: "pay_4b3d7g2h", time: "2026-02-11 13:42", amount: "¥15,600", rawAmt: 15600, status: "成功", sColor: "green", method: "ペイディ", card: "-", order: "ORD-20260211-004", threeD: "—", fee: "¥546", net: "¥15,054", customer: "m***@icloud.com" },
   ];
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-6 space-y-6">
     <div className="flex justify-between items-center">
-      <h2 className="text-sm font-bold text-slate-800">注文一覧</h2>
+      <h2 className="text-xl font-semibold text-slate-800">注文一覧</h2>
       <div className="flex gap-2">
-        <input className="text-xs border rounded px-2 py-1 w-40" placeholder="注文番号 / 金額で検索" />
-        <select className="text-xs border rounded px-2 py-1"><option>全ステータス</option><option>成功</option><option>失敗</option><option>返金済</option><option>ブロック</option></select>
-        <input type="date" className="text-xs border rounded px-2 py-1" />
-        <button onClick={() => toast("注文一覧をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200" title="出力項目: 決済ID/日時/金額/ステータス/決済手段/注文番号（カード番号等の機密情報は含みません）"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
+        <input className="text-[13px] border border-slate-200 rounded-lg px-3 py-2 w-44 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="注文番号 / 金額で検索" />
+        <select className="text-[13px] border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150"><option>全ステータス</option><option>成功</option><option>失敗</option><option>返金済</option><option>ブロック</option></select>
+        <input type="date" className="text-[13px] border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" />
+        <button onClick={() => toast("注文一覧をCSV出力しました", "success")} className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150" title="出力項目: 決済ID/日時/金額/ステータス/決済手段/注文番号（カード番号等の機密情報は含みません）"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
       </div>
     </div>
-    <div className="grid grid-cols-4 gap-3">
+    <div className="grid grid-cols-4 gap-4">
       <KPICard label="今月の取引数" value="342件" trend={8.2} color="blue" />
       <KPICard label="取引総額" value="¥4,280,000" trend={5.1} color="blue" />
       <KPICard label="成功率" value="97.4%" sub="" color="green" />
       <KPICard label="返金件数" value="3件" sub="¥9,200" color="yellow" />
     </div>
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card overflow-x-auto">
       <TableHeader cols={[{ label: "決済ID", w: "w-28" }, { label: "日時", w: "w-32" }, { label: "金額", w: "w-20" }, { label: "ステータス", w: "w-20" }, { label: "決済手段", w: "w-24" }, { label: "カード", w: "w-20" }, { label: "注文番号", w: "flex-1" }, { label: "操作", w: "w-16" }]}>
       {txData.map((tx, i) => (
-        <tr key={i} onClick={() => setSelectedTx(tx)} className={`border-b cursor-pointer hover:bg-brand-50 ${i % 2 ? "bg-slate-50" : ""}`}>
-          <td className="px-4 py-2 whitespace-nowrap w-28 font-mono text-brand-600">{tx.id}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-32 text-slate-500">{tx.time}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-20 font-semibold text-right">{tx.amount}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={tx.status} color={tx.sColor} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-600">{tx.method}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-20 font-mono text-slate-500">{tx.card}</td>
-          <td className="px-4 py-2 whitespace-nowrap text-slate-500">{tx.order}</td>
-          <td className="px-4 py-2 whitespace-nowrap w-16"><button onClick={(e) => { e.stopPropagation(); setSelectedTx(tx); }} className="text-xs text-brand-600 hover:underline">詳細</button></td>
+        <tr key={i} onClick={() => setSelectedTx(tx)} className="border-b border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors duration-150">
+          <td className="px-4 py-2.5 whitespace-nowrap w-28 font-mono text-brand-600">{tx.id}</td>
+          <td className="px-4 py-2.5 whitespace-nowrap w-32 text-[13px] text-slate-500">{tx.time}</td>
+          <td className="px-4 py-2.5 whitespace-nowrap w-20 font-semibold text-right text-[13px]">{tx.amount}</td>
+          <td className="px-4 py-2.5 whitespace-nowrap w-20"><Badge text={tx.status} color={tx.sColor} /></td>
+          <td className="px-4 py-2.5 whitespace-nowrap w-24 text-[13px] text-slate-600">{tx.method}</td>
+          <td className="px-4 py-2.5 whitespace-nowrap w-20 font-mono text-slate-500">{tx.card}</td>
+          <td className="px-4 py-2.5 whitespace-nowrap text-[13px] text-slate-500">{tx.order}</td>
+          <td className="px-4 py-2.5 whitespace-nowrap w-16"><button onClick={(e) => { e.stopPropagation(); setSelectedTx(tx); }} className="text-[13px] text-brand-600 hover:underline font-medium transition-colors duration-150">詳細</button></td>
         </tr>
       ))}
       </TableHeader>
     </div>
-    <div className="text-xs text-slate-400 text-right">5件表示 / 全342件</div>
+    <div className="text-[13px] text-slate-400 text-right">5件表示 / 全342件</div>
 
     {/* 取引詳細スライドパネル */}
     {selectedTx && (
-      <div className="fixed inset-0 z-50 flex">
-        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedTx(null)} />
-        <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex animate-fade-in">
+        <div className="flex-1 bg-slate-900/20" onClick={() => setSelectedTx(null)} />
+        <div className="w-96 bg-white shadow-overlay border-l overflow-y-auto animate-slide-in-right">
           <div className="p-4 border-b bg-brand-50 flex justify-between items-center">
-            <h3 className="text-sm font-bold text-slate-800">取引詳細</h3>
-            <button onClick={() => setSelectedTx(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
+            <h3 className="text-sm font-semibold text-slate-800">取引詳細</h3>
+            <button onClick={() => setSelectedTx(null)} className="text-slate-400 hover:text-slate-600 transition-colors duration-150"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
             <div>
-              <p className="text-xs text-slate-400 mb-1">取引サマリー</p>
+              <p className="text-sm font-medium text-slate-700 mb-2">取引サマリー</p>
               <div className="space-y-1.5">
                 {[["決済ID", selectedTx.id], ["日時", selectedTx.time], ["金額", selectedTx.amount], ["注文番号", selectedTx.order]].map(([l, v], i) => (
-                  <div key={i} className="flex text-xs"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
+                  <div key={i} className="flex text-[13px]"><span className="w-20 text-slate-400">{l}</span><span className="font-semibold">{v}</span></div>
                 ))}
-                <div className="flex text-xs"><span className="w-20 text-slate-400">ステータス</span><Badge text={selectedTx.status} color={selectedTx.sColor} /></div>
+                <div className="flex text-[13px]"><span className="w-20 text-slate-400">ステータス</span><Badge text={selectedTx.status} color={selectedTx.sColor} /></div>
               </div>
             </div>
             <div className="border-t pt-3">
-              <p className="text-xs text-slate-400 mb-1">決済情報</p>
+              <p className="text-sm font-medium text-slate-700 mb-2">決済情報</p>
               <div className="space-y-1.5">
                 {[["決済手段", selectedTx.method], ["カード番号", selectedTx.card], ["3Dセキュア", selectedTx.threeD], ["顧客メール", selectedTx.customer]].map(([l, v], i) => (
-                  <div key={i} className="flex text-xs"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
+                  <div key={i} className="flex text-[13px]"><span className="w-20 text-slate-400">{l}</span><span className="font-semibold">{v}</span></div>
                 ))}
               </div>
             </div>
             <div className="border-t pt-3">
-              <p className="text-xs text-slate-400 mb-1">手数料・精算</p>
+              <p className="text-sm font-medium text-slate-700 mb-2">手数料・精算</p>
               <div className="space-y-1.5">
                 {[["決済手数料", selectedTx.fee], ["入金額", selectedTx.net]].map(([l, v], i) => (
-                  <div key={i} className="flex text-xs"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
+                  <div key={i} className="flex text-[13px]"><span className="w-20 text-slate-400">{l}</span><span className="font-semibold">{v}</span></div>
                 ))}
               </div>
             </div>
             <div className="border-t pt-3">
-              <p className="text-xs text-slate-400 mb-2">イベントタイムライン</p>
+              <p className="text-sm font-medium text-slate-700 mb-2">イベントタイムライン</p>
               <div className="space-y-2">
                 {[
                   { time: "14:23:01", event: "決済リクエスト受信", icon: <Download className="w-4 h-4 inline text-slate-500" /> },
@@ -2721,7 +2721,7 @@ const MerchantTransactions = () => {
             </div>
             {selectedTx.status === "成功" && (
               <div className="border-t pt-3 flex gap-2">
-                <button onClick={() => setShowRefundModal(true)} className="flex-1 py-1.5 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200 font-bold"><RotateCcw className="w-4 h-4 inline mr-1" /> 返金する</button>
+                <button onClick={() => setShowRefundModal(true)} className="flex-1 py-2 bg-danger-50 text-danger-600 rounded-lg text-sm border border-danger-200 font-medium hover:bg-danger-100 transition-colors duration-150"><RotateCcw className="w-4 h-4 inline mr-1" /> 返金する</button>
               </div>
             )}
           </div>
@@ -2731,25 +2731,25 @@ const MerchantTransactions = () => {
 
     {/* 返金確認モーダル */}
     {showRefundModal && selectedTx && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowRefundModal(false)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
+      <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowRefundModal(false)} />
+        <div className="relative bg-white rounded-xl shadow-overlay w-[420px] animate-scale-in">
           <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
-            <h3 className="text-sm font-bold text-slate-800"><RotateCcw className="w-4 h-4 inline mr-1" /> 返金処理</h3>
-            <button onClick={() => setShowRefundModal(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
+            <h3 className="text-sm font-semibold text-slate-800"><RotateCcw className="w-4 h-4 inline mr-1" /> 返金処理</h3>
+            <button onClick={() => setShowRefundModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors duration-150"><X className="w-4 h-4" /></button>
           </div>
           <div className="p-5 space-y-4">
-            <div className="bg-brand-50 rounded p-3 text-xs">
-              <div className="flex justify-between"><span className="text-slate-500">対象取引</span><span className="font-mono font-bold">{selectedTx.id}</span></div>
-              <div className="flex justify-between mt-1"><span className="text-slate-500">決済金額</span><span className="font-bold">{selectedTx.amount}</span></div>
+            <div className="bg-brand-50 rounded-lg p-3 text-[13px]">
+              <div className="flex justify-between"><span className="text-slate-500">対象取引</span><span className="font-mono font-semibold">{selectedTx.id}</span></div>
+              <div className="flex justify-between mt-1"><span className="text-slate-500">決済金額</span><span className="font-semibold">{selectedTx.amount}</span></div>
             </div>
-            <div><label className="text-xs font-semibold text-slate-600">返金金額 <span className="text-danger-500">*</span></label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue={selectedTx.rawAmt} /><p className="text-xs text-slate-400 mt-0.5">一部返金の場合は金額を変更してください</p></div>
-            <div><label className="text-xs font-semibold text-slate-600">返金理由 <span className="text-danger-500">*</span></label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>お客様都合</option><option>商品不良・欠品</option><option>重複決済</option><option>不正利用</option><option>その他</option></select></div>
-            <div><label className="text-xs font-semibold text-slate-600">備考</label><textarea className="w-full text-xs border rounded px-2 py-1.5 mt-0.5 h-16" placeholder="任意メモ" /></div>
+            <div><label className="text-[13px] font-medium text-slate-600">返金金額 <span className="text-danger-500">*</span></label><input className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2 mt-1 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" defaultValue={selectedTx.rawAmt} /><p className="text-[13px] text-slate-400 mt-1">一部返金の場合は金額を変更してください</p></div>
+            <div><label className="text-[13px] font-medium text-slate-600">返金理由 <span className="text-danger-500">*</span></label><select className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2 mt-1 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150"><option>お客様都合</option><option>商品不良・欠品</option><option>重複決済</option><option>不正利用</option><option>その他</option></select></div>
+            <div><label className="text-[13px] font-medium text-slate-600">備考</label><textarea className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2 mt-1 h-16 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="任意メモ" /></div>
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
-            <button onClick={() => setShowRefundModal(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => setShowRefundModal(false)} className="px-4 py-2 text-xs bg-danger-600 text-white rounded font-semibold hover:bg-danger-700">返金を実行</button>
+            <button onClick={() => setShowRefundModal(false)} className="px-4 py-2 text-[13px] text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 font-medium transition-colors duration-150">キャンセル</button>
+            <button onClick={() => setShowRefundModal(false)} className="px-4 py-2 text-[13px] bg-danger-600 text-white rounded-lg font-medium hover:bg-danger-700 transition-colors duration-150">返金を実行</button>
           </div>
         </div>
       </div>
@@ -2773,16 +2773,16 @@ const MerchantAPISettings = () => {
     { id: "wh_05", event: "payment.refunded", url: "https://api.abc-mart.co.jp/webhooks/payment", status: 200, sc: "green", time: "2026-02-11 11:22:45", duration: "105ms" },
   ];
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-6 space-y-6">
     <div className="flex items-center justify-between">
-      <h2 className="text-sm font-bold text-slate-800">API設定</h2>
+      <h2 className="text-xl font-semibold text-slate-800">API設定</h2>
       <a href="#" className="text-xs text-brand-600 hover:underline"><FileText className="w-4 h-4 inline mr-1" /> APIドキュメント →</a>
     </div>
     <div className="grid grid-cols-2 gap-4">
       {[{ env: "本番環境", badge: "green", pk: "aip_pk_live_xxxxxxxxxxxx...", sk: "aip_sk_live_xxxxxxxxxxxxxxxxxxxxxxxx", key: "live" },
         { env: "テスト環境", badge: "yellow", pk: "aip_pk_test_xxxxxxxxxxxx...", sk: "aip_sk_test_xxxxxxxxxxxxxxxxxxxxxxxx", key: "test" }
       ].map(e => (
-        <div key={e.key} className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+        <div key={e.key} className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
           <div className="flex items-center justify-between mb-2">
             <Badge text={e.env} color={e.badge} />
             <button onClick={() => setShowRegenerateModal(e.key)} className="text-xs text-danger-500 hover:text-danger-700"><RefreshCw className="w-4 h-4 inline mr-1" /> キーを再発行</button>
@@ -2810,12 +2810,12 @@ const MerchantAPISettings = () => {
     </div>
 
     {/* Webhook セクション */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-bold text-slate-700">Webhook設定</p>
         <div className="flex bg-slate-100 rounded p-0.5">
           {["settings", "logs"].map(t => (
-            <button key={t} onClick={() => setWebhookTab(t)} className={`text-xs px-3 py-1 rounded ${webhookTab === t ? "bg-white shadow-sm font-bold" : "text-slate-500"}`}>{t === "settings" ? "設定" : "配信ログ"}</button>
+            <button key={t} onClick={() => setWebhookTab(t)} className={`text-xs px-3 py-1 rounded ${webhookTab === t ? "bg-white shadow-sm font-medium" : "text-slate-500"}`}>{t === "settings" ? "設定" : "配信ログ"}</button>
           ))}
         </div>
       </div>
@@ -2837,8 +2837,8 @@ const MerchantAPISettings = () => {
             </div>
           </div>
           <div className="flex gap-2 pt-1">
-            <button onClick={() => { toast("Webhookテスト送信中...", "info"); setTimeout(() => toast("Webhookテスト送信成功", "success"), 1500); }} className="text-xs px-3 py-1.5 bg-brand-50 text-brand-600 rounded border border-brand-200 hover:bg-brand-100"><FlaskConical className="w-4 h-4 inline mr-1" /> テスト送信</button>
-            <button onClick={() => toast("エンドポイントを追加しました", "success")} className="text-xs px-3 py-1.5 bg-slate-50 text-slate-600 rounded border border-slate-200 hover:bg-slate-100">+ エンドポイント追加</button>
+            <button onClick={() => { toast("Webhookテスト送信中...", "info"); setTimeout(() => toast("Webhookテスト送信成功", "success"), 1500); }} className="text-xs px-3 py-1.5 bg-brand-50 text-brand-600 rounded border border-brand-200 transition-colors duration-150 hover:bg-brand-100"><FlaskConical className="w-4 h-4 inline mr-1" /> テスト送信</button>
+            <button onClick={() => toast("エンドポイントを追加しました", "success")} className="text-xs px-3 py-1.5 bg-slate-50 text-slate-600 rounded border border-slate-200 transition-colors duration-150 hover:bg-slate-100">+ エンドポイント追加</button>
           </div>
           <div className="mt-3 pt-3 border-t">
             <p className="text-xs font-bold text-slate-700 mb-2">Webhook署名検証</p>
@@ -2877,7 +2877,7 @@ const MerchantAPISettings = () => {
     </div>
 
     {/* IP制限 */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-700 mb-2">IP制限（APIアクセス元）</p>
       <div className="space-y-1.5">
         {[["203.0.113.0/24", "本番サーバー", "green"], ["198.51.100.10", "開発環境", "yellow"]].map(([ip, label, color], i) => (
@@ -2894,9 +2894,9 @@ const MerchantAPISettings = () => {
 
     {/* キー再発行確認モーダル */}
     {showRegenerateModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => { setShowRegenerateModal(null); setConfirmText(""); }} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => { setShowRegenerateModal(null); setConfirmText(""); }} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[420px] animate-scale-in">
           <div className="p-4 border-b flex items-center justify-between">
             <p className="text-sm font-bold text-danger-600"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> APIキーの再発行</p>
             <button onClick={() => { setShowRegenerateModal(null); setConfirmText(""); }} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
@@ -2912,7 +2912,7 @@ const MerchantAPISettings = () => {
             </div>
             <div className="flex gap-2">
               <button onClick={() => { setShowRegenerateModal(null); setConfirmText(""); }} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
-              <button disabled={confirmText !== "再発行"} onClick={() => { setShowRegenerateModal(null); setConfirmText(""); toast("APIキーを再発行しました。新しいキーをコピーしてください", "warning"); }} className={`flex-1 py-2 rounded text-xs font-bold text-white ${confirmText === "再発行" ? "bg-danger-500 hover:bg-danger-600" : "bg-slate-300 cursor-not-allowed"}`}>キーを再発行する</button>
+              <button disabled={confirmText !== "再発行"} onClick={() => { setShowRegenerateModal(null); setConfirmText(""); toast("APIキーを再発行しました。新しいキーをコピーしてください", "warning"); }} className={`flex-1 py-2 rounded text-xs font-medium text-white ${confirmText === "再発行" ? "bg-danger-500 hover:bg-danger-600" : "bg-slate-300 cursor-not-allowed"}`}>キーを再発行する</button>
             </div>
           </div>
         </div>
@@ -3002,7 +3002,7 @@ const MerchantAIChat = () => {
         </div>
       </div>
       <div className="p-3 border-t flex gap-2">
-        <button onClick={() => toast("ファイルを選択してください", "info")} className="px-2 py-2 text-slate-400 border rounded-lg text-xs hover:bg-slate-50" title="画像ファイルを添付"><Paperclip className="w-4 h-4 inline" /></button>
+        <button onClick={() => toast("ファイルを選択してください", "info")} className="px-2 py-2 text-slate-400 border rounded-lg text-xs transition-colors duration-150 hover:bg-slate-50" title="画像ファイルを添付"><Paperclip className="w-4 h-4 inline" /></button>
         <input value={inputText} onChange={e => setInputText(e.target.value)} className="flex-1 text-xs border rounded-lg px-3 py-2" placeholder="メッセージを入力..." />
         <button onClick={() => { if (inputText) { toast("メッセージを送信しました", "success"); setInputText(""); } }} className={`px-3 py-2 rounded-lg text-xs font-semibold ${inputText ? "bg-brand-500 text-white" : "bg-slate-200 text-slate-400"}`}>送信</button>
       </div>
@@ -3014,7 +3014,7 @@ const MerchantAIChat = () => {
       <p className="text-xs font-bold text-slate-600 mb-2">クイックアクション</p>
       <div className="space-y-1">
         {["昨日の売上は？", "今月のレポートを出して", "決済成功率は？", "Webhook URLを変更したい", "テスト決済をしたい", "APIキーを再発行したい"].map(q => (
-          <button key={q} onClick={() => setInputText(q)} className="w-full text-left text-xs bg-white border rounded p-2 text-slate-600 hover:bg-brand-50 hover:text-brand-600 transition-all">{q}</button>
+          <button key={q} onClick={() => setInputText(q)} className="w-full text-left text-xs bg-white border rounded p-2 text-slate-600 transition-colors duration-150 hover:bg-brand-50 hover:text-brand-600 transition-all">{q}</button>
         ))}
       </div>
     </div>
@@ -3142,10 +3142,10 @@ const MasterUserManagement = () => {
   const permCount = (perms, type) => Object.values(perms).filter(v => v === type).length;
 
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-6 space-y-6">
     <div className="flex justify-between items-center">
-      <h2 className="text-sm font-bold text-slate-800">ユーザー管理（運営スタッフ）</h2>
-      <button onClick={() => setShowInviteM04(true)} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold hover:bg-brand-600"><Mail className="w-4 h-4 inline mr-1" /> スタッフを招待</button>
+      <h2 className="text-xl font-semibold text-slate-800">ユーザー管理（運営スタッフ）</h2>
+      <button onClick={() => setShowInviteM04(true)} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold transition-colors duration-150 hover:bg-brand-600"><Mail className="w-4 h-4 inline mr-1" /> スタッフを招待</button>
     </div>
 
     {/* Role Summary */}
@@ -3155,7 +3155,7 @@ const MasterUserManagement = () => {
         { role: "管理者", count: staffData.filter(s => s.roleLabel === "管理者").length, textClass: "text-brand-600", icon: <Key className="w-4 h-4 inline text-slate-500" />, desc: "個別メニュー権限設定可" },
         { role: "レビュアー", count: staffData.filter(s => s.roleLabel === "レビュアー").length, textClass: "text-purple-600", icon: <ClipboardList className="w-4 h-4 inline text-slate-500" />, desc: "個別メニュー権限設定可" },
       ].map((r, i) => (
-        <div key={i} className="flex-1 bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+        <div key={i} className="flex-1 bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
           <div className="flex items-center gap-2 mb-1">
             <span>{r.icon}</span>
             <span className="text-xs font-bold text-slate-600">{r.role}</span>
@@ -3171,7 +3171,7 @@ const MasterUserManagement = () => {
       {staffData.map((u, i) => {
         const isExpanded = expandedStaff === u.id;
         return (
-        <div key={u.id} className={`bg-white rounded-lg border shadow-sm ${isExpanded ? "border-brand-300 ring-1 ring-brand-100" : "border-slate-200"}`}>
+        <div key={u.id} className={`bg-white rounded-lg border shadow-card transition-shadow duration-150 hover:shadow-md ${isExpanded ? "border-brand-300 ring-1 ring-brand-100" : "border-slate-200"}`}>
           {/* Accordion Header */}
           <div className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-brand-50/50 transition-colors ${isExpanded ? "bg-brand-50/30" : ""}`} onClick={() => { setExpandedStaff(isExpanded ? null : u.id); setExpandedSection("permissions"); }}>
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-100 to-purple-100 flex items-center justify-center text-sm shrink-0"><User className="w-4 h-4 inline" /></div>
@@ -3211,8 +3211,8 @@ const MasterUserManagement = () => {
               ))}
               <div className="flex-1" />
               <div className="flex items-center gap-1 py-1" onClick={e => e.stopPropagation()}>
-                <button onClick={() => setActionConfirm({ title: "パスワードリセット", description: `${u.name} にパスワードリセットメールを送信します。`, type: "warning", onConfirm: () => toast(`${u.name} にリセットメールを送信しました`, "success") })} className="px-2 py-1 bg-warning-50 text-warning-700 border border-warning-200 rounded text-xs hover:bg-warning-100">パスワードリセット</button>
-                <button onClick={() => setActionConfirm({ title: "ユーザー無効化", description: `${u.name}（${u.email}）を無効化します。`, warning: "無効化されたユーザーはログインできなくなります。", type: "danger", onConfirm: () => toast(`${u.name} を無効化しました`, "warning") })} className="px-2 py-1 bg-danger-50 text-danger-600 border border-danger-200 rounded text-xs hover:bg-danger-100">無効化</button>
+                <button onClick={() => setActionConfirm({ title: "パスワードリセット", description: `${u.name} にパスワードリセットメールを送信します。`, type: "warning", onConfirm: () => toast(`${u.name} にリセットメールを送信しました`, "success") })} className="px-2 py-1 bg-warning-50 text-warning-700 border border-warning-200 rounded text-xs transition-colors duration-150 hover:bg-warning-100">パスワードリセット</button>
+                <button onClick={() => setActionConfirm({ title: "ユーザー無効化", description: `${u.name}（${u.email}）を無効化します。`, warning: "無効化されたユーザーはログインできなくなります。", type: "danger", onConfirm: () => toast(`${u.name} を無効化しました`, "warning") })} className="px-2 py-1 bg-danger-50 text-danger-600 border border-danger-200 rounded text-xs transition-colors duration-150 hover:bg-danger-100">無効化</button>
               </div>
             </div>
 
@@ -3259,9 +3259,9 @@ const MasterUserManagement = () => {
                 })}
                 {u.roleLabel !== "スーパー管理者" && (
                 <div className="flex gap-2 pt-2 border-t">
-                  <button onClick={() => toast(`${u.name} のメニュー権限を保存しました`, "success")} className="px-4 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">権限を保存</button>
-                  <button className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded text-xs hover:bg-slate-200">全て編集可にする</button>
-                  <button className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded text-xs hover:bg-slate-200">全て閲覧のみにする</button>
+                  <button onClick={() => toast(`${u.name} のメニュー権限を保存しました`, "success")} className="px-4 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-brand-600">権限を保存</button>
+                  <button className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded text-xs transition-colors duration-150 hover:bg-slate-200">全て編集可にする</button>
+                  <button className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded text-xs transition-colors duration-150 hover:bg-slate-200">全て閲覧のみにする</button>
                 </div>
                 )}
               </div>
@@ -3328,7 +3328,7 @@ const MasterUserManagement = () => {
                       <option>レビュアー</option>
                     </select>
                     <input className="flex-1 text-xs border rounded px-2 py-1.5" placeholder="変更理由（監査ログに記録されます）" />
-                    <button onClick={() => toast(`${u.name} のロールを変更しました`, "success")} className="px-3 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600 whitespace-nowrap">変更</button>
+                    <button onClick={() => toast(`${u.name} のロールを変更しました`, "success")} className="px-3 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-brand-600 whitespace-nowrap">変更</button>
                   </div>
                   <p className="text-xs text-warning-600 mt-1"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> ロール変更時はメニュー権限設定も合わせて見直してください。</p>
                 </div>
@@ -3344,9 +3344,9 @@ const MasterUserManagement = () => {
 
     {/* ── Modal: 招待 ── */}
     {showInviteM04 && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowInviteM04(false)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[520px] max-h-[85vh] overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowInviteM04(false)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[520px] max-h-[85vh] overflow-y-auto animate-scale-in">
           <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center sticky top-0 z-10">
             <h3 className="text-sm font-bold text-slate-800"><Mail className="w-4 h-4 inline mr-1" /> スタッフを招待</h3>
             <button onClick={() => setShowInviteM04(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
@@ -3383,8 +3383,8 @@ const MasterUserManagement = () => {
             </div>
           </div>
           <div className="p-4 border-t flex gap-2 justify-end sticky bottom-0 bg-white">
-            <button onClick={() => setShowInviteM04(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => { setShowInviteM04(false); toast("招待メールを送信しました", "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">招待メール送信</button>
+            <button onClick={() => setShowInviteM04(false)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
+            <button onClick={() => { setShowInviteM04(false); toast("招待メールを送信しました", "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-brand-600">招待メール送信</button>
           </div>
         </div>
       </div>
@@ -3438,7 +3438,7 @@ const MasterMerchantApplications = () => {
   ];
 
   return (
-    <div className="p-5 space-y-4">
+    <div className="p-6 space-y-6">
       {/* タブ切替: 新規加盟店申込 / 既存加盟店サイト追加 */}
       <div className="flex gap-1 border-b border-slate-200">
         {[
@@ -3446,7 +3446,7 @@ const MasterMerchantApplications = () => {
           { id: "site_add", label: "既存加盟店サイト追加", count: siteAddAppList.length },
         ].map(tab => (
           <button key={tab.id} onClick={() => setAppTab(tab.id)}
-            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-colors ${appTab === tab.id ? "border-brand-500 text-brand-600 bg-brand-50/50" : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors duration-150 ${appTab === tab.id ? "border-brand-500 text-brand-600 bg-brand-50/50" : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
             {tab.label} <span className="ml-1 text-slate-400">({tab.count})</span>
           </button>
         ))}
@@ -3454,10 +3454,10 @@ const MasterMerchantApplications = () => {
 
       {appTab === "new_merchant" && (<>
       <div className="flex justify-between items-center">
-        <h2 className="text-sm font-bold text-slate-800">加盟店 申込・登録管理 <span className="text-xs text-slate-400 font-normal ml-2">※自社審査のみ管理。接続先審査は「接続先審査」で管理</span></h2>
+        <h2 className="text-xl font-semibold text-slate-800">加盟店 申込・登録管理 <span className="text-xs text-slate-400 font-normal ml-2">※自社審査のみ管理。接続先審査は「接続先審査」で管理</span></h2>
         <div className="flex gap-2">
           {[{ k: "all", label: "全て (12)" }, { k: "ai", label: "AI審査中 (3)" }, { k: "human", label: "人間判定待ち (2)" }, { k: "approved", label: "自社承認済み (5)" }, { k: "rejected", label: "却下 (2)" }].map(f => (
-            <button key={f.k} onClick={() => setAppStatusFilter(f.k)} className={`text-xs px-2 py-1 rounded border ${appStatusFilter === f.k ? "bg-brand-50 text-brand-600 border-brand-200" : "bg-white text-slate-500"}`}>{f.label}</button>
+            <button key={f.k} onClick={() => setAppStatusFilter(f.k)} className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors duration-150 ${appStatusFilter === f.k ? "bg-brand-50 text-brand-600 border-brand-200" : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"}`}>{f.label}</button>
           ))}
         </div>
       </div>
@@ -3488,8 +3488,8 @@ const MasterMerchantApplications = () => {
 
       {/* Confirmation Dialog */}
       {appConfirmDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setAppConfirmDialog(null)}>
-          <div className="bg-white rounded-xl shadow-2xl w-[520px] max-w-[90vw]" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-slate-900/20 flex items-center justify-center z-50" onClick={() => setAppConfirmDialog(null)}>
+          <div className="bg-white rounded-xl shadow-overlay w-[520px] max-w-[90vw] animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className={`p-4 rounded-t-xl border-b ${
               appConfirmDialog.type === "approve" ? "bg-success-50" :
               appConfirmDialog.type === "reject" ? "bg-danger-50" :
@@ -3498,7 +3498,7 @@ const MasterMerchantApplications = () => {
             }`}>
               <div className="flex items-center gap-2">
                 <span className="text-lg">{appConfirmDialog.icon}</span>
-                <h3 className="text-sm font-bold text-slate-800">{appConfirmDialog.title}</h3>
+                <h3 className="text-sm font-semibold text-slate-800">{appConfirmDialog.title}</h3>
               </div>
             </div>
             <div className="p-5 space-y-4">
@@ -3524,14 +3524,14 @@ const MasterMerchantApplications = () => {
               )}
               {appConfirmDialog.type === "reject" && (
                 <div>
-                  <p className="text-xs font-semibold text-slate-600 mb-1">却下理由（必須）:</p>
-                  <textarea className="w-full border rounded p-2 text-xs h-16" placeholder="却下理由を入力してください..." />
+                  <p className="text-sm font-medium text-slate-700 mb-1">却下理由（必須）:</p>
+                  <textarea className="w-full text-[13px] border border-slate-200 rounded-lg p-2.5 h-16 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="却下理由を入力してください..." />
                 </div>
               )}
               {appConfirmDialog.type === "start_proc_review" && (
                 <div>
-                  <p className="text-xs font-semibold text-slate-600 mb-1">初期接続先の選択:</p>
-                  <select className="w-full border rounded p-2 text-xs">
+                  <p className="text-sm font-medium text-slate-700 mb-1">初期接続先の選択:</p>
+                  <select className="w-full text-[13px] border border-slate-200 rounded-lg p-2.5 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150">
                     <option>Simpletransact（推奨 — 審査最速 平均7日）</option>
                     <option>Univa Pay cast（審査 平均10日）</option>
                     <option>楽天銀行（審査 平均12日）</option>
@@ -3542,14 +3542,14 @@ const MasterMerchantApplications = () => {
               )}
               {appConfirmDialog.type !== "reject" && appConfirmDialog.type !== "start_proc_review" && (
                 <div>
-                  <p className="text-xs font-semibold text-slate-600 mb-1">備考（任意）:</p>
-                  <input className="w-full border rounded p-2 text-xs" placeholder="操作に関するメモを入力..." />
+                  <p className="text-sm font-medium text-slate-700 mb-1">備考（任意）:</p>
+                  <input className="w-full text-[13px] border border-slate-200 rounded-lg p-2.5 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="操作に関するメモを入力..." />
                 </div>
               )}
             </div>
             <div className="flex justify-end gap-2 p-4 border-t bg-slate-50 rounded-b-xl">
-              <button onClick={() => setAppConfirmDialog(null)} className="px-4 py-2 bg-white text-slate-600 rounded border text-xs font-semibold hover:bg-slate-100">キャンセル</button>
-              <button onClick={() => { const d = appConfirmDialog; setAppConfirmDialog(null); const msgs = { approve: ["承認しました", "success"], reject: ["却下しました", "warning"], start_proc_review: ["接続先審査を開始しました", "success"], reapply: ["再申込を許可しました", "info"] }; const [msg, type] = msgs[d.type] || ["処理が完了しました", "success"]; toast(`${d.appId} を${msg}`, type); }} className={`px-4 py-2 rounded text-white text-xs font-semibold ${
+              <button onClick={() => setAppConfirmDialog(null)} className="px-4 py-2 bg-white text-slate-600 rounded-lg border border-slate-200 text-[13px] font-medium transition-colors duration-150 hover:bg-slate-100">キャンセル</button>
+              <button onClick={() => { const d = appConfirmDialog; setAppConfirmDialog(null); const msgs = { approve: ["承認しました", "success"], reject: ["却下しました", "warning"], start_proc_review: ["接続先審査を開始しました", "success"], reapply: ["再申込を許可しました", "info"] }; const [msg, type] = msgs[d.type] || ["処理が完了しました", "success"]; toast(`${d.appId} を${msg}`, type); }} className={`px-4 py-2 rounded-lg text-white text-[13px] font-medium transition-colors duration-150 ${
                 appConfirmDialog.type === "approve" ? "bg-success-600 hover:bg-success-700" :
                 appConfirmDialog.type === "reject" ? "bg-danger-600 hover:bg-danger-700" :
                 appConfirmDialog.type === "start_proc_review" ? "bg-purple-600 hover:bg-purple-700" :
@@ -3561,8 +3561,8 @@ const MasterMerchantApplications = () => {
       )}
 
       {/* Application Detail */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
-        <div className={`p-3 border-b ${
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md">
+        <div className={`p-4 border-b ${
           selectedAppData?.status === "自社承認済み" ? "bg-success-50" :
           selectedAppData?.status === "人間判定待ち" ? "bg-warning-50" :
           selectedAppData?.status === "却下" ? "bg-danger-50" :
@@ -3571,12 +3571,12 @@ const MasterMerchantApplications = () => {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Badge text={selectedAppData?.status || ""} color={selectedAppData?.sColor || "gray"} />
-              <span className="text-sm font-bold text-slate-800">{selectedApp} - {selectedAppData?.name}</span>
+              <span className="text-sm font-semibold text-slate-800">{selectedApp} - {selectedAppData?.name}</span>
             </div>
             <span className="text-xs text-slate-400">申込日: {selectedAppData?.date}</span>
           </div>
         </div>
-        <div className="p-3">
+        <div className="p-4">
           {/* Progress Steps */}
           <div className="flex items-center gap-1 mb-3">
             {steps.map((s, i) => (
@@ -3601,21 +3601,21 @@ const MasterMerchantApplications = () => {
                   description: "AI審査結果を確認の上、この加盟店を自社承認します。承認後、接続先審査の開始が可能になります。",
                   impacts: ["加盟店ステータスが「自社承認済み」に変更", "加盟店マスターに登録される", "接続先審査の開始ボタンが有効化される", "加盟店担当者に承認通知メール送信（テンプレート: approval_notification）", "担当代理店にも承認通知を送信（代理店紐付がある場合）", "※契約書は接続先審査完了・条件確定後に生成されます"],
                   confirmLabel: "自社承認する"
-                })} className="px-3 py-1.5 bg-success-600 text-white rounded text-xs font-semibold hover:bg-success-700 shadow-sm"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 承認</button>
+                })} className="px-3 py-1.5 bg-success-600 text-white rounded-lg text-sm font-medium hover:bg-success-700 shadow-sm transition-colors duration-150"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 承認</button>
                 <button onClick={() => setAppConfirmDialog({
                   type: "reject", icon: <XCircle className="w-4 h-4 inline text-danger-500" />, title: "申込却下", appId: selectedApp, merchantName: selectedAppData.name,
                   description: "この加盟店の申込を却下します。却下理由は加盟店に通知されます。",
                   impacts: ["加盟店ステータスが「却下」に変更", "加盟店担当者に却下通知メール送信（テンプレート: rejection_notification）", "メールに却下理由が記載される（下記で入力）", "再申請には新規の申込が必要"],
                   confirmLabel: "却下する"
-                })} className="px-3 py-1.5 bg-white text-danger-600 border border-danger-300 rounded text-xs font-semibold hover:bg-danger-50"><XCircle className="w-4 h-4 text-danger-500 inline mr-1" /> 却下</button>
-                <button onClick={() => toast(`${selectedApp} のAI再審査をリクエストしました`, "info")} className="px-3 py-1.5 bg-white text-slate-600 border rounded text-xs hover:bg-slate-100">↩ AI再審査を依頼</button>
+                })} className="px-3 py-1.5 bg-white text-danger-600 border border-danger-300 rounded-lg text-sm font-medium hover:bg-danger-50 transition-colors duration-150"><XCircle className="w-4 h-4 text-danger-500 inline mr-1" /> 却下</button>
+                <button onClick={() => toast(`${selectedApp} のAI再審査をリクエストしました`, "info")} className="px-3 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-slate-50">↩ AI再審査を依頼</button>
               </>
             )}
             {/* AI審査中の場合 — プログレスバー（5段階） */}
             {selectedAppData?.status === "AI審査中" && (
               <div className="bg-brand-50 rounded-lg border border-brand-200 p-3 w-full">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-brand-700"><Bot className="w-4 h-4 inline mr-1" /> AI審査を実行中...</span>
+                  <span className="text-sm font-medium text-brand-700"><Bot className="w-4 h-4 inline mr-1" /> AI審査を実行中...</span>
                   <span className="text-xs text-brand-500">3/5 ステップ完了 — 60%</span>
                 </div>
                 <div className="w-full bg-brand-200 rounded-full h-2 mb-2">
@@ -3645,7 +3645,7 @@ const MasterMerchantApplications = () => {
                   ],
                   processorName: "Simpletransact（AI推薦）",
                   confirmLabel: "接続先審査を開始"
-                })} className="px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700 shadow-sm ring-2 ring-purple-300 ring-offset-1"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査を開始</button>
+                })} className="px-3 py-1.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 shadow-sm ring-2 ring-purple-300 ring-offset-1 transition-colors duration-150"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査を開始</button>
                 <span className="text-xs text-slate-400 ml-1">→ 接続先審査画面に審査案件が作成されます</span>
               </>
             )}
@@ -3653,7 +3653,7 @@ const MasterMerchantApplications = () => {
               <div className="flex items-center gap-2">
                 <Badge text="接続先審査中" color="blue" />
                 <span className="text-xs text-slate-500">接続先審査は「接続先審査」画面で進行中です →</span>
-                <button onClick={() => { if (nav.setMasterPage) nav.setMasterPage("processorReview"); toast("接続先審査画面に移動します", "info"); }} className="px-2 py-1 bg-brand-100 text-brand-700 rounded text-xs border border-brand-200 font-semibold hover:bg-brand-200"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査を開く</button>
+                <button onClick={() => { if (nav.setMasterPage) nav.setMasterPage("processorReview"); toast("接続先審査画面に移動します", "info"); }} className="px-3 py-1.5 bg-brand-100 text-brand-700 rounded-lg text-sm border border-brand-200 font-medium transition-colors duration-150 hover:bg-brand-200"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査を開く</button>
               </div>
             )}
             {selectedAppData?.status === "却下" && (
@@ -3665,7 +3665,7 @@ const MasterMerchantApplications = () => {
                   description: "この申込のデータを引き継いで再申込を許可しますか？加盟店に再申込リンクがメール送信されます。",
                   impacts: ["申込フォーム（P01）に既存データがプリセットされた状態で再申込リンクが生成", "加盟店担当者にメール通知"],
                   confirmLabel: "再申込を許可する"
-                })} className="px-3 py-1.5 bg-brand-100 text-brand-700 rounded text-xs font-semibold hover:bg-brand-200 border border-brand-200"><RefreshCw className="w-4 h-4 inline mr-1" /> 再申込を許可</button>
+                })} className="px-3 py-1.5 bg-brand-100 text-brand-700 rounded-lg text-sm font-medium hover:bg-brand-200 border border-brand-200 transition-colors duration-150"><RefreshCw className="w-4 h-4 inline mr-1" /> 再申込を許可</button>
               </div>
             )}
           </div>
@@ -3673,7 +3673,7 @@ const MasterMerchantApplications = () => {
           {/* Info Grid */}
           <div className="grid grid-cols-3 gap-4 mb-3">
             <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
-              <p className="text-xs font-bold text-slate-600 mb-1">申込企業情報</p>
+              <p className="text-sm font-medium text-slate-700 mb-1">申込企業情報</p>
               <div className="text-xs space-y-1 text-slate-600">
                 <div>法人名: 株式会社テックショップ</div>
                 <div>代表者: 佐々木 健一</div>
@@ -3683,7 +3683,7 @@ const MasterMerchantApplications = () => {
               </div>
             </div>
             <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
-              <p className="text-xs font-bold text-slate-600 mb-1">申込内容</p>
+              <p className="text-sm font-medium text-slate-700 mb-1">申込内容</p>
               <div className="text-xs space-y-1 text-slate-600">
                 <div>希望決済: VISA / MC / JCB</div>
                 <div>月間予定決済高: ¥5M</div>
@@ -3693,7 +3693,7 @@ const MasterMerchantApplications = () => {
               </div>
             </div>
             <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
-              <p className="text-xs font-bold text-slate-600 mb-1">AI審査進捗（自社審査）</p>
+              <p className="text-sm font-medium text-slate-700 mb-1">AI審査進捗（自社審査）</p>
               <div className="text-xs space-y-1.5">
                 <div className="flex items-center gap-2"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> 反社チェック: クリア</div>
                 <div className="flex items-center gap-2"><span className="text-success-500"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></span> サイト内容確認: 問題なし</div>
@@ -3708,7 +3708,7 @@ const MasterMerchantApplications = () => {
           {selectedAppData?.status === "自社承認済み" && (
             <div className="bg-gradient-to-r from-success-50 to-brand-50 rounded-lg border border-success-200 p-3">
               <div className="flex items-center justify-between mb-1">
-                <p className="text-xs font-bold text-success-700"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 自社審査完了 → 接続先審査フェーズ</p>
+                <p className="text-sm font-medium text-success-700"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 自社審査完了 → 接続先審査フェーズ</p>
                 {selectedAppData.procStatus === "接続先審査中" && <Badge text="接続先審査中" color="blue" />}
                 {selectedAppData.procStatus === "接続先審査待ち" && <Badge text="接続先審査未開始" color="yellow" />}
               </div>
@@ -3724,9 +3724,9 @@ const MasterMerchantApplications = () => {
           )}
 
           {/* メール通知履歴 */}
-          <div className="bg-white rounded-lg border border-slate-200 p-3 mt-3">
+          <div className="bg-white rounded-lg border border-slate-200 p-4 mt-3">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-bold text-slate-600"><Mail className="w-4 h-4 inline mr-1" /> メール通知履歴</p>
+              <p className="text-sm font-medium text-slate-700"><Mail className="w-4 h-4 inline mr-1" /> メール通知履歴</p>
               <button onClick={() => toast("通知メールを手動再送しました", "success")} className="text-xs text-brand-600 hover:underline">手動再送</button>
             </div>
             <div className="space-y-1.5 text-xs">
@@ -3771,21 +3771,21 @@ const MasterMerchantApplications = () => {
       </div>
 
       {/* Applications List */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
         <TableHeader cols={[{ label: "申込ID", w: "w-36" }, { label: "法人名", w: "flex-1" }, { label: "業種", w: "w-24" }, { label: "自社審査", w: "w-24" }, { label: "AI判定", w: "w-24" }, { label: "接続先審査", w: "w-28" }, { label: "申込日", w: "w-24" }, { label: "操作", w: "w-20" }]}>
         {appList.map((a, i) => (
-          <tr key={i} className={`border-b cursor-pointer transition-colors ${selectedApp === a.id ? "bg-brand-50 border-l-2 border-l-brand-500" : i % 2 ? "bg-slate-50 hover:bg-brand-50" : "hover:bg-brand-50"}`}
+          <tr key={i} className={`border-b border-slate-100 cursor-pointer transition-colors duration-150 ${selectedApp === a.id ? "bg-brand-50 border-l-2 border-l-brand-500" : "hover:bg-slate-50"}`}
                onClick={() => setSelectedApp(a.id)}>
-            <td className="px-4 py-2 whitespace-nowrap w-36 font-mono text-slate-500">{a.id}</td>
-            <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{a.name}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-500">{a.biz}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={a.status} color={a.sColor} /></td>
-            <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={a.ai} color={a.aColor} /></td>
-            <td className="px-4 py-2 whitespace-nowrap w-28">
+            <td className="px-4 py-2.5 whitespace-nowrap w-36 font-mono text-slate-500">{a.id}</td>
+            <td className="px-4 py-2.5 whitespace-nowrap font-semibold text-slate-700">{a.name}</td>
+            <td className="px-4 py-2.5 whitespace-nowrap w-24 text-[13px] text-slate-500">{a.biz}</td>
+            <td className="px-4 py-2.5 whitespace-nowrap w-24"><Badge text={a.status} color={a.sColor} /></td>
+            <td className="px-4 py-2.5 whitespace-nowrap w-24"><Badge text={a.ai} color={a.aColor} /></td>
+            <td className="px-4 py-2.5 whitespace-nowrap w-28">
               {a.procStatus ? <Badge text={a.procStatus} color={a.procStatus === "接続先審査中" ? "blue" : "yellow"} /> : <span className="text-slate-300">—</span>}
             </td>
-            <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{a.date}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-20"><button onClick={(e) => { e.stopPropagation(); setSelectedApp(a.id); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">詳細</button></td>
+            <td className="px-4 py-2.5 whitespace-nowrap w-24 text-[13px] text-slate-400">{a.date}</td>
+            <td className="px-4 py-2.5 whitespace-nowrap w-20"><button onClick={(e) => { e.stopPropagation(); setSelectedApp(a.id); }} className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-200 transition-colors duration-150">詳細</button></td>
           </tr>
         ))}
         </TableHeader>
@@ -3795,17 +3795,17 @@ const MasterMerchantApplications = () => {
       {/* ====== 既存加盟店サイト追加審査タブ ====== */}
       {appTab === "site_add" && (<>
       <div className="flex justify-between items-center">
-        <h2 className="text-sm font-bold text-slate-800">既存加盟店 サイト追加審査 <span className="text-xs text-slate-400 font-normal ml-2">※既存加盟店が新サイトを追加する際の審査を管理</span></h2>
+        <h2 className="text-xl font-semibold text-slate-800">既存加盟店 サイト追加審査 <span className="text-xs text-slate-400 font-normal ml-2">※既存加盟店が新サイトを追加する際の審査を管理</span></h2>
         <div className="flex gap-2">
           {[{ k: "all", label: `全て (${siteAddAppList.length})` }, { k: "ai", label: "AI審査中" }, { k: "human", label: "人間判定待ち" }, { k: "approved", label: "承認済み" }, { k: "rejected", label: "却下" }].map(f => (
-            <button key={f.k} onClick={() => setSiteAppStatusFilter(f.k)} className={`text-xs px-2 py-1 rounded border ${siteAppStatusFilter === f.k ? "bg-teal-50 text-teal-600 border-teal-200" : "bg-white text-slate-500"}`}>{f.label}</button>
+            <button key={f.k} onClick={() => setSiteAppStatusFilter(f.k)} className={`text-sm px-3 py-1.5 rounded-lg font-medium transition-colors duration-150 ${siteAppStatusFilter === f.k ? "bg-teal-50 text-teal-600 border border-teal-200" : "bg-white text-slate-500 border border-slate-200 hover:bg-slate-50"}`}>{f.label}</button>
           ))}
         </div>
       </div>
 
       {/* サイト追加審査フロー図 */}
       <div className="bg-gradient-to-r from-teal-50 via-white to-gray-50 rounded-lg border p-3">
-        <p className="text-xs font-bold text-slate-600 mb-2"><Globe className="w-4 h-4 inline mr-1" /> 既存加盟店サイト追加審査フロー（新規加盟店審査との違い）</p>
+        <p className="text-sm font-medium text-slate-700 mb-2"><Globe className="w-4 h-4 inline mr-1" /> 既存加盟店サイト追加審査フロー（新規加盟店審査との違い）</p>
         <div className="flex items-center gap-1 text-xs">
           <div className="bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-center">
             <p className="text-slate-500">スキップ</p>
@@ -3826,7 +3826,7 @@ const MasterMerchantApplications = () => {
       </div>
 
       {/* サイト追加審査 KPI */}
-      <div className="flex gap-3">
+      <div className="flex gap-4">
         <KPICard label="今月のサイト追加申請" value={`${siteAddAppList.length}件`} sub="前月比" trend={15} />
         <KPICard label="AI自動承認率" value="50.0%" sub="サイト審査特化" color="blue" />
         <KPICard label="平均審査時間" value="1.2時間" sub="反社・財務スキップ" color="green" />
@@ -3835,8 +3835,8 @@ const MasterMerchantApplications = () => {
 
       {/* サイト追加審査 詳細パネル */}
       {selectedSiteAppData && (
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
-        <div className={`p-3 border-b ${
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md">
+        <div className={`p-4 border-b ${
           selectedSiteAppData.status === "承認済み" ? "bg-success-50" :
           selectedSiteAppData.status === "人間判定待ち" ? "bg-warning-50" :
           selectedSiteAppData.status === "却下" ? "bg-danger-50" :
@@ -3846,12 +3846,12 @@ const MasterMerchantApplications = () => {
             <div className="flex items-center gap-2">
               <Badge text="サイト追加" color="teal" />
               <Badge text={selectedSiteAppData.status} color={selectedSiteAppData.sColor} />
-              <span className="text-sm font-bold text-slate-800">{selectedSiteAppData.id} — {selectedSiteAppData.siteName}</span>
+              <span className="text-sm font-semibold text-slate-800">{selectedSiteAppData.id} — {selectedSiteAppData.siteName}</span>
             </div>
             <span className="text-xs text-slate-400">申請日: {selectedSiteAppData.date}</span>
           </div>
         </div>
-        <div className="p-3">
+        <div className="p-4">
           {/* 審査ステップ（サイト追加用：簡略版） */}
           <div className="flex items-center gap-1 mb-3">
             {[
@@ -3880,20 +3880,20 @@ const MasterMerchantApplications = () => {
                   description: "AIサイト審査結果を確認の上、この新規サイトの追加を承認します。承認後、接続先の審査・設定を行います。",
                   impacts: ["サイトが加盟店マスターに追加される", "接続先審査の開始が可能になる", "既存の加盟店契約情報が引き継がれる", "加盟店担当者にサイト追加承認通知メール送信"],
                   confirmLabel: "サイト追加を承認"
-                })} className="px-3 py-1.5 bg-success-600 text-white rounded text-xs font-semibold hover:bg-success-700 shadow-sm"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 承認</button>
+                })} className="px-3 py-1.5 bg-success-600 text-white rounded-lg text-sm font-medium hover:bg-success-700 shadow-sm transition-colors duration-150"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 承認</button>
                 <button onClick={() => setAppConfirmDialog({
                   type: "reject", icon: <XCircle className="w-4 h-4 inline text-danger-500" />, title: "サイト追加却下", appId: selectedSiteAppData.id, merchantName: `${selectedSiteAppData.merchantName} — ${selectedSiteAppData.siteName}`,
                   description: "このサイト追加申請を却下します。理由は加盟店に通知されます。",
                   impacts: ["サイト追加が却下される", "加盟店担当者にサイト追加却下通知メール送信（却下理由付き）", "既存サイトの運用には影響なし"],
                   confirmLabel: "却下する"
-                })} className="px-3 py-1.5 bg-white text-danger-600 border border-danger-300 rounded text-xs font-semibold hover:bg-danger-50"><XCircle className="w-4 h-4 text-danger-500 inline mr-1" /> 却下</button>
-                <button onClick={() => toast(`${selectedSiteAppData.id} のAI再審査をリクエストしました`, "info")} className="px-3 py-1.5 bg-white text-slate-600 border rounded text-xs hover:bg-slate-100">↩ AI再審査を依頼</button>
+                })} className="px-3 py-1.5 bg-white text-danger-600 border border-danger-300 rounded-lg text-sm font-medium hover:bg-danger-50 transition-colors duration-150"><XCircle className="w-4 h-4 text-danger-500 inline mr-1" /> 却下</button>
+                <button onClick={() => toast(`${selectedSiteAppData.id} のAI再審査をリクエストしました`, "info")} className="px-3 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-slate-50">↩ AI再審査を依頼</button>
               </>
             )}
             {selectedSiteAppData.status === "AI審査中" && (
               <div className="bg-teal-50 rounded-lg border border-teal-200 p-3 w-full">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-teal-700"><Bot className="w-4 h-4 inline mr-1" /> AIサイト審査を実行中...</span>
+                  <span className="text-sm font-medium text-teal-700"><Bot className="w-4 h-4 inline mr-1" /> AIサイト審査を実行中...</span>
                   <span className="text-xs text-teal-500">1/3 ステップ完了 — 33%</span>
                 </div>
                 <div className="w-full bg-teal-200 rounded-full h-2 mb-2">
@@ -3915,7 +3915,7 @@ const MasterMerchantApplications = () => {
                   impacts: ["選択した接続先に審査申請が送信される", "既存加盟店の書類情報が自動転送される", "接続先審査画面に案件が追加される"],
                   processorName: "既存接続先流用 or 新規選定",
                   confirmLabel: "接続先審査を開始"
-                })} className="px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700 shadow-sm ring-2 ring-purple-300 ring-offset-1"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査を開始</button>
+                })} className="px-3 py-1.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 shadow-sm ring-2 ring-purple-300 ring-offset-1 transition-colors duration-150"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査を開始</button>
                 <span className="text-xs text-slate-400 ml-1">→ 既存接続先の流用 or 新規接続先の審査</span>
               </>
             )}
@@ -3923,7 +3923,7 @@ const MasterMerchantApplications = () => {
               <div className="flex items-center gap-2">
                 <Badge text="接続先審査中" color="blue" />
                 <span className="text-xs text-slate-500">接続先審査は「接続先審査」画面で進行中です →</span>
-                <button onClick={() => { if (nav.setMasterPage) nav.setMasterPage("processorReview"); toast("接続先審査画面に移動します", "info"); }} className="px-2 py-1 bg-brand-100 text-brand-700 rounded text-xs border border-brand-200 font-semibold hover:bg-brand-200"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査を開く</button>
+                <button onClick={() => { if (nav.setMasterPage) nav.setMasterPage("processorReview"); toast("接続先審査画面に移動します", "info"); }} className="px-3 py-1.5 bg-brand-100 text-brand-700 rounded-lg text-sm border border-brand-200 font-medium transition-colors duration-150 hover:bg-brand-200"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査を開く</button>
               </div>
             )}
             {selectedSiteAppData.status === "却下" && (
@@ -3935,21 +3935,21 @@ const MasterMerchantApplications = () => {
                   description: "サイト追加の再申請を許可しますか？加盟店管理画面から再申請が可能になります。",
                   impacts: ["加盟店の「新規サイト申請」から再申請が可能になる", "加盟店担当者にメール通知"],
                   confirmLabel: "再申請を許可する"
-                })} className="px-3 py-1.5 bg-brand-100 text-brand-700 rounded text-xs font-semibold hover:bg-brand-200 border border-brand-200"><RefreshCw className="w-4 h-4 inline mr-1" /> 再申請を許可</button>
+                })} className="px-3 py-1.5 bg-brand-100 text-brand-700 rounded-lg text-sm font-medium hover:bg-brand-200 border border-brand-200 transition-colors duration-150"><RefreshCw className="w-4 h-4 inline mr-1" /> 再申請を許可</button>
               </div>
             )}
           </div>
 
           {/* 審査メモ */}
           {(selectedSiteAppData.status === "人間判定待ち" || selectedSiteAppData.status === "承認済み") && (
-            <div className="bg-white rounded p-2 border border-slate-200 mb-3">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs font-bold text-slate-600"><PenLine className="w-4 h-4 inline mr-1" /> 審査メモ・コメント</p>
-                <span className="text-xs text-slate-400">審査時の判断根拠を記録</span>
+            <div className="bg-white rounded-lg p-3 border border-slate-200 mb-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-sm font-medium text-slate-700"><PenLine className="w-4 h-4 inline mr-1" /> 審査メモ・コメント</p>
+                <span className="text-[13px] text-slate-400">審査時の判断根拠を記録</span>
               </div>
-              <div className="flex gap-1">
-                <input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="審査コメントを追加..." />
-                <button onClick={() => toast("審査メモを追加しました", "success")} className="px-3 py-1 bg-teal-600 text-white rounded text-xs">追加</button>
+              <div className="flex gap-2">
+                <input className="flex-1 text-[13px] border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="審査コメントを追加..." />
+                <button onClick={() => toast("審査メモを追加しました", "success")} className="px-3 py-1.5 bg-teal-600 text-white rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-teal-700">追加</button>
               </div>
               {selectedSiteAppData.status === "承認済み" && (
                 <div className="mt-1.5 bg-slate-50 rounded p-1.5 text-xs text-slate-500">
@@ -3962,7 +3962,7 @@ const MasterMerchantApplications = () => {
           {/* 申請情報グリッド */}
           <div className="grid grid-cols-3 gap-4 mb-3">
             <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
-              <p className="text-xs font-bold text-slate-600 mb-1">申請元加盟店</p>
+              <p className="text-sm font-medium text-slate-700 mb-1">申請元加盟店</p>
               <div className="text-xs space-y-1 text-slate-600">
                 <div>加盟店ID: <span className="font-mono text-brand-600">{selectedSiteAppData.merchantId}</span></div>
                 <div>法人名: {selectedSiteAppData.merchantName}</div>
@@ -3974,7 +3974,7 @@ const MasterMerchantApplications = () => {
               </div>
             </div>
             <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
-              <p className="text-xs font-bold text-slate-600 mb-1">新規サイト情報</p>
+              <p className="text-sm font-medium text-slate-700 mb-1">新規サイト情報</p>
               <div className="text-xs space-y-1 text-slate-600">
                 <div>サイト名: <span className="font-semibold">{selectedSiteAppData.siteName}</span></div>
                 <div>URL: {selectedSiteAppData.siteUrl || <span className="text-slate-400">（準備中）</span>}</div>
@@ -3984,7 +3984,7 @@ const MasterMerchantApplications = () => {
               </div>
             </div>
             <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
-              <p className="text-xs font-bold text-slate-600 mb-1">AIサイト審査（簡易版）</p>
+              <p className="text-sm font-medium text-slate-700 mb-1">AIサイト審査（簡易版）</p>
               <div className="text-xs space-y-1.5">
                 <div className="flex items-center gap-2"><span className="text-slate-300 line-through">反社チェック</span> <span className="text-[10px] text-success-500 bg-success-50 px-1 rounded">登録時済み</span></div>
                 <div className="flex items-center gap-2"><span className="text-slate-300 line-through">財務分析</span> <span className="text-[10px] text-success-500 bg-success-50 px-1 rounded">登録時済み</span></div>
@@ -4012,7 +4012,7 @@ const MasterMerchantApplications = () => {
           {selectedSiteAppData.status === "承認済み" && (
             <div className="bg-gradient-to-r from-success-50 to-teal-50 rounded-lg border border-success-200 p-3">
               <div className="flex items-center justify-between mb-1">
-                <p className="text-xs font-bold text-success-700"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> サイト追加承認済み → 接続先設定フェーズ</p>
+                <p className="text-sm font-medium text-success-700"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> サイト追加承認済み → 接続先設定フェーズ</p>
                 {selectedSiteAppData.procStatus === "接続先審査中" && <Badge text="接続先審査中" color="blue" />}
                 {selectedSiteAppData.procStatus === "接続先審査待ち" && <Badge text="接続先審査未開始" color="yellow" />}
               </div>
@@ -4026,9 +4026,9 @@ const MasterMerchantApplications = () => {
           )}
 
           {/* メール通知履歴（サイト追加審査） */}
-          <div className="bg-white rounded-lg border border-slate-200 p-3 mt-3">
+          <div className="bg-white rounded-lg border border-slate-200 p-4 mt-3">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-bold text-slate-600"><Mail className="w-4 h-4 inline mr-1" /> 通知・コミュニケーション履歴</p>
+              <p className="text-sm font-medium text-slate-700"><Mail className="w-4 h-4 inline mr-1" /> 通知・コミュニケーション履歴</p>
               <button onClick={() => toast("手動で通知メールを再送しました", "success")} className="text-xs text-brand-600 hover:underline">手動再送</button>
             </div>
             <div className="space-y-1 text-xs">
@@ -4043,23 +4043,23 @@ const MasterMerchantApplications = () => {
       )}
 
       {/* サイト追加申請 一覧テーブル */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
         <TableHeader cols={[{ label: "申請ID", w: "w-36" }, { label: "加盟店", w: "w-44" }, { label: "新規サイト名", w: "flex-1" }, { label: "ジャンル", w: "w-28" }, { label: "予定決済高", w: "w-24" }, { label: "審査状況", w: "w-24" }, { label: "AI判定", w: "w-24" }, { label: "申請日", w: "w-24" }, { label: "操作", w: "w-20" }]}>
         {siteAddAppList.map((a, i) => (
-          <tr key={i} className={`border-b cursor-pointer transition-colors ${selectedSiteApp === a.id ? "bg-teal-50 border-l-2 border-l-teal-500" : i % 2 ? "bg-slate-50 hover:bg-teal-50" : "hover:bg-teal-50"}`}
+          <tr key={i} className={`border-b border-slate-100 cursor-pointer transition-colors duration-150 ${selectedSiteApp === a.id ? "bg-teal-50 border-l-2 border-l-teal-500" : "hover:bg-slate-50"}`}
                onClick={() => setSelectedSiteApp(a.id)}>
-            <td className="px-4 py-2 whitespace-nowrap w-36 font-mono text-slate-500">{a.id}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-44">
-              <div className="font-semibold text-slate-700">{a.merchantName}</div>
+            <td className="px-4 py-2.5 whitespace-nowrap w-36 font-mono text-[13px] text-slate-500">{a.id}</td>
+            <td className="px-4 py-2.5 whitespace-nowrap w-44">
+              <div className="text-[13px] font-semibold text-slate-700">{a.merchantName}</div>
               <div className="text-[10px] text-slate-400">{a.merchantId} · {a.existingSites}サイト稼働中</div>
             </td>
-            <td className="px-4 py-2 whitespace-nowrap font-semibold text-slate-700">{a.siteName}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-500">{a.genre}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-500">{a.monthlyVol}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={a.status} color={a.sColor} /></td>
-            <td className="px-4 py-2 whitespace-nowrap w-24"><Badge text={a.ai} color={a.aColor} /></td>
-            <td className="px-4 py-2 whitespace-nowrap w-24 text-slate-400">{a.date}</td>
-            <td className="px-4 py-2 whitespace-nowrap w-20"><button onClick={(e) => { e.stopPropagation(); setSelectedSiteApp(a.id); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">詳細</button></td>
+            <td className="px-4 py-2.5 whitespace-nowrap text-[13px] font-semibold text-slate-700">{a.siteName}</td>
+            <td className="px-4 py-2.5 whitespace-nowrap w-28 text-[13px] text-slate-500">{a.genre}</td>
+            <td className="px-4 py-2.5 whitespace-nowrap w-24 text-[13px] text-slate-500">{a.monthlyVol}</td>
+            <td className="px-4 py-2.5 whitespace-nowrap w-24"><Badge text={a.status} color={a.sColor} /></td>
+            <td className="px-4 py-2.5 whitespace-nowrap w-24"><Badge text={a.ai} color={a.aColor} /></td>
+            <td className="px-4 py-2.5 whitespace-nowrap w-24 text-[13px] text-slate-400">{a.date}</td>
+            <td className="px-4 py-2.5 whitespace-nowrap w-20"><button onClick={(e) => { e.stopPropagation(); setSelectedSiteApp(a.id); }} className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-slate-200">詳細</button></td>
           </tr>
         ))}
         </TableHeader>
@@ -4090,9 +4090,9 @@ const MasterSettlement = () => {
     { id: "PAY-0211-003", merchant: "M-004 テスト商事", period: "02/04 〜 02/10", amount: "¥612,000", fee: "¥23,256", status: "保留", sColor: "yellow", date: "-", sales: "¥680,000", brands: [{ name: "VISA", amt: "¥680,000", fee: "¥23,256" }], cb: "¥0", reserve: "¥68,000", bank: "三井住友銀行 品川支店 普通 9876543" },
   ];
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-6 space-y-6">
     <div className="flex justify-between items-center">
-      <h2 className="text-sm font-bold text-slate-800">精算・入金管理</h2>
+      <h2 className="text-xl font-semibold text-slate-800">精算・入金管理</h2>
       <div className="flex gap-2">
         <select className="text-xs border rounded px-2 py-1"><option>2026年2月</option><option>2026年1月</option></select>
         <button onClick={() => setShowBatchConfirm(true)} className="text-xs bg-success-600 text-white px-3 py-1 rounded font-semibold">精算バッチ実行</button>
@@ -4117,7 +4117,7 @@ const MasterSettlement = () => {
     </div>
 
     {/* Settlement Batch Status */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-600 mb-2">精算バッチ状況（直近5回）</p>
       <div className="space-y-2">
         {batchData.map((b, i) => (
@@ -4134,7 +4134,7 @@ const MasterSettlement = () => {
     </div>
 
     {/* Payout Error Details */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex items-center gap-2 mb-2">
         <p className="text-xs font-bold text-danger-600"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 入金エラー（要対応）</p>
         <Badge text="2件" color="red" />
@@ -4208,12 +4208,12 @@ const MasterSettlement = () => {
     </div>
 
     {/* Merchant Breakdown */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-slate-600">加盟店別 精算内訳</p>
         <button onClick={() => toast("全加盟店の精算内訳を表示しました", "info")} className="text-xs text-brand-600 hover:underline">全加盟店を表示 →</button>
       </div>
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
         <TableHeader cols={[{ label: "加盟店", w: "flex-1" }, { label: "決済高", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "CB差引", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-28" }]}>
         {[
           { merchant: "M-001 ABCマート", sales: "¥4,200,000", fee: "¥127,500", cb: "¥0", hold: "¥420,000", release: "¥280,000", payout: "¥3,932,500" },
@@ -4235,7 +4235,7 @@ const MasterSettlement = () => {
     </div>
 
     {/* Payout List */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
       <TableHeader cols={[{ label: "入金ID", w: "w-28" }, { label: "加盟店", w: "flex-1" }, { label: "精算期間", w: "w-36" }, { label: "入金額", w: "w-28" }, { label: "手数料", w: "w-24" }, { label: "ステータス", w: "w-24" }, { label: "入金日", w: "w-24" }]}>
       {payoutData.map((p, i) => (
         <tr key={i} onClick={() => setSelectedPayout(p)} className={`border-b cursor-pointer hover:bg-brand-50 ${i % 2 ? "bg-slate-50" : ""}`}>
@@ -4303,7 +4303,7 @@ const MasterSettlement = () => {
           <KPICard label="今月解放額" value="¥3.2M" sub="保持期間満了" color="green" />
           <KPICard label="CB充当額" value="¥380K" sub="今月" color="red" />
         </div>
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-bold text-slate-600">加盟店別リザーブ設定・残高</p>
             <div className="flex gap-2">
@@ -4346,7 +4346,7 @@ const MasterSettlement = () => {
             </tbody>
           </table>
         </div>
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
           <p className="text-xs font-bold text-slate-600 mb-2">リザーブ入出金履歴（直近）</p>
           <table className="w-full text-xs">
             <thead>
@@ -4395,7 +4395,7 @@ const MasterSettlement = () => {
           <KPICard label="未収リスク" value="1件" sub="要対応" color="red" />
           <KPICard label="勝訴率" value="42%" sub="過去6ヶ月" color="green" />
         </div>
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-bold text-slate-600">チャージバック案件一覧</p>
             <div className="flex gap-2">
@@ -4481,8 +4481,8 @@ const MasterSettlement = () => {
 
     {/* バッチ詳細スライドパネル */}
     {selectedBatch && (
-      <div className="fixed inset-0 z-50 flex">
-        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedBatch(null)} />
+      <div className="fixed inset-0 z-50 flex animate-fade-in">
+        <div className="flex-1 bg-slate-900/20" onClick={() => setSelectedBatch(null)} />
         <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
             <p className="text-sm font-bold">精算バッチ詳細</p>
@@ -4499,7 +4499,7 @@ const MasterSettlement = () => {
               <div>
                 <p className="text-xs font-bold text-slate-700 mb-2">実行ログ</p>
                 {selectedBatch.logs.map((log, i) => (
-                  <div key={i} className="flex items-center gap-2 py-1.5 border-b text-xs last:border-0">
+                  <div key={i} className="flex items-center gap-2 py-1.5 border-b hover:bg-slate-50 text-xs last:border-0">
                     <span className="font-mono text-slate-400 w-16">{log.time}</span>
                     <span className={log.st === "error" ? "text-danger-600" : log.st === "warn" ? "text-warning-600" : "text-slate-600"}>{log.st === "error" ? <XCircle className="w-3.5 h-3.5 text-danger-500 inline" /> : log.st === "warn" ? <AlertTriangle className="w-3.5 h-3.5 text-warning-500 inline" /> : <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />}</span>
                     <span className={`flex-1 ${log.st === "error" ? "text-danger-600 font-bold" : ""}`}>{log.msg}</span>
@@ -4508,7 +4508,7 @@ const MasterSettlement = () => {
               </div>
             )}
             {selectedBatch.errors > 0 && (
-              <button onClick={() => { toast(`エラー${selectedBatch.errors}件の再実行を開始しました`, "success"); }} className="w-full py-2 bg-success-50 text-success-600 rounded text-xs font-bold border border-success-200 hover:bg-success-100"><RefreshCw className="w-4 h-4 inline mr-1" /> エラー分を再実行</button>
+              <button onClick={() => { toast(`エラー${selectedBatch.errors}件の再実行を開始しました`, "success"); }} className="w-full py-2 bg-success-50 text-success-600 rounded text-xs font-medium border border-success-200 transition-colors duration-150 hover:bg-success-100"><RefreshCw className="w-4 h-4 inline mr-1" /> エラー分を再実行</button>
             )}
           </div>
         </div>
@@ -4517,8 +4517,8 @@ const MasterSettlement = () => {
 
     {/* 入金詳細スライドパネル */}
     {selectedPayout && (
-      <div className="fixed inset-0 z-50 flex">
-        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedPayout(null)} />
+      <div className="fixed inset-0 z-50 flex animate-fade-in">
+        <div className="flex-1 bg-slate-900/20" onClick={() => setSelectedPayout(null)} />
         <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
             <p className="text-sm font-bold">{selectedPayout.id}</p>
@@ -4528,7 +4528,7 @@ const MasterSettlement = () => {
             <div className="flex items-center gap-2"><Badge text={selectedPayout.status} color={selectedPayout.sColor} /><span className="text-xs text-slate-400">{selectedPayout.period}</span></div>
             <div><p className="text-xs font-bold text-slate-700 mb-2">精算サマリー</p>
               {[["決済高", selectedPayout.sales], ["手数料合計", `-${selectedPayout.fee}`], ["CB差引", selectedPayout.cb !== "¥0" ? `-${selectedPayout.cb}` : "—"], ["リザーブ留保", `-${selectedPayout.reserve}`], ["入金額", selectedPayout.amount]].map(([l, v], i) => (
-                <div key={i} className={`flex text-xs py-1 border-b ${i === 4 ? "font-bold text-slate-800" : ""}`}><span className="flex-1 text-slate-500">{l}</span><span className={i === 1 || i === 2 || i === 3 ? "text-danger-500" : ""}>{v}</span></div>
+                <div key={i} className={`flex text-xs py-1 border-b hover:bg-slate-50 ${i === 4 ? "font-bold text-slate-800" : ""}`}><span className="flex-1 text-slate-500">{l}</span><span className={i === 1 || i === 2 || i === 3 ? "text-danger-500" : ""}>{v}</span></div>
               ))}
             </div>
             <div><p className="text-xs font-bold text-slate-700 mb-2">ブランド別内訳</p>
@@ -4553,7 +4553,7 @@ const MasterSettlement = () => {
               </div>
             </div>
             <div><p className="text-xs font-bold text-slate-700 mb-1">振込先口座</p><p className="text-xs text-slate-600 bg-slate-50 rounded p-2">{selectedPayout.bank}</p></div>
-            <button onClick={() => toast("入金明細をダウンロードしました", "success")} className="w-full py-2 bg-brand-50 text-brand-600 rounded text-xs font-bold border border-brand-200"><Download className="w-4 h-4 inline mr-1" /> 明細をダウンロード</button>
+            <button onClick={() => toast("入金明細をダウンロードしました", "success")} className="w-full py-2 bg-brand-50 text-brand-600 rounded text-xs font-medium border border-brand-200"><Download className="w-4 h-4 inline mr-1" /> 明細をダウンロード</button>
           </div>
         </div>
       </div>
@@ -4563,9 +4563,9 @@ const MasterSettlement = () => {
 
     {/* バッチ実行確認モーダル */}
     {showBatchConfirm && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowBatchConfirm(false)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[450px]">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowBatchConfirm(false)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[450px] animate-scale-in">
           <div className="p-4 border-b flex items-center justify-between">
             <p className="text-sm font-bold">精算バッチの実行確認</p>
             <button onClick={() => setShowBatchConfirm(false)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
@@ -4586,7 +4586,7 @@ const MasterSettlement = () => {
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowBatchConfirm(false)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
-              <button onClick={() => { setShowBatchConfirm(false); toast("精算バッチの実行を開始しました", "success"); }} className="flex-1 py-2 bg-success-600 text-white rounded text-xs font-bold hover:bg-success-700">バッチを実行</button>
+              <button onClick={() => { setShowBatchConfirm(false); toast("精算バッチの実行を開始しました", "success"); }} className="flex-1 py-2 bg-success-600 text-white rounded text-xs font-medium transition-colors duration-150 hover:bg-success-700">バッチを実行</button>
             </div>
           </div>
         </div>
@@ -4604,8 +4604,8 @@ const MasterSystemSettings = () => {
   const [selectedSysProc, setSelectedSysProc] = useState(null);
   const [editingSysProc, setEditingSysProc] = useState(null);
   return (
-  <div className="p-5 space-y-4">
-    <h2 className="text-sm font-bold text-slate-800">システム設定</h2>
+  <div className="p-6 space-y-6">
+    <h2 className="text-xl font-semibold text-slate-800">システム設定</h2>
 
     {/* Tab navigation */}
     <div className="flex gap-1 border-b">
@@ -4616,7 +4616,7 @@ const MasterSystemSettings = () => {
 
     {/* ─── Tab 0: 決済手段 ─── */}
     {sysTab === 0 && (<>
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-600 mb-3">有効な決済手段</p>
       <div className="space-y-2">
         {[
@@ -4639,7 +4639,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Payment Type Settings Table */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-600 mb-3">決済種別ごとの詳細設定</p>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
@@ -4692,7 +4692,7 @@ const MasterSystemSettings = () => {
 
     {/* ─── Tab 1: 接続先管理 ─── */}
     {sysTab === 1 && (<>
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">プロセッサー接続一覧</p>
         <button onClick={() => setShowAddProcessor(!showAddProcessor)} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold">+ 接続先追加</button>
@@ -4700,7 +4700,7 @@ const MasterSystemSettings = () => {
 
       {showAddProcessor && (
         <div className="bg-brand-50 rounded-lg border border-brand-200 p-3 mb-3 space-y-3">
-          <div className="flex justify-between items-center"><p className="text-xs font-bold text-brand-700"><Link2 className="w-4 h-4 inline mr-1" /> 新規接続先追加</p><button onClick={() => setShowAddProcessor(false)} className="text-slate-400 text-sm"><X className="w-4 h-4" /></button></div>
+          <div className="flex justify-between items-center"><p className="text-xs font-medium text-brand-700"><Link2 className="w-4 h-4 inline mr-1" /> 新規接続先追加</p><button onClick={() => setShowAddProcessor(false)} className="text-slate-400 text-sm"><X className="w-4 h-4" /></button></div>
           <div className="grid grid-cols-2 gap-2">
             <div><label className="text-xs text-slate-500">プロセッサー名 *</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>Univa Pay cast</option><option>楽天銀行</option><option>Worldpay</option><option>TCMS</option><option>Simpletransact</option><option>ONTHELINE</option><option>Asiabill</option><option>ビットキャッシュ</option><option>スマートピット</option><option>ネットライドキャッシュ</option><option>セキュリティマネー</option><option>Gマネー</option><option>ペイディ</option><option>ニーハオペイ</option></select></div>
             <div><label className="text-xs text-slate-500">接続タイプ *</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>API</option><option>リダイレクト</option><option>SDK</option></select></div>
@@ -4752,10 +4752,10 @@ const MasterSystemSettings = () => {
               const isCard = p.type !== "WEBマネー";
               const isEditing = editingSysProc === p.id;
               const editInput = (val, w = "w-20") => isEditing
-                ? <input defaultValue={val} className={`${w} text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-brand-400`} onClick={(e) => e.stopPropagation()} />
+                ? <input defaultValue={val} className={`${w} text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white focus:outline-none transition-shadow duration-150 focus:ring-1 focus:ring-brand-400`} onClick={(e) => e.stopPropagation()} />
                 : <span className="font-semibold">{val}</span>;
               const editInputCenter = (val, w = "w-16") => isEditing
-                ? <input defaultValue={val} className={`${w} text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white text-center focus:outline-none focus:ring-1 focus:ring-brand-400`} onClick={(e) => e.stopPropagation()} />
+                ? <input defaultValue={val} className={`${w} text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white text-center focus:outline-none transition-shadow duration-150 focus:ring-1 focus:ring-brand-400`} onClick={(e) => e.stopPropagation()} />
                 : <p className={`text-xs font-bold ${val !== "-" ? "text-brand-700" : "text-slate-300"}`}>{val}</p>;
               return (
               <tr><td colSpan={7} className="p-0">
@@ -4768,11 +4768,11 @@ const MasterSystemSettings = () => {
                     <div className="flex items-center gap-2">
                       {isEditing ? (
                         <>
-                          <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(null); }} className="px-2.5 py-1 text-xs text-slate-500 border border-slate-300 rounded hover:bg-slate-100">キャンセル</button>
-                          <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(null); toast("接続先設定を保存しました", "success"); }} className="px-2.5 py-1 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600"><Save className="w-4 h-4 inline mr-1" /> 保存</button>
+                          <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(null); }} className="px-2.5 py-1 text-xs text-slate-500 border border-slate-300 rounded transition-colors duration-150 hover:bg-slate-100">キャンセル</button>
+                          <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(null); toast("接続先設定を保存しました", "success"); }} className="px-2.5 py-1 text-xs bg-brand-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-brand-600"><Save className="w-4 h-4 inline mr-1" /> 保存</button>
                         </>
                       ) : (
-                        <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(p.id); }} className="px-2.5 py-1 text-xs bg-warning-500 text-white rounded font-semibold hover:bg-warning-600"><Pencil className="w-4 h-4 inline mr-1" /> 編集（admin）</button>
+                        <button onClick={(e) => { e.stopPropagation(); setEditingSysProc(p.id); }} className="px-2.5 py-1 text-xs bg-warning-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-warning-600"><Pencil className="w-4 h-4 inline mr-1" /> 編集（admin）</button>
                       )}
                       <button onClick={(e) => { e.stopPropagation(); setSelectedSysProc(null); setEditingSysProc(null); }} className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1"><X className="w-3.5 h-3.5" /> 閉じる</button>
                     </div>
@@ -4800,7 +4800,7 @@ const MasterSystemSettings = () => {
                         ) : (
                           <div className="bg-brand-50 rounded border border-brand-200 p-2 text-center">
                             <p className="text-xs text-slate-400">WEBマネー手数料 <span className="text-danger-400">（仕入れ）</span></p>
-                            {isEditing ? <input defaultValue={p.fees.webmoney} className="w-20 text-sm border border-brand-300 rounded px-1.5 py-0.5 bg-white text-center font-bold focus:outline-none focus:ring-1 focus:ring-brand-400 mx-auto block" onClick={(e) => e.stopPropagation()} /> : <p className="text-sm font-bold text-brand-700">{p.fees.webmoney}</p>}
+                            {isEditing ? <input defaultValue={p.fees.webmoney} className="w-20 text-sm border border-brand-300 rounded px-1.5 py-0.5 bg-white text-center font-bold focus:outline-none transition-shadow duration-150 focus:ring-1 focus:ring-brand-400 mx-auto block" onClick={(e) => e.stopPropagation()} /> : <p className="text-sm font-bold text-brand-700">{p.fees.webmoney}</p>}
                           </div>
                         )}
                       </div>
@@ -4811,7 +4811,7 @@ const MasterSystemSettings = () => {
                           {[{l:"TR(成功)",v:p.trFees.success},{l:"TR(失敗)",v:p.trFees.fail},{l:"CB手数料",v:p.trFees.cb},{l:"返金",v:p.trFees.refund},{l:"3DS",v:p.trFees.tds},{l:"CB取消",v:p.trFees.cbCancel}].map(({l,v}) => (
                             <div key={l} className="bg-slate-50 rounded border border-slate-200 p-1.5">
                               <p className="text-xs text-slate-400">{l}</p>
-                              {isEditing ? <input defaultValue={v} className="w-full text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-brand-400 mt-0.5" onClick={(e) => e.stopPropagation()} /> : <p className={`text-xs font-bold ${v !== "-" ? "text-slate-700" : "text-slate-300"}`}>{v}</p>}
+                              {isEditing ? <input defaultValue={v} className="w-full text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white focus:outline-none transition-shadow duration-150 focus:ring-1 focus:ring-brand-400 mt-0.5" onClick={(e) => e.stopPropagation()} /> : <p className={`text-xs font-bold ${v !== "-" ? "text-slate-700" : "text-slate-300"}`}>{v}</p>}
                             </div>
                           ))}
                         </div>
@@ -4851,15 +4851,15 @@ const MasterSystemSettings = () => {
                           </div>
                         </div>
                         <div className="mt-1.5 bg-slate-50 rounded border border-slate-200 p-1.5 text-xs">
-                          <span className="text-slate-400">入金サイクル: </span>{isEditing ? <input defaultValue={p.settlement.cycle} className="w-full text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white mt-0.5 focus:outline-none focus:ring-1 focus:ring-brand-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold text-slate-700">{p.settlement.cycle}</span>}
+                          <span className="text-slate-400">入金サイクル: </span>{isEditing ? <input defaultValue={p.settlement.cycle} className="w-full text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white mt-0.5 focus:outline-none transition-shadow duration-150 focus:ring-1 focus:ring-brand-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold text-slate-700">{p.settlement.cycle}</span>}
                         </div>
                       </div>
                       {isCard && (
                       <div className="bg-white rounded-lg border border-slate-200 p-2.5">
                         <p className="text-xs font-bold text-slate-600 mb-1"><Ban className="w-4 h-4 inline mr-1" /> 制限事項</p>
                         <div className="space-y-1 text-xs">
-                          <div className="flex items-center gap-1"><span className="text-slate-400 w-10">CVV:</span>{isEditing ? <input defaultValue={p.restrictions.cvv} className="flex-1 text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-brand-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold">{p.restrictions.cvv}</span>}</div>
-                          <div className="flex items-center gap-1"><span className="text-slate-400 w-10">NG:</span>{isEditing ? <input defaultValue={p.restrictions.ngGenre} className="flex-1 text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-brand-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold">{p.restrictions.ngGenre}</span>}</div>
+                          <div className="flex items-center gap-1"><span className="text-slate-400 w-10">CVV:</span>{isEditing ? <input defaultValue={p.restrictions.cvv} className="flex-1 text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white focus:outline-none transition-shadow duration-150 focus:ring-1 focus:ring-brand-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold">{p.restrictions.cvv}</span>}</div>
+                          <div className="flex items-center gap-1"><span className="text-slate-400 w-10">NG:</span>{isEditing ? <input defaultValue={p.restrictions.ngGenre} className="flex-1 text-xs border border-brand-300 rounded px-1.5 py-0.5 bg-white focus:outline-none transition-shadow duration-150 focus:ring-1 focus:ring-brand-400" onClick={(e) => e.stopPropagation()} /> : <span className="font-semibold">{p.restrictions.ngGenre}</span>}</div>
                           <div className="flex items-center gap-1"><span className="text-slate-400 w-10">USD:</span>{isEditing ? <select defaultValue={p.restrictions.usd ? "対応" : "非対応"} className="text-xs border border-brand-300 rounded px-1 py-0.5 bg-white" onClick={(e) => e.stopPropagation()}><option>対応</option><option>非対応</option></select> : <span className="font-semibold">{p.restrictions.usd ? "対応" : "非対応"}</span>}</div>
                         </div>
                       </div>
@@ -4878,7 +4878,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Routing Rules */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">ルーティングルール</p>
         <button onClick={() => toast("ルーティングルールを追加しました", "success")} className="text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded font-semibold">+ ルール追加</button>
@@ -4904,7 +4904,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Health Monitor */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-600 mb-3">接続先ヘルスモニター（直近24時間）</p>
       <div className="grid grid-cols-3 gap-3">
         {[
@@ -4934,7 +4934,7 @@ const MasterSystemSettings = () => {
 
     {/* ─── Tab 2: 通知設定 ─── */}
     {sysTab === 2 && (<>
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">通知チャンネル設定</p>
         <button onClick={() => toast("通知設定を保存しました", "success")} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold">保存</button>
@@ -4966,7 +4966,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Notification Rules */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-600 mb-3">イベント別通知設定</p>
       <table className="w-full text-xs">
         <thead><tr className="bg-slate-50 text-slate-500">
@@ -5006,7 +5006,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Notification Schedule */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-600 mb-3">通知スケジュール</p>
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-slate-50 rounded-lg p-3 border">
@@ -5033,7 +5033,7 @@ const MasterSystemSettings = () => {
     {/* ─── Tab 3: API設定（AI APIキー・プロンプト設定含む） ─── */}
     {sysTab === 3 && (<>
     {/* AI API Keys */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600"><Bot className="w-4 h-4 inline mr-1" /> AI API キー設定</p>
         <Badge text="Claude API" color="purple" />
@@ -5071,7 +5071,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* AI Prompt Configuration */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600"><PenLine className="w-4 h-4 inline mr-1" /> AI機能別プロンプト設定</p>
         <div className="flex gap-2">
@@ -5114,7 +5114,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* External API Keys (Payment Gateways) */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-600 mb-3"><Key className="w-4 h-4 inline mr-1" /> 外部API キー管理</p>
       <table className="w-full text-xs">
         <thead><tr className="bg-slate-50 text-slate-500">
@@ -5153,7 +5153,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Webhook Settings */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600"><Bell className="w-4 h-4 inline" /> Webhook設定</p>
         <button onClick={() => toast("Webhookを追加しました", "success")} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold">+ Webhook追加</button>
@@ -5185,7 +5185,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Password Policy */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-600 mb-3"><ShieldCheck className="w-4 h-4 inline mr-1" /> パスワードポリシー <span className="text-success-600 font-normal">PCI DSS v4.0 Req 8.3.6準拠</span></p>
       <div className="grid grid-cols-2 gap-3">
         <div><label className="text-xs text-slate-500">最小文字数（PCI DSS: 12以上）</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="12" /></div>
@@ -5201,7 +5201,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Two-Factor Authentication */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-600 mb-3"><Smartphone className="w-4 h-4 inline mr-1" /> 二要素認証（2FA）</p>
       <div className="space-y-2">
         {[
@@ -5223,7 +5223,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* IP Restrictions */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600"><Globe className="w-4 h-4 inline mr-1" /> IPアドレス制限</p>
         <button onClick={() => toast("IPアドレスを追加しました", "success")} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold">+ IP追加</button>
@@ -5258,7 +5258,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Session & Rate Limiting */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-600 mb-3"><Clock className="w-4 h-4 inline mr-1" /> セッション・レート制限</p>
       <div className="grid grid-cols-2 gap-3">
         <div><label className="text-xs text-slate-500">セッションタイムアウト（分）</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" defaultValue="30" /></div>
@@ -5271,7 +5271,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Encryption & Compliance */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-600 mb-3"><Lock className="w-4 h-4 inline mr-1" /> 暗号化・コンプライアンス</p>
       <div className="space-y-2 text-xs">
         {[
@@ -5295,7 +5295,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Maintenance Mode */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-slate-700"><Wrench className="w-4 h-4 inline mr-1" /> メンテナンスモード</p>
         <div className="flex items-center gap-2">
@@ -5309,7 +5309,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Backup Settings */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-slate-700"><Save className="w-4 h-4 inline mr-1" /> バックアップ設定</p>
         <button onClick={() => { toast("手動バックアップを実行中...", "info"); setTimeout(() => toast("バックアップが完了しました", "success"), 2000); }} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold">手動バックアップ実行</button>
@@ -5331,7 +5331,7 @@ const MasterSystemSettings = () => {
     </div>
 
     {/* Audit Log */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-slate-700"><PenLine className="w-4 h-4 inline mr-1" /> 設定変更 監査ログ（直近）</p>
         <button onClick={() => toast("監査ログの全件検索を表示しています", "info")} className="text-xs text-brand-600 hover:underline">全ログ検索 →</button>
@@ -5356,7 +5356,7 @@ const MasterSystemSettings = () => {
 
     {/* ─── Tab 5: エラーコード一覧 ─── */}
     {sysTab === 5 && (<>
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">エラーコード一覧</p>
         <div className="flex gap-2 items-center">
@@ -5418,7 +5418,7 @@ const MasterSystemSettings = () => {
 
     {/* ─── Tab 6: お知らせ管理 ─── */}
     {sysTab === 6 && (<>
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">お知らせ管理</p>
         <button onClick={() => toast("お知らせを新規作成しています", "info")} className="text-xs bg-brand-500 text-white px-3 py-1.5 rounded font-semibold">+ 新規作成</button>
@@ -5469,7 +5469,7 @@ const MasterSystemSettings = () => {
       <Lock className="w-4 h-4 inline" />
       <span className="text-brand-700"><strong>PCI DSS v4.0準拠</strong> — 管理画面の全操作を記録しています。ログは12ヶ月間保持されます（直近3ヶ月: 即時検索 / 3〜12ヶ月: S3アーカイブ）。SIEM自動日次レビュー実施中。</span>
     </div>
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold text-slate-600">管理画面操作ログ検索</p>
         <button onClick={() => toast("操作ログをCSVエクスポートしました", "success")} className="text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded border">CSVエクスポート</button>
@@ -5555,18 +5555,18 @@ const MerchantUserManagement = () => {
     ]},
   ];
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-6 space-y-6">
     <div className="flex justify-between items-center">
-      <h2 className="text-sm font-bold text-slate-800">ユーザー管理</h2>
+      <h2 className="text-xl font-semibold text-slate-800">ユーザー管理</h2>
       <div className="flex items-center gap-2">
         <span className="text-xs text-slate-400">スタッフ: <span className="font-bold text-slate-700">{users.length}名</span></span>
-        <button onClick={() => setShowInviteS07(!showInviteS07)} className="text-xs bg-success-600 text-white px-3 py-1.5 rounded font-semibold hover:bg-success-700">+ スタッフを招待</button>
+        <button onClick={() => setShowInviteS07(!showInviteS07)} className="text-xs bg-success-600 text-white px-3 py-1.5 rounded font-semibold transition-colors duration-150 hover:bg-success-700">+ スタッフを招待</button>
       </div>
     </div>
 
     {showInviteS07 && (
       <div className="bg-success-50 rounded-lg border border-success-200 p-3 space-y-3">
-        <div className="flex justify-between items-center"><p className="text-xs font-bold text-success-700"><Mail className="w-4 h-4 inline mr-1" /> スタッフ招待</p><button onClick={() => setShowInviteS07(false)} className="text-slate-400 text-sm"><X className="w-4 h-4" /></button></div>
+        <div className="flex justify-between items-center"><p className="text-xs font-medium text-success-700"><Mail className="w-4 h-4 inline mr-1" /> スタッフ招待</p><button onClick={() => setShowInviteS07(false)} className="text-slate-400 text-sm"><X className="w-4 h-4" /></button></div>
         <div className="grid grid-cols-2 gap-2">
           <div><label className="text-xs text-slate-500">氏名 *</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: 田中 花子" /></div>
           <div><label className="text-xs text-slate-500">メール *</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="例: tanaka@shop.jp" /></div>
@@ -5580,7 +5580,7 @@ const MerchantUserManagement = () => {
       </div>
     )}
 
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
       <TableHeader cols={[{ label: "名前", w: "w-36" }, { label: "メール", w: "flex-1" }, { label: "権限", w: "w-28" }, { label: "MFA", w: "w-14" }, { label: "最終ログイン", w: "w-32" }, { label: "操作", w: "w-28" }]}>
       {users.map((u, i) => (
         <tr key={i} onClick={() => setSelectedUser(u)} className={`border-b cursor-pointer hover:bg-brand-50 ${i % 2 ? "bg-slate-50" : ""}`}>
@@ -5602,7 +5602,7 @@ const MerchantUserManagement = () => {
     </div>
 
     {/* Permission Matrix */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-600 mb-2">権限マトリクス</p>
       <div className="text-xs">
         <div className="flex bg-slate-50 py-1.5 px-2 font-semibold text-slate-500 border-b">
@@ -5631,8 +5631,8 @@ const MerchantUserManagement = () => {
 
     {/* ユーザー詳細スライドパネル */}
     {selectedUser && (
-      <div className="fixed inset-0 z-50 flex">
-        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedUser(null)} />
+      <div className="fixed inset-0 z-50 flex animate-fade-in">
+        <div className="flex-1 bg-slate-900/20" onClick={() => setSelectedUser(null)} />
         <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
             <p className="text-sm font-bold">{selectedUser.name}</p>
@@ -5684,9 +5684,9 @@ const MerchantUserManagement = () => {
 
             {/* アクションボタン */}
             <div className="space-y-2 pt-2 border-t">
-              <button onClick={() => { setShowEditModal(selectedUser); setSelectedUser(null); }} className="w-full py-2 bg-brand-50 text-brand-600 rounded text-xs font-bold border border-brand-200 hover:bg-brand-100">権限を変更</button>
+              <button onClick={() => { setShowEditModal(selectedUser); setSelectedUser(null); }} className="w-full py-2 bg-brand-50 text-brand-600 rounded text-xs font-medium border border-brand-200 transition-colors duration-150 hover:bg-brand-100">権限を変更</button>
               {selectedUser.role !== "オーナー" && (
-                <button onClick={() => { toast(`${selectedUser.name}のアカウントを無効化しました`, "warning"); setSelectedUser(null); }} className="w-full py-2 bg-danger-50 text-danger-600 rounded text-xs font-bold border border-danger-200 hover:bg-danger-100">アカウントを無効化</button>
+                <button onClick={() => { toast(`${selectedUser.name}のアカウントを無効化しました`, "warning"); setSelectedUser(null); }} className="w-full py-2 bg-danger-50 text-danger-600 rounded text-xs font-medium border border-danger-200 transition-colors duration-150 hover:bg-danger-100">アカウントを無効化</button>
               )}
             </div>
           </div>
@@ -5696,9 +5696,9 @@ const MerchantUserManagement = () => {
 
     {/* ロール編集モーダル */}
     {showEditModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowEditModal(null)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[400px]">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowEditModal(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[400px] animate-scale-in">
           <div className="p-4 border-b flex items-center justify-between">
             <p className="text-sm font-bold">権限の変更</p>
             <button onClick={() => setShowEditModal(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
@@ -5717,7 +5717,7 @@ const MerchantUserManagement = () => {
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowEditModal(null)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
-              <button onClick={() => setShowEditModal(null)} className="flex-1 py-2 bg-brand-500 text-white rounded text-xs font-bold hover:bg-brand-600">権限を更新</button>
+              <button onClick={() => setShowEditModal(null)} className="flex-1 py-2 bg-brand-500 text-white rounded text-xs font-medium transition-colors duration-150 hover:bg-brand-600">権限を更新</button>
             </div>
           </div>
         </div>
@@ -5772,9 +5772,9 @@ const MerchantPayouts = () => {
   });
 
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-6 space-y-6">
     <div className="flex justify-between items-center">
-      <h2 className="text-sm font-bold text-slate-800">入金確認</h2>
+      <h2 className="text-xl font-semibold text-slate-800">入金確認</h2>
       <div className="flex gap-2">
         <select className="text-xs border rounded px-2 py-1"><option>2026年2月</option><option>2026年1月</option></select>
       </div>
@@ -5822,7 +5822,7 @@ const MerchantPayouts = () => {
     </div>
 
     {/* Payout History */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
       <TableHeader cols={[{ label: "入金日", w: "w-20" }, { label: "精算期間", w: "w-32" }, { label: "総決済高", w: "w-24" }, { label: "手数料", w: "w-20" }, { label: "リザーブ留保", w: "w-24" }, { label: "リザーブ解放", w: "w-24" }, { label: "入金額", w: "w-24" }, { label: "ステータス", w: "w-20" }, { label: "明細", w: "w-14" }]}>
       {payoutData.map((p, i) => (
         <tr key={i} className={`border-b cursor-pointer hover:bg-brand-50 ${i % 2 ? "bg-slate-50" : ""}`} onClick={() => setSelectedPayout(p)}>
@@ -5834,7 +5834,7 @@ const MerchantPayouts = () => {
           <td className="px-4 py-2 whitespace-nowrap w-24 text-right text-success-600">{p.release}</td>
           <td className="px-4 py-2 whitespace-nowrap w-24 text-right font-semibold text-slate-700">{p.payout}</td>
           <td className="px-4 py-2 whitespace-nowrap w-20"><Badge text={p.status} color={p.sColor} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-14"><button onClick={e => { e.stopPropagation(); setSelectedPayout(p); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200"><FileText className="w-4 h-4 inline" /></button></td>
+          <td className="px-4 py-2 whitespace-nowrap w-14"><button onClick={e => { e.stopPropagation(); setSelectedPayout(p); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs transition-colors duration-150 hover:bg-slate-200"><FileText className="w-4 h-4 inline" /></button></td>
         </tr>
       ))}
       </TableHeader>
@@ -5843,7 +5843,7 @@ const MerchantPayouts = () => {
 
     {payoutTab === "calendar" && (
     <div className="space-y-3">
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4">
         <div className="flex justify-between items-center mb-3">
           <p className="text-xs font-bold text-slate-700"><Calendar className="w-4 h-4 inline mr-1" />2026年2月 入金カレンダー</p>
           <div className="flex gap-3 text-xs">
@@ -5897,7 +5897,7 @@ const MerchantPayouts = () => {
       </div>
 
       {/* Reserve Conditions */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
         <p className="text-xs font-bold text-slate-700 mb-2">適用中のリザーブ条件</p>
         <div className="space-y-1">
           {[
@@ -5924,7 +5924,7 @@ const MerchantPayouts = () => {
       </div>
 
       {/* Reserve Transaction History */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
         <TableHeader cols={[{ label: "日付", w: "w-24" }, { label: "種別", w: "w-16" }, { label: "接続先", w: "w-32" }, { label: "対象精算", w: "w-32" }, { label: "金額", w: "w-24" }, { label: "残高", w: "w-24" }]}>
         {[
           { date: "2026-02-07", type: "留保", tColor: "purple", proc: "Univa Pay cast", target: "01/28〜02/03精算分", amount: "-¥145,000", balance: "¥620,000" },
@@ -5949,8 +5949,8 @@ const MerchantPayouts = () => {
 
     {/* ── Slide Panel: 入金詳細 ── */}
     {selectedPayout && (
-      <div className="fixed inset-0 z-50 flex">
-        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedPayout(null)} />
+      <div className="fixed inset-0 z-50 flex animate-fade-in">
+        <div className="flex-1 bg-slate-900/20" onClick={() => setSelectedPayout(null)} />
         <div className="w-[440px] bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
             <h3 className="text-sm font-bold text-slate-800"><Coins className="w-4 h-4 inline mr-1" /> 入金明細</h3>
@@ -6013,8 +6013,8 @@ const MerchantPayouts = () => {
 
             {/* Actions */}
             <div className="flex gap-2 pt-2 border-t">
-              <button onClick={() => toast("入金明細をダウンロードしました", "success")} className="flex-1 px-3 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600"><Download className="w-4 h-4 inline mr-1" /> 明細ダウンロード</button>
-              <button onClick={() => setSelectedPayout(null)} className="px-3 py-2 bg-slate-100 text-slate-600 rounded text-xs border hover:bg-slate-200">閉じる</button>
+              <button onClick={() => toast("入金明細をダウンロードしました", "success")} className="flex-1 px-3 py-2 bg-brand-500 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-brand-600"><Download className="w-4 h-4 inline mr-1" /> 明細ダウンロード</button>
+              <button onClick={() => setSelectedPayout(null)} className="px-3 py-2 bg-slate-100 text-slate-600 rounded text-xs border transition-colors duration-150 hover:bg-slate-200">閉じる</button>
             </div>
           </div>
         </div>
@@ -6063,7 +6063,7 @@ const MerchantApplicationForm = () => {
             <span className="text-lg font-bold">⬡</span>
             <span className="text-sm font-bold">AI Payment</span>
           </div>
-          <h1 className="text-base font-bold text-slate-800">加盟店 新規申込フォーム</h1>
+          <h1 className="text-xl font-semibold text-slate-800">加盟店 新規申込フォーム</h1>
           <p className="text-xs text-slate-500 mt-1">AI審査により、最短即日で審査が完了します</p>
           <div className="mt-2 inline-flex items-center gap-1.5 bg-success-50 text-success-700 text-xs px-3 py-1 rounded-full border border-success-200">
             <span><Save className="w-4 h-4 inline" /></span> 入力内容はステップごとに自動保存されます。途中で閉じても再開できます。
@@ -6090,7 +6090,7 @@ const MerchantApplicationForm = () => {
 
         {/* ═══ Step 1: 企業情報 ═══ */}
         {step === 0 && (
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4 space-y-3">
             <p className="text-xs font-bold text-slate-700 border-b pb-2">Step 1: 企業情報</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -6146,14 +6146,14 @@ const MerchantApplicationForm = () => {
               <p className="text-xs text-brand-700"><Bot className="w-4 h-4 inline mr-1" /> <span className="font-semibold">AI審査のポイント:</span> 法人番号を入力すると、国税庁データベースと自動照合します。WebサイトURLが入力されている場合、サイト内容のAI解析も自動で行います。</p>
             </div>
             <div className="flex justify-end gap-2 pt-2 border-t">
-              <button onClick={() => setStep(1)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">次へ: 事業内容 →</button>
+              <button onClick={() => setStep(1)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-brand-600">次へ: 事業内容 →</button>
             </div>
           </div>
         )}
 
         {/* ═══ Step 2: 事業内容 ═══ */}
         {step === 1 && (
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4 space-y-3">
             <p className="text-xs font-bold text-slate-700 border-b pb-2">Step 2: 事業内容</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -6215,15 +6215,15 @@ const MerchantApplicationForm = () => {
               <p className="text-xs text-brand-700"><Bot className="w-4 h-4 inline mr-1" /> <span className="font-semibold">AI審査のポイント:</span> 業種と取扱商品の組み合わせでリスクレベルを自動判定します。詳しく記載いただくと審査がスムーズに進みます。</p>
             </div>
             <div className="flex justify-between pt-2 border-t">
-              <button onClick={() => setStep(0)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">← 戻る</button>
-              <button onClick={() => setStep(2)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">次へ: 決済設定 →</button>
+              <button onClick={() => setStep(0)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold transition-colors duration-150 hover:bg-slate-200">← 戻る</button>
+              <button onClick={() => setStep(2)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-brand-600">次へ: 決済設定 →</button>
             </div>
           </div>
         )}
 
         {/* ═══ Step 3: 決済設定 ═══ */}
         {step === 2 && (
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4 space-y-3">
             <p className="text-xs font-bold text-slate-700 border-b pb-2">Step 3: 決済設定</p>
 
             <div>
@@ -6286,15 +6286,15 @@ const MerchantApplicationForm = () => {
             </div>
 
             <div className="flex justify-between pt-2 border-t">
-              <button onClick={() => setStep(1)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">← 戻る</button>
-              <button onClick={() => setStep(3)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">次へ: 書類提出 →</button>
+              <button onClick={() => setStep(1)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold transition-colors duration-150 hover:bg-slate-200">← 戻る</button>
+              <button onClick={() => setStep(3)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-brand-600">次へ: 書類提出 →</button>
             </div>
           </div>
         )}
 
         {/* ═══ Step 4: 書類提出 ═══ */}
         {step === 3 && (
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4 space-y-3">
             <p className="text-xs font-bold text-slate-700 border-b pb-2">Step 4: 書類提出</p>
 
             <div className="space-y-3">
@@ -6339,15 +6339,15 @@ const MerchantApplicationForm = () => {
             </div>
 
             <div className="flex justify-between pt-2 border-t">
-              <button onClick={() => setStep(2)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">← 戻る</button>
-              <button onClick={() => setStep(4)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">次へ: 確認・申込 →</button>
+              <button onClick={() => setStep(2)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold transition-colors duration-150 hover:bg-slate-200">← 戻る</button>
+              <button onClick={() => setStep(4)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-brand-600">次へ: 確認・申込 →</button>
             </div>
           </div>
         )}
 
         {/* ═══ Step 5: 確認・申込 ═══ */}
         {step === 4 && (
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4 space-y-3">
             <p className="text-xs font-bold text-slate-700 border-b pb-2">Step 5: 確認・申込</p>
 
             {/* Summary Cards */}
@@ -6425,8 +6425,8 @@ const MerchantApplicationForm = () => {
             </div>
 
             <div className="flex justify-between pt-2 border-t">
-              <button onClick={() => setStep(3)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">← 戻る</button>
-              <button onClick={() => setSubmitted(true)} className="px-8 py-2.5 bg-success-600 text-white rounded text-xs font-bold hover:bg-success-700 shadow-sm"><Check className="w-4 h-4 inline mr-1" /> この内容で申込む</button>
+              <button onClick={() => setStep(3)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold transition-colors duration-150 hover:bg-slate-200">← 戻る</button>
+              <button onClick={() => setSubmitted(true)} className="px-8 py-2.5 bg-success-600 text-white rounded text-xs font-medium transition-colors duration-150 hover:bg-success-700 shadow-sm"><Check className="w-4 h-4 inline mr-1" /> この内容で申込む</button>
             </div>
           </div>
         )}
@@ -6475,7 +6475,7 @@ const AgentApplicationForm = () => {
             <span className="text-lg font-bold">⬡</span>
             <span className="text-sm font-bold">AI Payment</span>
           </div>
-          <h1 className="text-base font-bold text-slate-800">代理店 新規申込フォーム</h1>
+          <h1 className="text-xl font-semibold text-slate-800">代理店 新規申込フォーム</h1>
           <p className="text-xs text-slate-500 mt-1">代理店パートナーとして加盟店の紹介・取次を行えます</p>
         </div>
 
@@ -6494,7 +6494,7 @@ const AgentApplicationForm = () => {
 
         {/* ═══ Step 1: 企業情報 ═══ */}
         {step === 0 && (
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4 space-y-3">
             <p className="text-xs font-bold text-slate-700 border-b pb-2">Step 1: 企業情報</p>
             <div className="grid grid-cols-2 gap-3">
               <div><label className="text-xs text-slate-500 block mb-1">法人名 *</label><input className="w-full text-xs border rounded px-3 py-2" placeholder="例: 株式会社サンプル" /></div>
@@ -6514,14 +6514,14 @@ const AgentApplicationForm = () => {
               <div><label className="text-xs text-slate-500 block mb-1">WebサイトURL</label><input className="w-full text-xs border rounded px-3 py-2" placeholder="例: https://example.jp" /></div>
             </div>
             <div className="flex justify-end pt-2 border-t">
-              <button onClick={() => setStep(1)} className="px-6 py-2 bg-orange-600 text-white rounded text-xs font-semibold hover:bg-orange-700">次へ: 代理店情報 →</button>
+              <button onClick={() => setStep(1)} className="px-6 py-2 bg-orange-600 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-orange-700">次へ: 代理店情報 →</button>
             </div>
           </div>
         )}
 
         {/* ═══ Step 2: 代理店情報 ═══ */}
         {step === 1 && (
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4 space-y-3">
             <p className="text-xs font-bold text-slate-700 border-b pb-2">Step 2: 代理店情報</p>
             <div>
               <label className="text-xs text-slate-500 block mb-2">代理店種別 *</label>
@@ -6567,15 +6567,15 @@ const AgentApplicationForm = () => {
               <p className="text-xs text-orange-700"><Lightbulb className="w-4 h-4 inline mr-1" /> <span className="font-semibold">ご注意:</span> 代理店フィー（報酬率）は決済種別ごとに運営が設定します。契約時に条件をご提示いたします。</p>
             </div>
             <div className="flex justify-between pt-2 border-t">
-              <button onClick={() => setStep(0)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">← 戻る</button>
-              <button onClick={() => setStep(2)} className="px-6 py-2 bg-orange-600 text-white rounded text-xs font-semibold hover:bg-orange-700">次へ: 口座情報 →</button>
+              <button onClick={() => setStep(0)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold transition-colors duration-150 hover:bg-slate-200">← 戻る</button>
+              <button onClick={() => setStep(2)} className="px-6 py-2 bg-orange-600 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-orange-700">次へ: 口座情報 →</button>
             </div>
           </div>
         )}
 
         {/* ═══ Step 3: 口座情報 ═══ */}
         {step === 2 && (
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4 space-y-3">
             <p className="text-xs font-bold text-slate-700 border-b pb-2">Step 3: 報酬振込先口座</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -6593,15 +6593,15 @@ const AgentApplicationForm = () => {
               <p className="text-xs text-warning-700"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> 口座名義は法人名義と一致する必要があります。個人口座は受付できません。</p>
             </div>
             <div className="flex justify-between pt-2 border-t">
-              <button onClick={() => setStep(1)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">← 戻る</button>
-              <button onClick={() => setStep(3)} className="px-6 py-2 bg-orange-600 text-white rounded text-xs font-semibold hover:bg-orange-700">次へ: 確認 →</button>
+              <button onClick={() => setStep(1)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold transition-colors duration-150 hover:bg-slate-200">← 戻る</button>
+              <button onClick={() => setStep(3)} className="px-6 py-2 bg-orange-600 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-orange-700">次へ: 確認 →</button>
             </div>
           </div>
         )}
 
         {/* ═══ Step 4: 確認・申込 ═══ */}
         {step === 3 && (
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4 space-y-3">
             <p className="text-xs font-bold text-slate-700 border-b pb-2">Step 4: 確認・申込</p>
             <div className="space-y-2">
               <div className="bg-slate-50 rounded p-3">
@@ -6650,8 +6650,8 @@ const AgentApplicationForm = () => {
               </label>
             </div>
             <div className="flex justify-between pt-2 border-t">
-              <button onClick={() => setStep(2)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold hover:bg-slate-200">← 戻る</button>
-              <button onClick={() => setSubmitted(true)} className="px-8 py-2.5 bg-orange-600 text-white rounded text-xs font-bold hover:bg-orange-700 shadow-sm"><Check className="w-4 h-4 inline mr-1" /> この内容で申込む</button>
+              <button onClick={() => setStep(2)} className="px-6 py-2 bg-slate-100 text-slate-600 rounded text-xs font-semibold transition-colors duration-150 hover:bg-slate-200">← 戻る</button>
+              <button onClick={() => setSubmitted(true)} className="px-8 py-2.5 bg-orange-600 text-white rounded text-xs font-medium transition-colors duration-150 hover:bg-orange-700 shadow-sm"><Check className="w-4 h-4 inline mr-1" /> この内容で申込む</button>
             </div>
           </div>
         )}
@@ -6676,9 +6676,9 @@ const MasterRouting = () => {
   const approvedProcs = currentMerchant?.processors.filter(p => p.status === "approved") || [];
 
   return (
-    <div className="p-5 space-y-4">
+    <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-sm font-bold text-slate-800">ルーティング設定</h2>
+        <h2 className="text-xl font-semibold text-slate-800">ルーティング設定</h2>
       </div>
 
       <div className="flex gap-1 border-b">
@@ -6690,7 +6690,7 @@ const MasterRouting = () => {
       {/* 一括変更タブ */}
       {routeTab === "bulk" && (
         <div className="space-y-3">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4">
             <p className="text-xs font-bold text-slate-600 mb-3">決済ライン一括変更</p>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
@@ -6732,7 +6732,7 @@ const MasterRouting = () => {
               <button onClick={() => toast("プレビューを表示しました", "info")} className="text-xs bg-slate-100 text-slate-600 px-4 py-2 rounded border">プレビュー</button>
             </div>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <p className="text-xs font-bold text-slate-600 mb-2">変更履歴</p>
             <table className="w-full text-xs">
               <thead><tr className="bg-slate-50 border-b">
@@ -6822,7 +6822,7 @@ const MasterRouting = () => {
 
       {/* Selected Merchant's Available Processors */}
       {currentMerchant && (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-bold text-slate-700"><Plug className="w-4 h-4 inline mr-1" /> {currentMerchant.name} — 利用可能な接続先</p>
             <div className="flex gap-1">
@@ -6858,10 +6858,10 @@ const MasterRouting = () => {
       )}
 
       {/* Routing Rules */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs font-bold text-slate-700"><ClipboardList className="w-4 h-4 inline mr-1" /> ルーティングルール（優先順位順）</p>
-          <button onClick={() => setShowAddRouteRule(true)} className="text-xs bg-brand-500 text-white px-2 py-1 rounded hover:bg-brand-600">+ ルール追加</button>
+          <button onClick={() => setShowAddRouteRule(true)} className="text-xs bg-brand-500 text-white px-2 py-1 rounded transition-colors duration-150 hover:bg-brand-600">+ ルール追加</button>
         </div>
         <div className="space-y-2">
           {[
@@ -6896,7 +6896,7 @@ const MasterRouting = () => {
       </div>
 
       {/* Routing Flow Diagram */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
         <p className="text-xs font-bold text-slate-700 mb-2"><Shuffle className="w-4 h-4 inline mr-1" /> ルーティング判定フロー</p>
         <div className="bg-slate-50 rounded p-3">
           <div className="flex items-center justify-center gap-1 text-xs flex-wrap">
@@ -6927,7 +6927,7 @@ const MasterRouting = () => {
       </div>
 
       {/* Routing Performance */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
         <p className="text-xs font-bold text-slate-700 mb-2"><BarChart3 className="w-4 h-4 inline mr-1" /> ルーティング実績（直近7日）</p>
         <div className="flex gap-3 mb-3">
           <KPICard label="総決済件数" value="8,729件" sub="前週比" trend={6} />
@@ -6980,7 +6980,7 @@ const MasterRouting = () => {
       </div>
 
       {/* Cascade / Failover Config */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
         <p className="text-xs font-bold text-slate-700 mb-2"><Zap className="w-4 h-4 inline mr-1" /> フェイルオーバー / カスケード設定</p>
         <div className="space-y-2">
           {[
@@ -7021,7 +7021,7 @@ const MasterRouting = () => {
       </div>
 
       {/* Maintenance Mode */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
         <div className="flex justify-between items-center mb-2">
           <p className="text-xs font-bold text-slate-700"><Wrench className="w-4 h-4 inline mr-1" /> 接続先メンテナンスモード</p>
           <span className="text-xs text-slate-400">メンテ中の接続先はルーティング対象から自動除外されます</span>
@@ -7049,7 +7049,7 @@ const MasterRouting = () => {
       </div>
 
       {/* Routing Log */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 overflow-x-auto">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3 overflow-x-auto">
         <div className="flex justify-between items-center mb-2">
           <p className="text-xs font-bold text-slate-700"><BarChart3 className="w-4 h-4 inline mr-1" /> ルーティングログ（直近）</p>
           <button className="text-xs text-brand-600 hover:underline">全ログ検索 →</button>
@@ -7077,9 +7077,9 @@ const MasterRouting = () => {
 
       {/* ── Modal: ルーティングルール追加 ── */}
       {showAddRouteRule && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowAddRouteRule(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[520px] max-h-[85vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowAddRouteRule(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[520px] max-h-[85vh] overflow-y-auto animate-scale-in">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">ルーティングルール追加</h3>
               <button onClick={() => setShowAddRouteRule(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
@@ -7105,8 +7105,8 @@ const MasterRouting = () => {
               </div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
-              <button onClick={() => setShowAddRouteRule(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { setShowAddRouteRule(false); toast("ルーティングルールを作成しました", "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">ルールを作成</button>
+              <button onClick={() => setShowAddRouteRule(false)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => { setShowAddRouteRule(false); toast("ルーティングルールを作成しました", "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-brand-600">ルールを作成</button>
             </div>
           </div>
         </div>
@@ -7354,11 +7354,11 @@ const MasterProcessors = () => {
   const [showAddProc, setShowAddProc] = useState(false);
 
   return (
-    <div className="p-5 space-y-4">
+    <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-sm font-bold text-slate-800">接続先審査</h2>
+        <h2 className="text-xl font-semibold text-slate-800">接続先審査</h2>
         <div className="flex gap-2">
-          <button onClick={() => setShowAddProc(true)} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold hover:bg-brand-600">+ 接続先追加</button>
+          <button onClick={() => setShowAddProc(true)} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold transition-colors duration-150 hover:bg-brand-600">+ 接続先追加</button>
         </div>
       </div>
 
@@ -7387,7 +7387,7 @@ const MasterProcessors = () => {
             <KPICard label="平均審査日数" value="12日" sub="全接続先平均" />
           </div>
 
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
             <TableHeader cols={[{ label: "接続先ID", w: "w-24" }, { label: "接続先名", w: "w-36" }, { label: "種別", w: "w-36" }, { label: "対応ブランド", w: "w-32" }, { label: "稼働率", w: "w-20" }, { label: "承認済加盟店", w: "w-24" }, { label: "審査中", w: "w-16" }, { label: "状態", w: "w-20" }, { label: "操作", w: "w-16" }]}>
             {processorList.map((p, i) => (
               <tr key={p.id} className={`border-b ${i % 2 ? "bg-slate-50" : ""} hover:bg-brand-50 cursor-pointer`} onClick={() => setSelectedProc(selectedProc === p.id ? null : p.id)}>
@@ -7565,7 +7565,7 @@ const MasterProcessors = () => {
 
           {/* Confirmation Dialog */}
           {confirmDialog && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setConfirmDialog(null)}>
+            <div className="fixed inset-0 bg-slate-900/20 flex items-center justify-center z-50" onClick={() => setConfirmDialog(null)}>
               <div className="bg-white rounded-xl shadow-2xl w-[520px] max-w-[90vw]" onClick={e => e.stopPropagation()}>
                 {/* Dialog Header */}
                 <div className={`p-4 rounded-t-xl border-b ${
@@ -7706,7 +7706,7 @@ const MasterProcessors = () => {
 
                 {/* Dialog Footer */}
                 <div className="flex justify-end gap-2 p-4 border-t bg-slate-50 rounded-b-xl">
-                  <button onClick={() => setConfirmDialog(null)} className="px-4 py-2 bg-white text-slate-600 rounded border text-xs font-semibold hover:bg-slate-100">キャンセル</button>
+                  <button onClick={() => setConfirmDialog(null)} className="px-4 py-2 bg-white text-slate-600 rounded border text-xs font-semibold transition-colors duration-150 hover:bg-slate-100">キャンセル</button>
                   <button
                     onClick={() => setConfirmDialog(null)}
                     className={`px-4 py-2 rounded text-white text-xs font-semibold ${
@@ -7724,7 +7724,7 @@ const MasterProcessors = () => {
           )}
 
           {reviewFlowData.map((review, ri) => (
-            <div key={ri} className="bg-white rounded-lg border border-slate-200 shadow-sm">
+            <div key={ri} className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md">
               {/* Header */}
               <div className={`p-3 border-b ${review.status === "additional_docs" ? "bg-warning-50" : review.reviewType === "site_add" ? "bg-teal-50" : "bg-brand-50"}`}>
                 <div className="flex justify-between items-center">
@@ -7858,7 +7858,7 @@ const MasterProcessors = () => {
                               impacts: ["条件を反映した契約書PDFが自動生成される", "加盟店にメール通知 + 電子署名リクエストが送信される", "加盟店の署名完了後、決済開始ステップに進行可能"],
                               confirmLabel: "契約書を生成・送付"
                             })} className="px-3 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600 shadow-sm"><FileText className="w-4 h-4 inline mr-1" /> 契約書を生成・送付</button>
-                            <button className="px-2 py-1.5 bg-white text-slate-600 border rounded text-xs hover:bg-slate-100"><Eye className="w-4 h-4 inline mr-1" /> 契約書プレビュー</button>
+                            <button className="px-2 py-1.5 bg-white text-slate-600 border rounded text-xs transition-colors duration-150 hover:bg-slate-100"><Eye className="w-4 h-4 inline mr-1" /> 契約書プレビュー</button>
                           </>
                         )}
 
@@ -7932,7 +7932,7 @@ const MasterProcessors = () => {
                     <div className="w-48">書類名</div><div className="w-24">種別</div><div className="w-16">形式</div><div className="w-16">サイズ</div><div className="w-20">送付日</div><div className="w-20">状態</div><div className="flex-1">操作</div>
                   </div>
                   {review.documents.map((doc, di) => (
-                    <div key={di} className={`flex items-center px-3 py-1 text-xs border-b last:border-0 ${doc.status === "waiting" ? "bg-warning-50" : ""}`}>
+                    <div key={di} className={`flex items-center px-3 py-1 text-xs border-b hover:bg-slate-50 last:border-0 ${doc.status === "waiting" ? "bg-warning-50" : ""}`}>
                       <div className="w-48 text-slate-700 flex items-center gap-1">
                         {doc.auto && <Bot className="w-4 h-4 inline" />}
                         {doc.name}
@@ -7961,7 +7961,7 @@ const MasterProcessors = () => {
           ))}
 
           {/* 審査フロー操作ログ */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <p className="text-xs font-bold text-slate-700 mb-2"><PenLine className="w-4 h-4 inline mr-1" /> 操作ログ（直近の審査フロー操作）</p>
             <div className="space-y-1">
               {[
@@ -7971,7 +7971,7 @@ const MasterProcessors = () => {
                 { time: "01/28 11:20", user: "admin@aipaymentsys.com", action: "審査申請を実行", target: "XYZショップ → Univa Pay cast", detail: "申請書を自動生成" },
                 { time: "01/15 09:05", user: "admin@aipaymentsys.com", action: "審査申請を実行", target: "トラベルプラス → Asiabill", detail: "手動申請" },
               ].map((log, i) => (
-                <div key={i} className="flex items-center gap-3 text-xs py-1 border-b last:border-0">
+                <div key={i} className="flex items-center gap-3 text-xs py-1 border-b hover:bg-slate-50 last:border-0">
                   <span className="w-24 text-slate-400 font-mono">{log.time}</span>
                   <span className="w-44 text-slate-500">{log.user}</span>
                   <Badge text={log.action} color={log.action.includes("却下") ? "red" : log.action.includes("通過") || log.action.includes("完了") ? "green" : "blue"} />
@@ -7994,7 +7994,7 @@ const MasterProcessors = () => {
             <KPICard label="最短審査" value="4日" sub="Simpletransact" color="green" />
           </div>
 
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
             <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "審査種別", w: "w-24" }, { label: "接続先", w: "w-32" }, { label: "承認日", w: "w-28" }, { label: "審査日数", w: "w-20" }, { label: "提出書類", w: "w-20" }, { label: "結果", w: "w-20" }, { label: "書類", w: "w-20" }]}>
             {approvedHistory.map((h, i) => (
               <tr key={i} className={`border-b ${i % 2 ? "bg-slate-50" : ""}`}>
@@ -8048,7 +8048,7 @@ const MasterProcessors = () => {
           </div>
 
           {/* Document type templates */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <div className="flex justify-between items-center mb-2">
               <p className="text-xs font-bold text-slate-700"><ClipboardList className="w-4 h-4 inline mr-1" /> 審査書類テンプレート（接続先への送付パッケージ）</p>
               <button className="text-xs bg-brand-100 text-brand-700 px-2 py-1 rounded border border-brand-200">テンプレート編集</button>
@@ -8075,7 +8075,7 @@ const MasterProcessors = () => {
           </div>
 
           {/* Data model reference */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <p className="text-xs font-bold text-slate-700 mb-2"><Archive className="w-4 h-4 inline mr-1" /> review_documents テーブル定義</p>
             <div className="bg-slate-50 rounded-lg border border-slate-200">
               <div className="flex bg-slate-100 border-b text-xs font-semibold text-slate-500 px-3 py-1">
@@ -8096,7 +8096,7 @@ const MasterProcessors = () => {
                 ["sent_at", "TIMESTAMP", "", "接続先への送付日時"],
                 ["request_id", "UUID", "", "追加要求ID（追加書類の場合のみ FK → additional_requests）"],
               ].map((row, i) => (
-                <div key={i} className={`flex items-center px-3 py-1 text-xs border-b last:border-0 ${i % 2 ? "bg-slate-50" : ""}`}>
+                <div key={i} className={`flex items-center px-3 py-1 text-xs border-b hover:bg-slate-50 last:border-0 ${i % 2 ? "bg-slate-50" : ""}`}>
                   <div className="w-36 font-mono text-brand-600">{row[0]}</div>
                   <div className="w-28 text-slate-500">{row[1]}</div>
                   <div className="w-12">{row[2]}</div>
@@ -8107,7 +8107,7 @@ const MasterProcessors = () => {
           </div>
 
           {/* additional_requests table */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <p className="text-xs font-bold text-slate-700 mb-2"><Archive className="w-4 h-4 inline mr-1" /> additional_requests テーブル定義</p>
             <div className="bg-slate-50 rounded-lg border border-slate-200">
               <div className="flex bg-slate-100 border-b text-xs font-semibold text-slate-500 px-3 py-1">
@@ -8123,7 +8123,7 @@ const MasterProcessors = () => {
                 ["status", "ENUM", <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" />, "open / partially_submitted / completed / expired"],
                 ["completed_at", "TIMESTAMP", "", "全書類提出完了日時"],
               ].map((row, i) => (
-                <div key={i} className={`flex items-center px-3 py-1 text-xs border-b last:border-0 ${i % 2 ? "bg-slate-50" : ""}`}>
+                <div key={i} className={`flex items-center px-3 py-1 text-xs border-b hover:bg-slate-50 last:border-0 ${i % 2 ? "bg-slate-50" : ""}`}>
                   <div className="w-36 font-mono text-brand-600">{row[0]}</div>
                   <div className="w-28 text-slate-500">{row[1]}</div>
                   <div className="w-12">{row[2]}</div>
@@ -8137,9 +8137,9 @@ const MasterProcessors = () => {
 
       {/* ── Modal: 接続先追加 ── */}
       {showAddProc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowAddProc(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[520px] max-h-[85vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowAddProc(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[520px] max-h-[85vh] overflow-y-auto animate-scale-in">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">接続先を追加</h3>
               <button onClick={() => setShowAddProc(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
@@ -8161,8 +8161,8 @@ const MasterProcessors = () => {
               <div><label className="text-xs font-semibold text-slate-600">備考</label><textarea className="w-full text-xs border rounded p-2 h-12 mt-0.5" placeholder="接続に関するメモ..." /></div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
-              <button onClick={() => setShowAddProc(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setShowAddProc(false)} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">接続先を追加</button>
+              <button onClick={() => setShowAddProc(false)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => setShowAddProc(false)} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-brand-600">接続先を追加</button>
             </div>
           </div>
         </div>
@@ -8191,9 +8191,9 @@ const MasterTransactionMonitor = () => {
   const filtered = filterStatus === "all" ? txnData : txnData.filter(t => t.status === filterStatus);
 
   return (
-    <div className="p-5 space-y-4">
+    <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-sm font-bold text-slate-800">リアルタイム監視</h2>
+        <h2 className="text-xl font-semibold text-slate-800">リアルタイム監視</h2>
         <span className="flex items-center gap-1.5 text-xs"><span className="w-2 h-2 bg-danger-500 rounded-full animate-pulse" />LIVE</span>
       </div>
 
@@ -8234,7 +8234,7 @@ const MasterTransactionMonitor = () => {
           )}
 
           {/* Transaction Feed */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
             <TableHeader cols={[{ label: "取引ID", w: "w-40" }, { label: "加盟店", w: "w-36" }, { label: "購入者", w: "w-32" }, { label: "金額", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "接続先", w: "w-28" }, { label: "ルーティング", w: "w-28" }, { label: "応答", w: "w-16" }, { label: "3DS", w: "w-10" }, { label: "状態", w: "w-20" }, { label: "時刻", w: "w-20" }]}>
             {filtered.map((t, i) => (
               <React.Fragment key={t.id}>
@@ -8319,7 +8319,7 @@ const MasterTransactionMonitor = () => {
 
           {/* Stats Row */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold text-slate-600 mb-2">接続先別 レスポンスタイム</p>
               <div className="space-y-1.5">
                 {[
@@ -8337,7 +8337,7 @@ const MasterTransactionMonitor = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold text-slate-600 mb-2">ブランド別 決済件数</p>
               <div className="space-y-1.5">
                 {[
@@ -8355,7 +8355,7 @@ const MasterTransactionMonitor = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold text-slate-600 mb-2">時間帯別 決済推移</p>
               <div className="flex items-end gap-1 h-20">
                 {[20, 15, 8, 5, 3, 4, 12, 45, 78, 95, 110, 125, 130, 118, 105].map((v, i) => (
@@ -8390,14 +8390,14 @@ const MasterOrderSearch = () => {
   ];
 
   return (
-    <div className="p-5 space-y-4">
+    <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-sm font-bold text-slate-800">注文検索</h2>
+        <h2 className="text-xl font-semibold text-slate-800">注文検索</h2>
         <button className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSVエクスポート</button>
       </div>
 
       {/* Search Form */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
         <p className="text-xs font-bold text-slate-600 mb-2"><Search className="w-4 h-4 inline mr-1" /> 検索条件</p>
         <div className="grid grid-cols-4 gap-2">
           <div><label className="text-xs text-slate-400">取引ID</label><input className="w-full text-xs border rounded px-2 py-1.5" placeholder="TXN-..." /></div>
@@ -8434,7 +8434,7 @@ const MasterOrderSearch = () => {
       </div>
 
       {/* Search Results */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
         <div className="flex justify-between items-center px-3 py-2 border-b">
           <span className="text-xs text-slate-500">検索結果: 5件（1/1ページ）</span>
           <div className="flex gap-1 text-xs">
@@ -8530,7 +8530,7 @@ const MasterOrderSearch = () => {
 
       {/* Refund/Cancel Dialog */}
       {refundDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setRefundDialog(null)}>
+        <div className="fixed inset-0 bg-slate-900/20 flex items-center justify-center z-50" onClick={() => setRefundDialog(null)}>
           <div className="bg-white rounded-xl shadow-2xl w-[440px]" onClick={e => e.stopPropagation()}>
             <div className={`p-4 rounded-t-xl border-b ${refundDialog.type === "cancel" ? "bg-danger-50" : "bg-purple-50"}`}>
               <h3 className="text-sm font-bold text-slate-800">{refundDialog.type === "cancel" ? "取引キャンセル" : <><RotateCcw className="w-4 h-4 inline mr-1" /> 返金処理</>}</h3>
@@ -8565,8 +8565,8 @@ const MasterOrderSearch = () => {
 
       {/* Search Slide Panel */}
       {searchSlide && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSearchSlide(null)} />
+        <div className="fixed inset-0 z-50 flex animate-fade-in">
+          <div className="flex-1 bg-slate-900/20" onClick={() => setSearchSlide(null)} />
           <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
             <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">注文詳細</h3>
@@ -8818,9 +8818,9 @@ const MasterFraudSettings = () => {
   ];
 
   return (
-    <div className="p-5 space-y-4">
+    <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-sm font-bold text-slate-800">不正検知設定</h2>
+        <h2 className="text-xl font-semibold text-slate-800">不正検知設定</h2>
         <div className="flex gap-2">
           <button onClick={() => setTestMode(!testMode)} className={`text-xs px-3 py-1 rounded border font-semibold ${testMode ? "bg-warning-500 text-white border-warning-500" : "bg-warning-100 text-warning-700 border-warning-300"}`}>{testMode ? "テスト中" : "テストモード"}</button>
           <button onClick={() => setShowAddRule(true)} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold">+ ルール追加</button>
@@ -8854,7 +8854,7 @@ const MasterFraudSettings = () => {
           {/* ルールアコーディオン */}
           <div className="space-y-2">
             {fraudRules.map((r) => (
-              <div key={r.id} className={`bg-white rounded-lg border shadow-sm ${!r.enabled ? "opacity-60" : ""} ${expandedRule === r.id ? "border-brand-300 ring-1 ring-brand-100" : "border-slate-200"}`}>
+              <div key={r.id} className={`bg-white rounded-lg border shadow-card transition-shadow duration-150 hover:shadow-md ${!r.enabled ? "opacity-60" : ""} ${expandedRule === r.id ? "border-brand-300 ring-1 ring-brand-100" : "border-slate-200"}`}>
                 {/* ヘッダー（クリックで開閉） */}
                 <button onClick={() => setExpandedRule(expandedRule === r.id ? null : r.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-slate-50 transition-colors rounded-lg">
                   <span className={`text-xs transition-transform ${expandedRule === r.id ? "rotate-90" : ""}`}>▶</span>
@@ -8912,7 +8912,7 @@ const MasterFraudSettings = () => {
                         <button onClick={() => toast(`${r.id} のルールテストを開始しました`, "info")} className="px-3 py-1.5 bg-warning-100 text-warning-700 rounded text-xs font-semibold border border-warning-200"><FlaskConical className="w-4 h-4 inline mr-1" /> テスト実行</button>
                         <button onClick={() => setActionConfirm({ title: "ルール削除", description: `${r.id} "${r.name}" を削除します。`, warning: "削除後、このルールによる検知は行われなくなります。検知ログは保持されます。", type: "danger", onConfirm: () => { setExpandedRule(null); toast(`${r.id} を削除しました`, "warning"); } })} className="px-3 py-1.5 bg-danger-100 text-danger-600 rounded text-xs border border-danger-200">削除</button>
                       </div>
-                      <button onClick={() => setActionConfirm({ title: "ルール変更の保存", description: `${r.id} "${r.name}" の変更を保存します。`, warning: "ルール変更は即座に反映されます。admin権限の場合はsuper_adminの承認後に適用されます。", type: "warning", onConfirm: () => { setExpandedRule(null); toast(`${r.id} "${r.name}" を保存しました`, "success"); } })} className="px-4 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600"><Save className="w-4 h-4 inline mr-1" /> 変更を保存</button>
+                      <button onClick={() => setActionConfirm({ title: "ルール変更の保存", description: `${r.id} "${r.name}" の変更を保存します。`, warning: "ルール変更は即座に反映されます。admin権限の場合はsuper_adminの承認後に適用されます。", type: "warning", onConfirm: () => { setExpandedRule(null); toast(`${r.id} "${r.name}" を保存しました`, "success"); } })} className="px-4 py-1.5 bg-brand-500 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-brand-600"><Save className="w-4 h-4 inline mr-1" /> 変更を保存</button>
                     </div>
                   </div>
                 )}
@@ -8941,7 +8941,7 @@ const MasterFraudSettings = () => {
       {/* Tab: AIモデル設定 */}
       {ruleTab === "ai" && (
         <div className="space-y-3">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <div className="flex justify-between items-center mb-3">
               <p className="text-xs font-bold text-slate-700"><Bot className="w-4 h-4 inline mr-1" /> 不正検知AIモデル</p>
               <Badge text="v2.1 稼働中" color="green" />
@@ -8999,7 +8999,7 @@ const MasterFraudSettings = () => {
             <p className="text-xs text-warning-700 mb-2">シャドーモード: 判定するが実際の取引には影響しません。新ルールやモデルの影響を安全にテストできます。</p>
           </div>
           {/* Auto Retrain Schedule */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <div className="flex justify-between items-center mb-2">
               <p className="text-xs font-bold text-slate-700"><RefreshCw className="w-4 h-4 inline mr-1" /> 自動再学習スケジュール</p>
               <Badge text="毎週日曜 AM3:00" color="blue" />
@@ -9039,7 +9039,7 @@ const MasterFraudSettings = () => {
       {/* Tab: ブロック/ホワイトリスト */}
       {ruleTab === "lists" && (
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <div className="flex justify-between items-center mb-2">
               <p className="text-xs font-bold text-danger-600"><Ban className="w-4 h-4 inline mr-1" /> ブロックリスト</p>
               <button onClick={() => setShowAddBlock("block")} className="text-xs bg-danger-100 text-danger-700 px-2 py-1 rounded border border-danger-200">+ 追加</button>
@@ -9060,7 +9060,7 @@ const MasterFraudSettings = () => {
               ))}
             </div>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <div className="flex justify-between items-center mb-2">
               <p className="text-xs font-bold text-success-600"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> ホワイトリスト</p>
               <button onClick={() => setShowAddBlock("white")} className="text-xs bg-success-100 text-success-700 px-2 py-1 rounded border border-success-200">+ 追加</button>
@@ -9086,7 +9086,7 @@ const MasterFraudSettings = () => {
       {/* Tab: CSVインポート */}
       {ruleTab === "import" && (
         <div className="space-y-3">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4">
             <p className="text-xs font-bold text-slate-600 mb-3"><Upload className="w-4 h-4 inline mr-1" /> 決済制限CSVインポート</p>
             <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center bg-slate-50 hover:bg-brand-50 hover:border-brand-300 transition-colors cursor-pointer">
               <p className="text-2xl mb-2"><FolderOpen className="w-4 h-4 inline" /></p>
@@ -9104,7 +9104,7 @@ const MasterFraudSettings = () => {
               <button onClick={() => toast("テンプレートCSVをダウンロードしました", "success")} className="text-xs bg-slate-100 text-slate-600 px-4 py-1.5 rounded border">テンプレートDL</button>
             </div>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <p className="text-xs font-bold text-slate-600 mb-2">インポート履歴</p>
             <table className="w-full text-xs">
               <thead><tr className="bg-slate-50 border-b">
@@ -9144,7 +9144,7 @@ const MasterFraudSettings = () => {
           <div className="bg-warning-50 rounded border border-warning-200 p-2 text-xs text-warning-700">
             この「禁止リスト」に登録された値は、決済制限に追加できなくなります。誤ブロック防止のためのホワイトリストです。
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <div className="flex justify-between items-center mb-3">
               <p className="text-xs font-bold text-slate-600">制限登録禁止リスト検索</p>
               <button onClick={() => setShowAddBlock("ng")} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold">+ 新規登録</button>
@@ -9200,7 +9200,7 @@ const MasterFraudSettings = () => {
             <KPICard label="今月不採用" value="8件" sub="除外済" color="green" />
             <KPICard label="自動期限切れ" value="3件" sub="30日超過" />
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <div className="flex items-center gap-3 mb-3">
               <div className="flex gap-1">
                 {["全て","未処理","採用済","不採用"].map((s, i) => (
@@ -9265,7 +9265,7 @@ const MasterFraudSettings = () => {
 
       {/* Tab: 検知ログ */}
       {ruleTab === "log" && (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
           <TableHeader cols={[{ label: "日時", w: "w-32" }, { label: "取引ID", w: "w-36" }, { label: "加盟店", w: "flex-1" }, { label: "金額", w: "w-24" }, { label: "検知ルール", w: "w-36" }, { label: "AIスコア", w: "w-20" }, { label: "アクション", w: "w-28" }, { label: "結果", w: "w-20" }]}>
           {[
             { time: "02/11 14:50", txn: "TXN-14516", merchant: "トラベルプラス", amount: "¥158,000", rule: "AIスコア閾値", score: "0.92", action: "自動ブロック", result: "正検知", rColor: "green" },
@@ -9294,7 +9294,7 @@ const MasterFraudSettings = () => {
           <div className="bg-brand-50 rounded border border-brand-200 p-2 text-xs text-brand-700">
             加盟店ごとにグローバルルールの閾値をオーバーライドできます。業態に合わせた柔軟な設定で<strong>健全な決済を止めない</strong>ことが目的です。
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <div className="flex items-center gap-3 mb-3">
               <label className="text-xs font-bold text-slate-600">加盟店選択:</label>
               <div className="relative">
@@ -9345,9 +9345,9 @@ const MasterFraudSettings = () => {
 
       {/* ── Modal: ブロック/ホワイトリスト追加 ── */}
       {showAddBlock && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowAddBlock(null)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowAddBlock(null)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[440px] animate-scale-in">
             <div className={`p-4 border-b rounded-t-xl flex justify-between items-center ${showAddBlock === "block" ? "bg-danger-50" : "bg-success-50"}`}>
               <h3 className="text-sm font-bold text-slate-800">{showAddBlock === "block" ? "ブロックリストに追加" : "ホワイトリストに追加"}</h3>
               <button onClick={() => setShowAddBlock(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
@@ -9360,7 +9360,7 @@ const MasterFraudSettings = () => {
               <div className="bg-slate-50 rounded-lg border border-slate-200 p-2.5 text-xs text-slate-500"><Lightbulb className="w-4 h-4 inline mr-1" /> CSVで一括追加する場合は「ブロック/ホワイトリスト」タブのCSVアップロード機能をご利用ください</div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
-              <button onClick={() => setShowAddBlock(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => setShowAddBlock(null)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
               <button onClick={() => { const type = showAddBlock === "block" ? "ブロックリスト" : showAddBlock === "white" ? "ホワイトリスト" : showAddBlock === "ng" ? "禁止リスト" : "カスタム設定"; setShowAddBlock(null); toast(`${type}に追加しました`, "success"); }} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showAddBlock === "block" ? "bg-danger-600 hover:bg-danger-700" : "bg-success-600 hover:bg-success-700"}`}>追加する</button>
             </div>
           </div>
@@ -9370,9 +9370,9 @@ const MasterFraudSettings = () => {
       <ConfirmDialog config={actionConfirm} onClose={() => setActionConfirm(null)} />
 
       {showAddRule && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowAddRule(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[560px] max-h-[85vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowAddRule(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[560px] max-h-[85vh] overflow-y-auto animate-scale-in">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">不正検知ルール追加</h3>
               <button onClick={() => setShowAddRule(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
@@ -9448,8 +9448,8 @@ const MasterFraudSettings = () => {
             </div>
             {/* Footer */}
             <div className="p-4 border-t flex gap-2 justify-end">
-              <button onClick={() => setShowAddRule(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setActionConfirm({ title: "ルール作成の確認", description: "新しい不正検知ルールを作成します。", warning: "作成後、admin権限の場合はsuper_adminの承認待ちになります。super_adminの場合は即座に有効化されます。", type: "approve", onConfirm: () => { setShowAddRule(false); setNewRuleConditions([{ logic: "AND", rules: [{ field: "amount", operator: ">", value: "", timeWindow: "" }] }]); toast("不正検知ルールを作成しました（承認待ち）", "success"); } })} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">ルールを作成</button>
+              <button onClick={() => setShowAddRule(false)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => setActionConfirm({ title: "ルール作成の確認", description: "新しい不正検知ルールを作成します。", warning: "作成後、admin権限の場合はsuper_adminの承認待ちになります。super_adminの場合は即座に有効化されます。", type: "approve", onConfirm: () => { setShowAddRule(false); setNewRuleConditions([{ logic: "AND", rules: [{ field: "amount", operator: ">", value: "", timeWindow: "" }] }]); toast("不正検知ルールを作成しました（承認待ち）", "success"); } })} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-brand-600">ルールを作成</button>
             </div>
           </div>
         </div>
@@ -9495,9 +9495,9 @@ const MasterReport = () => {
   ];
 
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-6 space-y-6">
     <div className="flex justify-between items-center">
-      <h2 className="text-sm font-bold text-slate-800">レポート</h2>
+      <h2 className="text-xl font-semibold text-slate-800">レポート</h2>
       <div className="flex gap-2">
         <button onClick={() => setShowDeliveryLog(!showDeliveryLog)} className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded border border-slate-200"><Mail className="w-4 h-4 inline mr-1" /> 配信ログ</button>
         <button onClick={() => setShowReportModal("generate")} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold">+ レポート生成</button>
@@ -9513,7 +9513,7 @@ const MasterReport = () => {
 
     {/* Delivery Log Section */}
     {showDeliveryLog && (
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
         <div className="flex justify-between items-center p-3 border-b">
           <p className="text-xs font-bold text-slate-700"><Mail className="w-4 h-4 inline mr-1" /> 配信ログ（直近）</p>
           <button onClick={() => setShowDeliveryLog(false)} className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1"><X className="w-3.5 h-3.5" /> 閉じる</button>
@@ -9534,7 +9534,7 @@ const MasterReport = () => {
     )}
 
     {/* Report Templates */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-700 mb-2"><FileText className="w-4 h-4 inline mr-1" /> レポートテンプレート <span className="text-slate-400 font-normal">（クリックで自動入力して生成）</span></p>
       <div className="grid grid-cols-3 gap-2">
         {reportTemplates.map((t, i) => (
@@ -9560,7 +9560,7 @@ const MasterReport = () => {
     </div>
 
     {/* Recent Reports */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
       <div className="flex justify-between items-center p-3 border-b">
         <p className="text-xs font-bold text-slate-700"><FolderOpen className="w-4 h-4 inline" /> 生成済みレポート（直近）</p>
         <button onClick={() => toast("全レポート一覧を表示しています", "info")} className="text-xs text-brand-600">すべて表示 →</button>
@@ -9575,8 +9575,8 @@ const MasterReport = () => {
           <td className="px-4 py-2 whitespace-nowrap w-16 text-center">{r.ai ? "" : "—"}</td>
           <td className="px-4 py-2 whitespace-nowrap w-28 text-slate-400">{r.by}</td>
           <td className="px-4 py-2 whitespace-nowrap w-28"><div className="flex gap-1" onClick={e => e.stopPropagation()}>
-            <button onClick={() => toast(`${r.name}をダウンロードしました`, "success")} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200"><ArrowDownRight className="w-4 h-4 inline" /> DL</button>
-            <button onClick={() => setPreviewReport(r)} className="px-2 py-0.5 bg-brand-100 text-brand-600 rounded text-xs hover:bg-brand-200"><Eye className="w-4 h-4 inline mr-1" /> プレビュー</button>
+            <button onClick={() => toast(`${r.name}をダウンロードしました`, "success")} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs transition-colors duration-150 hover:bg-slate-200"><ArrowDownRight className="w-4 h-4 inline" /> DL</button>
+            <button onClick={() => setPreviewReport(r)} className="px-2 py-0.5 bg-brand-100 text-brand-600 rounded text-xs transition-colors duration-150 hover:bg-brand-200"><Eye className="w-4 h-4 inline mr-1" /> プレビュー</button>
           </div></td>
         </tr>
       ))}
@@ -9584,7 +9584,7 @@ const MasterReport = () => {
     </div>
 
     {/* Scheduled Reports */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-slate-700">⏰ 定期配信スケジュール</p>
         <button onClick={() => setShowReportModal("schedule")} className="text-xs bg-brand-100 text-brand-700 px-2 py-1 rounded border border-brand-200">+ スケジュール追加</button>
@@ -9620,7 +9620,7 @@ const MasterReport = () => {
     </div>
 
     {/* Custom Report Builder */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <div className="flex justify-between items-center mb-2">
         <p className="text-xs font-bold text-slate-700"><Wrench className="w-4 h-4 inline" /> カスタムレポート作成</p>
         <button onClick={() => setShowReportModal("custom")} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold">+ 新規レポート作成</button>
@@ -9638,16 +9638,16 @@ const MasterReport = () => {
 
     {/* ── Modal: レポートプレビュー (PDF風) ── */}
     {previewReport && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setPreviewReport(null)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[680px] max-h-[85vh] flex flex-col">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setPreviewReport(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[680px] max-h-[85vh] flex flex-col animate-scale-in">
           <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
             <div>
               <h3 className="text-sm font-bold text-slate-800"><FileText className="w-4 h-4 inline mr-1" /> レポートプレビュー</h3>
               <p className="text-xs text-slate-400 mt-0.5">{previewReport.name} — {previewReport.period}</p>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => { toast("レポートをダウンロードしました", "success"); }} className="px-3 py-1 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600"><ArrowDownRight className="w-4 h-4 inline" /> ダウンロード</button>
+              <button onClick={() => { toast("レポートをダウンロードしました", "success"); }} className="px-3 py-1 bg-brand-500 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-brand-600"><ArrowDownRight className="w-4 h-4 inline" /> ダウンロード</button>
               <button onClick={() => setPreviewReport(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
             </div>
           </div>
@@ -9742,9 +9742,9 @@ const MasterReport = () => {
 
     {/* ── Modal: レポート生成/スケジュール/カスタム ── */}
     {showReportModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowReportModal(null)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[520px]">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowReportModal(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[520px] animate-scale-in">
           <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
             <h3 className="text-sm font-bold text-slate-800">
               {showReportModal === "generate" ? "レポート生成" : showReportModal === "schedule" ? <><Calendar className="w-4 h-4 inline mr-1" />スケジュール追加</> : showReportModal === "custom" ? "新規レポート作成" : `${(reportTemplates.find(t => t.type === showReportModal) || {}).name || "レポート生成"}`}
@@ -9782,8 +9782,8 @@ const MasterReport = () => {
             </>)}
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
-            <button onClick={() => setShowReportModal(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => { const label = showReportModal === "schedule" ? "スケジュールを登録" : showReportModal === "custom" ? "カスタムレポートを作成" : "レポートを生成開始"; setShowReportModal(null); toast(`${label}しました`, "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">{showReportModal === "schedule" ? "スケジュール登録" : showReportModal === "custom" ? "レポート作成" : "生成する"}</button>
+            <button onClick={() => setShowReportModal(null)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
+            <button onClick={() => { const label = showReportModal === "schedule" ? "スケジュールを登録" : showReportModal === "custom" ? "カスタムレポートを作成" : "レポートを生成開始"; setShowReportModal(null); toast(`${label}しました`, "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-brand-600">{showReportModal === "schedule" ? "スケジュール登録" : showReportModal === "custom" ? "レポート作成" : "生成する"}</button>
           </div>
         </div>
       </div>
@@ -9801,21 +9801,21 @@ const MerchantSiteApplication = () => {
     { id: "SITE-2026-002", name: "会員限定ショップ", url: "https://members.abcmart-ec.jp", date: "2026-01-20", status: "承認済", genre: "物販EC" },
     { id: "SITE-2026-001", name: "本店ECサイト", url: "https://abcmart-ec.jp", date: "2025-06-01", status: "稼働中", genre: "家電・ガジェットEC" },
   ];
-  return <div className="p-5 space-y-4">
+  return <div className="p-6 space-y-6">
     <div className="flex justify-between items-center">
-      <h2 className="text-sm font-bold text-slate-800">新規サイト申請</h2>
+      <h2 className="text-xl font-semibold text-slate-800">新規サイト申請</h2>
       <span className="text-xs text-slate-400">新しいサイトを追加し、決済審査を申請できます</span>
     </div>
 
     {/* 申請フォーム */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4">
       <p className="text-xs font-bold text-slate-700 mb-3 border-b pb-2"><PenLine className="w-4 h-4 inline mr-1" /> 新規サイト審査申請</p>
       {submitted ? (
         <div className="text-center py-8">
           <div className="text-3xl mb-2"><CheckCircle2 className="w-4 h-4 text-success-600 inline" /></div>
           <p className="text-sm font-bold text-success-600">申請が送信されました！</p>
           <p className="text-xs text-slate-500 mt-1">運営による審査が開始されます。通常1〜3営業日で結果をお知らせします。</p>
-          <button onClick={() => setSubmitted(false)} className="mt-3 px-4 py-1.5 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">新しい申請を作成</button>
+          <button onClick={() => setSubmitted(false)} className="mt-3 px-4 py-1.5 bg-slate-100 text-slate-600 rounded text-xs transition-colors duration-150 hover:bg-slate-200">新しい申請を作成</button>
         </div>
       ) : (
         <div className="space-y-3">
@@ -9872,14 +9872,14 @@ const MerchantSiteApplication = () => {
             <p className="text-xs text-brand-700"><Bot className="w-4 h-4 inline mr-1" /> <span className="font-semibold">AI審査:</span> 申請後、サイトURLが入力されている場合はAIによるサイト内容の自動解析が行われます。審査結果は通常1〜3営業日でお知らせします。</p>
           </div>
           <div className="flex justify-end gap-2 pt-2 border-t">
-            <button onClick={() => setSubmitted(true)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600"><Rocket className="w-4 h-4 inline mr-1" /> 審査を申請する</button>
+            <button onClick={() => setSubmitted(true)} className="px-6 py-2 bg-brand-500 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-brand-600"><Rocket className="w-4 h-4 inline mr-1" /> 審査を申請する</button>
           </div>
         </div>
       )}
     </div>
 
     {/* 申請履歴 */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4">
       <p className="text-xs font-bold text-slate-700 mb-3"><ClipboardList className="w-4 h-4 inline mr-1" /> サイト申請履歴</p>
       <table className="w-full text-xs">
         <thead><tr className="border-b text-left text-slate-500">
@@ -9916,9 +9916,9 @@ const MerchantSalesReport = () => {
   ];
 
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-6 space-y-6">
     <div className="flex justify-between items-center">
-      <h2 className="text-sm font-bold text-slate-800">決済高レポート</h2>
+      <h2 className="text-xl font-semibold text-slate-800">決済高レポート</h2>
       <div className="flex gap-2">
         <select className="text-xs border rounded px-2 py-1" value={period} onChange={e => setPeriod(e.target.value)}><option value="thisMonth">今月（2026年2月）</option><option value="lastMonth">先月（2026年1月）</option><option value="custom">カスタム</option></select>
         {period === "custom" && <><input type="date" className="text-xs border rounded px-2 py-1" /><span className="text-xs text-slate-400">〜</span><input type="date" className="text-xs border rounded px-2 py-1" /></>}
@@ -9937,7 +9937,7 @@ const MerchantSalesReport = () => {
     </div>
 
     {/* Daily Chart */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-700 mb-2"><BarChart3 className="w-4 h-4 inline mr-1" /> 日別決済高推移（2026年2月）</p>
       <div className="flex items-end gap-1 h-32">
         {[320, 410, 380, 520, 480, 120, 90, 450, 510, 490, 560].map((v, i) => (
@@ -9952,7 +9952,7 @@ const MerchantSalesReport = () => {
 
     {/* Brand breakdown + Payout schedule */}
     <div className="grid grid-cols-2 gap-3">
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
         <p className="text-xs font-bold text-slate-700 mb-2"><CreditCard className="w-4 h-4 inline mr-1" /> ブランド別内訳</p>
         <div className="space-y-2">
           {[
@@ -9971,7 +9971,7 @@ const MerchantSalesReport = () => {
           ))}
         </div>
       </div>
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
         <p className="text-xs font-bold text-slate-700 mb-2"><Coins className="w-4 h-4 inline mr-1" /> 入金予定</p>
         <div className="space-y-2">
           <div className="bg-success-50 rounded border border-success-200 p-2">
@@ -10000,7 +10000,7 @@ const MerchantSalesReport = () => {
     </div>
 
     {/* Transaction List (masked) */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
       <div className="flex justify-between items-center p-3 border-b">
         <p className="text-xs font-bold text-slate-700">取引明細</p>
         <div className="flex gap-2">
@@ -10017,7 +10017,7 @@ const MerchantSalesReport = () => {
           <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={t.brand} color="blue" /></td>
           <td className="px-4 py-2 whitespace-nowrap w-24 text-right font-semibold text-slate-800">{t.amount}</td>
           <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={t.status} color={t.sColor} /></td>
-          <td className="px-4 py-2 whitespace-nowrap w-16"><button onClick={e => { e.stopPropagation(); setSelectedTx(t); }} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs hover:bg-slate-200">詳細</button></td>
+          <td className="px-4 py-2 whitespace-nowrap w-16"><button onClick={e => { e.stopPropagation(); setSelectedTx(t); }} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs transition-colors duration-150 hover:bg-slate-200">詳細</button></td>
         </tr>
       ))}
       </TableHeader>
@@ -10025,9 +10025,9 @@ const MerchantSalesReport = () => {
 
     {/* ── Modal: 取引詳細 ── */}
     {selectedTx && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setSelectedTx(null)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setSelectedTx(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[480px] animate-scale-in">
           <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
             <div>
               <h3 className="text-sm font-bold text-slate-800"><CreditCard className="w-4 h-4 inline mr-1" /> 取引詳細</h3>
@@ -10076,7 +10076,7 @@ const MerchantSalesReport = () => {
             </div>
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
-            <button onClick={() => setSelectedTx(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">閉じる</button>
+            <button onClick={() => setSelectedTx(null)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">閉じる</button>
           </div>
         </div>
       </div>
@@ -10084,9 +10084,9 @@ const MerchantSalesReport = () => {
 
     {/* ── Modal: CSV/PDFエクスポート ── */}
     {showExportModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowExportModal(null)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowExportModal(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[440px] animate-scale-in">
           <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
             <h3 className="text-sm font-bold text-slate-800">{showExportModal === "csv" ? "CSVエクスポート" : "PDFエクスポート"}</h3>
             <button onClick={() => setShowExportModal(null)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
@@ -10109,8 +10109,8 @@ const MerchantSalesReport = () => {
             <div><label className="text-xs font-semibold text-slate-600">ブランドフィルタ</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>全ブランド</option><option>VISA</option><option>Mastercard</option><option>JCB</option><option>AMEX</option></select></div>
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
-            <button onClick={() => setShowExportModal(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => setShowExportModal(null)} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">{showExportModal === "csv" ? "CSVダウンロード" : "PDF生成"}</button>
+            <button onClick={() => setShowExportModal(null)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
+            <button onClick={() => setShowExportModal(null)} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-brand-600">{showExportModal === "csv" ? "CSVダウンロード" : "PDF生成"}</button>
           </div>
         </div>
       </div>
@@ -10126,8 +10126,8 @@ const MerchantAccountSettings = () => {
   const [accTab, setAccTab] = useState("company");
 
   return (
-    <div className="p-5 space-y-4">
-      <h2 className="text-sm font-bold text-slate-800">アカウント設定</h2>
+    <div className="p-6 space-y-6">
+      <h2 className="text-xl font-semibold text-slate-800">アカウント設定</h2>
 
       <div className="flex gap-1 border-b">
         {[{ id: "company", label: "会社情報" }, { id: "bank", label: "振込先口座" }, { id: "api", label: "APIキー" }, { id: "security", label: "セキュリティ" }, { id: "members", label: "メンバー管理" }, { id: "notifications", label: "通知設定" }, { id: "contract", label: "契約情報" }].map(tab => (
@@ -10158,7 +10158,7 @@ const MerchantAccountSettings = () => {
               </div>
             ))}
             <div className="flex justify-end mt-3">
-              <button onClick={() => toast("変更申請を送信しました", "success")} className="px-4 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600">変更申請を送信</button>
+              <button onClick={() => toast("変更申請を送信しました", "success")} className="px-4 py-2 bg-brand-500 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-brand-600">変更申請を送信</button>
             </div>
           </div>
         </div>
@@ -10262,7 +10262,7 @@ const MerchantAccountSettings = () => {
                 { time: "02/10 18:30", ip: "203.0.113.xxx", device: "Safari / iPhone", status: "成功" },
                 { time: "02/10 08:45", ip: "198.51.100.xxx", device: "Chrome / Windows", status: "失敗（MFA）" },
               ].map((l, i) => (
-                <div key={i} className="flex items-center text-xs gap-3 py-1 border-b last:border-0">
+                <div key={i} className="flex items-center text-xs gap-3 py-1 border-b hover:bg-slate-50 last:border-0">
                   <span className="w-28 text-slate-400">{l.time}</span>
                   <span className="w-28 font-mono text-slate-500">{l.ip}</span>
                   <span className="flex-1 text-slate-600">{l.device}</span>
@@ -10280,7 +10280,7 @@ const MerchantAccountSettings = () => {
           <div className="flex justify-end">
             <button onClick={() => setShowInviteS08(true)} className="text-xs bg-brand-500 text-white px-3 py-1 rounded font-semibold">+ メンバー招待</button>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
             <TableHeader cols={[{ label: "名前", w: "flex-1" }, { label: "メール", w: "w-48" }, { label: "権限", w: "w-20" }, { label: "MFA", w: "w-14" }, { label: "最終ログイン", w: "w-28" }, { label: "操作", w: "w-20" }]}>
             {[
               { name: "山田 太郎", email: "yamada@abcmart-ec.jp", role: "管理者", mfa: true, last: "02/11 09:15" },
@@ -10353,7 +10353,7 @@ const MerchantAccountSettings = () => {
             <div className="mt-4 pt-3 border-t">
               <p className="text-xs font-bold text-danger-600 mb-1">アカウント解約</p>
               <p className="text-xs text-slate-500 mb-2">解約申請後、運営にて対応いたします。未精算の処理完了後に解約が確定します。</p>
-              <button onClick={() => toast("解約申請を送信しました。運営にて対応いたします", "warning")} className="px-3 py-1.5 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200 hover:bg-danger-100">解約申請を送信</button>
+              <button onClick={() => toast("解約申請を送信しました。運営にて対応いたします", "warning")} className="px-3 py-1.5 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200 transition-colors duration-150 hover:bg-danger-100">解約申請を送信</button>
             </div>
           </div>
         </div>
@@ -10361,9 +10361,9 @@ const MerchantAccountSettings = () => {
 
       {/* ── Modal: メンバー招待 ── */}
       {showInviteS08 && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowInviteS08(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowInviteS08(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[440px] animate-scale-in">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800"><Mail className="w-4 h-4 inline mr-1" /> メンバー招待</h3>
               <button onClick={() => setShowInviteS08(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
@@ -10374,8 +10374,8 @@ const MerchantAccountSettings = () => {
               <div><label className="text-xs font-semibold text-slate-600">MFA設定</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>必須（推奨）</option><option>任意</option></select></div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
-              <button onClick={() => setShowInviteS08(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setShowInviteS08(false)} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">招待メール送信</button>
+              <button onClick={() => setShowInviteS08(false)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => setShowInviteS08(false)} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-brand-600">招待メール送信</button>
             </div>
           </div>
         </div>
@@ -10397,12 +10397,12 @@ const MerchantPaymentLinks = () => {
     { id: "stats", label: "利用状況" },
   ];
   return (
-    <div className="p-5 space-y-4">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-slate-800">決済リンク管理</h2>
+        <h2 className="text-xl font-semibold text-slate-800">決済リンク管理</h2>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
-        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-success-500 text-success-700 bg-success-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-success-500 text-success-700 bg-success-50 font-medium" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}</div>
       {tab === "create" && (
         <div className="bg-white rounded-lg border p-4 space-y-4">
@@ -10426,8 +10426,8 @@ const MerchantPaymentLinks = () => {
             <span className="ml-4">利用可能回数:</span><input className="border rounded px-2 py-1 w-16 text-xs" placeholder="無制限" />
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setShowPreview(!showPreview)} className="flex-1 py-2 bg-slate-100 text-slate-600 rounded text-xs font-bold border hover:bg-slate-200"><Eye className="w-4 h-4 inline mr-1" /> プレビュー</button>
-            <button onClick={() => setShowGenerated(true)} className="flex-1 py-2 bg-success-600 text-white rounded text-xs font-bold hover:bg-success-700"><Link2 className="w-4 h-4 inline mr-1" /> 決済リンクを生成</button>
+            <button onClick={() => setShowPreview(!showPreview)} className="flex-1 py-2 bg-slate-100 text-slate-600 rounded text-xs font-medium border transition-colors duration-150 hover:bg-slate-200"><Eye className="w-4 h-4 inline mr-1" /> プレビュー</button>
+            <button onClick={() => setShowGenerated(true)} className="flex-1 py-2 bg-success-600 text-white rounded text-xs font-medium transition-colors duration-150 hover:bg-success-700"><Link2 className="w-4 h-4 inline mr-1" /> 決済リンクを生成</button>
           </div>
           <div className="bg-success-50 border border-success-200 rounded p-3 text-xs">
             <p className="font-bold text-success-700"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 決済リンクが生成されました！</p>
@@ -10441,7 +10441,7 @@ const MerchantPaymentLinks = () => {
         </div>
       )}
       {tab === "list" && (<>
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
           <div className="p-3 border-b flex gap-2">
             <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="商品名 / リンクIDで検索" />
             <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>有効</option><option>無効</option><option>期限切れ</option></select>
@@ -10460,9 +10460,9 @@ const MerchantPaymentLinks = () => {
               <td className="px-4 py-2 whitespace-nowrap w-16">{r.uses}</td>
               <td className="px-4 py-2 whitespace-nowrap w-16"><Badge text={r.st} color={r.stc} /></td>
               <td className="px-4 py-2 whitespace-nowrap w-24" onClick={e => e.stopPropagation()}><div className="flex gap-1">
-                <button onClick={() => toast(`${r.url}をコピーしました`, "success")} className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border hover:bg-slate-200"><ClipboardList className="w-4 h-4 inline" /></button>
-                <button onClick={() => toast("QRコードを生成しました", "info")} className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border hover:bg-slate-200">QR</button>
-                <button onClick={() => toast(`${r.name}のリンクを一時停止しました`, "warning")} className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border hover:bg-slate-200"><Pause className="w-3.5 h-3.5 inline" /></button>
+                <button onClick={() => toast(`${r.url}をコピーしました`, "success")} className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border transition-colors duration-150 hover:bg-slate-200"><ClipboardList className="w-4 h-4 inline" /></button>
+                <button onClick={() => toast("QRコードを生成しました", "info")} className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border transition-colors duration-150 hover:bg-slate-200">QR</button>
+                <button onClick={() => toast(`${r.name}のリンクを一時停止しました`, "warning")} className="px-1.5 py-0.5 bg-slate-100 rounded text-xs border transition-colors duration-150 hover:bg-slate-200"><Pause className="w-3.5 h-3.5 inline" /></button>
               </div></td>
             </tr>
           ))}
@@ -10477,7 +10477,7 @@ const MerchantPaymentLinks = () => {
             <KPICard label="総利用回数" value="1,247" color="green" />
             <KPICard label="総決済高" value="¥4,823,600" color="green" />
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 overflow-x-auto">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3 overflow-x-auto">
             <p className="text-xs font-bold mb-2">リンク別実績</p>
             <TableHeader cols={[{ label: "商品名", w: "flex-1" }, { label: "利用回数", w: "w-20" }, { label: "決済高", w: "w-24" }, { label: "成功率", w: "w-16" }, { label: "最終利用日", w: "w-24" }]}>
             {[["プレミアムプラン", "842", "¥8,251,600", "98.2%", "2026-02-13"], ["寄付金", "245", "¥1,230,000", "96.7%", "2026-02-12"], ["コース選択", "160", "¥960,000", "97.5%", "2026-02-11"]].map((r, i) => (
@@ -10492,9 +10492,9 @@ const MerchantPaymentLinks = () => {
 
       {/* ── Modal: 決済ページプレビュー ── */}
       {showPreview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowPreview(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[380px]">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowPreview(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[380px] animate-scale-in">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800"><Eye className="w-4 h-4 inline mr-1" /> 決済ページプレビュー</h3>
               <button onClick={() => setShowPreview(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
@@ -10508,20 +10508,20 @@ const MerchantPaymentLinks = () => {
                 <div className="space-y-2">
                   <input className="w-full text-xs border rounded px-3 py-2" placeholder="カード番号" disabled />
                   <div className="flex gap-2"><input className="flex-1 text-xs border rounded px-3 py-2" placeholder="有効期限" disabled /><input className="flex-1 text-xs border rounded px-3 py-2" placeholder="CVC" disabled /></div>
-                  <button className="w-full py-2 bg-success-600 text-white rounded text-xs font-bold" disabled>お支払い</button>
+                  <button className="w-full py-2 bg-success-600 text-white rounded text-xs font-medium" disabled>お支払い</button>
                 </div>
                 <p className="text-xs text-slate-300">Powered by AQUAGATES</p>
               </div>
             </div>
-            <div className="p-4 border-t"><button onClick={() => setShowPreview(false)} className="w-full py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">閉じる</button></div>
+            <div className="p-4 border-t"><button onClick={() => setShowPreview(false)} className="w-full py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">閉じる</button></div>
           </div>
         </div>
       )}
 
       {/* ── Slide Panel: リンク詳細 ── */}
       {selectedLink && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedLink(null)} />
+        <div className="fixed inset-0 z-50 flex animate-fade-in">
+          <div className="flex-1 bg-slate-900/20" onClick={() => setSelectedLink(null)} />
           <div className="w-[440px] bg-white shadow-xl border-l overflow-y-auto">
             <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
               <h3 className="text-sm font-bold text-slate-800"><Link2 className="w-4 h-4 inline mr-1" /> リンク詳細</h3>
@@ -10586,9 +10586,9 @@ const MerchantPaymentLinks = () => {
 
               {/* Actions */}
               <div className="flex gap-2 pt-2 border-t">
-                <button onClick={() => toast(`${selectedLink.name}を編集中`, "info")} className="flex-1 px-3 py-2 bg-slate-100 text-slate-600 rounded text-xs border hover:bg-slate-200"><Pencil className="w-4 h-4 inline mr-1" /> 編集</button>
-                <button onClick={() => toast(`${selectedLink.name}を一時停止しました`, "warning")} className="flex-1 px-3 py-2 bg-warning-50 text-warning-700 rounded text-xs border border-warning-200 hover:bg-warning-100"><Pause className="w-3.5 h-3.5 inline mr-1" /> 一時停止</button>
-                <button onClick={() => { toast(`${selectedLink.name}を削除しました`, "error"); setSelectedLink(null); }} className="px-3 py-2 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200 hover:bg-danger-100"><Trash2 className="w-4 h-4 inline" /></button>
+                <button onClick={() => toast(`${selectedLink.name}を編集中`, "info")} className="flex-1 px-3 py-2 bg-slate-100 text-slate-600 rounded text-xs border transition-colors duration-150 hover:bg-slate-200"><Pencil className="w-4 h-4 inline mr-1" /> 編集</button>
+                <button onClick={() => toast(`${selectedLink.name}を一時停止しました`, "warning")} className="flex-1 px-3 py-2 bg-warning-50 text-warning-700 rounded text-xs border border-warning-200 transition-colors duration-150 hover:bg-warning-100"><Pause className="w-3.5 h-3.5 inline mr-1" /> 一時停止</button>
+                <button onClick={() => { toast(`${selectedLink.name}を削除しました`, "error"); setSelectedLink(null); }} className="px-3 py-2 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200 transition-colors duration-150 hover:bg-danger-100"><Trash2 className="w-4 h-4 inline" /></button>
               </div>
             </div>
           </div>
@@ -10597,9 +10597,9 @@ const MerchantPaymentLinks = () => {
 
       {/* ── Modal: リンク生成完了 ── */}
       {showGenerated && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowGenerated(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowGenerated(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[440px] animate-scale-in">
             <div className="p-4 border-b bg-success-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-success-700"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 決済リンクを生成しました</h3>
               <button onClick={() => setShowGenerated(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
@@ -10607,13 +10607,13 @@ const MerchantPaymentLinks = () => {
             <div className="p-5 space-y-4">
               <div className="bg-slate-50 rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-400 mb-1">決済リンクURL</p><p className="text-xs font-mono text-brand-600 break-all">https://pay.aquagates.com/link/PL-20260216-001</p></div>
               <div className="flex gap-2">
-                <button onClick={() => toast("決済リンクをコピーしました", "success")} className="flex-1 py-2 bg-success-600 text-white rounded text-xs font-bold"><ClipboardList className="w-4 h-4 inline mr-1" /> コピー</button>
+                <button onClick={() => toast("決済リンクをコピーしました", "success")} className="flex-1 py-2 bg-success-600 text-white rounded text-xs font-medium"><ClipboardList className="w-4 h-4 inline mr-1" /> コピー</button>
                 <button onClick={() => toast("メールで決済リンクを送信しました", "success")} className="flex-1 py-2 bg-slate-100 text-slate-600 rounded text-xs border"><Mail className="w-4 h-4 inline mr-1" /> メール送信</button>
                 <button onClick={() => toast("QRコードを生成しました", "info")} className="flex-1 py-2 bg-slate-100 text-slate-600 rounded text-xs border">QRコード</button>
               </div>
               <div className="text-xs text-slate-400 text-center">有効期限: 2026-03-16 23:59</div>
             </div>
-            <div className="p-4 border-t"><button onClick={() => setShowGenerated(false)} className="w-full py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">閉じる</button></div>
+            <div className="p-4 border-t"><button onClick={() => setShowGenerated(false)} className="w-full py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">閉じる</button></div>
           </div>
         </div>
       )}
@@ -10633,10 +10633,10 @@ const MerchantSubscriptions = () => {
   const [selectedCsvBatch, setSelectedCsvBatch] = useState(null);
   const tabs = [{ id: "plans", label: "商品設定" }, { id: "users", label: "ユーザー管理" }, { id: "history", label: "決済履歴" }, { id: "csv", label: "CSV決済" }];
   return (
-    <div className="p-5 space-y-4">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h2 className="text-sm font-bold text-slate-800">決済管理</h2>
+          <h2 className="text-xl font-semibold text-slate-800">決済管理</h2>
           <div className="flex items-center gap-1 text-xs text-slate-400">
             <span className="bg-slate-100 px-1.5 py-0.5 rounded"><Building2 className="w-4 h-4 inline mr-1" /> 加盟店</span>
             <span>→</span>
@@ -10655,15 +10655,15 @@ const MerchantSubscriptions = () => {
         <span>決済管理はサイト単位で管理されます。各サイトに複数のプラン（月額・年額・分割等）を設定できます。サイトを切り替えてプランを管理してください。</span>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
-        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-success-500 text-success-700 bg-success-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-success-500 text-success-700 bg-success-50 font-medium" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}</div>
       {tab === "plans" && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <button onClick={() => setShowCreatePlan(!showCreatePlan)} className="px-3 py-1.5 bg-success-600 text-white rounded text-xs font-bold">+ プラン作成</button>
+            <button onClick={() => setShowCreatePlan(!showCreatePlan)} className="px-3 py-1.5 bg-success-600 text-white rounded text-xs font-medium">+ プラン作成</button>
             <span className="text-xs text-slate-400">このサイトのプラン: 4件（有効3 / アーカイブ1）</span>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
             <TableHeader cols={[{ label: "プラン名", w: "flex-1" }, { label: "タイプ", w: "w-16" }, { label: "金額", w: "w-24" }, { label: "サイクル", w: "w-20" }, { label: "ユーザー数", w: "w-16" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]}>
             {[{ name: "月額スタンダード", type: "継続", amt: "¥2,980/月", cycle: "毎月1日", users: "342", st: "active", created: "2025-06-01", mrr: "¥1,019,160", churn: "2.1%", trial: "7日間" },
               { name: "年間プレミアム", type: "継続", amt: "¥29,800/年", cycle: "365日", users: "89", st: "active", created: "2025-06-01", mrr: "¥221,017", churn: "0.5%", trial: "14日間" },
@@ -10690,7 +10690,7 @@ const MerchantSubscriptions = () => {
             <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="ユーザーID / メールで検索" />
             <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option><Circle className="w-3 h-3 fill-success-500 text-success-500 inline" /> 課金中</option><option><Circle className="w-3 h-3 fill-danger-500 text-danger-500 inline" /> 自動停止</option><option><Circle className="w-3 h-3 fill-brand-500 text-brand-500 inline" /> 完了</option></select>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
             <TableHeader cols={[{ label: "ユーザーID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "プラン", w: "w-28" }, { label: "カード", w: "w-16" }, { label: "次回決済", w: "w-20" }, { label: "失敗", w: "w-10" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-28" }]}>
             {[{ uid: "USR-001", email: "user1@example.com", plan: "月額スタンダード", card: "*4242", next: "03/01", fails: "0", st: "課金中", stc: "green", joined: "2025-08-10", total: "¥20,860", payments: [{ date: "02/01", amount: "¥2,980", status: "成功" }, { date: "01/01", amount: "¥2,980", status: "成功" }, { date: "12/01", amount: "¥2,980", status: "成功" }] },
               { uid: "USR-002", email: "user2@example.com", plan: "3回分割払い", card: "*1234", next: "03/15", fails: "0", st: "課金中", stc: "green", joined: "2026-01-15", total: "¥10,000", payments: [{ date: "02/15", amount: "¥5,000", status: "成功" }, { date: "01/15", amount: "¥5,000", status: "成功" }] },
@@ -10720,7 +10720,7 @@ const MerchantSubscriptions = () => {
             <KPICard label="今月 失敗" value="12件" color="red" />
             <KPICard label="リトライ中" value="3件" color="yellow" />
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
             <TableHeader cols={[{ label: "実行日", w: "w-24" }, { label: "ユーザーID", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "金額", w: "w-20" }, { label: "結果", w: "w-14" }, { label: "リトライ", w: "w-14" }, { label: "エラー", w: "w-20" }]}>
             {[["02/13 02:00", "USR-001", "月額スタンダード", "¥2,980", "成功", "—", "—"], ["02/13 02:00", "USR-003", "月額スタンダード", "¥2,980", "失敗", "2回目", "E-Card01"], ["02/13 02:00", "USR-004", "月額スタンダード", "¥2,980", "失敗", "3回目", "E-Card01"]].map((r, i) => (
               <tr key={i} className="border-b">
@@ -10738,7 +10738,7 @@ const MerchantSubscriptions = () => {
         <div className="space-y-3">
           <div className="flex gap-1 border-b">
             {[{ id: "upload", label: "CSVアップロード" }, { id: "batches", label: "決済バッチ一覧" }, { id: "format", label: "フォーマット説明" }].map(t => (
-              <button key={t.id} onClick={() => setCsvTab(t.id)} className={`px-3 py-1.5 text-xs border-b-2 ${csvTab === t.id ? "border-success-500 text-success-700 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+              <button key={t.id} onClick={() => setCsvTab(t.id)} className={`px-3 py-1.5 text-xs border-b-2 ${csvTab === t.id ? "border-success-500 text-success-700 font-medium" : "border-transparent text-slate-400"}`}>{t.label}</button>
             ))}
           </div>
 
@@ -10774,7 +10774,7 @@ const MerchantSubscriptions = () => {
               </div>
 
               {/* CSV Preview */}
-              <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
+              <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md">
                 <div className="p-3 border-b flex justify-between items-center bg-slate-50">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-700"><FileText className="w-4 h-4 inline mr-1" /> プレビュー: 202602_monthly.csv</span>
@@ -10830,8 +10830,8 @@ const MerchantSubscriptions = () => {
               <div className="flex justify-between items-center">
                 <p className="text-xs text-slate-400">合計金額: <span className="font-bold text-slate-700">¥46,400</span>（5件）</p>
                 <div className="flex gap-2">
-                  <button onClick={() => toast("テンプレートCSVをダウンロードしました", "success")} className="px-3 py-1.5 text-xs text-slate-500 border rounded hover:bg-slate-50">テンプレートCSVをDL</button>
-                  <button onClick={() => setShowCsvPreview(true)} className="px-4 py-1.5 text-xs bg-success-600 text-white rounded font-bold hover:bg-success-700">アップロードして承認依頼</button>
+                  <button onClick={() => toast("テンプレートCSVをダウンロードしました", "success")} className="px-3 py-1.5 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">テンプレートCSVをDL</button>
+                  <button onClick={() => setShowCsvPreview(true)} className="px-4 py-1.5 text-xs bg-success-600 text-white rounded font-medium transition-colors duration-150 hover:bg-success-700">アップロードして承認依頼</button>
                 </div>
               </div>
             </div>
@@ -10845,7 +10845,7 @@ const MerchantSubscriptions = () => {
                 <KPICard label="今月実行済み" value="3件" color="green" />
                 <KPICard label="今月決済総額" value="¥284,600" color="green" />
               </div>
-              <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+              <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
                 <TableHeader cols={[{ label: "バッチID", w: "w-24" }, { label: "バッチ名", w: "flex-1" }, { label: "件数", w: "w-14" }, { label: "合計金額", w: "w-24" }, { label: "決済予定日", w: "w-24" }, { label: "アップロード日", w: "w-28" }, { label: "ステータス", w: "w-20" }]}>
                 {[
                   { id: "CSV-0045", name: "2月月謝決済", count: "42", total: "¥411,600", schedule: "2026-02-20", uploaded: "2026-02-14 10:30", st: "承認待ち", stc: "yellow", results: null },
@@ -10871,7 +10871,7 @@ const MerchantSubscriptions = () => {
 
           {csvTab === "format" && (
             <div className="space-y-3">
-              <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 space-y-3">
+              <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4 space-y-3">
                 <p className="text-xs font-bold text-slate-800"><ClipboardList className="w-4 h-4 inline mr-1" /> CSVフォーマット仕様</p>
                 <div className="bg-slate-800 rounded-lg p-3 font-mono text-xs text-success-400 overflow-x-auto">
                   paymentid,price,email,tel,productName,orderid,free1,free2,free3
@@ -10918,8 +10918,8 @@ const MerchantSubscriptions = () => {
                 </ul>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => toast("テンプレートCSVをダウンロードしました", "success")} className="px-3 py-1.5 text-xs bg-slate-100 text-slate-600 rounded border hover:bg-slate-200"><Download className="w-4 h-4 inline mr-1" /> テンプレートCSVをダウンロード</button>
-                <button onClick={() => toast("サンプルCSVをダウンロードしました", "success")} className="px-3 py-1.5 text-xs bg-slate-100 text-slate-600 rounded border hover:bg-slate-200"><Download className="w-4 h-4 inline mr-1" /> サンプルCSV（記入例）をダウンロード</button>
+                <button onClick={() => toast("テンプレートCSVをダウンロードしました", "success")} className="px-3 py-1.5 text-xs bg-slate-100 text-slate-600 rounded border transition-colors duration-150 hover:bg-slate-200"><Download className="w-4 h-4 inline mr-1" /> テンプレートCSVをダウンロード</button>
+                <button onClick={() => toast("サンプルCSVをダウンロードしました", "success")} className="px-3 py-1.5 text-xs bg-slate-100 text-slate-600 rounded border transition-colors duration-150 hover:bg-slate-200"><Download className="w-4 h-4 inline mr-1" /> サンプルCSV（記入例）をダウンロード</button>
               </div>
             </div>
           )}
@@ -10928,9 +10928,9 @@ const MerchantSubscriptions = () => {
 
       {/* ── CSV アップロード確認モーダル ── */}
       {showCsvPreview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowCsvPreview(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowCsvPreview(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[480px] animate-scale-in">
             <div className="p-4 border-b bg-success-50 rounded-t-xl">
               <h3 className="text-sm font-bold text-slate-800"><Upload className="w-4 h-4 inline mr-1" /> CSV決済 承認依頼の確認</h3>
             </div>
@@ -10961,8 +10961,8 @@ const MerchantSubscriptions = () => {
               </div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
-              <button onClick={() => setShowCsvPreview(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { setShowCsvPreview(false); setCsvTab("batches"); toast("CSV決済の承認依頼を送信しました", "success"); }} className="px-4 py-2 text-xs bg-success-600 text-white rounded font-semibold hover:bg-success-700">承認依頼を送信</button>
+              <button onClick={() => setShowCsvPreview(false)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => { setShowCsvPreview(false); setCsvTab("batches"); toast("CSV決済の承認依頼を送信しました", "success"); }} className="px-4 py-2 text-xs bg-success-600 text-white rounded font-semibold transition-colors duration-150 hover:bg-success-700">承認依頼を送信</button>
             </div>
           </div>
         </div>
@@ -10970,8 +10970,8 @@ const MerchantSubscriptions = () => {
 
       {/* ── CSV バッチ詳細スライドパネル ── */}
       {selectedCsvBatch && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedCsvBatch(null)} />
+        <div className="fixed inset-0 z-50 flex animate-fade-in">
+          <div className="flex-1 bg-slate-900/20" onClick={() => setSelectedCsvBatch(null)} />
           <div className="w-[440px] bg-white shadow-xl border-l overflow-y-auto">
             <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
               <h3 className="text-sm font-bold text-slate-800"><Package className="w-4 h-4 inline mr-1" /> CSVバッチ詳細</h3>
@@ -11030,9 +11030,9 @@ const MerchantSubscriptions = () => {
                 </div>
               </div>
               <div className="flex gap-2 pt-2 border-t">
-                <button onClick={() => toast(`${selectedCsvBatch.id}のCSVをダウンロードしました`, "success")} className="flex-1 px-3 py-2 bg-slate-50 text-slate-600 rounded text-xs border hover:bg-slate-100"><Download className="w-4 h-4 inline mr-1" /> CSVダウンロード</button>
-                {selectedCsvBatch.results && <button onClick={() => toast(`${selectedCsvBatch.id}の結果CSVをダウンロードしました`, "success")} className="flex-1 px-3 py-2 bg-brand-50 text-brand-600 rounded text-xs border border-brand-200 hover:bg-brand-100"><BarChart3 className="w-4 h-4 inline mr-1" /> 結果CSVダウンロード</button>}
-                {selectedCsvBatch.st === "承認待ち" && <button onClick={() => { toast(`${selectedCsvBatch.id}の承認依頼を取り消しました`, "warning"); setSelectedCsvBatch(null); }} className="flex-1 px-3 py-2 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200 hover:bg-danger-100">取り消し</button>}
+                <button onClick={() => toast(`${selectedCsvBatch.id}のCSVをダウンロードしました`, "success")} className="flex-1 px-3 py-2 bg-slate-50 text-slate-600 rounded text-xs border transition-colors duration-150 hover:bg-slate-100"><Download className="w-4 h-4 inline mr-1" /> CSVダウンロード</button>
+                {selectedCsvBatch.results && <button onClick={() => toast(`${selectedCsvBatch.id}の結果CSVをダウンロードしました`, "success")} className="flex-1 px-3 py-2 bg-brand-50 text-brand-600 rounded text-xs border border-brand-200 transition-colors duration-150 hover:bg-brand-100"><BarChart3 className="w-4 h-4 inline mr-1" /> 結果CSVダウンロード</button>}
+                {selectedCsvBatch.st === "承認待ち" && <button onClick={() => { toast(`${selectedCsvBatch.id}の承認依頼を取り消しました`, "warning"); setSelectedCsvBatch(null); }} className="flex-1 px-3 py-2 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200 transition-colors duration-150 hover:bg-danger-100">取り消し</button>}
               </div>
             </div>
           </div>
@@ -11041,8 +11041,8 @@ const MerchantSubscriptions = () => {
 
       {/* ── Slide Panel: ユーザー詳細 ── */}
       {selectedSubUser && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedSubUser(null)} />
+        <div className="fixed inset-0 z-50 flex animate-fade-in">
+          <div className="flex-1 bg-slate-900/20" onClick={() => setSelectedSubUser(null)} />
           <div className="w-[420px] bg-white shadow-xl border-l overflow-y-auto">
             <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
               <h3 className="text-sm font-bold text-slate-800"><User className="w-4 h-4 inline mr-1" /> ユーザー詳細</h3>
@@ -11094,10 +11094,10 @@ const MerchantSubscriptions = () => {
               </div>
 
               <div className="flex gap-2 pt-2 border-t">
-                {selectedSubUser.st === "課金中" && <button onClick={() => toast(`${selectedSubUser.uid}を一時停止しました`, "warning")} className="flex-1 px-3 py-2 bg-warning-50 text-warning-700 rounded text-xs border border-warning-200 font-semibold hover:bg-warning-100"><Pause className="w-3.5 h-3.5 inline mr-1" /> 一時停止</button>}
-                {selectedSubUser.st === "リトライ中" && <button onClick={() => { toast(`${selectedSubUser.uid}の手動リトライを実行中...`, "info"); setTimeout(() => toast("リトライが完了しました", "success"), 1500); }} className="flex-1 px-3 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600"><RefreshCw className="w-4 h-4 inline mr-1" /> 手動リトライ</button>}
-                {selectedSubUser.st === "自動停止" && <button onClick={() => toast(`${selectedSubUser.uid}の課金を再開しました`, "success")} className="flex-1 px-3 py-2 bg-success-600 text-white rounded text-xs font-semibold hover:bg-success-700"><RotateCcw className="w-4 h-4 inline" /> 再開</button>}
-                <button onClick={() => toast("カード変更URLを発行しました", "success")} className="px-3 py-2 bg-brand-50 text-brand-600 rounded text-xs border border-brand-200 hover:bg-brand-100"><CreditCard className="w-4 h-4 inline mr-1" /> カード変更URL発行</button>
+                {selectedSubUser.st === "課金中" && <button onClick={() => toast(`${selectedSubUser.uid}を一時停止しました`, "warning")} className="flex-1 px-3 py-2 bg-warning-50 text-warning-700 rounded text-xs border border-warning-200 font-semibold transition-colors duration-150 hover:bg-warning-100"><Pause className="w-3.5 h-3.5 inline mr-1" /> 一時停止</button>}
+                {selectedSubUser.st === "リトライ中" && <button onClick={() => { toast(`${selectedSubUser.uid}の手動リトライを実行中...`, "info"); setTimeout(() => toast("リトライが完了しました", "success"), 1500); }} className="flex-1 px-3 py-2 bg-brand-500 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-brand-600"><RefreshCw className="w-4 h-4 inline mr-1" /> 手動リトライ</button>}
+                {selectedSubUser.st === "自動停止" && <button onClick={() => toast(`${selectedSubUser.uid}の課金を再開しました`, "success")} className="flex-1 px-3 py-2 bg-success-600 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-success-700"><RotateCcw className="w-4 h-4 inline" /> 再開</button>}
+                <button onClick={() => toast("カード変更URLを発行しました", "success")} className="px-3 py-2 bg-brand-50 text-brand-600 rounded text-xs border border-brand-200 transition-colors duration-150 hover:bg-brand-100"><CreditCard className="w-4 h-4 inline mr-1" /> カード変更URL発行</button>
               </div>
             </div>
           </div>
@@ -11106,8 +11106,8 @@ const MerchantSubscriptions = () => {
 
       {/* ── Slide Panel: プラン詳細 ── */}
       {selectedSubPlan && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedSubPlan(null)} />
+        <div className="fixed inset-0 z-50 flex animate-fade-in">
+          <div className="flex-1 bg-slate-900/20" onClick={() => setSelectedSubPlan(null)} />
           <div className="w-[420px] bg-white shadow-xl border-l overflow-y-auto">
             <div className="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
               <h3 className="text-sm font-bold text-slate-800"><Package className="w-4 h-4 inline mr-1" /> プラン詳細</h3>
@@ -11160,8 +11160,8 @@ const MerchantSubscriptions = () => {
               </div>
 
               <div className="flex gap-2 pt-2 border-t">
-                <button onClick={() => toast(`${selectedSubPlan.name}を編集中`, "info")} className="flex-1 px-3 py-2 bg-brand-500 text-white rounded text-xs font-semibold hover:bg-brand-600"><Pencil className="w-4 h-4 inline mr-1" /> プラン編集</button>
-                {selectedSubPlan.st === "active" && <button onClick={() => toast(`${selectedSubPlan.name}をアーカイブしました`, "warning")} className="px-3 py-2 bg-warning-50 text-warning-700 rounded text-xs border border-warning-200 hover:bg-warning-100"><Package className="w-4 h-4 inline mr-1" /> アーカイブ</button>}
+                <button onClick={() => toast(`${selectedSubPlan.name}を編集中`, "info")} className="flex-1 px-3 py-2 bg-brand-500 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-brand-600"><Pencil className="w-4 h-4 inline mr-1" /> プラン編集</button>
+                {selectedSubPlan.st === "active" && <button onClick={() => toast(`${selectedSubPlan.name}をアーカイブしました`, "warning")} className="px-3 py-2 bg-warning-50 text-warning-700 rounded text-xs border border-warning-200 transition-colors duration-150 hover:bg-warning-100"><Package className="w-4 h-4 inline mr-1" /> アーカイブ</button>}
               </div>
             </div>
           </div>
@@ -11170,9 +11170,9 @@ const MerchantSubscriptions = () => {
 
       {/* ── Modal: プラン作成 ── */}
       {showCreatePlan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowCreatePlan(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowCreatePlan(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[480px] animate-scale-in">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">+ サブスクリプションプラン作成</h3>
               <button onClick={() => setShowCreatePlan(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
@@ -11190,8 +11190,8 @@ const MerchantSubscriptions = () => {
               <div><label className="text-xs font-semibold text-slate-600">説明</label><textarea className="w-full text-xs border rounded p-2 h-12 mt-0.5" placeholder="プランの説明..." /></div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
-              <button onClick={() => setShowCreatePlan(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { setShowCreatePlan(false); toast("新しいプランを作成しました", "success"); }} className="px-4 py-2 text-xs bg-success-600 text-white rounded font-semibold hover:bg-success-700">プランを作成</button>
+              <button onClick={() => setShowCreatePlan(false)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => { setShowCreatePlan(false); toast("新しいプランを作成しました", "success"); }} className="px-4 py-2 text-xs bg-success-600 text-white rounded font-semibold transition-colors duration-150 hover:bg-success-700">プランを作成</button>
             </div>
           </div>
         </div>
@@ -11231,12 +11231,12 @@ const MasterRecurring = () => {
     { id: "U-1108", email: "k***@icloud.com", m: "ABC商事", plan: "月額スタンダード", st: "自動停止", stc: "red", next: "—", fail: "3", created: "2025-06-10", total: "¥23,840", txCount: 8, history: [{ date: "2026-02-01", amt: "¥2,980", st: "失敗" }, { date: "2026-01-15", amt: "¥2,980", st: "失敗" }, { date: "2026-01-01", amt: "¥2,980", st: "失敗" }] },
   ];
   return (
-    <div className="p-5 space-y-4">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-slate-800">リカーリング管理</h2>
+        <h2 className="text-xl font-semibold text-slate-800">リカーリング管理</h2>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
-        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-brand-500 text-brand-700 bg-brand-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-brand-500 text-brand-700 bg-brand-50 font-medium" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}</div>
       {tab === "overview" && (
         <div className="space-y-3">
@@ -11251,7 +11251,7 @@ const MasterRecurring = () => {
             <div className="text-xs"><span className="font-bold text-danger-700">自動停止急増アラート：</span><span className="text-danger-600">直近24hの自動停止が前日比250%（5件 → 12件）。接続先の障害の可能性があります</span></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 overflow-x-auto">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3 overflow-x-auto">
               <p className="text-xs font-bold mb-2">本日の実行予定</p>
               <TableHeader cols={[{ label: "時刻", w: "w-14" }, { label: "加盟店", w: "w-24" }, { label: "プラン", w: "flex-1" }, { label: "対象数", w: "w-14" }, { label: "状態", w: "w-14" }]}>
               {[["02:00", "ABC商事", "月額スタンダード", "342", "完了"], ["02:00", "XYZ物産", "年間プレミアム", "89", "完了"], ["14:00", "DEF Inc", "月額ライト", "56", "待機中"]].map((r, i) => (
@@ -11261,7 +11261,7 @@ const MasterRecurring = () => {
               ))}
               </TableHeader>
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 overflow-x-auto">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3 overflow-x-auto">
               <p className="text-xs font-bold mb-2">直近バッチ実行結果</p>
               <TableHeader cols={[{ label: "実行日時", w: "w-28" }, { label: "処理", w: "w-12" }, { label: "成功", w: "w-12" }, { label: "失敗", w: "w-12" }, { label: "状態", w: "w-14" }]}>
               {[["2026-02-13 02:00", "423", "411", "12", "完了"], ["2026-02-12 02:00", "398", "391", "7", "完了"], ["2026-02-11 02:00", "412", "406", "6", "完了"]].map((r, i) => (
@@ -11275,7 +11275,7 @@ const MasterRecurring = () => {
         </div>
       )}
       {tab === "plans" && (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
           <div className="p-3 border-b flex gap-2">
             <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="加盟店名 / プラン名で検索" />
             <select className="border rounded px-2 py-1 text-xs"><option>全タイプ</option><option>継続</option><option>分割</option></select>
@@ -11342,7 +11342,7 @@ const MasterRecurring = () => {
         </div>
       )}
       {tab === "users" && (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
           <div className="p-3 border-b flex gap-2">
             <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="メール / ユーザーIDで検索" />
             <select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>課金中</option><option>一時停止</option><option>自動停止</option></select>
@@ -11387,9 +11387,9 @@ const MasterRecurring = () => {
                     <div className="bg-white rounded-lg border border-slate-200 p-2.5">
                       <p className="font-semibold text-slate-600 mb-1">操作</p>
                       <div className="space-y-2">
-                        {r.st === "リトライ中" && <button className="w-full py-1.5 bg-brand-50 text-brand-600 rounded text-xs font-bold border border-brand-200 hover:bg-brand-100"><RefreshCw className="w-4 h-4 inline mr-1" /> 手動リトライ</button>}
-                        {r.st === "課金中" && <button className="w-full py-1.5 bg-warning-50 text-warning-600 rounded text-xs font-bold border border-warning-200 hover:bg-warning-100"><Pause className="w-3.5 h-3.5 inline mr-1" /> 一時停止</button>}
-                        {r.st !== "自動停止" && <button onClick={(e) => { e.stopPropagation(); setShowForceStop(r); }} className="w-full py-1.5 bg-danger-50 text-danger-600 rounded text-xs font-bold border border-danger-200 hover:bg-danger-100"><ShieldAlert className="w-4 h-4 inline mr-1" /> 強制停止</button>}
+                        {r.st === "リトライ中" && <button className="w-full py-1.5 bg-brand-50 text-brand-600 rounded text-xs font-medium border border-brand-200 transition-colors duration-150 hover:bg-brand-100"><RefreshCw className="w-4 h-4 inline mr-1" /> 手動リトライ</button>}
+                        {r.st === "課金中" && <button className="w-full py-1.5 bg-warning-50 text-warning-600 rounded text-xs font-medium border border-warning-200 transition-colors duration-150 hover:bg-warning-100"><Pause className="w-3.5 h-3.5 inline mr-1" /> 一時停止</button>}
+                        {r.st !== "自動停止" && <button onClick={(e) => { e.stopPropagation(); setShowForceStop(r); }} className="w-full py-1.5 bg-danger-50 text-danger-600 rounded text-xs font-medium border border-danger-200 transition-colors duration-150 hover:bg-danger-100"><ShieldAlert className="w-4 h-4 inline mr-1" /> 強制停止</button>}
                         {r.st === "自動停止" && <div className="text-xs text-slate-400 text-center py-2">このユーザーは自動停止済みです</div>}
                       </div>
                     </div>
@@ -11407,7 +11407,7 @@ const MasterRecurring = () => {
         <div className="space-y-3">
           <div className="flex gap-1 border-b">
             {[{ id: "pending", label: "承認待ち", count: 2 }, { id: "approved", label: "承認済（実行待ち）", count: 1 }, { id: "completed", label: "実行完了", count: null }, { id: "all", label: "全て", count: null }].map(t => (
-              <button key={t.id} onClick={() => setCsvApprovalTab(t.id)} className={`px-3 py-1.5 text-xs border-b-2 ${csvApprovalTab === t.id ? "border-brand-500 text-brand-700 font-bold" : "border-transparent text-slate-400"}`}>
+              <button key={t.id} onClick={() => setCsvApprovalTab(t.id)} className={`px-3 py-1.5 text-xs border-b-2 ${csvApprovalTab === t.id ? "border-brand-500 text-brand-700 font-medium" : "border-transparent text-slate-400"}`}>
                 {t.label}{t.count !== null && <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${csvApprovalTab === t.id ? "bg-brand-100 text-brand-600" : "bg-slate-100 text-slate-400"}`}>{t.count}</span>}
               </button>
             ))}
@@ -11423,7 +11423,7 @@ const MasterRecurring = () => {
           </div>
 
           {/* CSV Batch Table */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
             <div className="p-3 border-b flex gap-2">
               <input className="border rounded px-2 py-1 text-xs flex-1" placeholder="加盟店名 / バッチIDで検索" />
               <input type="date" className="border rounded px-2 py-1 text-xs" defaultValue="2026-02-01" />
@@ -11452,8 +11452,8 @@ const MasterRecurring = () => {
                 <td className="px-4 py-2 whitespace-nowrap w-28" onClick={e => e.stopPropagation()}>
                   {r.st === "承認待ち" && (
                     <div className="flex gap-1">
-                      <button onClick={() => setShowApprovalConfirm({ ...r, action: "approve" })} className="px-2 py-1 bg-success-100 text-success-700 rounded text-xs border border-success-200 hover:bg-success-200">承認</button>
-                      <button onClick={() => setShowApprovalConfirm({ ...r, action: "reject" })} className="px-2 py-1 bg-danger-100 text-danger-700 rounded text-xs border border-danger-200 hover:bg-danger-200">却下</button>
+                      <button onClick={() => setShowApprovalConfirm({ ...r, action: "approve" })} className="px-2 py-1 bg-success-100 text-success-700 rounded text-xs border border-success-200 transition-colors duration-150 hover:bg-success-200">承認</button>
+                      <button onClick={() => setShowApprovalConfirm({ ...r, action: "reject" })} className="px-2 py-1 bg-danger-100 text-danger-700 rounded text-xs border border-danger-200 transition-colors duration-150 hover:bg-danger-200">却下</button>
                     </div>
                   )}
                   {r.st === "承認済" && <span className="text-xs text-brand-500">実行待ち</span>}
@@ -11505,10 +11505,10 @@ const MasterRecurring = () => {
                     </div>
                     <div className="flex gap-2 mt-2">
                       {r.st === "承認待ち" && (<>
-                        <button onClick={(e) => { e.stopPropagation(); setShowApprovalConfirm({ ...r, action: "approve" }); }} className="px-3 py-1.5 bg-success-600 text-white rounded text-xs font-semibold hover:bg-success-700"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 承認する</button>
-                        <button onClick={(e) => { e.stopPropagation(); setShowApprovalConfirm({ ...r, action: "reject" }); }} className="px-3 py-1.5 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200 hover:bg-danger-100"><XCircle className="w-4 h-4 text-danger-500 inline mr-1" /> 却下する</button>
+                        <button onClick={(e) => { e.stopPropagation(); setShowApprovalConfirm({ ...r, action: "approve" }); }} className="px-3 py-1.5 bg-success-600 text-white rounded text-xs font-semibold transition-colors duration-150 hover:bg-success-700"><CheckCircle2 className="w-4 h-4 text-success-600 inline mr-1" /> 承認する</button>
+                        <button onClick={(e) => { e.stopPropagation(); setShowApprovalConfirm({ ...r, action: "reject" }); }} className="px-3 py-1.5 bg-danger-50 text-danger-600 rounded text-xs border border-danger-200 transition-colors duration-150 hover:bg-danger-100"><XCircle className="w-4 h-4 text-danger-500 inline mr-1" /> 却下する</button>
                       </>)}
-                      <button className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded text-xs border hover:bg-slate-100 ml-auto"><Download className="w-4 h-4 inline mr-1" /> 元CSVダウンロード</button>
+                      <button className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded text-xs border transition-colors duration-150 hover:bg-slate-100 ml-auto"><Download className="w-4 h-4 inline mr-1" /> 元CSVダウンロード</button>
                     </div>
                   </div>
                 </td></tr>
@@ -11526,9 +11526,9 @@ const MasterRecurring = () => {
 
       {/* CSV承認/却下 確認モーダル */}
       {showApprovalConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowApprovalConfirm(null)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowApprovalConfirm(null)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[480px] animate-scale-in">
             <div className={`p-4 border-b rounded-t-xl ${showApprovalConfirm.action === "approve" ? "bg-success-50" : "bg-danger-50"}`}>
               <h3 className="text-sm font-bold text-slate-800">{showApprovalConfirm.action === "approve" ? "CSV決済バッチの承認" : "CSV決済バッチの却下"}</h3>
             </div>
@@ -11561,7 +11561,7 @@ const MasterRecurring = () => {
               )}
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
-              <button onClick={() => setShowApprovalConfirm(null)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => setShowApprovalConfirm(null)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
               <button onClick={() => setShowApprovalConfirm(null)} className={`px-4 py-2 text-xs text-white rounded font-semibold ${showApprovalConfirm.action === "approve" ? "bg-success-600 hover:bg-success-700" : "bg-danger-600 hover:bg-danger-700"}`}>
                 {showApprovalConfirm.action === "approve" ? "承認する" : "却下する"}
               </button>
@@ -11573,7 +11573,7 @@ const MasterRecurring = () => {
       {/* (CSV詳細はアコーディオン展開に移行) */}
 
       {tab === "logs" && (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
           <TableHeader cols={[{ label: "実行日時", w: "w-32" }, { label: "バッチID", w: "w-20" }, { label: "種別", w: "w-16" }, { label: "処理件数", w: "w-16" }, { label: "成功", w: "w-14" }, { label: "失敗", w: "w-14" }, { label: "リトライ", w: "w-14" }, { label: "処理時間", w: "w-14" }, { label: "状態", w: "w-16" }, { label: "", w: "w-10" }]}>
           {[["2026-02-13 02:00:05", "B-4521", "リカーリング", "423", "411", "12", "8", "4.2s", "完了"],
             ["2026-02-12 02:00:03", "B-4520", "リカーリング", "398", "391", "7", "5", "3.8s", "完了"],
@@ -11593,9 +11593,9 @@ const MasterRecurring = () => {
 
       {/* 強制停止確認モーダル */}
       {showForceStop && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowForceStop(null)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[400px]">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowForceStop(null)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[400px] animate-scale-in">
             <div className="p-4 border-b"><p className="text-sm font-bold text-danger-600"><AlertTriangle className="w-4 h-4 text-warning-500 inline mr-1" /> サブスクリプション強制停止</p></div>
             <div className="p-4 space-y-3">
               <div className="bg-danger-50 border border-danger-200 rounded p-3 text-xs text-danger-700">
@@ -11610,7 +11610,7 @@ const MasterRecurring = () => {
               <div><label className="text-xs text-slate-500">停止理由</label><select className="w-full border rounded px-2 py-1.5 text-xs mt-0.5"><option>顧客の要望</option><option>支払い不能</option><option>不正利用の疑い</option><option>その他</option></select></div>
               <div className="flex gap-2">
                 <button onClick={() => setShowForceStop(null)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
-                <button onClick={() => setShowForceStop(null)} className="flex-1 py-2 bg-danger-500 text-white rounded text-xs font-bold">停止する</button>
+                <button onClick={() => setShowForceStop(null)} className="flex-1 py-2 bg-danger-500 text-white rounded text-xs font-medium">停止する</button>
               </div>
             </div>
           </div>
@@ -11634,15 +11634,15 @@ const MasterAgents = () => {
     { code: "AG-003", name: "ITソリューションズ", rep: "鈴木一郎", merchants: "8", rate: "5.0%", st: "active", email: "info@it-solutions.jp", tel: "03-5555-1234", created: "2025-06-01", totalRevenue: "¥3,650,000", monthlyRevenue: "¥415,000", topMerchants: ["SaaSプロダクト (¥1.8M)"], chart: [320, 350, 370, 390, 400, 415] },
   ];
   return (
-    <div className="p-5 space-y-4">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-slate-800">代理店管理</h2>
+        <h2 className="text-xl font-semibold text-slate-800">代理店管理</h2>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
-        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-brand-500 text-brand-700 bg-brand-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-brand-500 text-brand-700 bg-brand-50 font-medium" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}</div>
       {tab === "list" && (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
           <div className="p-3 border-b"><input className="border rounded px-2 py-1 text-xs w-full" placeholder="代理店名 / コードで検索" /></div>
           <TableHeader cols={[{ label: "コード", w: "w-20" }, { label: "代理店名", w: "flex-1" }, { label: "代表者", w: "w-20" }, { label: "紹介加盟店数", w: "w-20" }, { label: "紹介料率", w: "w-16" }, { label: "今月報酬", w: "w-24" }, { label: "ステータス", w: "w-16" }]}>
           {agentData.map((r, i) => {
@@ -11748,7 +11748,7 @@ const MasterAgents = () => {
             <div key={f}><label className="text-xs text-slate-500">{f}</label><input className="w-full border rounded px-2 py-1.5 text-xs mt-0.5" placeholder={f.replace(" *", "")} /></div>
           ))}
           <div><label className="text-xs text-slate-500">契約条件メモ</label><textarea className="w-full border rounded px-2 py-1.5 text-xs mt-0.5 h-16" /></div>
-          <button onClick={() => setShowAddAgent(true)} className="w-full py-2 bg-brand-500 text-white rounded text-xs font-bold">代理店を登録する</button>
+          <button onClick={() => setShowAddAgent(true)} className="w-full py-2 bg-brand-500 text-white rounded text-xs font-medium">代理店を登録する</button>
         </div>
       )}
       {tab === "commissions" && (
@@ -11758,7 +11758,7 @@ const MasterAgents = () => {
             <button onClick={() => toast("今月の報酬を計算しています...", "info")} className="px-3 py-1 bg-brand-500 text-white rounded text-xs">今月の報酬を計算</button>
             <button onClick={() => toast("報酬一覧をCSV出力しました", "success")} className="px-3 py-1 bg-slate-100 text-slate-600 rounded text-xs border"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
             <TableHeader cols={[{ label: "代理店", w: "flex-1" }, { label: "対象加盟店", w: "w-16" }, { label: "取引総額", w: "w-24" }, { label: "料率", w: "w-14" }, { label: "報酬額", w: "w-24" }, { label: "ステータス", w: "w-16" }, { label: "操作", w: "w-16" }]}>
             {[["デジタルパートナーズ", "23", "¥45,200,000", "5.0%", "¥2,260,000", "pending"], ["ウェブコンサル合同会社", "12", "¥18,500,000", "4.5%", "¥832,500", "confirmed"], ["ITソリューションズ", "8", "¥8,300,000", "5.0%", "¥415,000", "paid"]].map((r, i) => (
               <tr key={i} className="border-b">
@@ -11820,7 +11820,7 @@ const MasterAgents = () => {
               });
             });
             return (
-            <div key={si} className="bg-white rounded-lg border shadow-sm overflow-hidden">
+            <div key={si} className="bg-white rounded-lg border shadow-card transition-shadow duration-150 hover:shadow-md overflow-hidden">
               <div className="bg-gradient-to-r from-brand-50 to-slate-50 px-4 py-2 border-b flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-mono bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded">{site.siteId}</span>
@@ -11872,9 +11872,9 @@ const MasterAgents = () => {
 
       {/* ── Modal: 代理店登録 ── */}
       {showAddAgent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowAddAgent(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[480px]">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowAddAgent(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[480px] animate-scale-in">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800">代理店を登録</h3>
               <button onClick={() => setShowAddAgent(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
@@ -11895,8 +11895,8 @@ const MasterAgents = () => {
               </div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
-              <button onClick={() => setShowAddAgent(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => setShowAddAgent(false)} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">登録する</button>
+              <button onClick={() => setShowAddAgent(false)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => setShowAddAgent(false)} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-brand-600">登録する</button>
             </div>
           </div>
         </div>
@@ -11925,9 +11925,9 @@ const AgentDashboard = () => {
     { type: "success", icon: <Coins className="w-4 h-4 inline text-slate-500" />, text: "1月分の報酬が振り込まれました（¥2,105,000）", time: "1日前" },
   ];
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-6 space-y-6">
     <div className="flex items-center justify-between">
-      <h2 className="text-sm font-bold text-slate-800">代理店ダッシュボード</h2>
+      <h2 className="text-xl font-semibold text-slate-800">代理店ダッシュボード</h2>
       <div className="flex items-center gap-2">
         <div className="flex bg-slate-100 rounded-lg p-0.5">
           {["今日", "今週", "今月"].map(p => (
@@ -11955,7 +11955,7 @@ const AgentDashboard = () => {
         </div>
       );
       return (
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Megaphone className="w-4 h-4 inline" />
@@ -11997,7 +11997,7 @@ const AgentDashboard = () => {
     </div>
 
     <div className="grid grid-cols-2 gap-3">
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
         <p className="text-xs font-bold mb-2">加盟店ステータス</p>
         <div className="flex items-center gap-4 py-4 justify-center">
           <div className="text-center"><div className="w-12 h-12 rounded-full bg-success-100 flex items-center justify-center text-success-700 font-bold">23</div><p className="text-xs text-slate-500 mt-1">稼働中</p></div>
@@ -12005,7 +12005,7 @@ const AgentDashboard = () => {
           <div className="text-center"><div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold">1</div><p className="text-xs text-slate-500 mt-1">停止中</p></div>
         </div>
       </div>
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
         <p className="text-xs font-bold mb-2">月別報酬推移（直近6ヶ月）</p>
         <div className="flex items-end gap-2 h-24 px-2">
           {[60, 72, 68, 85, 90, 95].map((h, i) => (
@@ -12020,20 +12020,20 @@ const AgentDashboard = () => {
     </div>
 
     <div className="grid grid-cols-2 gap-3">
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
         <p className="text-xs font-bold mb-2">最新の紹介加盟店</p>
         {[["ネットショップ太郎", "2026-02-10", "審査中", "yellow"], ["ファッションEC123", "2026-01-25", "稼働中", "green"], ["フード通販ABC", "2026-01-15", "稼働中", "green"], ["テクノストアX", "2025-12-20", "稼働中", "green"]].map((r, i) => (
-          <div key={i} className="flex items-center py-2 border-b text-xs last:border-0">
+          <div key={i} className="flex items-center py-2 border-b hover:bg-slate-50 text-xs last:border-0">
             <div className="flex-1 font-bold">{r[0]}</div>
             <div className="w-24 text-slate-400">{r[1]}</div>
             <Badge text={r[2]} color={r[3]} />
           </div>
         ))}
       </div>
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
         <p className="text-xs font-bold mb-2"><Bell className="w-4 h-4 inline" /> 通知</p>
         {notifications.map((n, i) => (
-          <div key={i} className={`flex items-start gap-2 py-2 border-b text-xs last:border-0 ${n.type === "alert" ? "bg-warning-50 -mx-3 px-3" : ""}`}>
+          <div key={i} className={`flex items-start gap-2 py-2 border-b hover:bg-slate-50 text-xs last:border-0 ${n.type === "alert" ? "bg-warning-50 -mx-3 px-3" : ""}`}>
             <span>{n.icon}</span>
             <div className="flex-1">
               <p className="text-slate-700">{n.text}</p>
@@ -12045,7 +12045,7 @@ const AgentDashboard = () => {
     </div>
 
     {/* 取次サイト一覧 */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md">
       <div className="p-3 border-b flex justify-between items-center">
         <p className="text-xs font-bold text-slate-700">取次サイト一覧</p>
         <span className="text-xs text-slate-400">登録されているサイト情報を表示します</span>
@@ -12072,20 +12072,20 @@ const AgentDashboard = () => {
       </div>
     </div>
 
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold mb-2"><Zap className="w-4 h-4 inline mr-1" /> クイックアクション</p>
       <div className="flex gap-2">
         {[["新規紹介", "orange"], ["報酬明細", "blue"], ["紹介先一覧", "emerald"], ["アカウント設定", "slate"]].map(([label, color], i) => (
-          <button key={i} onClick={() => toast(`${label}を開きます`, "info")} className={`flex-1 py-2 rounded-lg border text-xs font-bold bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100`}>{label}</button>
+          <button key={i} onClick={() => toast(`${label}を開きます`, "info")} className={`flex-1 py-2 rounded-lg border text-xs font-medium bg-${color}-50 text-${color}-700 border-${color}-200 hover:bg-${color}-100`}>{label}</button>
         ))}
       </div>
     </div>
 
     {/* KPIドリルダウンモーダル */}
     {showDetail && kpiDetails[showDetail] && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowDetail(null)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowDetail(null)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[440px] animate-scale-in">
           <div className="p-4 border-b flex items-center justify-between">
             <p className="text-sm font-bold">{showDetail}</p>
             <button onClick={() => setShowDetail(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
@@ -12111,7 +12111,7 @@ const AgentDashboard = () => {
             <div>
               <p className="text-xs font-bold text-slate-700 mb-2">内訳</p>
               {kpiDetails[showDetail].details.map((d, i) => (
-                <div key={i} className="flex text-xs border-b py-1.5"><span className="flex-1 text-slate-600">{d.label}</span><span className="font-bold">{d.value}</span></div>
+                <div key={i} className="flex text-xs border-b hover:bg-slate-50 py-1.5"><span className="flex-1 text-slate-600">{d.label}</span><span className="font-bold">{d.value}</span></div>
               ))}
             </div>
           </div>
@@ -12141,9 +12141,9 @@ const AgentMerchants = () => {
     { txId: "TXN-20260213-005", orderId: "ORD-B-5679", date: "2026-02-13 11:45:33", merchant: "オンラインストアB", site: "XYZオンライン", amount: "¥22,000", currency: "JPY", status: "成功", sc: "green", cardLast4: "3456", cardBrand: "AMEX", customer: "高橋美咲", email: "takahashi@example.com", method: "クレジット", threeds: "認証済" },
   ];
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-6 space-y-6">
     <div className="flex items-center justify-between">
-      <h2 className="text-sm font-bold text-slate-800">紹介先一覧</h2>
+      <h2 className="text-xl font-semibold text-slate-800">紹介先一覧</h2>
       <button onClick={() => toast("紹介先一覧をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
     </div>
     {/* タブ */}
@@ -12160,7 +12160,7 @@ const AgentMerchants = () => {
       <KPICard label="今月の報酬見込" value="¥415,000" sub="" color="green" />
     </div>
     <div className="flex gap-2"><input className="border rounded px-2 py-1 text-xs flex-1" placeholder="加盟店名で検索" /><select className="border rounded px-2 py-1 text-xs"><option>全ステータス</option><option>稼働中</option><option>審査中</option><option>停止中</option></select></div>
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
       <TableHeader cols={[{ label: "加盟店名", w: "flex-1" }, { label: "法人名", w: "w-28" }, { label: "ステータス", w: "w-16" }, { label: "月間取引額", w: "w-24" }, { label: "取引数", w: "w-16" }, { label: "紹介日", w: "w-20" }, { label: "適用料率", w: "w-16" }]}>
       {merchants.map((r, i) => (
         <tr key={i} onClick={() => setSelectedMerchant(r)} className="border-b hover:bg-brand-50 cursor-pointer">
@@ -12179,7 +12179,7 @@ const AgentMerchants = () => {
 
     {d02Tab === "txSearch" && (<>
     {/* AQUAGATES準拠: クレジット決済検索 */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md">
       <div className="p-3 border-b bg-slate-50 flex items-center justify-between cursor-pointer" onClick={() => setShowD02Search(!showD02Search)}>
         <p className="text-xs font-bold text-slate-700"><Search className="w-4 h-4 inline mr-1" /> 検索条件</p>
         <span className="text-xs text-slate-400">{showD02Search ? "▲ 閉じる" : "▼ 開く"}</span>
@@ -12205,8 +12205,8 @@ const AgentMerchants = () => {
             <div><label className="text-xs text-slate-500">金額</label><div className="flex gap-1 mt-0.5"><input className="w-1/2 text-xs border rounded px-2 py-1.5" placeholder="最小" /><input className="w-1/2 text-xs border rounded px-2 py-1.5" placeholder="最大" /></div></div>
           </div>
           <div className="flex justify-end gap-2">
-            <button onClick={() => toast("検索条件をリセットしました", "info")} className="text-xs px-3 py-1.5 border rounded text-slate-500 hover:bg-slate-50">条件リセット</button>
-            <button onClick={() => toast("決済を検索しました", "info")} className="text-xs px-4 py-1.5 bg-orange-500 text-white rounded font-semibold hover:bg-orange-600">検索</button>
+            <button onClick={() => toast("検索条件をリセットしました", "info")} className="text-xs px-3 py-1.5 border rounded text-slate-500 transition-colors duration-150 hover:bg-slate-50">条件リセット</button>
+            <button onClick={() => toast("決済を検索しました", "info")} className="text-xs px-4 py-1.5 bg-orange-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-orange-600">検索</button>
           </div>
         </div>
       )}
@@ -12215,7 +12215,7 @@ const AgentMerchants = () => {
       <p className="text-xs text-slate-500">検索結果: <span className="font-bold text-slate-800">5件</span></p>
       <button onClick={() => toast("決済履歴をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
     </div>
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
       <TableHeader cols={[{ label: "決済日時", w: "w-32" }, { label: "決済ID", w: "w-36" }, { label: "オーダーID", w: "w-28" }, { label: "加盟店", w: "w-24" }, { label: "サイト", w: "w-28" }, { label: "金額", w: "w-20" }, { label: "ステータス", w: "w-16" }, { label: "カード", w: "w-20" }, { label: "顧客名", w: "w-20" }]}>
       {d02TxResults.map((tx, i) => (
         <tr key={i} onClick={() => setSelectedD02Tx(tx)} className="border-b hover:bg-orange-50 cursor-pointer">
@@ -12244,8 +12244,8 @@ const AgentMerchants = () => {
 
     {/* 加盟店詳細スライドパネル */}
     {selectedMerchant && (
-      <div className="fixed inset-0 z-50 flex">
-        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedMerchant(null)} />
+      <div className="fixed inset-0 z-50 flex animate-fade-in">
+        <div className="flex-1 bg-slate-900/20" onClick={() => setSelectedMerchant(null)} />
         <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b bg-brand-50 flex justify-between items-center">
             <h3 className="text-sm font-bold text-slate-800">{selectedMerchant.name}</h3>
@@ -12289,7 +12289,7 @@ const AgentMerchants = () => {
                 { time: "02/10 15:30", amt: "¥3,200", st: "返金済", stc: "yellow" },
                 { time: "02/09 11:45", amt: "¥22,000", st: "成功", stc: "green" },
               ].map((t, i) => (
-                <div key={i} className="flex items-center py-1 text-xs border-b last:border-0">
+                <div key={i} className="flex items-center py-1 text-xs border-b hover:bg-slate-50 last:border-0">
                   <span className="w-24 text-slate-400">{t.time}</span>
                   <span className="w-20 font-bold">{t.amt}</span>
                   <Badge text={t.st} color={t.stc} />
@@ -12303,8 +12303,8 @@ const AgentMerchants = () => {
 
     {/* 決済詳細スライドパネル */}
     {selectedD02Tx && (
-      <div className="fixed inset-0 z-50 flex">
-        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedD02Tx(null)} />
+      <div className="fixed inset-0 z-50 flex animate-fade-in">
+        <div className="flex-1 bg-slate-900/20" onClick={() => setSelectedD02Tx(null)} />
         <div className="w-[480px] bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b bg-orange-50 flex justify-between items-center">
             <div><h3 className="text-sm font-bold text-slate-800">決済詳細</h3><p className="text-xs text-slate-400 font-mono">{selectedD02Tx.txId}</p></div>
@@ -12361,9 +12361,9 @@ const AgentReports = () => {
     { reportId: "RPT-2025-12", reportNo: "AG001-202512", month: "2025年12月", issueDate: "2025-12-31", payDate: "2026-01-15", merchants: "21社", volume: "¥38,500,000", commission: "¥1,925,000", status: "paid", label: "支払済", breakdown: [{ name: "ECサイトA", siteId: "S-001", vol: "¥4,200,000", fee: "3.2%", com: "¥210,000", txn: 1020 }, { name: "オンラインストアB", siteId: "S-002", vol: "¥2,500,000", fee: "3.0%", com: "¥125,000", txn: 650 }, { name: "ファッションEC", siteId: "S-004", vol: "¥4,100,000", fee: "3.5%", com: "¥205,000", txn: 540 }] },
   ];
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-6 space-y-6">
     <div className="flex items-center justify-between">
-      <h2 className="text-sm font-bold text-slate-800">報酬明細</h2>
+      <h2 className="text-xl font-semibold text-slate-800">報酬明細</h2>
       <button onClick={() => toast("報酬明細をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
     </div>
     <div className="grid grid-cols-3 gap-3">
@@ -12372,7 +12372,7 @@ const AgentReports = () => {
       <KPICard label="トップ加盟店" value="ECサイトA" sub="¥260,000/月" color="blue" />
     </div>
     {/* 検索フォーム */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-700 mb-2"><Search className="w-4 h-4 inline mr-1" /> 明細検索</p>
       <div className="grid grid-cols-4 gap-3">
         <div><label className="text-xs text-slate-500">報告書ID</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="RPT-" /></div>
@@ -12381,11 +12381,11 @@ const AgentReports = () => {
         <div><label className="text-xs text-slate-500">発行日（終了）</label><input type="date" className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" /></div>
       </div>
       <div className="flex justify-end mt-2">
-        <button onClick={() => toast("報酬明細を検索しました", "info")} className="text-xs px-4 py-1.5 bg-orange-500 text-white rounded font-semibold hover:bg-orange-600">検索</button>
+        <button onClick={() => toast("報酬明細を検索しました", "info")} className="text-xs px-4 py-1.5 bg-orange-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-orange-600">検索</button>
       </div>
     </div>
     {/* 月次報酬推移 */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
       <p className="text-xs font-bold text-slate-700 mb-2">月次報酬推移</p>
       <div className="flex items-end gap-1 h-24 px-1">
         {[{ m: "9月", v: 1750 }, { m: "10月", v: 1820 }, { m: "11月", v: 1900 }, { m: "12月", v: 1925 }, { m: "1月", v: 2105 }, { m: "2月", v: 2260 }].map((d, i) => (
@@ -12398,7 +12398,7 @@ const AgentReports = () => {
       </div>
     </div>
     {/* 支払明細テーブル（AQUAGATES準拠: 報告書ID/レポートナンバー/発行日/お支払金額/お支払予定日/内訳） */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
       <TableHeader cols={[{ label: "報告書ID", w: "w-24" }, { label: "レポートNo.", w: "w-32" }, { label: "対象月", w: "w-20" }, { label: "発行日", w: "w-20" }, { label: "お支払金額", w: "w-24" }, { label: "お支払予定日", w: "w-24" }, { label: "ステータス", w: "w-16" }, { label: "内訳", w: "w-12" }]}>
       {reports.map((r, i) => (
         <tr key={i} className="border-b hover:bg-orange-50">
@@ -12409,7 +12409,7 @@ const AgentReports = () => {
           <td className="px-3 py-2 whitespace-nowrap text-xs w-24 font-bold text-success-700">{r.commission}</td>
           <td className="px-3 py-2 whitespace-nowrap text-xs w-24 text-slate-500">{r.payDate}</td>
           <td className="px-3 py-2 whitespace-nowrap text-xs w-16"><Badge text={r.label} color={r.status === "paid" ? "green" : "yellow"} /></td>
-          <td className="px-3 py-2 whitespace-nowrap text-xs w-12"><button onClick={() => setSelectedReport(r)} className="text-brand-600 hover:underline font-bold">内訳</button></td>
+          <td className="px-3 py-2 whitespace-nowrap text-xs w-12"><button onClick={() => setSelectedReport(r)} className="text-brand-600 hover:underline font-medium">内訳</button></td>
         </tr>
       ))}
       </TableHeader>
@@ -12417,8 +12417,8 @@ const AgentReports = () => {
 
     {/* 支払明細詳細スライドパネル */}
     {selectedReport && (
-      <div className="fixed inset-0 z-50 flex">
-        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedReport(null)} />
+      <div className="fixed inset-0 z-50 flex animate-fade-in">
+        <div className="flex-1 bg-slate-900/20" onClick={() => setSelectedReport(null)} />
         <div className="w-[480px] bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b bg-orange-50 flex justify-between items-center">
             <div><h3 className="text-sm font-bold text-slate-800">報酬明細 内訳</h3><p className="text-xs text-slate-400 font-mono">{selectedReport.reportNo}</p></div>
@@ -12470,8 +12470,8 @@ const AgentReports = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => toast("報酬明細PDFをダウンロードしました", "success")} className="flex-1 py-1.5 bg-slate-100 text-slate-600 rounded text-xs border font-bold"><FileText className="w-4 h-4 inline mr-1" /> PDF出力</button>
-              <button onClick={() => toast("報酬明細CSVをダウンロードしました", "success")} className="flex-1 py-1.5 bg-slate-100 text-slate-600 rounded text-xs border font-bold"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
+              <button onClick={() => toast("報酬明細PDFをダウンロードしました", "success")} className="flex-1 py-1.5 bg-slate-100 text-slate-600 rounded text-xs border font-medium"><FileText className="w-4 h-4 inline mr-1" /> PDF出力</button>
+              <button onClick={() => toast("報酬明細CSVをダウンロードしました", "success")} className="flex-1 py-1.5 bg-slate-100 text-slate-600 rounded text-xs border font-medium"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
             </div>
           </div>
         </div>
@@ -12513,9 +12513,9 @@ const AgentReferral = () => {
     ]}
   ];
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-6 space-y-6">
     <div className="flex items-center justify-between">
-      <h2 className="text-sm font-bold text-slate-800">申込紹介</h2>
+      <h2 className="text-xl font-semibold text-slate-800">申込紹介</h2>
       <div className="flex items-center gap-2 text-xs text-slate-400">
         <span>紹介総数: <span className="font-bold text-slate-700">12件</span></span>
         <span>承認率: <span className="font-bold text-success-600">75%</span></span>
@@ -12534,11 +12534,11 @@ const AgentReferral = () => {
         ))}
         <div><label className="text-xs text-slate-500">業種</label><select className="w-full border rounded px-2 py-1.5 text-xs mt-0.5"><option>選択してください</option><option>EC物販</option><option>デジタルコンテンツ</option><option>サービス業</option></select></div>
         <div><label className="text-xs text-slate-500">備考</label><textarea className="w-full border rounded px-2 py-1.5 text-xs mt-0.5 h-12" /></div>
-        <button onClick={() => setShowConfirm(true)} className="w-full py-2 bg-orange-500 text-white rounded text-xs font-bold hover:bg-orange-600">紹介申請を送信</button>
+        <button onClick={() => setShowConfirm(true)} className="w-full py-2 bg-orange-500 text-white rounded text-xs font-medium transition-colors duration-150 hover:bg-orange-600">紹介申請を送信</button>
       </div>
       <div className="space-y-3">
         <p className="text-xs font-bold">申請履歴</p>
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md">
           {referralHistory.map((r, i) => (
             <div key={i} onClick={() => setSelectedReferral(r)} className="flex items-center px-4 py-2.5 text-xs border-b whitespace-nowrap cursor-pointer hover:bg-slate-50">
               <div className="flex-1 font-bold">{r.name}</div>
@@ -12561,9 +12561,9 @@ const AgentReferral = () => {
 
     {/* 送信確認モーダル */}
     {showConfirm && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowConfirm(false)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[420px] max-h-[80vh] overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowConfirm(false)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[420px] max-h-[80vh] overflow-y-auto animate-scale-in">
           <div className="p-4 border-b flex items-center justify-between">
             <p className="text-sm font-bold">紹介申請の確認</p>
             <button onClick={() => setShowConfirm(false)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
@@ -12576,12 +12576,12 @@ const AgentReferral = () => {
             <div className="space-y-2">
               <p className="text-xs font-bold text-slate-700">入力内容サマリー</p>
               {[["法人名", "（入力値）"], ["代表者名", "（入力値）"], ["担当者メール", "（入力値）"], ["サイトURL", "（入力値）"], ["月間予定決済高", "（入力値）"], ["業種", "（選択値）"]].map(([l, v], i) => (
-                <div key={i} className="flex text-xs border-b pb-1"><span className="w-28 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
+                <div key={i} className="flex text-xs border-b hover:bg-slate-50 pb-1"><span className="w-28 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
               ))}
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowConfirm(false)} className="flex-1 py-2 border rounded text-xs">戻って修正</button>
-              <button onClick={() => setShowConfirm(false)} className="flex-1 py-2 bg-orange-500 text-white rounded text-xs font-bold hover:bg-orange-600">申請を送信</button>
+              <button onClick={() => setShowConfirm(false)} className="flex-1 py-2 bg-orange-500 text-white rounded text-xs font-medium transition-colors duration-150 hover:bg-orange-600">申請を送信</button>
             </div>
           </div>
         </div>
@@ -12590,8 +12590,8 @@ const AgentReferral = () => {
 
     {/* 紹介ステータスタイムライン スライドパネル */}
     {selectedReferral && (
-      <div className="fixed inset-0 z-50 flex">
-        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedReferral(null)} />
+      <div className="fixed inset-0 z-50 flex animate-fade-in">
+        <div className="flex-1 bg-slate-900/20" onClick={() => setSelectedReferral(null)} />
         <div className="w-96 bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
             <p className="text-sm font-bold">{selectedReferral.name}</p>
@@ -12664,9 +12664,9 @@ const AgentAccountSettings = () => {
     { staffId: "STF-003", loginUser: "suzuki_h", name: "鈴木花子", role: "viewer", state: "無効", stateColor: "red", last: "2025-11-20", lastPwUpdate: "2025-09-01", email: "suzuki@digital-partners.jp", created: "2025-01-10", updated: "2025-12-01", mfa: false, dlPerm: true, editPerm: false, logs: [{ action: "ログイン", time: "2025-11-20 14:00" }] },
   ];
   return (
-  <div className="p-5 space-y-4">
+  <div className="p-6 space-y-6">
     <div className="flex items-center justify-between">
-      <h2 className="text-sm font-bold text-slate-800">アカウント設定</h2>
+      <h2 className="text-xl font-semibold text-slate-800">アカウント設定</h2>
     </div>
     {/* タブ */}
     <div className="flex gap-1 border-b">
@@ -12690,7 +12690,7 @@ const AgentAccountSettings = () => {
           <span className="text-xs text-slate-400">{staffList.length}名</span>
         </div>
         {staffList.slice(0, 3).map((s, i) => (
-          <div key={i} className="flex items-center text-xs border-b py-1.5">
+          <div key={i} className="flex items-center text-xs border-b hover:bg-slate-50 py-1.5">
             <span className="flex-1 font-bold">{s.name}</span>
             <Badge text={s.role} color={s.role === "admin" ? "blue" : "gray"} />
             <Badge text={s.state} color={s.stateColor} />
@@ -12700,8 +12700,8 @@ const AgentAccountSettings = () => {
       </div>
       <div className="bg-white rounded-lg border p-4 space-y-2">
         <p className="text-xs font-bold">セキュリティ</p>
-        <button onClick={() => setShowPasswordModal(true)} className="w-full py-1.5 bg-slate-50 rounded text-xs border hover:bg-slate-100"><Key className="w-4 h-4 inline mr-1" /> パスワード変更</button>
-        <button onClick={() => setShowMfaModal(true)} className="w-full py-1.5 bg-slate-50 rounded text-xs border hover:bg-slate-100"><Smartphone className="w-4 h-4 inline mr-1" /> MFA設定</button>
+        <button onClick={() => setShowPasswordModal(true)} className="w-full py-1.5 bg-slate-50 rounded text-xs border transition-colors duration-150 hover:bg-slate-100"><Key className="w-4 h-4 inline mr-1" /> パスワード変更</button>
+        <button onClick={() => setShowMfaModal(true)} className="w-full py-1.5 bg-slate-50 rounded text-xs border transition-colors duration-150 hover:bg-slate-100"><Smartphone className="w-4 h-4 inline mr-1" /> MFA設定</button>
         <div className="mt-2"><p className="text-xs text-slate-400 mb-1">最近のログイン</p>
           {[["2026-02-13 09:15", "103.xx.xx.xx", "Chrome"], ["2026-02-12 14:30", "103.xx.xx.xx", "Chrome"], ["2026-02-11 10:00", "192.xx.xx.xx", "Safari"]].map(([d, ip, br], i) => (
             <div key={i} className="flex text-xs text-slate-500 py-0.5"><span className="flex-1">{d}</span><span className="w-14">{br}</span><span>{ip}</span></div>
@@ -12721,7 +12721,7 @@ const AgentAccountSettings = () => {
 
     {d05StaffTab === "search" && (<>
     {/* スタッフ検索フォーム（AQUAGATES D04準拠） */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-4">
       <p className="text-xs font-bold text-slate-700 mb-2"><Search className="w-4 h-4 inline mr-1" /> 検索条件</p>
       <div className="grid grid-cols-5 gap-3">
         <div><label className="text-xs text-slate-500">ログインユーザー名</label><input className="w-full text-xs border rounded px-2 py-1.5 mt-0.5" placeholder="tanaka_t" /></div>
@@ -12731,8 +12731,8 @@ const AgentAccountSettings = () => {
         <div><label className="text-xs text-slate-500">権限設定</label><select className="w-full text-xs border rounded px-2 py-1.5 mt-0.5"><option>全て</option><option>管理者</option><option>閲覧のみ</option></select></div>
       </div>
       <div className="flex justify-end mt-2 gap-2">
-        <button onClick={() => toast("検索条件をリセットしました", "info")} className="text-xs px-3 py-1.5 border rounded text-slate-500 hover:bg-slate-50">リセット</button>
-        <button onClick={() => toast("スタッフを検索しました", "info")} className="text-xs px-4 py-1.5 bg-orange-500 text-white rounded font-semibold hover:bg-orange-600">検索</button>
+        <button onClick={() => toast("検索条件をリセットしました", "info")} className="text-xs px-3 py-1.5 border rounded text-slate-500 transition-colors duration-150 hover:bg-slate-50">リセット</button>
+        <button onClick={() => toast("スタッフを検索しました", "info")} className="text-xs px-4 py-1.5 bg-orange-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-orange-600">検索</button>
       </div>
     </div>
     {/* スタッフ一覧テーブル（AQUAGATES D04準拠: スタッフID/ログインユーザー名/氏名/メール/状態/権限設定/最終パスワード更新日時/登録日時/更新日時） */}
@@ -12740,10 +12740,10 @@ const AgentAccountSettings = () => {
       <p className="text-xs text-slate-500">検索結果: <span className="font-bold text-slate-800">{staffList.length}件</span></p>
       <div className="flex gap-1">
         <button onClick={() => toast("スタッフ一覧をCSV出力しました", "success")} className="text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSV出力</button>
-        <button onClick={() => setShowInviteD05(true)} className="text-xs bg-orange-500 text-white px-3 py-1 rounded font-semibold hover:bg-orange-600">+ 新規登録</button>
+        <button onClick={() => setShowInviteD05(true)} className="text-xs bg-orange-500 text-white px-3 py-1 rounded font-semibold transition-colors duration-150 hover:bg-orange-600">+ 新規登録</button>
       </div>
     </div>
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
       <TableHeader cols={[{ label: "スタッフID", w: "w-20" }, { label: "ログインユーザー名", w: "w-28" }, { label: "氏名", w: "w-20" }, { label: "メール", w: "w-36" }, { label: "状態", w: "w-12" }, { label: "権限", w: "w-14" }, { label: "最終PW更新", w: "w-24" }, { label: "登録日時", w: "w-20" }, { label: "更新日時", w: "w-20" }]}>
       {staffList.map((s, i) => (
         <tr key={i} onClick={() => setSelectedStaff(s)} className="border-b hover:bg-orange-50 cursor-pointer">
@@ -12764,7 +12764,7 @@ const AgentAccountSettings = () => {
 
     {d05StaffTab === "register" && (<>
     {/* スタッフ登録フォーム（AQUAGATES D05準拠: 基本設定+個別権限設定） */}
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5 space-y-5">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-5 space-y-5">
       <div>
         <p className="text-xs font-bold text-slate-700 mb-3">基本設定</p>
         <div className="grid grid-cols-2 gap-4">
@@ -12802,8 +12802,8 @@ const AgentAccountSettings = () => {
         </div>
       </div>
       <div className="flex justify-end gap-2">
-        <button onClick={() => setShowInviteD05(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-        <button onClick={() => { setShowInviteD05(false); toast("スタッフを登録しました", "success"); }} className="px-6 py-2 text-xs bg-orange-500 text-white rounded font-semibold hover:bg-orange-600">スタッフを登録</button>
+        <button onClick={() => setShowInviteD05(false)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
+        <button onClick={() => { setShowInviteD05(false); toast("スタッフを登録しました", "success"); }} className="px-6 py-2 text-xs bg-orange-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-orange-600">スタッフを登録</button>
       </div>
     </div>
     </>)}
@@ -12811,8 +12811,8 @@ const AgentAccountSettings = () => {
 
     {/* スタッフ詳細スライドパネル */}
     {selectedStaff && (
-      <div className="fixed inset-0 z-50 flex">
-        <div className="flex-1 bg-black bg-opacity-30" onClick={() => setSelectedStaff(null)} />
+      <div className="fixed inset-0 z-50 flex animate-fade-in">
+        <div className="flex-1 bg-slate-900/20" onClick={() => setSelectedStaff(null)} />
         <div className="w-[480px] bg-white shadow-xl border-l overflow-y-auto">
           <div className="p-4 border-b bg-orange-50 flex justify-between items-center">
             <div>
@@ -12848,7 +12848,7 @@ const AgentAccountSettings = () => {
             <div className="border-t pt-3">
               <p className="text-xs font-bold text-slate-700 mb-2">最近の操作</p>
               {selectedStaff.logs.map((log, i) => (
-                <div key={i} className="flex text-xs py-1 border-b last:border-0"><span className="flex-1">{log.action}</span><span className="text-slate-400">{log.time}</span></div>
+                <div key={i} className="flex text-xs py-1 border-b hover:bg-slate-50 last:border-0"><span className="flex-1">{log.action}</span><span className="text-slate-400">{log.time}</span></div>
               ))}
             </div>
             <div className="flex gap-2 mt-3">
@@ -12863,9 +12863,9 @@ const AgentAccountSettings = () => {
 
     {/* ── Modal: スタッフ招待 ── */}
     {showInviteD05 && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowInviteD05(false)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[500px]">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowInviteD05(false)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[500px] animate-scale-in">
           <div className="p-4 border-b bg-orange-50 rounded-t-xl flex justify-between items-center">
             <h3 className="text-sm font-bold text-slate-800"><Mail className="w-4 h-4 inline mr-1" /> スタッフを招待</h3>
             <button onClick={() => setShowInviteD05(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
@@ -12892,8 +12892,8 @@ const AgentAccountSettings = () => {
             </div>
           </div>
           <div className="p-4 border-t flex gap-2 justify-end">
-            <button onClick={() => setShowInviteD05(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-            <button onClick={() => setShowInviteD05(false)} className="px-4 py-2 text-xs bg-orange-500 text-white rounded font-semibold hover:bg-orange-600">スタッフを登録</button>
+            <button onClick={() => setShowInviteD05(false)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
+            <button onClick={() => setShowInviteD05(false)} className="px-4 py-2 text-xs bg-orange-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-orange-600">スタッフを登録</button>
           </div>
         </div>
       </div>
@@ -12901,9 +12901,9 @@ const AgentAccountSettings = () => {
 
     {/* パスワード変更モーダル */}
     {showPasswordModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowPasswordModal(false)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[400px]">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowPasswordModal(false)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[400px] animate-scale-in">
           <div className="p-4 border-b flex items-center justify-between">
             <p className="text-sm font-bold"><Key className="w-4 h-4 inline mr-1" /> パスワード変更</p>
             <button onClick={() => setShowPasswordModal(false)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
@@ -12927,7 +12927,7 @@ const AgentAccountSettings = () => {
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowPasswordModal(false)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
-              <button onClick={() => setShowPasswordModal(false)} className="flex-1 py-2 bg-orange-500 text-white rounded text-xs font-bold hover:bg-orange-600">パスワードを変更</button>
+              <button onClick={() => setShowPasswordModal(false)} className="flex-1 py-2 bg-orange-500 text-white rounded text-xs font-medium transition-colors duration-150 hover:bg-orange-600">パスワードを変更</button>
             </div>
           </div>
         </div>
@@ -12936,9 +12936,9 @@ const AgentAccountSettings = () => {
 
     {/* MFA設定モーダル */}
     {showMfaModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowMfaModal(false)} />
-        <div className="relative bg-white rounded-xl shadow-2xl w-[420px]">
+      <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowMfaModal(false)} />
+        <div className="relative bg-white rounded-xl shadow-2xl w-[420px] animate-scale-in">
           <div className="p-4 border-b flex items-center justify-between">
             <p className="text-sm font-bold"><Smartphone className="w-4 h-4 inline mr-1" /> 二要素認証（MFA）設定</p>
             <button onClick={() => setShowMfaModal(false)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
@@ -12967,7 +12967,7 @@ const AgentAccountSettings = () => {
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowMfaModal(false)} className="flex-1 py-2 border rounded text-xs">キャンセル</button>
-              <button onClick={() => setShowMfaModal(false)} className="flex-1 py-2 bg-orange-500 text-white rounded text-xs font-bold hover:bg-orange-600">MFAを有効化</button>
+              <button onClick={() => setShowMfaModal(false)} className="flex-1 py-2 bg-orange-500 text-white rounded text-xs font-medium transition-colors duration-150 hover:bg-orange-600">MFAを有効化</button>
             </div>
           </div>
         </div>
@@ -12994,18 +12994,18 @@ const MasterCustomers = () => {
   const riskColors = { low: "green", medium: "yellow", high: "red", blocked: "gray" };
   const segColors = { "ロイヤル": "purple", "リピーター": "blue", "初回": "gray" };
   return (
-    <div className="p-5 space-y-4">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-slate-800">顧客管理</h2>
+        <h2 className="text-xl font-semibold text-slate-800">顧客管理</h2>
         <button onClick={() => setShowM16CsvExport(true)} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSVエクスポート</button>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
-        <button key={t.id} onClick={() => { setTab(t.id); setSelectedCustomer(null); }} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-brand-500 text-brand-700 bg-brand-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        <button key={t.id} onClick={() => { setTab(t.id); setSelectedCustomer(null); }} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-brand-500 text-brand-700 bg-brand-50 font-medium" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}</div>
 
       {tab === "search" && !selectedCustomer && (
         <div className="space-y-3">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <p className="text-xs font-bold mb-2">検索条件</p>
             <div className="grid grid-cols-4 gap-2">
               <div><label className="text-xs text-slate-400">メール / 名前</label><input className="w-full border rounded px-2 py-1 text-xs mt-0.5" placeholder="検索..." /></div>
@@ -13023,10 +13023,10 @@ const MasterCustomers = () => {
               <div><label className="text-xs text-slate-400">最終利用日（From）</label><input type="date" className="w-full border rounded px-2 py-1 text-xs mt-0.5" /></div>
               <div><label className="text-xs text-slate-400">最終利用日（To）</label><input type="date" className="w-full border rounded px-2 py-1 text-xs mt-0.5" /></div>
               <div />
-              <div className="flex items-end"><button onClick={() => toast("顧客を検索しました", "success")} className="w-full py-1 bg-brand-500 text-white rounded text-xs font-bold"><Search className="w-4 h-4 inline mr-1" /> 検索</button></div>
+              <div className="flex items-end"><button onClick={() => toast("顧客を検索しました", "success")} className="w-full py-1 bg-brand-500 text-white rounded text-xs font-medium"><Search className="w-4 h-4 inline mr-1" /> 検索</button></div>
             </div>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
             <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "最終取引", w: "w-24" }, { label: "PQ ID", w: "w-20" }, { label: "RC紐付", w: "w-12" }, { label: "サブスク", w: "w-14" }, { label: "セグメント", w: "w-16" }, { label: "リスク", w: "w-12" }]}>
             {customers.map((c, i) => (
               <tr key={i} onClick={() => setSelectedCustomer(c)} className="border-b hover:bg-brand-50 cursor-pointer">
@@ -13053,18 +13053,18 @@ const MasterCustomers = () => {
       {tab === "search" && selectedCustomer && (
         <div className="grid grid-cols-5 gap-3">
           <div className="col-span-2 space-y-3">
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-bold">プロファイル</p>
                 <button onClick={() => setSelectedCustomer(null)} className="text-xs text-brand-600">← 一覧に戻る</button>
               </div>
               <div className="space-y-2">
                 {[["顧客ID", selectedCustomer.id], ["メール", selectedCustomer.email], ["カード", selectedCustomer.card], ["加盟店", selectedCustomer.merchant], ["初回取引", "2024-08-15"], ["最終取引", selectedCustomer.last]].map(([l, v], i) => (
-                  <div key={i} className="flex text-xs items-center"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span>{l === "メール" && <button onClick={() => toast("メールアドレスのマスクを解除しました", "info")} className="ml-2 px-1.5 py-0.5 bg-brand-50 text-brand-600 rounded border border-brand-200 text-xs"><LockOpen className="w-4 h-4 inline" /> マスク解除</button>}</div>
+                  <div key={i} className="flex text-xs items-center"><span className="w-20 text-slate-400">{l}</span><span className="font-medium">{v}</span>{l === "メール" && <button onClick={() => toast("メールアドレスのマスクを解除しました", "info")} className="ml-2 px-1.5 py-0.5 bg-brand-50 text-brand-600 rounded border border-brand-200 text-xs"><LockOpen className="w-4 h-4 inline" /> マスク解除</button>}</div>
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold mb-2">リスク & セグメント</p>
               <div className="flex gap-2 mb-2">
                 <Badge text={`リスク: ${selectedCustomer.risk === "low" ? "低" : "中"}`} color={riskColors[selectedCustomer.risk]} />
@@ -13074,7 +13074,7 @@ const MasterCustomers = () => {
               <div className="flex text-xs"><span className="w-20 text-slate-400">AIスコア</span><span className="font-bold">23/100（低リスク）</span></div>
               <div className="flex text-xs mt-1"><span className="w-20 text-slate-400">CB件数</span><span>0件</span></div>
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold mb-2">タグ</p>
               <div className="flex gap-1 flex-wrap">
                 {selectedCustomer.segment === "ロイヤル" && <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">VIP</span>}
@@ -13082,7 +13082,7 @@ const MasterCustomers = () => {
                 <button onClick={() => toast("タグを追加しました", "success")} className="text-xs px-2 py-0.5 bg-slate-100 text-slate-400 rounded-full border border-dashed">+ タグ追加</button>
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold mb-2">メモ</p>
               <div className="space-y-1.5">
                 <div className="bg-slate-50 rounded p-2 text-xs"><p className="text-slate-400">2026-02-10 — admin田中</p><p>問い合わせあり。返金対応完了。</p></div>
@@ -13096,7 +13096,7 @@ const MasterCustomers = () => {
             </div>
           </div>
           <div className="col-span-3 space-y-3">
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-bold">取引統計</p>
                 <div className="flex gap-2 text-xs">
@@ -13115,7 +13115,7 @@ const MasterCustomers = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-bold">取引タイムライン</p>
                 <div className="flex gap-1">
@@ -13131,7 +13131,7 @@ const MasterCustomers = () => {
                 { date: "01/15 13:20", amt: "¥35,000", brand: "VISA", st: "成功", stc: "green", note: "" },
                 { date: "01/08 10:00", amt: "¥2,980", brand: "VISA", st: "失敗", stc: "red", note: "残高不足→リトライ成功" },
               ].map((t, i) => (
-                <div key={i} className="flex items-center py-1.5 border-b last:border-0 text-xs whitespace-nowrap overflow-hidden">
+                <div key={i} className="flex items-center py-1.5 border-b hover:bg-slate-50 last:border-0 text-xs whitespace-nowrap overflow-hidden">
                   <div className="w-2 h-2 rounded-full mr-2 shrink-0" style={{ backgroundColor: t.stc === "green" ? "#22c55e" : t.stc === "red" ? "#ef4444" : "#a855f7" }} />
                   <div className="w-24 shrink-0 text-slate-400">{t.date}</div>
                   <div className="w-20 shrink-0 font-bold">{t.amt}</div>
@@ -13142,7 +13142,7 @@ const MasterCustomers = () => {
               ))}
               <div className="text-center mt-2"><button onClick={() => toast("取引タイムラインを全件表示します", "info")} className="text-xs text-brand-600">さらに表示 →</button></div>
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold mb-2">カード情報</p>
               <div className="flex gap-3">
                 {[{ brand: "VISA", last4: "4242", exp: "12/27", lastUsed: "02/13", active: true }, { brand: "VISA", last4: "8888", exp: "03/25", lastUsed: "2024-12", active: false }].map((c, i) => (
@@ -13167,7 +13167,7 @@ const MasterCustomers = () => {
             <KPICard label="今月新規" value="623" trend={-2.1} color="blue" />
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold mb-3">セグメント分布</p>
               <div className="space-y-2">
                 {[{ seg: "ロイヤル（11回以上）", pct: 8, cnt: "1,028", color: "bg-purple-400" }, { seg: "リピーター（2-10回）", pct: 27, cnt: "3,469", color: "bg-brand-400" }, { seg: "初回（1回のみ）", pct: 45, cnt: "5,781", color: "bg-slate-300" }, { seg: "休眠（90日+）", pct: 15, cnt: "1,927", color: "bg-warning-300" }, { seg: "離脱（180日+）", pct: 5, cnt: "642", color: "bg-danger-300" }].map((s, i) => (
@@ -13178,7 +13178,7 @@ const MasterCustomers = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold mb-3">月別 新規 vs リピーター</p>
               <div className="flex items-end gap-1 h-32 px-1">
                 {[{ n: 580, r: 320 }, { n: 610, r: 340 }, { n: 550, r: 360 }, { n: 640, r: 380 }, { n: 670, r: 410 }, { n: 623, r: 395 }].map((d, i) => (
@@ -13193,7 +13193,7 @@ const MasterCustomers = () => {
               </div>
               <div className="flex justify-center gap-4 mt-2 text-xs"><span className="flex items-center gap-1"><span className="w-3 h-2 bg-slate-300 rounded" />新規</span><span className="flex items-center gap-1"><span className="w-3 h-2 bg-brand-300 rounded" />リピーター</span></div>
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold mb-3">LTV分布</p>
               <div className="flex items-end gap-1 h-32 px-1">
                 {[{ range: "〜¥1万", h: 85 }, { range: "¥1-5万", h: 60 }, { range: "¥5-10万", h: 35 }, { range: "¥10-50万", h: 20 }, { range: "¥50万〜", h: 8 }].map((d, i) => (
@@ -13205,7 +13205,7 @@ const MasterCustomers = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <p className="text-xs font-bold mb-2">加盟店別 顧客数（TOP10）</p>
             {[["ABC商事", 3420, 34], ["XYZ物産", 2150, 22], ["DEFサービス", 1890, 19], ["GHIオンライン", 1240, 12], ["JKLマーケット", 980, 10]].map((r, i) => (
               <div key={i} className="flex items-center text-xs py-1">
@@ -13220,7 +13220,7 @@ const MasterCustomers = () => {
 
       {tab === "cards" && (
         <div className="space-y-3">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <p className="text-xs font-bold mb-2"><Search className="w-4 h-4 inline mr-1" /> トークン検索</p>
             <div className="grid grid-cols-4 gap-2">
               <div><label className="text-xs text-slate-400">トークンID</label><input className="w-full border rounded px-2 py-1 text-xs mt-0.5" placeholder="TKN-..." /></div>
@@ -13232,7 +13232,7 @@ const MasterCustomers = () => {
               <div><label className="text-xs text-slate-400">ブランド</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全て</option><option>VISA</option><option>MC</option><option>JCB</option><option>AMEX</option></select></div>
               <div><label className="text-xs text-slate-400">ステータス</label><select className="w-full border rounded px-2 py-1 text-xs mt-0.5"><option>全て</option><option>有効</option><option>期限切れ</option><option>無効化済</option></select></div>
               <div />
-              <div className="flex items-end"><button onClick={() => toast("トークンを検索しました", "success")} className="w-full py-1 bg-brand-500 text-white rounded text-xs font-bold"><Search className="w-4 h-4 inline mr-1" /> 検索</button></div>
+              <div className="flex items-end"><button onClick={() => toast("トークンを検索しました", "success")} className="w-full py-1 bg-brand-500 text-white rounded text-xs font-medium"><Search className="w-4 h-4 inline mr-1" /> 検索</button></div>
             </div>
           </div>
           <div className="grid grid-cols-4 gap-3">
@@ -13241,7 +13241,7 @@ const MasterCustomers = () => {
             <KPICard label="期限切れ" value="3,892" sub="13.7%" color="yellow" />
             <KPICard label="無効化済" value="437" sub="1.5%" color="red" />
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
             <TableHeader cols={[{ label: "トークンID", w: "w-28" }, { label: "PQ ID", w: "w-24" }, { label: "ブランド", w: "w-16" }, { label: "カード末尾", w: "w-16" }, { label: "有効期限", w: "w-20" }, { label: "顧客ID", w: "w-24" }, { label: "加盟店", w: "w-24" }, { label: "RC紐付", w: "w-14" }, { label: "最終利用", w: "w-24" }, { label: "状態", w: "w-16" }]}>
             {[
               { tkn: "TKN-A00123", pq: "PQ-10234", brand: "VISA", last4: "4242", exp: "12/27", cust: "CUS-00001", merchant: "ABC商事", rc: 2, lastUsed: "02/13 14:22", st: "有効" },
@@ -13283,9 +13283,9 @@ const MasterCustomers = () => {
 
       {/* ── Modal: CSVエクスポート ── */}
       {showM16CsvExport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowM16CsvExport(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[460px]">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowM16CsvExport(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[460px] animate-scale-in">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800"><Download className="w-4 h-4 inline mr-1" /> 顧客データCSVエクスポート</h3>
               <button onClick={() => setShowM16CsvExport(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
@@ -13312,8 +13312,8 @@ const MasterCustomers = () => {
               </div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
-              <button onClick={() => setShowM16CsvExport(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { setShowM16CsvExport(false); toast("顧客データCSVをダウンロードしました", "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold hover:bg-brand-600">CSVダウンロード</button>
+              <button onClick={() => setShowM16CsvExport(false)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => { setShowM16CsvExport(false); toast("顧客データCSVをダウンロードしました", "success"); }} className="px-4 py-2 text-xs bg-brand-500 text-white rounded font-semibold transition-colors duration-150 hover:bg-brand-600">CSVダウンロード</button>
             </div>
           </div>
         </div>
@@ -13338,21 +13338,21 @@ const MerchantCustomers = () => {
   ];
   const repeatColors = { "ロイヤル": "purple", "リピーター": "blue", "初回": "gray" };
   return (
-    <div className="p-5 space-y-4">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-slate-800">顧客管理</h2>
+        <h2 className="text-xl font-semibold text-slate-800">顧客管理</h2>
         <div className="flex items-center gap-2">
           <select className="border rounded px-2 py-1 text-xs"><option><Building2 className="w-4 h-4 inline mr-1" /> ECサイトA</option><option>全サイト合算</option></select>
           <button onClick={() => setShowCsvExport(true)} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200"><Download className="w-4 h-4 inline mr-1" /> CSV</button>
         </div>
       </div>
       <div className="flex gap-1">{tabs.map(t => (
-        <button key={t.id} onClick={() => { setTab(t.id); setDetail(null); }} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-success-500 text-success-700 bg-success-50 font-bold" : "border-transparent text-slate-400"}`}>{t.label}</button>
+        <button key={t.id} onClick={() => { setTab(t.id); setDetail(null); }} className={`px-3 py-1.5 text-xs rounded-t border-b-2 ${tab === t.id ? "border-success-500 text-success-700 bg-success-50 font-medium" : "border-transparent text-slate-400"}`}>{t.label}</button>
       ))}</div>
 
       {tab === "list" && !detail && (
         <div className="space-y-3">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <div className="flex gap-2">
               <input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="メール / 名前 / 顧客IDで検索" />
               <input className="w-24 border rounded px-2 py-1 text-xs" placeholder="カード下4桁" />
@@ -13361,7 +13361,7 @@ const MerchantCustomers = () => {
               <button onClick={() => toast("顧客を検索しました", "success")} className="px-3 py-1 bg-success-600 text-white rounded text-xs">検索</button>
             </div>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md overflow-x-auto">
             <TableHeader cols={[{ label: "顧客ID", w: "w-24" }, { label: "メール", w: "flex-1" }, { label: "カード", w: "w-24" }, { label: "取引回数", w: "w-16" }, { label: "LTV", w: "w-24" }, { label: "リピート", w: "w-16" }, { label: "サブスク", w: "w-14" }, { label: "最終取引", w: "w-24" }, { label: "タグ", w: "w-20" }]}>
             {customers.map((c, i) => (
               <tr key={i} onClick={() => setDetail(c)} className="border-b hover:bg-success-50 cursor-pointer">
@@ -13384,7 +13384,7 @@ const MerchantCustomers = () => {
       {tab === "list" && detail && (
         <div className="grid grid-cols-5 gap-3">
           <div className="col-span-2 space-y-3">
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-bold">顧客プロファイル</p>
                 <button onClick={() => setDetail(null)} className="text-xs text-success-600">← 一覧に戻る</button>
@@ -13393,7 +13393,7 @@ const MerchantCustomers = () => {
                 <div key={i} className="flex text-xs py-0.5"><span className="w-20 text-slate-400">{l}</span><span className="font-bold">{v}</span></div>
               ))}
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold mb-1">セグメント & サブスク</p>
               <div className="flex gap-2 mt-1">
                 <Badge text={detail.repeat} color={repeatColors[detail.repeat]} />
@@ -13401,14 +13401,14 @@ const MerchantCustomers = () => {
               </div>
               {detail.sub === "課金中" && <div className="mt-2 text-xs text-slate-500 bg-success-50 rounded p-1.5">月額スタンダード ¥2,980/月<br/>次回: 2026-03-01 → <button onClick={() => toast("S10 決済管理画面を開きます", "info")} className="text-success-600 underline">S10で開く</button></div>}
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold mb-1">タグ</p>
               <div className="flex gap-1 flex-wrap mt-1">
                 {detail.tags.map((t, i) => <span key={i} className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">{t}</span>)}
                 <button onClick={() => toast("タグを追加しました", "success")} className="text-xs px-2 py-0.5 bg-slate-100 text-slate-400 rounded-full border border-dashed">+ タグ追加</button>
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold mb-1">メモ</p>
               <div className="bg-slate-50 rounded p-2 text-xs"><p className="text-slate-400">2026-02-10 — admin山田</p><p>電話で問い合わせあり。サブスク解約方法をご案内。</p></div>
               <div className="flex gap-1 mt-2"><input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="メモを追加..." /><button onClick={() => toast("メモを追加しました", "success")} className="px-2 py-1 bg-success-600 text-white rounded text-xs">追加</button></div>
@@ -13419,7 +13419,7 @@ const MerchantCustomers = () => {
             </div>
           </div>
           <div className="col-span-3 space-y-3">
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold mb-2">月別利用推移</p>
               <div className="flex items-end gap-1 h-16 px-1">
                 {[35, 42, 38, 55, 48, 62].map((h, i) => (
@@ -13435,7 +13435,7 @@ const MerchantCustomers = () => {
                 <span>CB: <b>0件</b></span>
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-bold">取引履歴</p>
                 <select className="border rounded px-1.5 py-0.5 text-xs"><option>全て</option><option>成功のみ</option><option>返金/CB</option></select>
@@ -13447,7 +13447,7 @@ const MerchantCustomers = () => {
                 { date: "01/28 16:45", amt: "¥2,980", brand: "VISA", st: "成功", stc: "green" },
                 { date: "01/15 13:20", amt: "¥35,000", brand: "VISA", st: "成功", stc: "green" },
               ].map((t, i) => (
-                <div key={i} className="flex items-center py-1.5 border-b last:border-0 text-xs">
+                <div key={i} className="flex items-center py-1.5 border-b hover:bg-slate-50 last:border-0 text-xs">
                   <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: t.stc === "green" ? "#22c55e" : "#a855f7" }} />
                   <div className="w-24 text-slate-400">{t.date}</div>
                   <div className="w-20 font-bold">{t.amt}</div>
@@ -13471,7 +13471,7 @@ const MerchantCustomers = () => {
             <KPICard label="今月新規" value="187" color="green" />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold mb-3">セグメント分布</p>
               <div className="flex items-center justify-center gap-6 py-3">
                 {[{ seg: "ロイヤル", cnt: 274, pct: "8%", color: "bg-purple-500" }, { seg: "リピーター", cnt: 1044, pct: "30.5%", color: "bg-brand-500" }, { seg: "初回", cnt: 1540, pct: "45%", color: "bg-slate-400" }, { seg: "休眠", cnt: 432, pct: "12.6%", color: "bg-warning-400" }, { seg: "離脱", cnt: 130, pct: "3.8%", color: "bg-danger-400" }].map((s, i) => (
@@ -13483,7 +13483,7 @@ const MerchantCustomers = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
               <p className="text-xs font-bold mb-3">リピート率推移（12ヶ月）</p>
               <div className="flex items-end gap-0.5 h-24 px-1">
                 {[30, 31, 32, 33, 34, 33, 34, 35, 36, 37, 38, 38.5].map((v, i) => (
@@ -13495,7 +13495,7 @@ const MerchantCustomers = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <p className="text-xs font-bold mb-2">取引頻度分布</p>
             <div className="grid grid-cols-4 gap-3">
               {[{ label: "1回のみ", cnt: 1540, pct: 45 }, { label: "2-5回", cnt: 820, pct: 24 }, { label: "6-10回", cnt: 524, pct: 15 }, { label: "11回以上", cnt: 536, pct: 16 }].map((d, i) => (
@@ -13509,7 +13509,7 @@ const MerchantCustomers = () => {
           </div>
 
           {/* Cohort Analysis */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-card transition-shadow duration-150 hover:shadow-md p-3">
             <p className="text-xs font-bold mb-2"><BarChart3 className="w-4 h-4 inline mr-1" /> コホート分析（月次リテンション）</p>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
@@ -13549,9 +13549,9 @@ const MerchantCustomers = () => {
 
       {/* ── Modal: CSVエクスポート ── */}
       {showCsvExport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowCsvExport(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-[440px]">
+        <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/20" onClick={() => setShowCsvExport(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-[440px] animate-scale-in">
             <div className="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800"><Download className="w-4 h-4 inline mr-1" /> 顧客データCSVエクスポート</h3>
               <button onClick={() => setShowCsvExport(false)} className="text-slate-400 hover:text-slate-600 text-lg"><X className="w-4 h-4" /></button>
@@ -13575,8 +13575,8 @@ const MerchantCustomers = () => {
               </div>
             </div>
             <div className="p-4 border-t flex gap-2 justify-end">
-              <button onClick={() => setShowCsvExport(false)} className="px-4 py-2 text-xs text-slate-500 border rounded hover:bg-slate-50">キャンセル</button>
-              <button onClick={() => { setShowCsvExport(false); toast("顧客データCSVをダウンロードしました", "success"); }} className="px-4 py-2 text-xs bg-success-600 text-white rounded font-semibold hover:bg-success-700">CSVダウンロード</button>
+              <button onClick={() => setShowCsvExport(false)} className="px-4 py-2 text-xs text-slate-500 border rounded transition-colors duration-150 hover:bg-slate-50">キャンセル</button>
+              <button onClick={() => { setShowCsvExport(false); toast("顧客データCSVをダウンロードしました", "success"); }} className="px-4 py-2 text-xs bg-success-600 text-white rounded font-semibold transition-colors duration-150 hover:bg-success-700">CSVダウンロード</button>
             </div>
           </div>
         </div>
