@@ -1247,37 +1247,37 @@ const MasterMerchants = () => {
               <span className="text-xs text-slate-400">全 {allSites.length} サイト</span>
               <span className="text-xs text-slate-300"><Lightbulb className="w-4 h-4 inline mr-1" /> 行クリックで詳細展開</span>
             </div>
-            <table className="w-full text-xs table-fixed">
+            <table className="w-full text-xs" style={{minWidth:"900px"}}>
               <thead><tr className="bg-slate-50 border-b">
-                <th className="text-left p-2 text-slate-500 font-semibold w-8"><input type="checkbox" className="w-3 h-3" onClick={e => e.stopPropagation()} /></th>
-                <th className="text-left p-2 text-slate-500 font-semibold w-[72px]">サイトID</th>
+                <th className="text-left p-2 text-slate-500 font-semibold" style={{width:"32px"}}><input type="checkbox" className="w-3 h-3" onClick={e => e.stopPropagation()} /></th>
+                <th className="text-left p-2 text-slate-500 font-semibold whitespace-nowrap" style={{width:"76px"}}>サイトID</th>
                 <th className="text-left p-2 text-slate-500 font-semibold">サイト名</th>
-                <th className="text-left p-2 text-slate-500 font-semibold w-[88px]">加盟店</th>
-                <th className="text-left p-2 text-slate-500 font-semibold w-[64px]">代理店</th>
-                <th className="text-left p-2 text-slate-500 font-semibold w-[80px]">URL</th>
-                <th className="text-center p-2 text-slate-500 font-semibold w-9">3DS</th>
-                <th className="text-center p-2 text-slate-500 font-semibold w-9">継続</th>
-                <th className="text-center p-2 text-slate-500 font-semibold w-9">IP</th>
-                <th className="text-left p-2 text-slate-500 font-semibold w-[56px]">接続先</th>
-                <th className="text-left p-2 text-slate-500 font-semibold w-[72px]">月間処理</th>
-                <th className="text-center p-2 text-slate-500 font-semibold w-[56px] whitespace-nowrap">状態</th>
+                <th className="text-left p-2 text-slate-500 font-semibold whitespace-nowrap" style={{width:"80px"}}>加盟店</th>
+                <th className="text-left p-2 text-slate-500 font-semibold whitespace-nowrap" style={{width:"60px"}}>代理店</th>
+                <th className="text-left p-2 text-slate-500 font-semibold whitespace-nowrap" style={{width:"80px"}}>URL</th>
+                <th className="text-center p-2 text-slate-500 font-semibold whitespace-nowrap" style={{width:"36px"}}>3DS</th>
+                <th className="text-center p-2 text-slate-500 font-semibold whitespace-nowrap" style={{width:"32px"}}>RC</th>
+                <th className="text-center p-2 text-slate-500 font-semibold whitespace-nowrap" style={{width:"28px"}}>IP</th>
+                <th className="text-left p-2 text-slate-500 font-semibold whitespace-nowrap" style={{width:"52px"}}>接続先</th>
+                <th className="text-right p-2 text-slate-500 font-semibold whitespace-nowrap" style={{width:"68px"}}>月間処理</th>
+                <th className="text-center p-2 text-slate-500 font-semibold whitespace-nowrap" style={{width:"64px"}}>状態</th>
               </tr></thead>
               <tbody>
                 {allSites.map((s, i) => (
                   <React.Fragment key={s.siteId}>
                   <tr onClick={() => setExpandedSiteId(expandedSiteId === s.siteId ? null : s.siteId)} className={`border-b cursor-pointer transition-colors ${expandedSiteId === s.siteId ? "bg-brand-100 border-l-2 border-l-brand-500" : i % 2 ? "bg-slate-50/50 hover:bg-brand-50" : "hover:bg-brand-50"}`}>
                     <td className="p-2" onClick={e => e.stopPropagation()}><input type="checkbox" className="w-3 h-3" /></td>
-                    <td className="p-2 font-mono text-brand-600">{s.siteId}</td>
-                    <td className="p-2 text-slate-700 font-semibold">{s.siteName}</td>
-                    <td className="p-2 text-slate-500 w-24 truncate">{s.merchantName.replace(/株式会社|合同会社|有限会社/g, "")}</td>
-                    <td className="p-2 w-20">{s.agentId ? <span className="text-xs font-mono text-orange-600">{s.agentId}</span> : <span className="text-slate-300">—</span>}</td>
-                    <td className="p-2 text-brand-500 font-mono truncate max-w-[6rem]" title={s.url}>{s.url.replace(/https?:\/\//, "").split("/")[0]}</td>
-                    <td className="p-2 text-center">{s.settings.tds ? <CheckCircle2 className="w-4 h-4 text-success-600 inline" /> : "—"}</td>
-                    <td className="p-2 text-center">{s.settings.rec ? "" : "—"}</td>
-                    <td className="p-2 text-center">{s.settings.ipRestrict ? <CheckCircle2 className="w-4 h-4 text-success-600 inline" /> : "—"}</td>
-                    <td className="p-2 w-16"><span className="text-success-600 font-bold">{s.approvedProcs.length}</span><span className="text-slate-300">/{s.processors.length}</span></td>
-                    <td className="p-2 w-20 text-right font-semibold">{s.settings.monthlyVol || "—"}</td>
-                    <td className="p-2 text-center"><Badge text={s.siteStatus} color={s.siteStatusColor} /></td>
+                    <td className="p-2 font-mono text-brand-600 whitespace-nowrap">{s.siteId}</td>
+                    <td className="p-2 text-slate-700 font-semibold truncate">{s.siteName}</td>
+                    <td className="p-2 text-slate-500 truncate">{s.merchantName.replace(/株式会社|合同会社|有限会社/g, "")}</td>
+                    <td className="p-2">{s.agentId ? <span className="text-xs font-mono text-orange-600">{s.agentId}</span> : <span className="text-slate-300">—</span>}</td>
+                    <td className="p-2 text-brand-500 font-mono truncate" title={s.url}>{s.url.replace(/https?:\/\//, "").split("/")[0]}</td>
+                    <td className="p-2 text-center">{s.settings.tds ? <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" /> : <span className="text-slate-300">—</span>}</td>
+                    <td className="p-2 text-center">{s.settings.rec ? <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" /> : <span className="text-slate-300">—</span>}</td>
+                    <td className="p-2 text-center">{s.settings.ipRestrict ? <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline" /> : <span className="text-slate-300">—</span>}</td>
+                    <td className="p-2"><span className="text-success-600 font-bold">{s.approvedProcs.length}</span><span className="text-slate-300">/{s.processors.length}</span></td>
+                    <td className="p-2 text-right font-semibold whitespace-nowrap">{s.settings.monthlyVol || "—"}</td>
+                    <td className="p-2 text-center whitespace-nowrap"><Badge text={s.siteStatus} color={s.siteStatusColor} /></td>
                   </tr>
                   {expandedSiteId === s.siteId && (
                     <tr><td colSpan={12} className="p-0">
