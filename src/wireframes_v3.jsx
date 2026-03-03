@@ -1,5 +1,5 @@
 import React, { useState, useContext, useCallback, useRef, useEffect, createContext } from "react";
-import { LayoutDashboard, Zap, Search, CreditCard, Bot, ClipboardList, Shield, Users, Settings, Building2, FileText, TrendingUp, Wallet, BarChart3, Network, AlertTriangle, Eye, Link2, RefreshCw, UserCircle, Wrench, MessageSquare, ChevronDown, ChevronRight, ChevronLeft, ChevronUp, X, Check, Plus, Download, Upload, Filter, MoreHorizontal, Lock, ArrowUpRight, ArrowDownRight, Bell, LogOut, Copy, ThumbsUp, ThumbsDown, Send, Loader2, Info, AlertCircle, CheckCircle2, XCircle, CircleDot, ExternalLink, Pencil, Trash2, Archive, Play, Pause, RotateCcw, Calendar, Clock, Globe, Mail, Phone, Receipt, ArrowRight, ArrowLeft, Handshake, Monitor, Radio, ShoppingCart, Repeat, UserPlus, FileSpreadsheet, Landmark, AlertOctagon, Ban, Circle, Coins, FlaskConical, FolderOpen, Key, Lightbulb, MailOpen, Megaphone, Package, Paperclip, PenLine, Pin, Plug, Rocket, Save, ShieldAlert, ShieldCheck, Shuffle, Smartphone, Sparkles, User } from "lucide-react";
+import { LayoutDashboard, Zap, Search, CreditCard, Bot, ClipboardList, Shield, Users, Settings, Building2, FileText, TrendingUp, Wallet, BarChart3, Network, AlertTriangle, Eye, Link2, RefreshCw, UserCircle, Wrench, MessageSquare, ChevronDown, ChevronRight, ChevronLeft, ChevronUp, X, Check, Plus, Download, Upload, Filter, MoreHorizontal, Lock, ArrowUpRight, ArrowDownRight, Bell, LogOut, Copy, ThumbsUp, ThumbsDown, Send, Loader2, Info, AlertCircle, CheckCircle2, XCircle, CircleDot, ExternalLink, Pencil, Trash2, Archive, Play, Pause, RotateCcw, Calendar, Clock, Globe, Mail, Phone, Receipt, ArrowRight, ArrowLeft, Handshake, Monitor, Radio, ShoppingCart, Repeat, UserPlus, FileSpreadsheet, Landmark, AlertOctagon, Ban, Circle, Coins, FlaskConical, FolderOpen, Key, Lightbulb, MailOpen, Megaphone, Package, Paperclip, PenLine, Pin, Plug, Rocket, Save, ShieldAlert, ShieldCheck, Shuffle, Smartphone, Sparkles, User, LockOpen } from "lucide-react";
 
 // ─── トースト通知システム ───
 const ToastContext = createContext(() => {});
@@ -258,6 +258,193 @@ const MiniChart = ({ data, color = "#635BFF", h = 30, w = 100 }) => {
   );
 };
 
+// ─── グローバル AIChat コンポーネント ───
+const chatSuggestionsMap = {
+  "ダッシュボード": ["不正検知の状況", "今日の決済件数", "例外キューの確認", "精算状況", "エラーコード検索"],
+  "例外キュー": ["保留中の件について", "優先度の高い例外", "自動処理の設定", "2時間超過の詳細"],
+  "リアルタイム監視": ["現在のTPS", "エラー率の推移", "接続先の状況"],
+  "注文検索": ["最近の失敗取引", "チャージバック一覧", "特定注文の検索方法"],
+  "顧客管理": ["顧客の検索方法", "重複顧客の統合", "顧客データのエクスポート"],
+  "継続課金管理": ["失敗中のサブスク", "解約率の推移", "リトライ設定の確認"],
+  "加盟店管理": ["加盟店 M-001 のステータスは？", "審査中の加盟店一覧", "新規申込の状況"],
+  "審査・申込": ["審査中の案件", "書類不備の確認", "平均審査日数"],
+  "接続先審査": ["接続テストの状況", "新規接続先の追加", "レート交渉の履歴"],
+  "代理店管理": ["代理店の実績", "報酬計算の確認", "新規代理店の登録"],
+  "精算管理": ["今月の精算スケジュール", "未精算の加盟店", "手数料率の確認"],
+  "レポート": ["月次レポートの生成", "カスタムレポート", "データエクスポート"],
+  "ルーティング": ["ルーティングルールの確認", "フォールバック設定", "成功率の比較"],
+  "不正検知": ["不正検知ルールの確認", "誤検知の調整", "ブラックリスト管理"],
+  "AI監視": ["AIモデルの精度", "学習データの状況", "異常検知の設定"],
+  "スタッフ管理": ["ユーザー権限の確認", "新規ユーザーの追加", "監査ログの確認"],
+  "システム設定": ["現在の設定値", "メンテナンスモード", "API設定の確認"],
+  "default": ["この画面の使い方", "操作方法を教えて", "ヘルプ"],
+};
+
+const screenContextMap = {
+  dashboard: "ダッシュボード",
+  queue: "例外キュー",
+  txn: "リアルタイム監視",
+  orderSearch: "注文検索",
+  customers: "顧客管理",
+  recurring: "継続課金管理",
+  merchants: "加盟店管理",
+  applications: "審査・申込",
+  processors: "接続先審査",
+  agents: "代理店管理",
+  settlement: "精算管理",
+  report: "レポート",
+  routing: "ルーティング",
+  fraud: "不正検知",
+  ai: "AI監視",
+  users: "スタッフ管理",
+  settings: "システム設定",
+};
+
+const AIChat = ({ screenContext, defaultOpen = false }) => {
+  const toast = useToast();
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [hasUnread, setHasUnread] = useState(!defaultOpen);
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState([
+    { role: "ai", text: "本日の状況をまとめました：取引量 1,247件（前日比+8%）、成功率 99.2%。例外キューに3件の保留あり（うち1件が2時間超過中）。不正検知で2件を自動ブロック済みです。" },
+    { role: "user", text: "例外キューの2時間超過の詳細を教えて" },
+    { role: "ai", text: "例外キュー #1024 は加盟店「ディーライフ」の審査案件です。AI推薦は「承認」（信頼スコア 82/100）。中リスク判定の理由はカテゴリ初回申請のためです。早めの対応をお勧めします。" },
+  ]);
+  const chatEndRef = useRef(null);
+  const prevContextRef = useRef(screenContext);
+
+  const aiResponses = {
+    "不正検知の状況": "本日の不正検知状況です：自動ブロック2件（合計¥156,000）。リスクスコア80以上の保留案件が1件あります。全体の不正率は0.03%で基準値内です。",
+    "今日の決済件数": "本日の決済件数は1,247件（前日比+8%）です。VISA: 486件、MC: 312件、JCB: 198件、AMEX: 89件、WEBマネー: 162件。ピーク時間帯は12:00-14:00でした。",
+    "例外キューの確認": "例外キューに3件の保留があります：\n1. #1024 審査保留（2時間超過）- AI推薦: 承認\n2. #5521 不正検知保留（30分前）- ¥89,000\n3. #1025 審査保留（15分前）- AI推薦: 承認",
+    "精算状況": "本日の精算状況：処理済み45件（¥28.5M）、保留中2件（口座情報不備）。次回精算予定は2/18（金）です。",
+    "エラーコード検索": "よく発生するエラーコード：\n・E001 カード有効期限切れ（本日12件）\n・E003 残高不足（本日8件）\n・E007 3DS認証失敗（本日5件）\n詳細はエラーコード管理画面で確認できます。",
+    "加盟店 M-001 のステータスは？": "加盟店 M-001 の情報です：\n加盟店名: ABCマート\nステータス: 有効\n月間決済高: ¥2.4M\n成功率: 99.2%",
+  };
+
+  // screenContextが変わったら通知メッセージを追加
+  useEffect(() => {
+    if (prevContextRef.current !== screenContext && screenContext) {
+      prevContextRef.current = screenContext;
+      if (!isOpen) {
+        setHasUnread(true);
+      }
+    }
+  }, [screenContext, isOpen]);
+
+  // 新メッセージ時に自動スクロール
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
+
+  const suggestions = chatSuggestionsMap[screenContext] || chatSuggestionsMap["default"];
+
+  const sendChat = (text) => {
+    if (!text.trim()) return;
+    setChatMessages(prev => [...prev, { role: "user", text }]);
+    setChatInput("");
+    setTimeout(() => {
+      const response = aiResponses[text] || `「${text}」について確認しました。${screenContext ? `（${screenContext}画面）` : ""}現在のシステム状況は正常です。詳細はサイドメニューから該当画面をご確認ください。`;
+      setChatMessages(prev => [...prev, { role: "ai", text: response }]);
+    }, 1200);
+  };
+
+  const handleOpen = () => {
+    setIsOpen(true);
+    setHasUnread(false);
+  };
+
+  if (!isOpen) {
+    return (
+      <button
+        onClick={handleOpen}
+        className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-brand-500 text-white shadow-lg hover:bg-brand-600 hover:shadow-xl transition-all duration-200 flex items-center justify-center z-40 group"
+        title="AI アシスタント"
+      >
+        <Bot size={20} />
+        {hasUnread && (
+          <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-danger-500 rounded-full border-2 border-white animate-pulse" />
+        )}
+        <span className="absolute right-full mr-3 bg-slate-800 text-white text-xs px-2.5 py-1.5 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+          AI アシスタント
+        </span>
+      </button>
+    );
+  }
+
+  return (
+    <div className="fixed top-0 right-0 h-full w-80 bg-white shadow-overlay border-l border-slate-200 animate-slide-in-right z-40 flex flex-col">
+      {/* Header */}
+      <div className="px-4 py-3 border-b bg-gradient-to-r from-brand-50 to-purple-50 flex items-center gap-2.5 shrink-0">
+        <div className="w-6 h-6 rounded-full bg-brand-100 flex items-center justify-center shrink-0">
+          <Bot size={14} className="text-brand-600" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-brand-700">AI アシスタント</p>
+        </div>
+        <Badge text="Claude 4 Opus" color="purple" />
+        <button onClick={() => setIsOpen(false)} className="ml-1 p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors duration-150" title="閉じる"><X size={14} /></button>
+      </div>
+
+      {/* Screen context indicator */}
+      <div className="px-3 py-2 border-b bg-slate-50/80 shrink-0">
+        <p className="text-[11px] text-slate-500">
+          <span className="inline-flex items-center gap-1"><Monitor size={10} className="text-brand-400" /> この画面（{screenContext || "ダッシュボード"}）についてご質問があればお聞きください</span>
+        </p>
+      </div>
+
+      {/* Suggestion chips */}
+      <div className="p-2.5 border-b bg-slate-50/50 shrink-0">
+        <div className="flex flex-wrap gap-1.5">
+          {suggestions.map(q => (
+            <button key={q} onClick={() => sendChat(q)} className="text-xs bg-white border border-slate-200 rounded-md px-2.5 py-1 text-slate-500 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200 transition-colors duration-150">{q}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Chat messages */}
+      <div className="flex-1 p-3 space-y-3 overflow-y-auto bg-slate-50/50">
+        {chatMessages.map((msg, i) => msg.role === "user" ? (
+          <div key={i} className="flex gap-2 justify-end">
+            <div className="bg-white rounded-lg px-3 py-2 max-w-[220px] border border-slate-200 shadow-sm"><p className="text-xs text-slate-700 whitespace-pre-wrap">{msg.text}</p></div>
+          </div>
+        ) : (
+          <div key={i} className="flex gap-2">
+            <div className="w-6 h-6 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center shrink-0"><Bot size={12} className="text-brand-500" /></div>
+            <div className="bg-brand-50/60 rounded-lg px-3 py-2 border border-brand-100/50 max-w-[240px]">
+              <p className="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+              <div className="flex gap-1.5 mt-2 pt-1.5 border-t border-brand-100/40">
+                <button onClick={() => toast("フィードバックを送信しました", "success")} className="p-0.5 rounded text-slate-400 hover:text-success-600 transition-colors duration-150"><ThumbsUp size={12} /></button>
+                <button onClick={() => toast("フィードバックを送信しました", "info")} className="p-0.5 rounded text-slate-400 hover:text-danger-600 transition-colors duration-150"><ThumbsDown size={12} /></button>
+                <button onClick={() => { navigator.clipboard?.writeText(msg.text); toast("クリップボードにコピーしました", "info"); }} className="p-0.5 rounded text-slate-400 hover:text-brand-600 transition-colors duration-150 ml-auto"><Copy size={12} /></button>
+              </div>
+            </div>
+          </div>
+        ))}
+        <div ref={chatEndRef} />
+      </div>
+
+      {/* Input area */}
+      <div className="p-3 border-t bg-white shrink-0">
+        <div className="flex gap-2">
+          <input value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === "Enter" && sendChat(chatInput)} className="flex-1 text-xs border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="AI アシスタントに質問..." />
+          <button onClick={() => sendChat(chatInput)} className="bg-brand-500 hover:bg-brand-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150 flex items-center gap-1.5 shrink-0"><Send size={13} /></button>
+        </div>
+      </div>
+
+      {/* Footer: chat history indicator */}
+      <div className="px-3 py-2 border-t bg-slate-50 shrink-0">
+        <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+          <Archive size={10} />
+          <span>チャット履歴はDBに保存されます</span>
+          <span className="mx-1">|</span>
+          <span>月次サマリー → 管理者配信</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── M01: ダッシュボード ───
 const MasterDashboard = () => {
   const toast = useToast();
@@ -267,33 +454,8 @@ const MasterDashboard = () => {
   const [chartType, setChartType] = useState("count");
   const [showKpiDrill, setShowKpiDrill] = useState(null);
   const [expandedQueue, setExpandedQueue] = useState(null);
-  const [chatOpen, setChatOpen] = useState(true);
   const [showAllNotices, setShowAllNotices] = useState(false);
-  const [chatInput, setChatInput] = useState("");
   const [aiSummaryLoading, setAiSummaryLoading] = useState(false);
-  const [chatMessages, setChatMessages] = useState([
-    { role: "ai", text: "本日の状況をまとめました：取引量 1,247件（前日比+8%）、成功率 99.2%。例外キューに3件の保留あり（うち1件が2時間超過中）。不正検知で2件を自動ブロック済みです。" },
-    { role: "user", text: "例外キューの2時間超過の詳細を教えて" },
-    { role: "ai", text: "例外キュー #1024 は加盟店「ディーライフ」の審査案件です。AI推薦は「承認」（信頼スコア 82/100）。中リスク判定の理由はカテゴリ初回申請のためです。早めの対応をお勧めします。" },
-    { role: "user", text: "加盟店 M-001 のステータスは？" },
-    { role: "ai", text: "加盟店 M-001 の情報です：\n加盟店名: ABCマート\nステータス: 有効\n月間決済高: ¥2.4M\n成功率: 99.2%" },
-  ]);
-  const aiResponses = {
-    "不正検知の状況": "本日の不正検知状況です：自動ブロック2件（合計¥156,000）。リスクスコア80以上の保留案件が1件あります。全体の不正率は0.03%で基準値内です。",
-    "今日の決済件数": "本日の決済件数は1,247件（前日比+8%）です。VISA: 486件、MC: 312件、JCB: 198件、AMEX: 89件、WEBマネー: 162件。ピーク時間帯は12:00-14:00でした。",
-    "例外キューの確認": "例外キューに3件の保留があります：\n1. #1024 審査保留（2時間超過）- AI推薦: 承認\n2. #5521 不正検知保留（30分前）- ¥89,000\n3. #1025 審査保留（15分前）- AI推薦: 承認",
-    "精算状況": "本日の精算状況：処理済み45件（¥28.5M）、保留中2件（口座情報不備）。次回精算予定は2/18（金）です。",
-    "エラーコード検索": "よく発生するエラーコード：\n・E001 カード有効期限切れ（本日12件）\n・E003 残高不足（本日8件）\n・E007 3DS認証失敗（本日5件）\n詳細はエラーコード管理画面で確認できます。",
-  };
-  const sendChat = (text) => {
-    if (!text.trim()) return;
-    setChatMessages(prev => [...prev, { role: "user", text }]);
-    setChatInput("");
-    setTimeout(() => {
-      const response = aiResponses[text] || `「${text}」について確認しました。現在のシステム状況は正常です。詳細はサイドメニューから該当画面をご確認ください。`;
-      setChatMessages(prev => [...prev, { role: "ai", text: response }]);
-    }, 1200);
-  };
   const handleRegenerate = () => {
     setAiSummaryLoading(true);
     setTimeout(() => { setAiSummaryLoading(false); toast("AIサマリーを再生成しました", "info"); }, 1500);
@@ -313,65 +475,7 @@ const MasterDashboard = () => {
   };
 
   return (
-  <div className="p-6 flex gap-6">
-    {/* ===== 左カラム: AIチャット（アコーディオン） ===== */}
-    <div className={`${chatOpen ? "w-80" : "w-10"} shrink-0 transition-all duration-300`}>
-      {chatOpen ? (
-      <div className="bg-white rounded-lg border border-slate-200 shadow-card overflow-hidden flex flex-col" style={{ height: "calc(100vh - 80px)" }}>
-        <div className="px-4 py-3 border-b bg-gradient-to-r from-brand-50 to-purple-50 flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-full bg-brand-100 flex items-center justify-center shrink-0">
-            <Bot size={14} className="text-brand-600" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-brand-700">AIアシスタント</p>
-          </div>
-          <Badge text="Claude 4 Opus" color="purple" />
-          <button onClick={() => setChatOpen(false)} className="ml-1 p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors duration-150" title="チャットを閉じる"><ChevronLeft size={14} /></button>
-        </div>
-        {/* クイックアクション */}
-        <div className="p-2.5 border-b bg-slate-50/80">
-          <div className="flex flex-wrap gap-1.5">
-            {["不正検知の状況", "今日の決済件数", "例外キューの確認", "精算状況", "エラーコード検索"].map(q => (
-              <button key={q} onClick={() => sendChat(q)} className="text-xs bg-white border border-slate-200 rounded-md px-2.5 py-1 text-slate-500 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200 transition-colors duration-150">{q}</button>
-            ))}
-          </div>
-        </div>
-        {/* 会話エリア */}
-        <div className="flex-1 p-3 space-y-3 overflow-y-auto bg-slate-50/50">
-          {chatMessages.map((msg, i) => msg.role === "user" ? (
-            <div key={i} className="flex gap-2 justify-end">
-              <div className="bg-white rounded-lg px-3 py-2 max-w-[220px] border border-slate-200 shadow-sm"><p className="text-xs text-slate-700 whitespace-pre-wrap">{msg.text}</p></div>
-            </div>
-          ) : (
-            <div key={i} className="flex gap-2">
-              <div className="w-6 h-6 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center shrink-0"><Bot size={12} className="text-brand-500" /></div>
-              <div className="bg-brand-50/60 rounded-lg px-3 py-2 border border-brand-100/50 max-w-[240px]">
-                <p className="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed">{msg.text}</p>
-                <div className="flex gap-1.5 mt-2 pt-1.5 border-t border-brand-100/40">
-                  <button onClick={() => toast("フィードバックを送信しました", "success")} className="p-0.5 rounded text-slate-400 hover:text-success-600 transition-colors duration-150"><ThumbsUp size={12} /></button>
-                  <button onClick={() => toast("フィードバックを送信しました", "info")} className="p-0.5 rounded text-slate-400 hover:text-danger-600 transition-colors duration-150"><ThumbsDown size={12} /></button>
-                  <button onClick={() => { navigator.clipboard?.writeText(msg.text); toast("クリップボードにコピーしました", "info"); }} className="p-0.5 rounded text-slate-400 hover:text-brand-600 transition-colors duration-150 ml-auto"><Copy size={12} /></button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        {/* 入力エリア */}
-        <div className="p-3 border-t bg-white flex gap-2">
-          <input value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === "Enter" && sendChat(chatInput)} className="flex-1 text-xs border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="AIアシスタントに質問..." />
-          <button onClick={() => sendChat(chatInput)} className="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150 flex items-center gap-1.5"><Send size={13} /></button>
-        </div>
-      </div>
-      ) : (
-      <button onClick={() => setChatOpen(true)} className="bg-white rounded-lg border border-slate-200 shadow-card flex flex-col items-center justify-center gap-2 hover:bg-brand-50 hover:shadow-md transition-all duration-200 cursor-pointer" style={{ height: "calc(100vh - 80px)" }}>
-        <MessageSquare size={16} className="text-brand-500" />
-        <span className="text-[10px] text-slate-400 font-medium" style={{ writingMode: "vertical-rl" }}>AIチャット</span>
-      </button>
-      )}
-    </div>
-
-    {/* ===== 右カラム: ダッシュボード本体 ===== */}
-    <div className="flex-1 space-y-6 min-w-0">
+  <div className="p-6 space-y-6">
     <div className="flex items-center justify-between">
       <h2 className="text-xl font-semibold text-slate-800">ダッシュボード</h2>
       <div className="flex items-center gap-3">
@@ -572,8 +676,6 @@ const MasterDashboard = () => {
         ))}
       </div>
     </div>
-
-    </div>{/* 右カラム終了 */}
 
     {/* KPIドリルダウンモーダル */}
     {showKpiDrill && kpiDrillData[showKpiDrill] && (
@@ -1054,7 +1156,6 @@ const MasterMerchants = () => {
           <h2 className="text-xl font-semibold text-slate-800">加盟店管理 <span className="text-sm text-slate-400 font-normal">({filtered.length}件)</span></h2>
           <button onClick={() => setShowAddModal(true)} className="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">+ 手動登録</button>
           <button onClick={() => toast("加盟店一覧をCSV出力しました", "success")} className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150"><Download className="w-4 h-4 inline mr-1" /> CSV</button>
-          <button onClick={() => toast("加盟店一覧をExcel出力しました", "success")} className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150"><Download className="w-4 h-4 inline mr-1" /> Excel</button>
         </div>
         <div className="flex gap-2">
           <input className="text-[13px] border border-slate-200 rounded-lg px-3 py-2 w-48 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-shadow duration-150" placeholder="加盟店名 / IDで検索..." value={searchText} onChange={e => setSearchText(e.target.value)} />
@@ -1146,20 +1247,20 @@ const MasterMerchants = () => {
               <span className="text-xs text-slate-400">全 {allSites.length} サイト</span>
               <span className="text-xs text-slate-300"><Lightbulb className="w-4 h-4 inline mr-1" /> 行クリックで詳細展開</span>
             </div>
-            <table className="w-full text-xs">
+            <table className="w-full text-xs table-fixed">
               <thead><tr className="bg-slate-50 border-b">
-                <th className="text-left p-2 text-slate-500 font-semibold"><input type="checkbox" className="w-3 h-3" onClick={e => e.stopPropagation()} /></th>
-                <th className="text-left p-2 text-slate-500 font-semibold w-20">サイトID</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-8"><input type="checkbox" className="w-3 h-3" onClick={e => e.stopPropagation()} /></th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-[72px]">サイトID</th>
                 <th className="text-left p-2 text-slate-500 font-semibold">サイト名</th>
-                <th className="text-left p-2 text-slate-500 font-semibold w-24">加盟店</th>
-                <th className="text-left p-2 text-slate-500 font-semibold w-20">代理店</th>
-                <th className="text-left p-2 text-slate-500 font-semibold w-24">URL</th>
-                <th className="text-center p-2 text-slate-500 font-semibold w-10">3DS</th>
-                <th className="text-center p-2 text-slate-500 font-semibold w-10">継続</th>
-                <th className="text-center p-2 text-slate-500 font-semibold w-10">IP</th>
-                <th className="text-left p-2 text-slate-500 font-semibold w-16">接続先</th>
-                <th className="text-left p-2 text-slate-500 font-semibold w-20">月間処理</th>
-                <th className="text-center p-2 text-slate-500 font-semibold w-14">状態</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-[88px]">加盟店</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-[64px]">代理店</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-[80px]">URL</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-9">3DS</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-9">継続</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-9">IP</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-[56px]">接続先</th>
+                <th className="text-left p-2 text-slate-500 font-semibold w-[72px]">月間処理</th>
+                <th className="text-center p-2 text-slate-500 font-semibold w-[56px] whitespace-nowrap">状態</th>
               </tr></thead>
               <tbody>
                 {allSites.map((s, i) => (
@@ -3405,6 +3506,7 @@ const MasterMerchantApplications = () => {
   const [appTab, setAppTab] = useState("new_merchant");
   const [selectedSiteApp, setSelectedSiteApp] = useState("SADD-0212-001");
   const [siteAppStatusFilter, setSiteAppStatusFilter] = useState("all");
+  const [showScopeDiagram, setShowScopeDiagram] = useState(false);
 
   const appList = [
     { id: "APP-0211-003", name: "株式会社テックショップ", biz: "家電EC", status: "AI審査中", sColor: "blue", ai: "処理中", aColor: "blue", date: "02/11 10:15", step: 3, procStatus: null },
@@ -3462,20 +3564,35 @@ const MasterMerchantApplications = () => {
         </div>
       </div>
 
-      {/* Scope Diagram */}
-      <div className="bg-gradient-to-r from-brand-50 via-white to-gray-50 rounded-lg border p-3">
-        <p className="text-xs font-bold text-slate-600 mb-2"><ClipboardList className="w-4 h-4 inline mr-1" /> 審査フロー全体像（この画面の管轄範囲）</p>
-        <div className="flex items-center gap-1 text-xs">
-          <div className="bg-brand-100 border-2 border-brand-400 rounded-lg px-3 py-2 text-center">
-            <p className="font-bold text-brand-700">この画面で管理</p>
-            <p className="text-brand-500 mt-1">申込受付 → 書類確認 → AI審査 → 人間判定 → <span className="font-bold">自社承認</span></p>
+      {/* Scope Diagram (collapsible) */}
+      <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+        <button onClick={() => setShowScopeDiagram(!showScopeDiagram)} className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-slate-50 transition-colors duration-150">
+          <span className="text-xs font-medium text-slate-500 flex items-center gap-1.5"><ClipboardList size={14} className="text-slate-400" /> 審査フロー全体像</span>
+          <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${showScopeDiagram ? "rotate-180" : ""}`} />
+        </button>
+        {showScopeDiagram && (
+          <div className="px-4 pb-3 border-t border-slate-100">
+            <div className="flex items-center gap-2 mt-3 text-xs">
+              <div className="flex-1 bg-brand-50 border-2 border-brand-300 rounded-lg px-3 py-2.5">
+                <p className="font-semibold text-brand-700 text-[11px] mb-1">この画面で管理</p>
+                <div className="flex items-center gap-1 text-brand-600 flex-wrap">
+                  {["申込受付","書類確認","AI審査","人間判定","自社承認"].map((s,i) => (
+                    <React.Fragment key={i}>{i > 0 && <ArrowRight size={10} className="text-brand-300" />}<span className={i === 4 ? "font-bold" : ""}>{s}</span></React.Fragment>
+                  ))}
+                </div>
+              </div>
+              <ArrowRight size={16} className="text-slate-300 shrink-0" />
+              <div className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5">
+                <p className="font-semibold text-slate-500 text-[11px] mb-1"><Plug size={12} className="inline mr-1" />接続先審査で管理</p>
+                <div className="flex items-center gap-1 text-slate-400 flex-wrap">
+                  {["審査申請","書類送付","審査","条件確定","契約","決済開始"].map((s,i) => (
+                    <React.Fragment key={i}>{i > 0 && <ArrowRight size={10} className="text-slate-300" />}<span className={i >= 3 ? "font-medium text-slate-500" : ""}>{s}</span></React.Fragment>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-          <span className="text-2xl text-slate-300 mx-1">→</span>
-          <div className="bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-center">
-            <p className="font-semibold text-slate-500"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査で管理</p>
-            <p className="text-slate-400 mt-1">審査申請 → 書類送付 → 審査 → <span className="font-semibold text-slate-500">条件確定 → 契約 → 決済開始</span></p>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Pipeline KPIs */}
@@ -3803,26 +3920,41 @@ const MasterMerchantApplications = () => {
         </div>
       </div>
 
-      {/* サイト追加審査フロー図 */}
-      <div className="bg-gradient-to-r from-teal-50 via-white to-gray-50 rounded-lg border p-3">
-        <p className="text-sm font-medium text-slate-700 mb-2"><Globe className="w-4 h-4 inline mr-1" /> 既存加盟店サイト追加審査フロー（新規加盟店審査との違い）</p>
-        <div className="flex items-center gap-1 text-xs">
-          <div className="bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-center">
-            <p className="text-slate-500">スキップ</p>
-            <p className="text-slate-400 mt-1 line-through">反社チェック・財務分析</p>
-            <p className="text-[10px] text-slate-400">（加盟店登録時に実施済み）</p>
+      {/* サイト追加審査フロー図 (collapsible) */}
+      <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+        <button onClick={() => setShowScopeDiagram(!showScopeDiagram)} className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-slate-50 transition-colors duration-150">
+          <span className="text-xs font-medium text-slate-500 flex items-center gap-1.5"><Globe size={14} className="text-slate-400" /> サイト追加審査フロー（新規加盟店審査との違い）</span>
+          <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${showScopeDiagram ? "rotate-180" : ""}`} />
+        </button>
+        {showScopeDiagram && (
+          <div className="px-4 pb-3 border-t border-slate-100">
+            <div className="flex items-center gap-2 mt-3 text-xs">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-center">
+                <p className="text-slate-400 text-[11px] font-medium">スキップ</p>
+                <p className="text-slate-400 mt-0.5 line-through text-[11px]">反社チェック・財務分析</p>
+                <p className="text-[10px] text-slate-400">（登録時に実施済み）</p>
+              </div>
+              <ArrowRight size={16} className="text-slate-300 shrink-0" />
+              <div className="flex-1 bg-teal-50 border-2 border-teal-300 rounded-lg px-3 py-2.5">
+                <p className="font-semibold text-teal-700 text-[11px] mb-1">この画面で管理</p>
+                <div className="flex items-center gap-1 text-teal-600 flex-wrap">
+                  {["サイト申請受付","AIサイト審査","人間判定","承認"].map((s,i) => (
+                    <React.Fragment key={i}>{i > 0 && <ArrowRight size={10} className="text-teal-300" />}<span className={i === 3 ? "font-bold" : ""}>{s}</span></React.Fragment>
+                  ))}
+                </div>
+              </div>
+              <ArrowRight size={16} className="text-slate-300 shrink-0" />
+              <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5">
+                <p className="font-semibold text-slate-500 text-[11px] mb-1"><Plug size={12} className="inline mr-1" />接続先審査で管理</p>
+                <div className="flex items-center gap-1 text-slate-400 flex-wrap">
+                  {["接続先選定","条件確定","決済開始"].map((s,i) => (
+                    <React.Fragment key={i}>{i > 0 && <ArrowRight size={10} className="text-slate-300" />}<span>{s}</span></React.Fragment>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-          <span className="text-2xl text-slate-300 mx-1">→</span>
-          <div className="bg-teal-100 border-2 border-teal-400 rounded-lg px-3 py-2 text-center">
-            <p className="font-bold text-teal-700">この画面で管理</p>
-            <p className="text-teal-600 mt-1">サイト申請受付 → AI<span className="font-semibold">サイト審査</span> → 人間判定 → <span className="font-bold">承認</span></p>
-          </div>
-          <span className="text-2xl text-slate-300 mx-1">→</span>
-          <div className="bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-center">
-            <p className="font-semibold text-slate-500"><Plug className="w-4 h-4 inline mr-1" /> 接続先審査で管理</p>
-            <p className="text-slate-400 mt-1">接続先選定 → 条件確定 → 決済開始</p>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* サイト追加審査 KPI */}
@@ -7349,7 +7481,7 @@ const approvedHistory = [
 const MasterProcessors = () => {
   const toast = useToast();
   const [selectedProc, setSelectedProc] = useState(null);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("reviews");
   const [confirmDialog, setConfirmDialog] = useState(null);
   const [showAddProc, setShowAddProc] = useState(false);
 
@@ -7365,10 +7497,10 @@ const MasterProcessors = () => {
       {/* Tab navigation */}
       <div className="flex gap-1 border-b">
         {[
-          { id: "overview", label: "接続先一覧", badge: null },
           { id: "reviews", label: "審査フロー管理", badge: 4 },
           { id: "history", label: "審査完了履歴", badge: null },
           { id: "documents", label: "審査資料管理", badge: 1 },
+          { id: "overview", label: "接続先一覧", badge: null },
         ].map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`text-xs px-3 py-2 border-b-2 flex items-center gap-1 ${activeTab === tab.id ? "border-brand-500 text-brand-600 font-semibold" : "border-transparent text-slate-400 hover:text-slate-600"}`}>
             {tab.label}
@@ -14119,6 +14251,21 @@ export default function Wireframes() {
 
   const navCtx = { setMasterPage, setMerchantPage, setAgentPage, setView };
 
+  // AIChat: 現在の画面コンテキストを算出
+  const currentScreenContext = view === "master"
+    ? (screenContextMap[masterPage] || "ダッシュボード")
+    : view === "merchant"
+    ? "加盟店管理"
+    : view === "agent"
+    ? "代理店管理"
+    : null;
+
+  // AIChat: マスター管理のダッシュボードではデフォルトでオープン
+  const aiChatDefaultOpen = view === "master" && masterPage === "dashboard";
+
+  // AIChat: マスター/加盟店/代理店ビューでのみ表示（申込・決済ページでは非表示）
+  const showAIChat = view === "master" || view === "merchant" || view === "agent";
+
   return (
     <ToastProvider>
     <NavigationContext.Provider value={navCtx}>
@@ -14172,6 +14319,15 @@ export default function Wireframes() {
           <div className="flex-1 overflow-y-auto"><MerchantApplicationForm /></div>
         )}
       </div>
+
+      {/* グローバル AIChat */}
+      {showAIChat && (
+        <AIChat
+          key={`${view}-${masterPage}-${merchantPage}-${agentPage}`}
+          screenContext={currentScreenContext}
+          defaultOpen={aiChatDefaultOpen}
+        />
+      )}
     </div>
     </NavigationContext.Provider>
     </ToastProvider>
