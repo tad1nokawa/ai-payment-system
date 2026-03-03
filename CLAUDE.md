@@ -5,12 +5,25 @@
 
 ## 技術スタック
 - React 19 + Vite 6
-- Tailwind CSS v4
-- 単一ファイル: `src/wireframes_v3.jsx`（約8,100行）
+- Tailwind CSS v4（`@theme` ブロックによるデザイントークン定義）
+- Lucide React — 94アイコン（tree-shakeable、絵文字不使用）
+- Google Fonts — Inter + Noto Sans JP
+- 単一ファイル: `src/wireframes_v3.jsx`（約14,500行）
 - デプロイ: Vercel（https://aipayment-system.vercel.app/）
 - Git: https://github.com/tad1nokawa/ai-payment-system.git (main)
 
-## 画面構成（36画面）
+## デザインシステム: Stripe風クリーン（2026-03-03 導入）
+- **ブランドカラー**: `#635BFF`（インディゴ/パープル）— brand-50〜brand-900（`src/index.css` @theme定義）
+- **セマンティックカラー**: success/warning/danger/info（各50/100/500/600/700）
+- **サーフェス**: 白ベース + 微細なボーダー（border-slate-200）+ shadow-card / shadow-overlay
+- **サイドバー**: ライトテーマ（bg-white + border-r）、アクティブ: bg-brand-50 text-brand-700
+- **ボタン**: Primary=bg-brand-500、Secondary=bg-white border-slate-200、Danger=bg-danger-600
+- **アイコン**: 全てLucide React（絵文字からの全面移行完了、776箇所）
+- **アニメーション**: animate-fade-in / animate-scale-in / animate-slide-in-right
+- **フォント**: Inter（Latin）+ Noto Sans JP（日本語）— index.html preconnect + link
+- **カラートークン統一**: blue→brand / emerald→success / rose→danger / amber→warning（~1,250箇所）
+
+## 画面構成（37画面）
 
 ### マスター管理（17画面）M01-M16 + AIチャット
 | ID | 画面名 | メニュー表示名 | カテゴリ |
@@ -22,6 +35,7 @@
 | M14 | リカーリング管理 | 継続課金管理 | 取引 |
 | M03 | 加盟店管理 | 加盟店管理 | 加盟店・代理店 |
 | M04 | 申込・登録管理 | 審査・申込管理 | 加盟店・代理店 |
+| M09b | 接続先審査 | 接続先審査 | 加盟店・代理店 |
 | M15 | 代理店管理 | 代理店管理 | 加盟店・代理店 |
 | M08 | 精算管理 | 精算・入金管理 | 経理 |
 | M11 | レポート | レポート | 経理 |
@@ -29,7 +43,7 @@
 | M10 | ルーティング設定 | ルーティング | 決済インフラ |
 | M07 | 不正検知設定 | 不正検知 | 決済インフラ |
 | M05 | AI監視 | AI監視 | AI・運用 |
-| — | AIチャット（master_chat） | AIチャット | AI・運用 |
+| — | AIチャット（全画面グローバル） | AIチャット | AI・運用 |
 | M12 | ユーザー管理 | スタッフ管理 | AI・運用 |
 | M13 | システム設定（8タブ） | システム設定 | AI・運用 |
 
@@ -44,6 +58,20 @@
 | エラーコード | エラーコード一覧（20件サンプル）、検索、ページネーション |
 | お知らせ管理 | お知らせ検索・登録、種別（障害/メンテ/機能リリース/お知らせ）、公開状態管理 |
 | 操作ログ | 管理画面操作ログ検索（スタッフ/IP/ページ/日時/種別）、PCI DSS v4.0準拠バッジ、12ヶ月保持 |
+
+#### M04 審査・申込 タブ構成
+| タブ | 内容 |
+|------|------|
+| 新規加盟店申込 | 申込一覧、AI審査進捗、ステップ管理、メール送信管理。審査フロー全体像は折りたたみ式（デフォルト非表示） |
+| 既存加盟店サイト追加 | サイト追加申込一覧、審査ステップ管理。審査フロー全体像は折りたたみ式（デフォルト非表示） |
+
+#### M09b 接続先審査 タブ構成（デフォルト: 審査フロー管理）
+| タブ | 内容 |
+|------|------|
+| 審査フロー管理 | 審査中の接続先申込一覧、対接続先API連携ステータス（3ステップ進捗） |
+| 審査完了履歴 | 完了済み審査の履歴 |
+| 審査資料管理 | 審査関連資料の管理 |
+| 接続先一覧 | 接続先マスタ一覧 |
 
 #### M03 加盟店管理 タブ構成
 | タブ | 内容 |
@@ -118,11 +146,18 @@
 カテゴリ区切り（separator）対応済み。各メニュー項目にカテゴリヘッダーを表示。
 
 ## コード構造
-- 共通UI: Sidebar（separator対応）, KPICard, TableHeader, Badge, MiniChart
-- データ: merchantData, processorList, reviewFlowData, approvedHistory
-- メニュー: masterMenuItems, merchantMenuItems, agentMenuItems
-- メインApp: `export default function Wireframes()`
-- テーブル: 全てHTML `<table>` 要素（`<div>` flexではない）
+- **共通UI**: Sidebar（separator対応、Lucideアイコン）, KPICard, TableHeader, Badge, MiniChart, ToastProvider, ConfirmDialog, AIChat（グローバル）
+- **Lucideインポート**: ファイル先頭で94アイコンをnamed import（tree-shakeable）
+  - Lucideアイコンは `React.forwardRef()` でラップされているため、typeof === 'object'（functionではない）
+  - Sidebar判定: `typeof item.icon === 'function' || (typeof item.icon === 'object' && item.icon !== null && item.icon.$typeof)`
+- **AIChat**: 全画面共通フローティングパネル（右下Bot icon→右サイドパネル展開）
+  - `screenContext` prop: 画面IDに応じた文脈別サジェスション（17画面対応）
+  - `defaultOpen` prop: ダッシュボードのみデフォルト展開
+  - チャット履歴DB保存コンセプト、月次サマリー管理者送信UI
+- **データ**: merchantData, processorList, reviewFlowData, approvedHistory
+- **メニュー**: masterMenuItems, merchantMenuItems, agentMenuItems（icon: Lucideコンポーネント参照）
+- **メインApp**: `export default function Wireframes()`
+- **テーブル**: 全てHTML `<table>` 要素（`<div>` flexではない）
 
 ## 開発ルール
 - セクションコメント形式: `// ─── [SCREEN_ID]: [日本語名] ───`
@@ -131,6 +166,12 @@
 - hooksを使うコンポーネントは `() => {` 構文、使わないものは `() => (` 構文
 - タブ: `useState` + 条件付きレンダリング `{tab === X && (<>...</>)}`
 - メニューセパレーター: `{ separator: true, label: "カテゴリ名" }`
+- **カラー**: blue/emerald/rose/amber → brand/success/danger/warning トークンを使用
+- **アイコン**: 絵文字禁止。全てLucide Reactコンポーネントを使用
+- **ボタン**: `bg-brand-500 hover:bg-brand-600 transition-colors duration-150`
+- **カード**: `border border-slate-200 rounded-lg shadow-card`
+- **モーダル**: `bg-slate-900/20 animate-fade-in` + パネル `animate-scale-in shadow-overlay`
+- **Input**: `focus:ring-brand-500/20 rounded-md shadow-sm`
 
 ## 代理店フィーモデル
 - 代理店フィーは決済種別ごと（VISA/MC/JCB/AMEX/QR/銀行振込/コンビニ）
@@ -257,3 +298,23 @@ Google Drive上の管理画面動画12本 + スクリーンショット54枚を�
   - DB_Design_Addendum_v1.1.md: 1件（リカーリング再開Phase2検討注記）
 - [ ] 「わからない」19問の再協議（特にPhase 1ブロッカー: A-3, A-4, A-8）
 - [ ] 江成チーム確認事項 H-1〜H-5（別途MTG要）
+
+## 変更履歴
+
+### 2026-03-03: デザインシステム刷新 + UI修正5件
+**Stripe風クリーンデザイン導入**:
+- Phase 0: lucide-react導入、Google Fonts（Inter + Noto Sans JP）、CSS @themeデザイントークン
+- Phase 1: 共有コンポーネント8個刷新（Sidebar/KPICard/Badge/TableHeader/MiniChart/Toast/ConfirmDialog/colorMap）
+- Phase 2: 絵文字→Lucide React全面移行（776箇所、85種類の絵文字→94種Lucideアイコン）
+- Phase 3: カラートークン統一（blue→brand/emerald→success/rose→danger/amber→warning、~1,250箇所）
+- Phase 4: 全37画面のデザインリファイン
+
+**UI修正5件**:
+1. M09b 接続先審査: タブ順序変更（①審査フロー管理 ②審査完了履歴 ③審査資料管理 ④接続先一覧）、デフォルト=審査フロー管理
+2. M04 審査・申込: 審査フロー全体像を折りたたみ式に変更（新規加盟店/サイト追加 両タブ）
+3. M03 加盟店管理サイト管理: テーブル幅調整（minWidth:900px + 列幅指定）、Excelダウンロードボタン削除
+4. M16 顧客管理: 白画面修正（LockOpenアイコン未インポート）
+5. AIチャット: ダッシュボード内蔵→全画面グローバルフローティングパネルに抽出（17画面文脈対応サジェスション、チャットDB保存コンセプト）
+
+**バグ修正**:
+- Sidebar: Lucideアイコン判定修正（forwardRef対応 — typeof === 'object' + $typeof チェック）
